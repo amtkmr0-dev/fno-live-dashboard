@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<!--
+  MTF Divergence Scanner — SignalReady F&O Dashboard
+  ==================================================
+  Integration with ws_server.py (aiohttp):
+
+    from aiohttp import web
+
+    async def divergence_page(request):
+        with open('results/fno_divergence_page.html') as f:
+            return web.Response(text=f.read(), content_type='text/html')
+
+    app.router.add_get('/divergence', divergence_page)
+
+    # Optional: API endpoint for live refresh
+    async def api_scan(request):
+        with open('results/scan_compact.json') as f:
+            return web.json_response(json.load(f))
+
+    app.router.add_get('/api/scan', api_scan)
+
+  The page's window.refreshScan() stub is wired to call /api/scan
+  and reload the data without a full page refresh.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MTF Divergence Scanner | SignalReady</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== RESET & FOUNDATIONS ===================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1923;--panel:#1a2332;--panel-hover:#1e2a3a;--border:#2a3a4a;--border-light:#3a4a5a;
+  --text:#e8eaed;--text-secondary:#8899aa;--text-muted:#5a6a7a;
+  --bull:#00c853;--bull-bg:rgba(0,200,83,.12);--bull-bg-hover:rgba(0,200,83,.2);
+  --bear:#ff1744;--bear-bg:rgba(255,23,68,.12);--bear-bg-hover:rgba(255,23,68,.2);
+  --info:#448aff;--info-bg:rgba(68,138,255,.12);
+  --gold:#ffd740;--gold-bg:rgba(255,215,64,.1);
+  --purple:#b388ff;--blue:#448aff;--cyan:#18ffff;--orange:#ff9100;--yellow:#ffea00;
+  --sidebar-w:60px;--sidebar-exp:220px;
+  --header-h:72px;--tab-h:48px;
+  --radius:8px;--radius-sm:6px;--radius-lg:12px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);--shadow-sm:0 2px 8px rgba(0,0,0,.3);
+  --transition:all .2s cubic-bezier(.4,0,.2,1);
+  --font-ui:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--font-ui);background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-light)}
+input,select,button{font-family:inherit;font-size:inherit}
+a{color:var(--info);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===================== SIDEBAR ===================== */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:#111b27;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;
+  transition:width .25s cubic-bezier(.4,0,.2,1);overflow:hidden;
+}
+.sidebar:hover{width:var(--sidebar-exp)}
+.sidebar-logo{
+  height:60px;display:flex;align-items:center;padding:0 16px;gap:12px;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.sidebar-logo .logo-icon{
+  width:28px;height:28px;background:linear-gradient(135deg,var(--info),var(--bull));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;color:#fff;flex-shrink:0;
+  letter-spacing:-.5px;
+}
+.sidebar-logo .logo-text{
+  font-weight:700;font-size:15px;white-space:nowrap;opacity:0;
+  transition:opacity .2s .05s;letter-spacing:-.3px;
+  background:linear-gradient(135deg,var(--info),var(--bull));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.sidebar:hover .logo-text{opacity:1}
+.sidebar-nav{flex:1;padding:12px 0;display:flex;flex-direction:column;gap:2px}
+.nav-item{
+  display:flex;align-items:center;gap:14px;padding:10px 16px;
+  color:var(--text-secondary);cursor:pointer;position:relative;
+  transition:var(--transition);white-space:nowrap;border-radius:0;
+  font-size:13px;font-weight:500;text-decoration:none;
+}
+.nav-item:hover{background:rgba(68,138,255,.08);color:var(--text);text-decoration:none}
+.nav-item.active{color:var(--info)}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;
+  background:var(--info);border-radius:0 2px 2px 0;
+}
+.nav-item .nav-icon{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.nav-item .nav-label{opacity:0;transition:opacity .2s .05s}
+.sidebar:hover .nav-label{opacity:1}
+.sidebar-footer{
+  padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;
+  font-size:11px;color:var(--text-muted);white-space:nowrap;
+  overflow:hidden;
+}
+.sidebar-footer .footer-label{opacity:0;transition:opacity .2s .05s}
+.sidebar:hover .footer-label{opacity:1}
+
+/* ===================== MAIN LAYOUT ===================== */
+.main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+
+/* ===================== HEADER ===================== */
+.header{
+  height:var(--header-h);padding:0 28px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--border);
+  background:var(--panel);flex-shrink:0;gap:20px;
+}
+.header-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.header-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.header-subtitle{font-size:12px;color:var(--text-secondary);font-weight:400}
+.header-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.live-cluster{display:flex;align-items:center;gap:10px}
+.live-badge{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 10px;
+  border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;
+  background:rgba(0,200,83,.12);color:var(--bull);border:1px solid rgba(0,200,83,.25);
+}
+.live-badge.paused{background:rgba(255,215,64,.1);color:var(--gold);border-color:rgba(255,215,64,.25)}
+.live-badge.scanning{background:rgba(68,138,255,.15);color:var(--info);border-color:rgba(68,138,255,.3)}
+.live-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--bull);
+  animation:livePulse 2s ease-in-out infinite;
+}
+.live-badge.paused .live-dot{background:var(--gold);animation:none}
+.live-badge.scanning .live-dot{background:var(--info);animation:scanSpin 1s linear infinite}
+@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,200,83,.5)}50%{opacity:.6;box-shadow:0 0 6px 2px rgba(0,200,83,.3)}}
+@keyframes scanSpin{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+.next-refresh{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);min-width:44px}
+.header-scan-time{font-size:12px;color:var(--text-muted);font-family:var(--font-mono)}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 16px;
+  border-radius:var(--radius-sm);font-weight:600;font-size:12px;
+  cursor:pointer;transition:var(--transition);border:none;
+  letter-spacing:.2px;text-transform:uppercase;
+}
+.btn-primary{background:var(--info);color:#fff}
+.btn-primary:hover{background:#5c9aff;box-shadow:0 0 20px rgba(68,138,255,.3)}
+.btn-outline{background:transparent;color:var(--bull);border:1px solid rgba(0,200,83,.3)}
+.btn-outline:hover{background:rgba(0,200,83,.08);border-color:rgba(0,200,83,.5)}
+.btn-outline.off{color:var(--text-muted);border-color:var(--border)}
+.btn-outline.off:hover{border-color:var(--border-light);color:var(--text-secondary)}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border-light);color:var(--text)}
+.refresh-spinning svg{animation:spin .8s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.summary-pills{display:flex;gap:8px;align-items:center}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  border-radius:20px;font-size:11px;font-weight:600;font-family:var(--font-mono);
+}
+.pill-total{background:var(--info-bg);color:var(--info)}
+.pill-bull{background:var(--bull-bg);color:var(--bull)}
+.pill-bear{background:var(--bear-bg);color:var(--bear)}
+
+/* ===================== TABS ===================== */
+.tabs-bar{
+  display:flex;gap:0;border-bottom:1px solid var(--border);
+  background:var(--panel);padding:0 28px;flex-shrink:0;
+}
+.tab{
+  padding:12px 20px;font-size:13px;font-weight:600;color:var(--text-secondary);
+  cursor:pointer;position:relative;transition:var(--transition);
+  border-bottom:2px solid transparent;letter-spacing:.2px;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--info);border-bottom-color:var(--info)}
+.tab .tab-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-left:6px;min-width:18px;height:18px;padding:0 5px;
+  border-radius:9px;font-size:10px;font-family:var(--font-mono);
+  font-weight:700;
+}
+.tab.active .tab-badge{background:var(--info-bg);color:var(--info)}
+.tab:not(.active) .tab-badge{background:rgba(255,255,255,.06);color:var(--text-muted)}
+
+/* ===================== CONTENT AREA ===================== */
+.content{flex:1;padding:20px 28px 40px;overflow-y:auto}
+.tab-panel{display:none;animation:fadeIn .3s ease}
+.tab-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===================== FILTER BAR ===================== */
+.filter-bar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  margin-bottom:16px;padding:12px 16px;
+  background:var(--panel);border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.filter-btn{
+  padding:5px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);background:transparent;
+  color:var(--text-secondary);transition:var(--transition);
+}
+.filter-btn:hover{border-color:var(--border-light);color:var(--text)}
+.filter-btn.active{background:var(--info-bg);border-color:var(--info);color:var(--info)}
+.search-input{
+  padding:6px 12px 6px 32px;border-radius:var(--radius-sm);font-size:12px;
+  border:1px solid var(--border);background:var(--bg);color:var(--text);
+  width:200px;transition:var(--transition);position:relative;
+}
+.search-input:focus{outline:none;border-color:var(--info);box-shadow:0 0 0 2px rgba(68,138,255,.15)}
+.search-wrap{position:relative}
+.search-wrap::before{
+  content:'\1F50D';position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  font-size:12px;pointer-events:none;opacity:.4;
+}
+.toggle-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary)}
+.toggle-switch{
+  width:36px;height:20px;border-radius:10px;background:var(--border);
+  position:relative;transition:var(--transition);cursor:pointer;flex-shrink:0;
+}
+.toggle-switch.on{background:var(--info)}
+.toggle-switch::after{
+  content:'';position:absolute;left:3px;top:3px;width:14px;height:14px;
+  border-radius:50%;background:#fff;transition:var(--transition);
+}
+.toggle-switch.on::after{left:19px}
+.select-input{
+  padding:6px 28px 6px 10px;border-radius:var(--radius-sm);font-size:12px;
+  border:1px solid var(--border);background:var(--bg);color:var(--text);
+  cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238899aa'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+}
+.select-input:focus{outline:none;border-color:var(--info)}
+.slider-wrap{display:flex;align-items:center;gap:8px}
+.slider-input{
+  -webkit-appearance:none;width:100px;height:4px;border-radius:2px;
+  background:var(--border);outline:none;
+}
+.slider-input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--info);cursor:pointer;border:2px solid var(--panel);
+}
+.slider-value{font-family:var(--font-mono);font-size:12px;color:var(--info);min-width:18px}
+.filter-sep{width:1px;height:24px;background:var(--border);margin:0 4px}
+
+/* ===================== HEATMAP ===================== */
+.heatmap-container{overflow-x:auto}
+.heatmap-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  background:var(--panel);border-radius:var(--radius-lg);
+  border:1px solid var(--border);overflow:hidden;
+}
+.heatmap-table thead th{
+  padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--text-muted);background:#151f2c;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;
+  cursor:pointer;user-select:none;transition:var(--transition);
+  white-space:nowrap;
+}
+.heatmap-table thead th:hover{color:var(--text);background:#1a2636}
+.heatmap-table thead th.sorted{color:var(--info)}
+.heatmap-table thead th .sort-arrow{margin-left:4px;font-size:10px;opacity:.5}
+.heatmap-table thead th.sorted .sort-arrow{opacity:1;color:var(--info)}
+.heatmap-table tbody tr{transition:var(--transition);cursor:pointer}
+.heatmap-table tbody tr:hover{background:rgba(68,138,255,.05)}
+.heatmap-table tbody tr:not(:last-child) td{border-bottom:1px solid rgba(42,58,74,.5)}
+.heatmap-table tbody td{padding:6px 10px;vertical-align:middle}
+.heatmap-table .stock-cell{
+  font-weight:600;font-size:13px;letter-spacing:.2px;white-space:nowrap;
+  min-width:120px;padding-left:16px;
+}
+.heatmap-cell{display:flex;justify-content:center}
+.signal-chip{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 10px;
+  border-radius:var(--radius-sm);font-size:12px;font-weight:600;
+  font-family:var(--font-mono);min-width:56px;justify-content:center;
+  transition:var(--transition);position:relative;
+}
+.signal-chip.bull{background:var(--bull-bg);color:var(--bull)}
+.signal-chip.bull:hover{background:var(--bull-bg-hover)}
+.signal-chip.bear{background:var(--bear-bg);color:var(--bear)}
+.signal-chip.bear:hover{background:var(--bear-bg-hover)}
+.signal-chip.none{background:rgba(255,255,255,.03);color:var(--text-muted)}
+.chip-arrow{font-size:10px}
+
+/* Heatmap cell tooltip */
+.chip-tooltip{
+  display:none;position:absolute;bottom:calc(100% + 8px);left:50%;
+  transform:translateX(-50%);background:#111b27;border:1px solid var(--border-light);
+  border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;
+  white-space:nowrap;z-index:50;box-shadow:var(--shadow);
+  font-family:var(--font-ui);font-weight:400;color:var(--text);
+  pointer-events:none;min-width:180px;
+}
+.chip-tooltip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#111b27;
+}
+.signal-chip:hover .chip-tooltip{display:block}
+.tooltip-row{display:flex;justify-content:space-between;gap:16px;margin-bottom:3px}
+.tooltip-row:last-child{margin-bottom:0}
+.tooltip-key{color:var(--text-muted)}
+.tooltip-val{font-family:var(--font-mono);text-align:right}
+
+/* ===================== ALIGNMENT CARDS ===================== */
+.align-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.align-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:18px;transition:var(--transition);position:relative;overflow:hidden;
+}
+.align-card:hover{border-color:var(--border-light);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.align-card.strong{border-color:rgba(255,215,64,.3)}
+.align-card.strong::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),rgba(255,215,64,.2));
+}
+.align-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.align-stock-name{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.align-price{font-family:var(--font-mono);font-size:13px;color:var(--text-secondary);margin-top:2px}
+.direction-badge{
+  padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;
+  font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+}
+.direction-badge.bull{background:var(--bull-bg);color:var(--bull)}
+.direction-badge.bear{background:var(--bear-bg);color:var(--bear)}
+.strong-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:var(--radius-sm);font-size:10px;
+  font-weight:700;background:var(--gold-bg);color:var(--gold);
+  margin-bottom:10px;letter-spacing:.3px;
+}
+.tf-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tf-chip{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 10px;border-radius:var(--radius-sm);font-size:11px;
+  font-weight:600;min-width:52px;
+}
+.tf-chip .tf-name{font-size:10px;font-weight:700;letter-spacing:.3px;opacity:.7}
+.tf-chip .tf-conf{font-family:var(--font-mono);font-size:13px;font-weight:700}
+.tf-chip.tf-M{background:rgba(179,136,255,.12);color:var(--purple)}
+.tf-chip.tf-W{background:rgba(68,138,255,.12);color:var(--blue)}
+.tf-chip.tf-D{background:rgba(24,255,255,.1);color:var(--cyan)}
+.tf-chip.tf-4H{background:rgba(255,145,0,.1);color:var(--orange)}
+.tf-chip.tf-1H{background:rgba(255,234,0,.1);color:var(--yellow)}
+.score-bar-wrap{margin-bottom:8px}
+.score-label{font-size:11px;color:var(--text-muted);margin-bottom:4px;display:flex;justify-content:space-between}
+.score-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.score-bar-fill.bull{background:linear-gradient(90deg,var(--bull),rgba(0,200,83,.5))}
+.score-bar-fill.bear{background:linear-gradient(90deg,var(--bear),rgba(255,23,68,.5))}
+.indicator-tags{display:flex;gap:4px;flex-wrap:wrap}
+.ind-tag{
+  padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;
+  background:rgba(255,255,255,.05);color:var(--text-secondary);
+  font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.3px;
+}
+
+/* ===================== SIGNALS TABLE ===================== */
+.signals-table-wrap{overflow-x:auto}
+.signals-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  background:var(--panel);border-radius:var(--radius-lg);
+  border:1px solid var(--border);overflow:hidden;font-size:12px;
+}
+.signals-table thead th{
+  padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--text-muted);background:#151f2c;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;
+  cursor:pointer;user-select:none;transition:var(--transition);
+  white-space:nowrap;text-align:left;
+}
+.signals-table thead th:hover{color:var(--text)}
+.signals-table thead th.sorted{color:var(--info)}
+.signals-table tbody tr{transition:var(--transition)}
+.signals-table tbody tr:hover{background:rgba(68,138,255,.05)}
+.signals-table tbody tr:not(:last-child) td{border-bottom:1px solid rgba(42,58,74,.4)}
+.signals-table tbody tr.row-bull{background:rgba(0,200,83,.03)}
+.signals-table tbody tr.row-bear{background:rgba(255,23,68,.03)}
+.signals-table tbody td{padding:8px 12px;vertical-align:middle}
+.signals-table .mono{font-family:var(--font-mono)}
+.mini-badge{
+  display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:600;
+}
+.mini-badge.bull{background:var(--bull-bg);color:var(--bull)}
+.mini-badge.bear{background:var(--bear-bg);color:var(--bear)}
+.div-type-tag{
+  display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;
+  background:rgba(255,255,255,.05);color:var(--text-secondary);margin:1px 2px;
+  font-family:var(--font-mono);
+}
+.pagination{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:14px;
+}
+.page-btn{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  border-radius:var(--radius-sm);font-size:12px;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);background:transparent;
+  color:var(--text-secondary);transition:var(--transition);
+  font-family:var(--font-mono);
+}
+.page-btn:hover{border-color:var(--border-light);color:var(--text)}
+.page-btn.active{background:var(--info-bg);border-color:var(--info);color:var(--info)}
+.page-btn:disabled{opacity:.3;cursor:default;pointer-events:none}
+.page-info{font-size:12px;color:var(--text-muted);margin:0 8px;font-family:var(--font-mono)}
+
+/* ===================== DEEP DIVE ===================== */
+.deepdive-select-wrap{margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.deepdive-select{
+  padding:8px 36px 8px 14px;border-radius:var(--radius);font-size:14px;font-weight:600;
+  border:1px solid var(--border);background:var(--panel);color:var(--text);
+  cursor:pointer;appearance:none;min-width:200px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238899aa'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+.deepdive-select:focus{outline:none;border-color:var(--info)}
+.tf-cards-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.tf-detail-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:16px;text-align:center;transition:var(--transition);
+}
+.tf-detail-card.has-signal{border-color:rgba(68,138,255,.2)}
+.tf-detail-card.no-signal{opacity:.5}
+.tf-card-name{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.tf-card-arrow{font-size:28px;margin-bottom:6px}
+.tf-card-conf{font-family:var(--font-mono);font-size:20px;font-weight:700;margin-bottom:4px}
+.tf-card-conf-label{font-size:10px;color:var(--text-muted);margin-bottom:8px}
+.tf-card-indicators{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+.tf-card-meta{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.tf-card-nosignal{color:var(--text-muted);font-size:12px;font-style:italic}
+.align-status-bar{
+  padding:12px 16px;border-radius:var(--radius);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;
+}
+.align-status-bar.aligned{background:var(--bull-bg);color:var(--bull);border:1px solid rgba(0,200,83,.2)}
+.align-status-bar.not-aligned{background:rgba(255,255,255,.03);color:var(--text-muted);border:1px solid var(--border)}
+
+/* ===================== DRILL-DOWN PANEL ===================== */
+.drilldown-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);
+  z-index:200;opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+.drilldown-overlay.open{opacity:1;pointer-events:auto}
+.drilldown-panel{
+  position:fixed;top:0;right:-420px;bottom:0;width:400px;
+  background:var(--panel);border-left:1px solid var(--border);
+  z-index:210;transition:right .3s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;box-shadow:-8px 0 40px rgba(0,0,0,.5);
+}
+.drilldown-overlay.open .drilldown-panel{right:0}
+.drilldown-header{
+  padding:20px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;
+  position:sticky;top:0;background:var(--panel);z-index:1;
+}
+.drilldown-close{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;
+  color:var(--text-secondary);cursor:pointer;font-size:16px;transition:var(--transition);
+}
+.drilldown-close:hover{border-color:var(--bear);color:var(--bear)}
+.drilldown-body{padding:20px}
+.dd-stock-name{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.dd-stock-price{font-family:var(--font-mono);font-size:14px;color:var(--text-secondary);margin-top:2px}
+.dd-section{margin-bottom:20px}
+.dd-section-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.dd-tf-card{
+  padding:12px;border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:8px;display:flex;align-items:center;gap:12px;
+}
+.dd-tf-card.no-sig{opacity:.4}
+.dd-tf-label{font-size:12px;font-weight:700;width:60px;flex-shrink:0}
+.dd-tf-arrow{font-size:18px;width:28px;text-align:center}
+.dd-tf-info{flex:1;display:flex;flex-direction:column;gap:4px}
+.dd-tf-conf{font-family:var(--font-mono);font-size:13px;font-weight:600}
+.dd-tf-indicators{display:flex;gap:3px;flex-wrap:wrap}
+.dd-tf-meta{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.dd-align-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
+  border-radius:var(--radius);font-size:12px;font-weight:600;
+  margin-bottom:16px;
+}
+.dd-align-badge.bull{background:var(--bull-bg);color:var(--bull);border:1px solid rgba(0,200,83,.2)}
+.dd-align-badge.bear{background:var(--bear-bg);color:var(--bear);border:1px solid rgba(255,23,68,.2)}
+.tv-link{
+  display:flex;align-items:center;gap:8px;padding:10px 16px;
+  border-radius:var(--radius);border:1px solid var(--border);
+  color:var(--text-secondary);font-size:12px;font-weight:600;
+  transition:var(--transition);margin-top:16px;
+}
+.tv-link:hover{border-color:var(--info);color:var(--info);text-decoration:none}
+
+/* ===================== EMPTY / SKELETON ===================== */
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--text-muted);
+}
+.empty-state .empty-icon{font-size:48px;margin-bottom:12px;opacity:.3}
+.empty-state .empty-text{font-size:14px}
+.skeleton{
+  background:linear-gradient(90deg,var(--border) 25%,var(--border-light) 50%,var(--border) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm);
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ===================== RESPONSIVE ===================== */
+@media(max-width:768px){
+  .sidebar{
+    top:auto;bottom:0;left:0;right:0;width:100%!important;height:56px;
+    flex-direction:row;border-right:none;border-top:1px solid var(--border);
+  }
+  .sidebar:hover{width:100%!important}
+  .sidebar-logo,.sidebar-footer{display:none}
+  .sidebar-nav{flex-direction:row;justify-content:space-around;padding:0;gap:0}
+  .nav-item{flex-direction:column;padding:8px 4px;gap:2px;font-size:10px}
+  .nav-item .nav-icon{font-size:16px;width:auto}
+  .nav-item .nav-label{opacity:1;font-size:9px}
+  .nav-item.active::before{display:none}
+  .nav-item.active{border-top:2px solid var(--info)}
+  .main{margin-left:0;padding-bottom:60px}
+  .header{padding:0 16px;flex-wrap:wrap;height:auto;padding-top:12px;padding-bottom:12px;gap:8px}
+  .content{padding:14px 12px 80px}
+  .tf-cards-row{grid-template-columns:repeat(3,1fr)}
+  .align-grid{grid-template-columns:1fr}
+  .filter-bar{flex-direction:column;align-items:stretch}
+  .drilldown-panel{width:100%}
+  .heatmap-table .stock-cell{min-width:90px;padding-left:10px}
+}
+
+/* ===================== ANIMATIONS ===================== */
+@keyframes cellFadeIn{
+  from{opacity:0;transform:scale(.92)}
+  to{opacity:1;transform:scale(1)}
+}
+.heatmap-table tbody td .signal-chip{animation:cellFadeIn .3s ease both}
+/* Stagger rows */
+.heatmap-table tbody tr:nth-child(1) td .signal-chip{animation-delay:.02s}
+.heatmap-table tbody tr:nth-child(2) td .signal-chip{animation-delay:.04s}
+.heatmap-table tbody tr:nth-child(3) td .signal-chip{animation-delay:.06s}
+.heatmap-table tbody tr:nth-child(4) td .signal-chip{animation-delay:.08s}
+.heatmap-table tbody tr:nth-child(5) td .signal-chip{animation-delay:.10s}
+.heatmap-table tbody tr:nth-child(6) td .signal-chip{animation-delay:.12s}
+.heatmap-table tbody tr:nth-child(7) td .signal-chip{animation-delay:.14s}
+.heatmap-table tbody tr:nth-child(8) td .signal-chip{animation-delay:.16s}
+.heatmap-table tbody tr:nth-child(9) td .signal-chip{animation-delay:.18s}
+.heatmap-table tbody tr:nth-child(10) td .signal-chip{animation-delay:.20s}
+
+/* Multiselect dropdown */
+.ms-dropdown{position:relative;display:inline-block}
+.ms-trigger{
+  padding:5px 28px 5px 10px;border-radius:var(--radius-sm);font-size:12px;
+  border:1px solid var(--border);background:var(--bg);color:var(--text);
+  cursor:pointer;min-width:120px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238899aa'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+}
+.ms-menu{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);
+  z-index:20;min-width:140px;box-shadow:var(--shadow);padding:4px;
+}
+.ms-dropdown.open .ms-menu{display:block}
+.ms-option{
+  padding:6px 10px;font-size:12px;cursor:pointer;border-radius:4px;
+  display:flex;align-items:center;gap:6px;transition:var(--transition);
+}
+.ms-option:hover{background:rgba(68,138,255,.08)}
+.ms-option .ms-check{
+  width:14px;height:14px;border:1px solid var(--border);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+  transition:var(--transition);flex-shrink:0;
+}
+.ms-option.selected .ms-check{background:var(--info);border-color:var(--info);color:#fff}
+.tv-sym-link{color:var(--text);text-decoration:none;font-weight:600;transition:color .15s} .tv-sym-link:hover{color:var(--info);text-decoration:underline}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">SR</div>
+    <div class="logo-text">SignalReady</div>
+  </div>
+  <div class="sidebar-nav">
+    <a class="nav-item" href="/">
+      <span class="nav-icon">&#x1f4ca;</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+    <a class="nav-item active" href="/divergence">
+      <span class="nav-icon">&#x1f50d;</span>
+      <span class="nav-label">Scanner</span>
+    </a>
+    <a class="nav-item" href="/sectors">
+      <span class="nav-icon">&#x1f3ed;</span>
+      <span class="nav-label">Sectors</span>
+    </a>
+    <a class="nav-item" href="/paper">
+      <span class="nav-icon">&#x1f4cb;</span>
+      <span class="nav-label">Paper Trades</span>
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <span class="footer-label">Last scan: <span id="sidebar-ts"></span></span>
+  </div>
+</nav>
+
+<!-- DRILL-DOWN OVERLAY -->
+<div class="drilldown-overlay" id="ddOverlay">
+  <div class="drilldown-panel" id="ddPanel">
+    <div class="drilldown-header">
+      <div>
+        <div class="dd-stock-name" id="ddName"></div>
+        <div class="dd-stock-price" id="ddPrice"></div>
+      </div>
+      <button class="drilldown-close" id="ddClose" title="Close (Esc)">&times;</button>
+    </div>
+    <div class="drilldown-body" id="ddBody"></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-title">MTF Divergence Scanner</div>
+      <div class="header-subtitle">Multi-timeframe divergence signals across NIFTY 50</div>
+    </div>
+    <div class="header-right">
+      <div class="summary-pills" id="summaryPills"></div>
+      <div class="live-cluster">
+        <div class="live-badge" id="liveBadge" title="Auto-refresh active">
+          <span class="live-dot"></span>
+          <span class="live-text">LIVE</span>
+        </div>
+        <span class="header-scan-time" id="headerTs"></span>
+        <span class="next-refresh" id="nextRefresh" title="Time until next auto-refresh"></span>
+      </div>
+      <button class="btn btn-outline" id="autoRefreshToggle" title="Toggle auto-refresh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="autoRefreshLabel">Auto: ON</span>
+      </button>
+      <button class="btn btn-primary" id="refreshBtn" title="Refresh scan data now">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs-bar" id="tabsBar">
+    <div class="tab active" data-tab="heatmap">Heatmap<span class="tab-badge" id="badge-heatmap"></span></div>
+    <div class="tab" data-tab="alignments">Alignments<span class="tab-badge" id="badge-alignments"></span></div>
+    <div class="tab" data-tab="signals">Signals<span class="tab-badge" id="badge-signals"></span></div>
+    <div class="tab" data-tab="deepdive">Deep Dive</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="contentArea">
+    <!-- HEATMAP TAB -->
+    <div class="tab-panel active" id="panel-heatmap">
+      <div class="filter-bar" id="heatmap-filters">
+        <div class="filter-group">
+          <span class="filter-label">Direction</span>
+          <button class="filter-btn active" data-dir="all">All</button>
+          <button class="filter-btn" data-dir="bull">Bull</button>
+          <button class="filter-btn" data-dir="bear">Bear</button>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="search-wrap">
+          <input type="text" class="search-input" id="heatmapSearch" placeholder="Search symbol...">
+        </div>
+        <div class="filter-sep"></div>
+        <label class="toggle-wrap" id="alignToggle">
+          <div class="toggle-switch" id="alignSwitch"></div>
+          <span>Only aligned</span>
+        </label>
+      </div>
+      <div class="heatmap-container" id="heatmapContainer"></div>
+    </div>
+
+    <!-- ALIGNMENTS TAB -->
+    <div class="tab-panel" id="panel-alignments">
+      <div class="filter-bar" id="align-filters">
+        <div class="filter-group">
+          <span class="filter-label">Direction</span>
+          <button class="filter-btn active" data-adir="all">All</button>
+          <button class="filter-btn" data-adir="bull">Bull</button>
+          <button class="filter-btn" data-adir="bear">Bear</button>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Min TFs</span>
+          <button class="filter-btn active" data-mintfs="2">2+</button>
+          <button class="filter-btn" data-mintfs="3">3+</button>
+          <button class="filter-btn" data-mintfs="4">4+</button>
+          <button class="filter-btn" data-mintfs="5">5</button>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Sort</span>
+          <select class="select-input" id="alignSort">
+            <option value="score">Score</option>
+            <option value="ntfs">TF Count</option>
+            <option value="symbol">Symbol</option>
+          </select>
+        </div>
+      </div>
+      <div class="align-grid" id="alignGrid"></div>
+    </div>
+
+    <!-- SIGNALS TAB -->
+    <div class="tab-panel" id="panel-signals">
+      <div class="filter-bar" id="signal-filters">
+        <div class="filter-group">
+          <span class="filter-label">Direction</span>
+          <button class="filter-btn active" data-sdir="all">All</button>
+          <button class="filter-btn" data-sdir="bull">Bull</button>
+          <button class="filter-btn" data-sdir="bear">Bear</button>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Timeframe</span>
+          <div class="ms-dropdown" id="tfDropdown">
+            <div class="ms-trigger" id="tfTrigger">All TFs</div>
+            <div class="ms-menu" id="tfMenu"></div>
+          </div>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Min Conf.</span>
+          <div class="slider-wrap">
+            <input type="range" class="slider-input" id="confSlider" min="2" max="10" value="2">
+            <span class="slider-value" id="confValue">2</span>
+          </div>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="search-wrap">
+          <input type="text" class="search-input" id="signalSearch" placeholder="Search symbol...">
+        </div>
+      </div>
+      <div class="signals-table-wrap" id="signalsTableWrap"></div>
+      <div class="pagination" id="signalsPagination"></div>
+    </div>
+
+    <!-- DEEP DIVE TAB -->
+    <div class="tab-panel" id="panel-deepdive">
+      <div class="deepdive-select-wrap">
+        <span class="filter-label">Select Stock</span>
+        <select class="deepdive-select" id="ddSelect"></select>
+      </div>
+      <div id="deepdiveContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  EMBEDDED SCAN DATA
+// ============================================================
+const DATA = {"t":"2026-05-13 12:16 IST","ts":{"Monthly":{"bullish":39,"bearish":31,"total":70},"Weekly":{"bullish":31,"bearish":39,"total":70},"1H":{"bullish":164,"bearish":101,"total":265},"4H":{"bullish":83,"bearish":64,"total":147},"Daily":{"bullish":37,"bearish":44,"total":81}},"sg":[{"sy":"ADANIENT","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":2,"dv":"pos_regular","in":"macd_hist|momentum","cp":2161.8,"ba":3},{"sy":"ADANIENT","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"macd_hist|momentum|rsi","cp":2408.4,"ba":1},{"sy":"ADANIENT","tf":"Monthly","dt":"2026-05-01 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"mfi|rsi","cp":2405.2,"ba":0},{"sy":"ADANIENT","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":5,"dv":"pos_regular","in":"cci|mfi|momentum|rsi|stoch","cp":1834.2,"ba":6},{"sy":"ADANIENT","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|rsi","cp":2405.2,"ba":0},{"sy":"ADANIENT","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":2,"dv":"neg_regular","in":"cmf|momentum","cp":2540.5,"ba":28},{"sy":"ADANIENT","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|rsi","cp":2507.0,"ba":15},{"sy":"ADANIENT","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":2482.0,"ba":12},{"sy":"ADANIENT","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|rsi","cp":2495.0,"ba":11},{"sy":"ADANIENT","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"cci|mfi|momentum","cp":2444.5,"ba":4},{"sy":"ADANIENT","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":2410.5,"ba":14},{"sy":"ADANIENT","tf":"4H","dt":"2026-05-11 12:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|mfi|momentum","cp":2501.0,"ba":2},{"sy":"ADANIPORTS","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"mfi|vwmacd","cp":1469.8,"ba":5},{"sy":"ADANIPORTS","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd|momentum|rsi","cp":1657.3,"ba":1},{"sy":"ADANIPORTS","tf":"Daily","dt":"2026-04-30 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|stoch","cp":1657.3,"ba":7},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-06 14:15","dr":"b","cf":2,"dv":"neg_hidden|neg_regular","in":"cmf|mfi","cp":1747.6,"ba":29},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":6,"dv":"neg_regular","in":"macd|macd_hist|mfi|momentum|rsi|stoch","cp":1742.2,"ba":28},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"mfi|vwmacd","cp":1735.0,"ba":21},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":6,"dv":"neg_regular","in":"cci|macd|macd_hist|mfi|momentum|stoch","cp":1768.0,"ba":19},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|obv","cp":1743.5,"ba":12},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|mfi","cp":1715.8,"ba":4},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-12 13:15","dr":"b","cf":2,"dv":"pos_hidden","in":"momentum|stoch","cp":1696.9,"ba":2},{"sy":"ADANIPORTS","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":7,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|mfi|momentum|obv|rsi|vwmacd","cp":1691.0,"ba":0},{"sy":"ADANIPORTS","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|mfi|vwmacd","cp":1675.5,"ba":14},{"sy":"ADANIPORTS","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":3,"dv":"neg_regular","in":"macd_hist|mfi|vwmacd","cp":1731.6,"ba":11},{"sy":"ADANIPORTS","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|vwmacd","cp":1735.0,"ba":6},{"sy":"APOLLOHOSP","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|rsi|vwmacd","cp":7821.5,"ba":3},{"sy":"APOLLOHOSP","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd|mfi|obv|rsi","cp":8022.5,"ba":0},{"sy":"APOLLOHOSP","tf":"Daily","dt":"2026-05-11 00:00","dr":"b","cf":8,"dv":"neg_regular","in":"cmf|macd|macd_hist|mfi|obv|rsi|stoch|vwmacd","cp":8082.0,"ba":1},{"sy":"APOLLOHOSP","tf":"1H","dt":"2026-05-12 13:15","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"cmf|macd_hist|momentum|rsi|stoch","cp":8027.0,"ba":2},{"sy":"APOLLOHOSP","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"stoch|vwmacd","cp":8026.0,"ba":0},{"sy":"APOLLOHOSP","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|obv|rsi|stoch|vwmacd","cp":7650.0,"ba":14},{"sy":"APOLLOHOSP","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|vwmacd","cp":7824.0,"ba":7},{"sy":"APOLLOHOSP","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":3,"dv":"neg_regular","in":"cmf|rsi|vwmacd","cp":8094.0,"ba":3},{"sy":"ASIANPAINT","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"cci|macd_hist|momentum|obv|vwmacd","cp":2769.5,"ba":5},{"sy":"ASIANPAINT","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":3,"dv":"pos_regular","in":"macd|macd_hist|vwmacd","cp":2444.5,"ba":1},{"sy":"ASIANPAINT","tf":"Weekly","dt":"2026-03-23 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|macd","cp":2207.4,"ba":7},{"sy":"ASIANPAINT","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|momentum|rsi","cp":2505.5,"ba":0},{"sy":"ASIANPAINT","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":6,"dv":"neg_hidden","in":"macd|macd_hist|mfi|obv|rsi|stoch","cp":2522.2,"ba":27},{"sy":"ASIANPAINT","tf":"1H","dt":"2026-05-11 12:15","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|momentum|obv|stoch","cp":2580.3,"ba":10},{"sy":"ASIANPAINT","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cmf|macd_hist|momentum|rsi","cp":2568.0,"ba":7},{"sy":"ASIANPAINT","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi","cp":2450.0,"ba":14},{"sy":"AXISBANK","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"cmf|macd|vwmacd","cp":1269.4,"ba":5},{"sy":"AXISBANK","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"obv|stoch","cp":1268.3,"ba":2},{"sy":"AXISBANK","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|momentum","cp":1260.1,"ba":0},{"sy":"AXISBANK","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|stoch","cp":1275.1,"ba":6},{"sy":"AXISBANK","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|rsi","cp":1294.2,"ba":4},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|momentum","cp":1300.6,"ba":28},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":4,"dv":"neg_hidden","in":"macd|momentum|obv|vwmacd","cp":1273.0,"ba":20},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":1273.7,"ba":19},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-08 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|momentum","cp":1275.4,"ba":18},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|stoch","cp":1267.8,"ba":15},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":3,"dv":"pos_regular","in":"macd|rsi|vwmacd","cp":1270.6,"ba":12},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-12 13:15","dr":"b","cf":2,"dv":"neg_hidden","in":"momentum|vwmacd","cp":1260.6,"ba":2},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd|mfi","cp":1263.5,"ba":0},{"sy":"AXISBANK","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|mfi|obv|rsi|vwmacd","cp":1298.5,"ba":27},{"sy":"AXISBANK","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"mfi|rsi|vwmacd","cp":1275.5,"ba":14},{"sy":"AXISBANK","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|cmf|obv|rsi","cp":1258.9,"ba":9},{"sy":"AXISBANK","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|macd_hist|momentum|rsi|stoch","cp":1287.7,"ba":7},{"sy":"BAJAJ-AUTO","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"cmf|macd|obv|vwmacd","cp":8781.5,"ba":2},{"sy":"BAJAJ-AUTO","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|obv|rsi","cp":9813.5,"ba":5},{"sy":"BAJAJ-AUTO","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":6,"dv":"neg_regular","in":"cci|mfi|momentum|obv|rsi|stoch","cp":10397.0,"ba":0},{"sy":"BAJAJ-AUTO","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd|macd_hist|momentum|stoch","cp":10046.0,"ba":5},{"sy":"BAJAJ-AUTO","tf":"Daily","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|stoch","cp":10595.5,"ba":1},{"sy":"BAJAJ-AUTO","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|obv","cp":10581.0,"ba":12},{"sy":"BAJAJ-AUTO","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|momentum","cp":10596.0,"ba":7},{"sy":"BAJAJ-AUTO","tf":"1H","dt":"2026-05-12 10:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cmf|obv|rsi|vwmacd","cp":10578.5,"ba":5},{"sy":"BAJAJ-AUTO","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":7,"dv":"pos_hidden","in":"cci|macd_hist|mfi|momentum|rsi|stoch|vwmacd","cp":10405.0,"ba":0},{"sy":"BAJAJ-AUTO","tf":"4H","dt":"2026-05-04 12:00","dr":"b","cf":2,"dv":"neg_regular","in":"mfi|stoch","cp":10151.0,"ba":12},{"sy":"BAJAJ-AUTO","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":6,"dv":"neg_regular","in":"macd|macd_hist|momentum|obv|rsi|vwmacd","cp":10066.0,"ba":11},{"sy":"BAJAJ-AUTO","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":5,"dv":"neg_regular","in":"cci|cmf|macd_hist|stoch|vwmacd","cp":10590.0,"ba":6},{"sy":"BAJAJ-AUTO","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":3,"dv":"neg_regular","in":"macd_hist|stoch|vwmacd","cp":10696.5,"ba":4},{"sy":"BAJFINANCE","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd_hist|momentum|obv|rsi|stoch","cp":995.9,"ba":3},{"sy":"BAJFINANCE","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd|momentum|rsi|vwmacd","cp":937.0,"ba":1},{"sy":"BAJFINANCE","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|macd_hist|mfi|obv","cp":904.2,"ba":0},{"sy":"BAJFINANCE","tf":"Daily","dt":"2026-04-28 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|stoch","cp":923.65,"ba":9},{"sy":"BAJFINANCE","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|stoch","cp":930.0,"ba":8},{"sy":"BAJFINANCE","tf":"Daily","dt":"2026-05-07 00:00","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"macd_hist|momentum|obv|rsi|stoch","cp":972.75,"ba":3},{"sy":"BAJFINANCE","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|cmf|macd_hist|momentum|obv|rsi","cp":973.6,"ba":25},{"sy":"BAJFINANCE","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":6,"dv":"pos_hidden","in":"macd|macd_hist|mfi|obv|rsi|stoch","cp":973.6,"ba":21},{"sy":"BAJFINANCE","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|mfi","cp":957.0,"ba":19},{"sy":"BAJFINANCE","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|rsi|vwmacd","cp":954.6,"ba":11},{"sy":"BAJFINANCE","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":2,"dv":"neg_regular","in":"rsi|stoch","cp":976.05,"ba":27},{"sy":"BAJFINANCE","tf":"4H","dt":"2026-05-04 12:00","dr":"b","cf":3,"dv":"neg_regular","in":"cmf|macd_hist|stoch","cp":950.0,"ba":12},{"sy":"BAJFINANCE","tf":"4H","dt":"2026-05-06 12:00","dr":"b","cf":2,"dv":"neg_regular","in":"cci|vwmacd","cp":981.15,"ba":8},{"sy":"BAJFINANCE","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi","cp":954.5,"ba":4},{"sy":"BAJFINANCE","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|macd_hist|stoch","cp":954.6,"ba":3},{"sy":"BAJFINANCE","tf":"4H","dt":"2026-05-12 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|mfi","cp":907.0,"ba":0},{"sy":"BAJFINANCE","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"macd_hist|obv|rsi|stoch","cp":939.7,"ba":14},{"sy":"BAJFINANCE","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":8,"dv":"neg_hidden|neg_regular","in":"cci|macd_hist|mfi|momentum|obv|rsi|stoch|vwmacd","cp":973.6,"ba":7},{"sy":"BAJAJFINSV","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd|macd_hist|momentum|rsi","cp":1993.4,"ba":3},{"sy":"BAJAJFINSV","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi","cp":1747.2,"ba":1},{"sy":"BAJAJFINSV","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|mfi","cp":1744.8,"ba":0},{"sy":"BAJAJFINSV","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|obv|rsi","cp":1809.2,"ba":5},{"sy":"BAJAJFINSV","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"pos_regular","in":"macd|mfi","cp":1770.4,"ba":6},{"sy":"BAJAJFINSV","tf":"Daily","dt":"2026-05-07 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|rsi","cp":1824.5,"ba":3},{"sy":"BAJAJFINSV","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":1825.6,"ba":25},{"sy":"BAJAJFINSV","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|macd_hist|mfi","cp":1829.0,"ba":21},{"sy":"BAJAJFINSV","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd_hist|mfi|obv|rsi|stoch","cp":1810.0,"ba":19},{"sy":"BAJAJFINSV","tf":"1H","dt":"2026-05-11 14:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|stoch","cp":1794.5,"ba":8},{"sy":"BAJAJFINSV","tf":"1H","dt":"2026-05-12 09:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|mfi","cp":1774.4,"ba":6},{"sy":"BAJAJFINSV","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"cci|cmf|momentum|rsi|vwmacd","cp":1769.0,"ba":4},{"sy":"BAJAJFINSV","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cci|macd|mfi|momentum|rsi|stoch","cp":1836.0,"ba":28},{"sy":"BAJAJFINSV","tf":"4H","dt":"2026-05-04 08:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|mfi|obv","cp":1773.2,"ba":13},{"sy":"BAJAJFINSV","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":5,"dv":"neg_hidden","in":"macd_hist|mfi|momentum|obv|rsi","cp":1825.6,"ba":7},{"sy":"BEL","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cmf|macd_hist|momentum|obv|rsi","cp":431.3,"ba":1},{"sy":"BEL","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|cmf|rsi","cp":421.6,"ba":6},{"sy":"BEL","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|momentum","cp":438.1,"ba":28},{"sy":"BEL","tf":"1H","dt":"2026-05-07 13:15","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"cci|obv|rsi","cp":438.25,"ba":23},{"sy":"BEL","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"cci|macd|obv|rsi","cp":441.5,"ba":19},{"sy":"BEL","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"cci|momentum|rsi","cp":431.8,"ba":14},{"sy":"BEL","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":3,"dv":"neg_hidden","in":"mfi|obv|stoch","cp":430.45,"ba":11},{"sy":"BEL","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":4,"dv":"neg_hidden","in":"macd_hist|obv|rsi|stoch","cp":437.9,"ba":7},{"sy":"BEL","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":8,"dv":"neg_hidden","in":"cci|cmf|macd_hist|mfi|momentum|obv|rsi|stoch","cp":439.85,"ba":5},{"sy":"BPCL","tf":"Monthly","dt":"2026-01-01 00:00","dr":"b","cf":8,"dv":"neg_regular","in":"cmf|macd|macd_hist|mfi|momentum|rsi|stoch|vwmacd","cp":364.5,"ba":4},{"sy":"BPCL","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd|obv|rsi|stoch","cp":300.45,"ba":1},{"sy":"BPCL","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"momentum|stoch","cp":278.15,"ba":6},{"sy":"BPCL","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|macd_hist|rsi","cp":299.35,"ba":5},{"sy":"BPCL","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|obv|stoch","cp":301.7,"ba":6},{"sy":"BPCL","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|momentum|obv|stoch","cp":314.05,"ba":4},{"sy":"BPCL","tf":"Daily","dt":"2026-05-07 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|obv","cp":307.6,"ba":3},{"sy":"BPCL","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|obv|rsi","cp":307.75,"ba":27},{"sy":"BPCL","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|cmf|momentum|obv","cp":305.2,"ba":19},{"sy":"BPCL","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":3,"dv":"pos_hidden","in":"cmf|macd_hist|stoch","cp":302.65,"ba":15},{"sy":"BPCL","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi","cp":296.5,"ba":12},{"sy":"BPCL","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":2,"dv":"pos_regular","in":"obv|rsi","cp":290.15,"ba":3},{"sy":"BPCL","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd_hist|mfi|momentum|rsi|vwmacd","cp":301.7,"ba":14},{"sy":"BPCL","tf":"4H","dt":"2026-05-05 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|momentum|vwmacd","cp":299.35,"ba":10},{"sy":"BPCL","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd|vwmacd","cp":305.6,"ba":7},{"sy":"BPCL","tf":"4H","dt":"2026-05-12 12:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd|macd_hist|momentum|stoch","cp":288.4,"ba":0},{"sy":"BHARTIARTL","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":8,"dv":"pos_hidden","in":"cci|cmf|macd|macd_hist|momentum|rsi|stoch|vwmacd","cp":1886.8,"ba":1},{"sy":"BHARTIARTL","tf":"Weekly","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|macd_hist","cp":1834.5,"ba":1},{"sy":"BHARTIARTL","tf":"Daily","dt":"2026-04-30 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd_hist|momentum|obv|stoch","cp":1886.8,"ba":7},{"sy":"BHARTIARTL","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cmf|macd_hist","cp":1833.7,"ba":4},{"sy":"BHARTIARTL","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|macd","cp":1829.6,"ba":21},{"sy":"BHARTIARTL","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|macd","cp":1827.3,"ba":19},{"sy":"BHARTIARTL","tf":"1H","dt":"2026-05-08 13:15","dr":"b","cf":2,"dv":"neg_hidden|neg_regular","in":"cci|obv","cp":1834.4,"ba":16},{"sy":"BHARTIARTL","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|cmf|mfi|obv|rsi|stoch","cp":1762.8,"ba":0},{"sy":"BHARTIARTL","tf":"4H","dt":"2026-05-04 08:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd_hist|obv|stoch|vwmacd","cp":1842.7,"ba":13},{"sy":"BHARTIARTL","tf":"4H","dt":"2026-05-05 12:00","dr":"b","cf":5,"dv":"pos_regular","in":"cmf|macd|macd_hist|momentum|obv","cp":1816.0,"ba":10},{"sy":"BHARTIARTL","tf":"4H","dt":"2026-05-11 12:00","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd_hist|rsi|stoch","cp":1764.9,"ba":2},{"sy":"BRITANNIA","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd|macd_hist|momentum|rsi","cp":5726.0,"ba":1},{"sy":"BRITANNIA","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|obv|rsi","cp":5557.5,"ba":5},{"sy":"BRITANNIA","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|obv","cp":5709.0,"ba":8},{"sy":"BRITANNIA","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":8,"dv":"neg_hidden|neg_regular","in":"cmf|macd|macd_hist|mfi|momentum|obv|rsi|vwmacd","cp":5783.0,"ba":4},{"sy":"BRITANNIA","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|rsi|stoch","cp":5807.0,"ba":26},{"sy":"BRITANNIA","tf":"1H","dt":"2026-05-07 13:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|rsi","cp":5792.5,"ba":23},{"sy":"BRITANNIA","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":3,"dv":"neg_regular","in":"macd|mfi|stoch","cp":5615.5,"ba":20},{"sy":"BRITANNIA","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":5,"dv":"neg_hidden","in":"macd_hist|mfi|obv|rsi|stoch","cp":5787.5,"ba":11},{"sy":"BRITANNIA","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"momentum|rsi","cp":5536.5,"ba":5},{"sy":"CIPLA","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|cmf|macd|rsi","cp":1348.2,"ba":3},{"sy":"CIPLA","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cmf|macd|rsi","cp":1309.6,"ba":1},{"sy":"CIPLA","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":7,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|mfi|momentum|rsi|stoch|vwmacd","cp":1292.3,"ba":0},{"sy":"CIPLA","tf":"Daily","dt":"2026-04-30 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd|vwmacd","cp":1309.6,"ba":7},{"sy":"CIPLA","tf":"Daily","dt":"2026-04-28 00:00","dr":"b","cf":6,"dv":"neg_hidden","in":"cmf|macd|macd_hist|rsi|stoch|vwmacd","cp":1306.5,"ba":9},{"sy":"CIPLA","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"macd|rsi|vwmacd","cp":1333.7,"ba":5},{"sy":"CIPLA","tf":"Daily","dt":"2026-05-07 00:00","dr":"b","cf":4,"dv":"neg_hidden","in":"macd|momentum|rsi|vwmacd","cp":1362.3,"ba":3},{"sy":"CIPLA","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd|vwmacd","cp":1347.0,"ba":2},{"sy":"CIPLA","tf":"1H","dt":"2026-05-06 14:15","dr":"b","cf":2,"dv":"neg_regular","in":"macd|momentum","cp":1362.5,"ba":29},{"sy":"CIPLA","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"momentum|vwmacd","cp":1357.7,"ba":19},{"sy":"CIPLA","tf":"1H","dt":"2026-05-08 12:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|mfi|momentum|rsi","cp":1345.5,"ba":17},{"sy":"CIPLA","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":5,"dv":"pos_hidden","in":"macd|mfi|momentum|rsi|vwmacd","cp":1340.3,"ba":12},{"sy":"CIPLA","tf":"1H","dt":"2026-05-11 12:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":1316.8,"ba":10},{"sy":"CIPLA","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":3,"dv":"pos_regular","in":"macd_hist|obv|stoch","cp":1293.7,"ba":0},{"sy":"CIPLA","tf":"1H","dt":"2026-05-12 10:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"momentum|obv|rsi","cp":1303.9,"ba":5},{"sy":"CIPLA","tf":"4H","dt":"2026-05-04 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|momentum","cp":1331.9,"ba":13},{"sy":"CIPLA","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":3,"dv":"neg_regular","in":"cci|mfi|rsi","cp":1327.8,"ba":11},{"sy":"CIPLA","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cmf|macd_hist|rsi|stoch","cp":1348.0,"ba":4},{"sy":"CIPLA","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":1301.7,"ba":1},{"sy":"COALINDIA","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"obv|rsi","cp":399.0,"ba":5},{"sy":"COALINDIA","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"cci|cmf|macd|mfi|obv","cp":430.65,"ba":3},{"sy":"COALINDIA","tf":"Monthly","dt":"2026-05-01 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"cmf|macd|vwmacd","cp":463.05,"ba":0},{"sy":"COALINDIA","tf":"Weekly","dt":"2026-04-13 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|mfi|rsi","cp":438.75,"ba":4},{"sy":"COALINDIA","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd|mfi","cp":479.95,"ba":6},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|mfi|rsi","cp":470.0,"ba":27},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd|obv","cp":472.05,"ba":25},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-07 12:15","dr":"b","cf":4,"dv":"neg_hidden","in":"macd_hist|momentum|stoch|vwmacd","cp":461.5,"ba":24},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-07 13:15","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|obv|rsi","cp":466.3,"ba":23},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-11 14:15","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|momentum|stoch","cp":464.75,"ba":8},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|momentum|stoch","cp":463.65,"ba":7},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":5,"dv":"neg_hidden","in":"cmf|macd_hist|momentum|rsi|stoch","cp":465.45,"ba":4},{"sy":"COALINDIA","tf":"1H","dt":"2026-05-08 15:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|momentum|rsi","cp":457.0,"ba":14},{"sy":"COALINDIA","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|mfi","cp":473.1,"ba":9},{"sy":"COALINDIA","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|mfi|momentum|rsi","cp":472.05,"ba":7},{"sy":"COALINDIA","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":7,"dv":"pos_hidden","in":"cci|macd_hist|mfi|momentum|obv|rsi|stoch","cp":457.0,"ba":4},{"sy":"COALINDIA","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|mfi|stoch|vwmacd","cp":462.5,"ba":3},{"sy":"DRREDDY","tf":"Monthly","dt":"2026-05-01 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|rsi","cp":1270.0,"ba":0},{"sy":"DRREDDY","tf":"Weekly","dt":"2026-05-04 00:00","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"cci|macd|obv","cp":1293.9,"ba":1},{"sy":"DRREDDY","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd|rsi|stoch|vwmacd","cp":1329.8,"ba":8},{"sy":"DRREDDY","tf":"1H","dt":"2026-05-06 14:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cmf|macd_hist|momentum","cp":1310.0,"ba":29},{"sy":"DRREDDY","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":1299.0,"ba":19},{"sy":"DRREDDY","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cmf|mfi","cp":1287.2,"ba":12},{"sy":"DRREDDY","tf":"1H","dt":"2026-05-12 10:15","dr":"b","cf":9,"dv":"pos_regular","in":"cci|macd|macd_hist|mfi|momentum|obv|rsi|stoch|vwmacd","cp":1284.2,"ba":5},{"sy":"DRREDDY","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|mfi","cp":1293.2,"ba":3},{"sy":"EICHERMOT","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cmf|macd|macd_hist|mfi|rsi","cp":7424.0,"ba":5},{"sy":"EICHERMOT","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|obv","cp":7301.5,"ba":5},{"sy":"EICHERMOT","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"cci|mfi|rsi","cp":7302.5,"ba":2},{"sy":"EICHERMOT","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":6,"dv":"neg_regular","in":"macd|macd_hist|mfi|momentum|rsi|stoch","cp":7400.0,"ba":25},{"sy":"EICHERMOT","tf":"1H","dt":"2026-05-08 15:15","dr":"b","cf":7,"dv":"pos_hidden","in":"macd|macd_hist|mfi|obv|rsi|stoch|vwmacd","cp":7315.0,"ba":14},{"sy":"EICHERMOT","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"macd|mfi|obv","cp":7206.0,"ba":11},{"sy":"EICHERMOT","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|momentum|vwmacd","cp":7205.0,"ba":7},{"sy":"EICHERMOT","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|obv","cp":7208.0,"ba":3},{"sy":"EICHERMOT","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|rsi","cp":7125.0,"ba":0},{"sy":"EICHERMOT","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|obv","cp":7267.0,"ba":11},{"sy":"EICHERMOT","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cci|cmf|macd|macd_hist|obv|rsi","cp":7342.0,"ba":6},{"sy":"ETERNAL","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|rsi|stoch","cp":247.03,"ba":1},{"sy":"ETERNAL","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cmf|macd_hist|obv","cp":247.03,"ba":2},{"sy":"ETERNAL","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|mfi|momentum","cp":239.98,"ba":0},{"sy":"ETERNAL","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|macd_hist|obv","cp":254.03,"ba":8},{"sy":"ETERNAL","tf":"Daily","dt":"2026-04-30 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"cci|obv|rsi","cp":247.03,"ba":7},{"sy":"ETERNAL","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|macd_hist|stoch","cp":251.9,"ba":6},{"sy":"ETERNAL","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|stoch","cp":256.05,"ba":4},{"sy":"ETERNAL","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|rsi","cp":256.39,"ba":2},{"sy":"ETERNAL","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|rsi","cp":255.9,"ba":28},{"sy":"ETERNAL","tf":"1H","dt":"2026-05-07 12:15","dr":"b","cf":2,"dv":"neg_hidden","in":"macd|rsi","cp":257.36,"ba":24},{"sy":"ETERNAL","tf":"1H","dt":"2026-05-08 12:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|momentum|rsi|stoch","cp":254.56,"ba":17},{"sy":"ETERNAL","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":2,"dv":"pos_regular","in":"macd|obv","cp":247.94,"ba":11},{"sy":"ETERNAL","tf":"1H","dt":"2026-05-11 13:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"obv|rsi","cp":247.05,"ba":9},{"sy":"ETERNAL","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":2,"dv":"pos_regular","in":"cci|obv","cp":243.1,"ba":4},{"sy":"ETERNAL","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|momentum","cp":246.6,"ba":14},{"sy":"ETERNAL","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|obv","cp":257.6,"ba":6},{"sy":"GRASIM","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|macd_hist|rsi","cp":2794.5,"ba":1},{"sy":"GRASIM","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd|macd_hist","cp":2742.6,"ba":5},{"sy":"GRASIM","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"cci|macd|mfi|stoch","cp":2903.0,"ba":0},{"sy":"GRASIM","tf":"Daily","dt":"2026-04-30 00:00","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|momentum|rsi|stoch","cp":2794.5,"ba":7},{"sy":"GRASIM","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"cci|momentum","cp":2871.5,"ba":5},{"sy":"GRASIM","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":2,"dv":"neg_hidden|neg_regular","in":"cmf|mfi","cp":2914.8,"ba":4},{"sy":"GRASIM","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|momentum","cp":2902.3,"ba":28},{"sy":"GRASIM","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|momentum","cp":2938.0,"ba":26},{"sy":"GRASIM","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi|stoch","cp":2953.0,"ba":12},{"sy":"GRASIM","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|stoch|vwmacd","cp":2991.6,"ba":11},{"sy":"GRASIM","tf":"1H","dt":"2026-05-11 13:15","dr":"b","cf":3,"dv":"neg_regular","in":"macd|macd_hist|rsi","cp":3000.2,"ba":9},{"sy":"GRASIM","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":6,"dv":"pos_hidden","in":"macd|macd_hist|momentum|obv|rsi|stoch","cp":2949.6,"ba":4},{"sy":"GRASIM","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":6,"dv":"pos_hidden","in":"macd|macd_hist|momentum|rsi|stoch|vwmacd","cp":2904.1,"ba":0},{"sy":"GRASIM","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":4,"dv":"neg_regular","in":"cci|mfi|rsi|stoch","cp":2845.9,"ba":11},{"sy":"HCLTECH","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|momentum","cp":1389.1,"ba":3},{"sy":"HCLTECH","tf":"Weekly","dt":"2026-04-20 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|cmf","cp":1203.2,"ba":3},{"sy":"HCLTECH","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":5,"dv":"pos_regular","in":"cmf|macd|macd_hist|mfi|rsi","cp":1186.5,"ba":25},{"sy":"HCLTECH","tf":"1H","dt":"2026-05-08 11:15","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cci|cmf|mfi|momentum|obv|rsi","cp":1194.1,"ba":18},{"sy":"HCLTECH","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":5,"dv":"neg_hidden","in":"macd|macd_hist|momentum|rsi|stoch","cp":1198.9,"ba":15},{"sy":"HCLTECH","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cci|macd|macd_hist|mfi|momentum|rsi","cp":1200.0,"ba":11},{"sy":"HCLTECH","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd_hist|momentum|obv|rsi|stoch","cp":1195.0,"ba":7},{"sy":"HCLTECH","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":5,"dv":"pos_regular","in":"macd|mfi|rsi|stoch|vwmacd","cp":1150.4,"ba":3},{"sy":"HCLTECH","tf":"4H","dt":"2026-05-04 08:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|obv","cp":1196.3,"ba":13},{"sy":"HCLTECH","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|macd|mfi|obv|stoch","cp":1194.4,"ba":9},{"sy":"HCLTECH","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":3,"dv":"pos_regular","in":"macd|macd_hist|rsi","cp":1194.1,"ba":5},{"sy":"HCLTECH","tf":"4H","dt":"2026-05-11 12:00","dr":"b","cf":7,"dv":"neg_hidden","in":"cci|cmf|macd|macd_hist|rsi|stoch|vwmacd","cp":1195.0,"ba":2},{"sy":"HCLTECH","tf":"4H","dt":"2026-05-12 12:00","dr":"b","cf":4,"dv":"pos_regular","in":"macd|macd_hist|momentum|rsi","cp":1147.0,"ba":0},{"sy":"HDFCBANK","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|momentum|obv|rsi|vwmacd","cp":771.7,"ba":1},{"sy":"HDFCBANK","tf":"Weekly","dt":"2026-04-20 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|stoch","cp":784.85,"ba":3},{"sy":"HDFCBANK","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|macd_hist","cp":750.45,"ba":0},{"sy":"HDFCBANK","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"pos_regular","in":"macd|vwmacd","cp":779.4,"ba":6},{"sy":"HDFCBANK","tf":"Daily","dt":"2026-05-07 00:00","dr":"b","cf":5,"dv":"neg_regular","in":"macd_hist|mfi|momentum|obv|stoch","cp":796.05,"ba":3},{"sy":"HDFCBANK","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|macd","cp":780.85,"ba":2},{"sy":"HDFCBANK","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|cmf","cp":783.35,"ba":19},{"sy":"HDFCBANK","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":6,"dv":"pos_hidden","in":"cmf|macd_hist|mfi|obv|rsi|stoch","cp":781.5,"ba":15},{"sy":"HDFCBANK","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|rsi","cp":770.0,"ba":12},{"sy":"HDFCBANK","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":2,"dv":"pos_regular","in":"obv|rsi","cp":766.25,"ba":7},{"sy":"HDFCBANK","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|stoch","cp":774.75,"ba":14},{"sy":"HDFCBANK","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"cci|macd|obv","cp":793.35,"ba":7},{"sy":"HDFCBANK","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|mfi|obv","cp":780.5,"ba":5},{"sy":"HDFCBANK","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":2,"dv":"pos_regular","in":"mfi|momentum","cp":755.9,"ba":1},{"sy":"HDFCLIFE","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|momentum","cp":749.85,"ba":5},{"sy":"HDFCLIFE","tf":"Monthly","dt":"2026-05-01 00:00","dr":"b","cf":7,"dv":"pos_hidden","in":"cmf|macd_hist|mfi|momentum|obv|rsi|stoch","cp":601.8,"ba":0},{"sy":"HDFCLIFE","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|cmf|mfi","cp":601.8,"ba":0},{"sy":"HDFCLIFE","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":8,"dv":"neg_hidden|neg_regular","in":"cci|cmf|macd_hist|mfi|momentum|obv|rsi|stoch","cp":621.7,"ba":2},{"sy":"HDFCLIFE","tf":"Daily","dt":"2026-05-12 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|obv","cp":601.8,"ba":0},{"sy":"HDFCLIFE","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|momentum|stoch|vwmacd","cp":615.85,"ba":12},{"sy":"HDFCLIFE","tf":"1H","dt":"2026-05-12 10:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"cci|momentum|rsi","cp":612.05,"ba":5},{"sy":"HDFCLIFE","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":7,"dv":"pos_hidden|pos_regular","in":"cci|macd|macd_hist|momentum|rsi|stoch|vwmacd","cp":602.95,"ba":0},{"sy":"HDFCLIFE","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":7,"dv":"pos_hidden|pos_regular","in":"cmf|macd|macd_hist|mfi|obv|rsi|stoch","cp":589.0,"ba":14},{"sy":"HDFCLIFE","tf":"4H","dt":"2026-05-06 12:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|cmf","cp":606.0,"ba":8},{"sy":"HDFCLIFE","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cci|macd|mfi|obv|rsi|vwmacd","cp":628.0,"ba":6},{"sy":"HDFCLIFE","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|mfi","cp":623.8,"ba":5},{"sy":"HEROMOTOCO","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"mfi|obv","cp":5099.0,"ba":2},{"sy":"HEROMOTOCO","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|mfi|obv|rsi","cp":5322.0,"ba":2},{"sy":"HEROMOTOCO","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"momentum|vwmacd","cp":5224.5,"ba":12},{"sy":"HEROMOTOCO","tf":"1H","dt":"2026-05-12 13:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|cmf","cp":5124.0,"ba":2},{"sy":"HEROMOTOCO","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"cci|rsi|vwmacd","cp":5088.0,"ba":0},{"sy":"HEROMOTOCO","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"mfi|vwmacd","cp":5080.0,"ba":9},{"sy":"HEROMOTOCO","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"cci|cmf|obv|rsi","cp":5352.5,"ba":6},{"sy":"HINDALCO","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"mfi|rsi|vwmacd","cp":924.7,"ba":3},{"sy":"HINDALCO","tf":"Weekly","dt":"2026-03-23 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|cmf","cp":866.7,"ba":7},{"sy":"HINDALCO","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":7,"dv":"pos_hidden","in":"macd|macd_hist|mfi|momentum|obv|rsi|stoch","cp":916.25,"ba":6},{"sy":"HINDALCO","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"momentum|rsi","cp":1067.2,"ba":8},{"sy":"HINDALCO","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"mfi|momentum|rsi","cp":1042.7,"ba":6},{"sy":"HINDALCO","tf":"Daily","dt":"2026-05-12 00:00","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"macd|obv|rsi","cp":1041.4,"ba":0},{"sy":"HINDALCO","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":1051.5,"ba":27},{"sy":"HINDALCO","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|mfi|momentum|rsi","cp":1044.6,"ba":19},{"sy":"HINDALCO","tf":"1H","dt":"2026-05-08 13:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|rsi|stoch","cp":1041.7,"ba":16},{"sy":"HINDALCO","tf":"1H","dt":"2026-05-11 09:15","dr":"b","cf":2,"dv":"neg_hidden","in":"mfi|obv","cp":1035.5,"ba":13},{"sy":"HINDALCO","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":2,"dv":"pos_regular","in":"macd|vwmacd","cp":1034.0,"ba":11},{"sy":"HINDALCO","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":2,"dv":"pos_regular","in":"macd_hist|vwmacd","cp":1025.4,"ba":7},{"sy":"HINDALCO","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|macd_hist|rsi|stoch","cp":1041.8,"ba":4},{"sy":"HINDALCO","tf":"4H","dt":"2026-05-04 08:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd|macd_hist|momentum|rsi|stoch","cp":1040.5,"ba":13},{"sy":"HINDALCO","tf":"4H","dt":"2026-05-04 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|stoch","cp":1043.9,"ba":12},{"sy":"HINDALCO","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|stoch","cp":1045.0,"ba":11},{"sy":"HINDALCO","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|momentum","cp":1059.2,"ba":7},{"sy":"HINDALCO","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|rsi","cp":1044.7,"ba":4},{"sy":"HINDALCO","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|obv|rsi|stoch","cp":1041.8,"ba":1},{"sy":"HINDUNILVR","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd_hist|mfi|obv|rsi","cp":2250.9,"ba":1},{"sy":"HINDUNILVR","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|mfi|obv|rsi|vwmacd","cp":2315.8,"ba":28},{"sy":"HINDUNILVR","tf":"1H","dt":"2026-05-08 12:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|macd_hist|rsi|stoch","cp":2285.0,"ba":17},{"sy":"HINDUNILVR","tf":"1H","dt":"2026-05-11 14:15","dr":"b","cf":8,"dv":"neg_hidden|neg_regular","in":"cci|cmf|macd_hist|mfi|momentum|obv|rsi|stoch","cp":2303.8,"ba":8},{"sy":"HINDUNILVR","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi|stoch","cp":2254.0,"ba":14},{"sy":"HINDUNILVR","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|vwmacd","cp":2293.0,"ba":5},{"sy":"ICICIBANK","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":7,"dv":"pos_hidden","in":"cci|cmf|macd|macd_hist|momentum|rsi|stoch","cp":1263.4,"ba":1},{"sy":"ICICIBANK","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|cmf","cp":1281.0,"ba":8},{"sy":"ICICIBANK","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"macd_hist|momentum|obv|stoch|vwmacd","cp":1270.8,"ba":6},{"sy":"ICICIBANK","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|mfi|momentum|obv","cp":1279.5,"ba":4},{"sy":"ICICIBANK","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|momentum","cp":1279.6,"ba":28},{"sy":"ICICIBANK","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":8,"dv":"neg_hidden","in":"cmf|macd|macd_hist|mfi|momentum|rsi|stoch|vwmacd","cp":1287.6,"ba":26},{"sy":"ICICIBANK","tf":"1H","dt":"2026-05-07 12:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cmf|macd|mfi|vwmacd","cp":1284.2,"ba":24},{"sy":"ICICIBANK","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|stoch","cp":1265.5,"ba":15},{"sy":"ICICIBANK","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|rsi","cp":1267.7,"ba":12},{"sy":"ICICIBANK","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":5,"dv":"pos_regular","in":"macd|momentum|obv|rsi|stoch","cp":1244.7,"ba":4},{"sy":"ICICIBANK","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":3,"dv":"pos_regular","in":"macd|rsi|stoch","cp":1244.5,"ba":0},{"sy":"ICICIBANK","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cmf|macd_hist|mfi","cp":1265.7,"ba":14},{"sy":"ICICIBANK","tf":"4H","dt":"2026-05-05 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"rsi|vwmacd","cp":1250.9,"ba":10},{"sy":"ICICIBANK","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd|vwmacd","cp":1279.0,"ba":6},{"sy":"ICICIBANK","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"mfi|vwmacd","cp":1244.7,"ba":1},{"sy":"ITC","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":6,"dv":"pos_hidden","in":"macd|macd_hist|momentum|rsi|stoch|vwmacd","cp":314.9,"ba":1},{"sy":"ITC","tf":"Weekly","dt":"2026-04-20 00:00","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|macd_hist|mfi|rsi|stoch","cp":301.6,"ba":3},{"sy":"ITC","tf":"Weekly","dt":"2026-05-04 00:00","dr":"b","cf":6,"dv":"neg_hidden","in":"cci|macd|macd_hist|mfi|rsi|stoch","cp":307.45,"ba":1},{"sy":"ITC","tf":"Daily","dt":"2026-04-30 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"cmf|macd_hist|momentum","cp":314.9,"ba":7},{"sy":"ITC","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":5,"dv":"neg_hidden","in":"cmf|macd_hist|mfi|momentum|obv","cp":310.75,"ba":28},{"sy":"ITC","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|mfi|stoch","cp":309.7,"ba":27},{"sy":"ITC","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":2,"dv":"pos_regular","in":"mfi|obv","cp":309.9,"ba":26},{"sy":"ITC","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cmf|macd|macd_hist|obv|rsi|vwmacd","cp":307.55,"ba":21},{"sy":"ITC","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|mfi|obv|rsi","cp":307.15,"ba":19},{"sy":"ITC","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|stoch","cp":307.5,"ba":15},{"sy":"ITC","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"obv|rsi|stoch","cp":306.95,"ba":12},{"sy":"ITC","tf":"1H","dt":"2026-05-11 13:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cmf|macd_hist|momentum|vwmacd","cp":307.1,"ba":9},{"sy":"ITC","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":4,"dv":"pos_regular","in":"cci|macd_hist|mfi|vwmacd","cp":300.85,"ba":0},{"sy":"ITC","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"obv|rsi","cp":304.6,"ba":4},{"sy":"ITC","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"mfi|momentum|obv","cp":307.2,"ba":4},{"sy":"ITC","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":2,"dv":"neg_hidden|neg_regular","in":"obv|rsi","cp":315.2,"ba":14},{"sy":"INDUSINDBK","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":4,"dv":"neg_hidden","in":"macd_hist|mfi|rsi|stoch","cp":752.45,"ba":2},{"sy":"INDUSINDBK","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"momentum|stoch","cp":778.7,"ba":6},{"sy":"INDUSINDBK","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cmf|macd_hist|rsi|vwmacd","cp":830.9,"ba":5},{"sy":"INDUSINDBK","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|obv","cp":892.85,"ba":0},{"sy":"INDUSINDBK","tf":"Daily","dt":"2026-04-28 00:00","dr":"b","cf":7,"dv":"neg_hidden","in":"cci|cmf|macd|mfi|obv|rsi|vwmacd","cp":885.55,"ba":9},{"sy":"INDUSINDBK","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":2,"dv":"neg_regular","in":"obv|rsi","cp":940.5,"ba":27},{"sy":"INDUSINDBK","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":3,"dv":"neg_regular","in":"cci|obv|rsi","cp":945.2,"ba":20},{"sy":"INDUSINDBK","tf":"1H","dt":"2026-05-08 15:15","dr":"b","cf":4,"dv":"neg_regular","in":"macd|macd_hist|momentum|rsi","cp":950.0,"ba":14},{"sy":"INDUSINDBK","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"macd_hist|mfi|momentum|obv|rsi|vwmacd","cp":926.35,"ba":11},{"sy":"INDUSINDBK","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd|vwmacd","cp":922.0,"ba":7},{"sy":"INDUSINDBK","tf":"1H","dt":"2026-05-12 14:15","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cmf|macd|macd_hist|obv|rsi|vwmacd","cp":892.75,"ba":1},{"sy":"INDUSINDBK","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":6,"dv":"neg_regular","in":"cmf|macd|macd_hist|momentum|rsi|stoch","cp":946.25,"ba":7},{"sy":"INFY","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"cmf|macd|mfi|vwmacd","cp":1300.1,"ba":3},{"sy":"INFY","tf":"1H","dt":"2026-05-06 14:15","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|mfi|rsi","cp":1166.4,"ba":29},{"sy":"INFY","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":2,"dv":"neg_hidden","in":"mfi|obv","cp":1168.5,"ba":27},{"sy":"INFY","tf":"1H","dt":"2026-05-07 13:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|obv","cp":1168.2,"ba":23},{"sy":"INFY","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":2,"dv":"pos_regular","in":"obv|rsi","cp":1165.9,"ba":21},{"sy":"INFY","tf":"1H","dt":"2026-05-11 09:15","dr":"b","cf":4,"dv":"neg_hidden","in":"macd|macd_hist|obv|rsi","cp":1177.4,"ba":13},{"sy":"INFY","tf":"1H","dt":"2026-05-11 12:15","dr":"b","cf":5,"dv":"neg_hidden","in":"cmf|macd|macd_hist|obv|rsi","cp":1183.0,"ba":10},{"sy":"INFY","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":2,"dv":"pos_regular","in":"macd|vwmacd","cp":1139.3,"ba":3},{"sy":"INFY","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|mfi","cp":1171.7,"ba":9},{"sy":"INFY","tf":"4H","dt":"2026-05-06 12:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|mfi","cp":1170.5,"ba":8},{"sy":"INFY","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|mfi","cp":1167.2,"ba":7},{"sy":"INFY","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|macd|macd_hist|mfi|obv|stoch","cp":1170.1,"ba":5},{"sy":"INFY","tf":"4H","dt":"2026-05-11 12:00","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|macd|macd_hist|rsi","cp":1176.0,"ba":2},{"sy":"INFY","tf":"4H","dt":"2026-05-12 12:00","dr":"b","cf":6,"dv":"pos_regular","in":"macd|macd_hist|momentum|rsi|stoch|vwmacd","cp":1139.7,"ba":0},{"sy":"JSWSTEEL","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"mfi|vwmacd","cp":1122.5,"ba":2},{"sy":"JSWSTEEL","tf":"Weekly","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"cci|momentum","cp":1277.8,"ba":1},{"sy":"JSWSTEEL","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd_hist|momentum|rsi|stoch","cp":1252.3,"ba":0},{"sy":"JSWSTEEL","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|mfi|obv|rsi","cp":1266.6,"ba":6},{"sy":"JSWSTEEL","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":7,"dv":"pos_hidden|pos_regular","in":"cci|macd|macd_hist|momentum|rsi|stoch|vwmacd","cp":1273.3,"ba":4},{"sy":"JSWSTEEL","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|stoch","cp":1270.0,"ba":28},{"sy":"JSWSTEEL","tf":"1H","dt":"2026-05-07 12:15","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cmf|macd_hist|mfi|obv|rsi|stoch","cp":1281.5,"ba":24},{"sy":"JSWSTEEL","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":4,"dv":"pos_regular","in":"cmf|macd|mfi|vwmacd","cp":1278.0,"ba":19},{"sy":"JSWSTEEL","tf":"1H","dt":"2026-05-11 12:15","dr":"b","cf":8,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd|mfi|obv|rsi|stoch|vwmacd","cp":1272.4,"ba":10},{"sy":"JSWSTEEL","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"mfi|rsi|stoch","cp":1262.9,"ba":14},{"sy":"JSWSTEEL","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"cmf|macd|mfi","cp":1263.2,"ba":9},{"sy":"JSWSTEEL","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"cci|macd|momentum|obv","cp":1280.4,"ba":6},{"sy":"JIOFIN","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|vwmacd","cp":246.37,"ba":2},{"sy":"JIOFIN","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":6,"dv":"neg_hidden","in":"cci|macd_hist|mfi|obv|rsi|vwmacd","cp":230.47,"ba":0},{"sy":"JIOFIN","tf":"Daily","dt":"2026-04-28 00:00","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cci|cmf|macd|mfi|momentum|rsi","cp":250.81,"ba":9},{"sy":"JIOFIN","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cmf|macd|mfi","cp":248.45,"ba":5},{"sy":"JIOFIN","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"cci|cmf|mfi","cp":252.5,"ba":28},{"sy":"JIOFIN","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|cmf|obv","cp":252.29,"ba":25},{"sy":"JIOFIN","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|obv|rsi","cp":251.0,"ba":21},{"sy":"JIOFIN","tf":"1H","dt":"2026-05-08 13:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|obv|rsi|stoch","cp":248.95,"ba":16},{"sy":"JIOFIN","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|cmf","cp":242.88,"ba":12},{"sy":"JIOFIN","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|momentum","cp":234.96,"ba":4},{"sy":"JIOFIN","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":2,"dv":"pos_regular","in":"cci|obv","cp":230.75,"ba":0},{"sy":"JIOFIN","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cmf|mfi|momentum","cp":251.17,"ba":9},{"sy":"JIOFIN","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":5,"dv":"neg_regular","in":"macd|macd_hist|mfi|rsi|stoch","cp":251.0,"ba":6},{"sy":"KOTAKBANK","tf":"Monthly","dt":"2026-01-01 00:00","dr":"b","cf":6,"dv":"neg_hidden","in":"cci|macd|obv|rsi|stoch|vwmacd","cp":408.0,"ba":4},{"sy":"KOTAKBANK","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|momentum|obv|rsi|vwmacd","cp":383.3,"ba":1},{"sy":"KOTAKBANK","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"macd|mfi|obv|rsi","cp":374.55,"ba":5},{"sy":"KOTAKBANK","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"rsi|vwmacd","cp":371.65,"ba":6},{"sy":"KOTAKBANK","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"obv|vwmacd","cp":376.6,"ba":4},{"sy":"KOTAKBANK","tf":"Daily","dt":"2026-05-12 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd|obv","cp":376.0,"ba":0},{"sy":"KOTAKBANK","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|momentum|stoch","cp":379.4,"ba":26},{"sy":"KOTAKBANK","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":2,"dv":"neg_hidden","in":"momentum|vwmacd","cp":376.5,"ba":20},{"sy":"KOTAKBANK","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":3,"dv":"pos_hidden","in":"mfi|obv|rsi","cp":380.6,"ba":12},{"sy":"KOTAKBANK","tf":"1H","dt":"2026-05-11 14:15","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|rsi","cp":381.05,"ba":8},{"sy":"KOTAKBANK","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|rsi","cp":376.0,"ba":0},{"sy":"KOTAKBANK","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cmf|obv|rsi","cp":373.4,"ba":11},{"sy":"KOTAKBANK","tf":"4H","dt":"2026-05-06 12:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cmf|macd|obv|rsi","cp":377.15,"ba":8},{"sy":"LT","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"macd|obv|vwmacd","cp":3504.1,"ba":2},{"sy":"LT","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|rsi","cp":4014.0,"ba":1},{"sy":"LT","tf":"Weekly","dt":"2026-03-23 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|rsi","cp":3564.1,"ba":7},{"sy":"LT","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|macd_hist","cp":4096.1,"ba":8},{"sy":"LT","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi|stoch","cp":4100.8,"ba":6},{"sy":"LT","tf":"Daily","dt":"2026-05-07 00:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd_hist|mfi|obv|rsi|stoch","cp":4023.0,"ba":3},{"sy":"LT","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|cmf|obv|stoch","cp":4003.0,"ba":27},{"sy":"LT","tf":"1H","dt":"2026-05-07 13:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|momentum","cp":4033.3,"ba":23},{"sy":"LT","tf":"1H","dt":"2026-05-07 14:15","dr":"b","cf":4,"dv":"neg_hidden","in":"macd_hist|obv|rsi|stoch","cp":4019.9,"ba":22},{"sy":"LT","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":4,"dv":"pos_regular","in":"macd_hist|mfi|obv|rsi","cp":3926.3,"ba":11},{"sy":"LT","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"macd_hist|obv","cp":3904.0,"ba":3},{"sy":"LT","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":5,"dv":"pos_regular","in":"cci|macd_hist|obv|rsi|stoch","cp":3865.0,"ba":0},{"sy":"LT","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd|obv|rsi|vwmacd","cp":4021.0,"ba":14},{"sy":"LT","tf":"4H","dt":"2026-05-06 12:00","dr":"b","cf":8,"dv":"pos_hidden|pos_regular","in":"cci|macd|macd_hist|mfi|momentum|obv|rsi|stoch","cp":4012.6,"ba":8},{"sy":"LT","tf":"4H","dt":"2026-05-11 12:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd|mfi|obv|rsi","cp":3940.0,"ba":2},{"sy":"M&M","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":5,"dv":"neg_regular","in":"macd_hist|mfi|momentum|rsi|stoch","cp":3709.2,"ba":5},{"sy":"M&M","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd_hist|mfi|momentum|rsi|stoch","cp":3097.5,"ba":1},{"sy":"M&M","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|mfi","cp":3176.0,"ba":0},{"sy":"M&M","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":7,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|mfi|momentum|rsi|stoch|vwmacd","cp":3330.4,"ba":2},{"sy":"M&M","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":3,"dv":"neg_regular","in":"cci|cmf|stoch","cp":3356.5,"ba":26},{"sy":"M&M","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|mfi","cp":3356.5,"ba":19},{"sy":"M&M","tf":"1H","dt":"2026-05-08 13:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|cmf|rsi|stoch","cp":3345.0,"ba":16},{"sy":"M&M","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"obv|vwmacd","cp":3103.5,"ba":11},{"sy":"M&M","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":4,"dv":"neg_regular","in":"cmf|macd|obv|vwmacd","cp":3366.0,"ba":6},{"sy":"MARUTI","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|rsi","cp":13314.0,"ba":1},{"sy":"MARUTI","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cmf|macd|macd_hist|rsi|stoch|vwmacd","cp":12631.0,"ba":6},{"sy":"MARUTI","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|macd_hist","cp":13172.0,"ba":0},{"sy":"MARUTI","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|macd|mfi|vwmacd","cp":13257.0,"ba":8},{"sy":"MARUTI","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|momentum|rsi","cp":13426.0,"ba":5},{"sy":"MARUTI","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|momentum|obv|stoch","cp":13726.0,"ba":2},{"sy":"MARUTI","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":5,"dv":"neg_regular","in":"macd|macd_hist|mfi|momentum|vwmacd","cp":13725.0,"ba":27},{"sy":"MARUTI","tf":"1H","dt":"2026-05-07 13:15","dr":"b","cf":2,"dv":"neg_hidden|neg_regular","in":"macd_hist|obv","cp":13820.0,"ba":23},{"sy":"MARUTI","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|stoch","cp":13616.0,"ba":12},{"sy":"MARUTI","tf":"1H","dt":"2026-05-11 13:15","dr":"b","cf":5,"dv":"pos_hidden","in":"macd_hist|mfi|obv|rsi|vwmacd","cp":13554.0,"ba":9},{"sy":"MARUTI","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|momentum|rsi|vwmacd","cp":13496.0,"ba":7},{"sy":"MARUTI","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":6,"dv":"pos_hidden","in":"macd|macd_hist|mfi|rsi|stoch|vwmacd","cp":13283.0,"ba":3},{"sy":"MARUTI","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd|rsi|stoch|vwmacd","cp":13188.0,"ba":0},{"sy":"MARUTI","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":3,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|obv","cp":13482.0,"ba":11},{"sy":"MARUTI","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":7,"dv":"neg_regular","in":"cmf|macd|macd_hist|obv|rsi|stoch|vwmacd","cp":13770.0,"ba":6},{"sy":"NTPC","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"mfi|rsi","cp":329.55,"ba":5},{"sy":"NTPC","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"cci|cmf|macd|vwmacd","cp":370.65,"ba":2},{"sy":"NTPC","tf":"Monthly","dt":"2026-05-01 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"macd|mfi|vwmacd","cp":392.7,"ba":0},{"sy":"NTPC","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd_hist|mfi|rsi|stoch","cp":399.15,"ba":2},{"sy":"NTPC","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":8,"dv":"pos_regular","in":"cci|cmf|macd|macd_hist|mfi|momentum|rsi|vwmacd","cp":397.35,"ba":27},{"sy":"NTPC","tf":"1H","dt":"2026-05-08 13:15","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"cci|macd_hist|obv|rsi|stoch","cp":401.45,"ba":16},{"sy":"NTPC","tf":"1H","dt":"2026-05-11 13:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"cci|macd|macd_hist","cp":397.1,"ba":9},{"sy":"NTPC","tf":"1H","dt":"2026-05-12 09:15","dr":"b","cf":7,"dv":"pos_regular","in":"cmf|macd|macd_hist|mfi|rsi|stoch|vwmacd","cp":399.55,"ba":6},{"sy":"NTPC","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|mfi|rsi|stoch","cp":399.9,"ba":14},{"sy":"NTPC","tf":"4H","dt":"2026-05-05 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|rsi","cp":399.2,"ba":10},{"sy":"NTPC","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|macd_hist","cp":399.9,"ba":6},{"sy":"NTPC","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd|mfi","cp":397.3,"ba":3},{"sy":"NTPC","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":7,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|momentum|obv|rsi|stoch|vwmacd","cp":394.8,"ba":1},{"sy":"NESTLEIND","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":5,"dv":"neg_hidden","in":"macd_hist|mfi|momentum|obv|stoch","cp":1291.7,"ba":3},{"sy":"NESTLEIND","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"momentum|stoch","cp":1191.3,"ba":6},{"sy":"NESTLEIND","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd|macd_hist|mfi|obv","cp":1249.3,"ba":5},{"sy":"NESTLEIND","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"momentum|vwmacd","cp":1468.6,"ba":0},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|momentum","cp":1472.1,"ba":25},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-07 12:15","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd|macd_hist|rsi|stoch","cp":1477.7,"ba":24},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd|mfi|momentum|stoch","cp":1475.5,"ba":21},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|momentum|stoch","cp":1490.9,"ba":20},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-08 11:15","dr":"b","cf":4,"dv":"neg_regular","in":"macd|mfi|obv|stoch","cp":1485.0,"ba":18},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-11 09:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|rsi","cp":1497.0,"ba":13},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":7,"dv":"neg_regular","in":"cci|cmf|macd|macd_hist|mfi|stoch|vwmacd","cp":1492.7,"ba":12},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-12 13:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|macd_hist|rsi","cp":1473.0,"ba":2},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":5,"dv":"pos_hidden","in":"cmf|macd|macd_hist|obv|rsi","cp":1467.5,"ba":0},{"sy":"NESTLEIND","tf":"1H","dt":"2026-05-12 09:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|cmf|macd|rsi","cp":1483.9,"ba":6},{"sy":"NESTLEIND","tf":"4H","dt":"2026-05-04 12:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd|mfi|rsi|stoch","cp":1457.0,"ba":12},{"sy":"NESTLEIND","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd|macd_hist|stoch","cp":1466.8,"ba":11},{"sy":"NESTLEIND","tf":"4H","dt":"2026-05-06 08:00","dr":"b","cf":2,"dv":"neg_regular","in":"mfi|momentum","cp":1484.1,"ba":9},{"sy":"NESTLEIND","tf":"4H","dt":"2026-05-06 12:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd_hist|mfi|rsi|stoch","cp":1479.9,"ba":8},{"sy":"NESTLEIND","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|rsi|stoch","cp":1493.4,"ba":3},{"sy":"NESTLEIND","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|rsi|stoch","cp":1475.9,"ba":1},{"sy":"ONGC","tf":"Monthly","dt":"2026-05-01 00:00","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"macd|obv|stoch|vwmacd","cp":294.5,"ba":0},{"sy":"ONGC","tf":"Weekly","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|mfi","cp":279.2,"ba":1},{"sy":"ONGC","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|rsi","cp":294.5,"ba":0},{"sy":"ONGC","tf":"1H","dt":"2026-05-07 12:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|rsi|stoch","cp":282.35,"ba":24},{"sy":"ONGC","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|momentum","cp":283.6,"ba":21},{"sy":"ONGC","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|momentum","cp":282.15,"ba":20},{"sy":"ONGC","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":7,"dv":"neg_hidden","in":"cci|macd|macd_hist|momentum|obv|rsi|stoch","cp":280.45,"ba":7},{"sy":"ONGC","tf":"4H","dt":"2026-05-05 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|macd_hist|rsi","cp":290.1,"ba":10},{"sy":"ONGC","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|mfi|momentum|obv","cp":285.0,"ba":7},{"sy":"ONGC","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"macd_hist|obv","cp":279.7,"ba":3},{"sy":"POWERGRID","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|mfi","cp":264.6,"ba":5},{"sy":"POWERGRID","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":3,"dv":"pos_hidden","in":"cmf|obv|rsi","cp":298.65,"ba":3},{"sy":"POWERGRID","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|macd_hist","cp":296.1,"ba":2},{"sy":"POWERGRID","tf":"Monthly","dt":"2026-05-01 00:00","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"cci|cmf|macd|obv|vwmacd","cp":306.3,"ba":0},{"sy":"POWERGRID","tf":"Weekly","dt":"2026-04-20 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|rsi","cp":316.4,"ba":3},{"sy":"POWERGRID","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|cmf|momentum|rsi","cp":315.2,"ba":27},{"sy":"POWERGRID","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":5,"dv":"pos_regular","in":"cci|cmf|macd_hist|mfi|rsi","cp":314.85,"ba":25},{"sy":"POWERGRID","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":2,"dv":"pos_regular","in":"cmf|rsi","cp":314.0,"ba":21},{"sy":"POWERGRID","tf":"1H","dt":"2026-05-08 11:15","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|macd_hist","cp":313.45,"ba":18},{"sy":"POWERGRID","tf":"1H","dt":"2026-05-08 15:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|stoch","cp":313.85,"ba":14},{"sy":"POWERGRID","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":2,"dv":"pos_regular","in":"mfi|stoch","cp":308.95,"ba":4},{"sy":"POWERGRID","tf":"1H","dt":"2026-05-12 13:15","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|cmf|momentum|rsi|stoch","cp":307.65,"ba":2},{"sy":"POWERGRID","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":3,"dv":"pos_hidden","in":"macd_hist|momentum|stoch","cp":319.0,"ba":14},{"sy":"POWERGRID","tf":"4H","dt":"2026-05-05 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|momentum","cp":318.5,"ba":10},{"sy":"POWERGRID","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|momentum|rsi|stoch","cp":314.85,"ba":7},{"sy":"POWERGRID","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|rsi","cp":313.85,"ba":4},{"sy":"RELIANCE","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":2,"dv":"pos_regular","in":"macd|mfi","cp":1430.8,"ba":1},{"sy":"RELIANCE","tf":"Weekly","dt":"2026-03-23 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|momentum","cp":1348.1,"ba":7},{"sy":"RELIANCE","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|macd_hist|momentum|obv|rsi","cp":1364.0,"ba":0},{"sy":"RELIANCE","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd|mfi","cp":1437.9,"ba":4},{"sy":"RELIANCE","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|vwmacd","cp":1441.8,"ba":25},{"sy":"RELIANCE","tf":"1H","dt":"2026-05-07 15:15","dr":"b","cf":4,"dv":"pos_hidden","in":"cmf|mfi|obv|vwmacd","cp":1435.5,"ba":21},{"sy":"RELIANCE","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|mfi","cp":1428.4,"ba":20},{"sy":"RELIANCE","tf":"1H","dt":"2026-05-08 13:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|rsi","cp":1426.0,"ba":16},{"sy":"RELIANCE","tf":"1H","dt":"2026-05-11 09:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|macd_hist|vwmacd","cp":1420.2,"ba":13},{"sy":"RELIANCE","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":3,"dv":"pos_regular","in":"cci|macd_hist|obv","cp":1366.5,"ba":0},{"sy":"RELIANCE","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|momentum","cp":1382.5,"ba":1},{"sy":"SBILIFE","tf":"Monthly","dt":"2026-01-01 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"cci|macd_hist|rsi|stoch","cp":1998.5,"ba":4},{"sy":"SBILIFE","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cci|macd_hist|momentum|rsi|stoch","cp":1819.0,"ba":1},{"sy":"SBILIFE","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"momentum|stoch","cp":1774.0,"ba":6},{"sy":"SBILIFE","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cmf|macd|obv|rsi","cp":1923.2,"ba":5},{"sy":"SBILIFE","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":5,"dv":"pos_hidden","in":"cmf|macd|mfi|obv|vwmacd","cp":1819.0,"ba":2},{"sy":"SBILIFE","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|obv|rsi","cp":1867.2,"ba":26},{"sy":"SBILIFE","tf":"1H","dt":"2026-05-11 14:15","dr":"b","cf":5,"dv":"neg_regular","in":"macd|macd_hist|momentum|rsi|stoch","cp":1887.2,"ba":8},{"sy":"SBILIFE","tf":"1H","dt":"2026-05-12 14:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd|macd_hist|momentum|rsi","cp":1831.6,"ba":1},{"sy":"SBILIFE","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":2,"dv":"neg_hidden|neg_regular","in":"cci|rsi","cp":1871.3,"ba":15},{"sy":"SBILIFE","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"mfi|momentum","cp":1872.1,"ba":7},{"sy":"SBILIFE","tf":"4H","dt":"2026-05-08 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|stoch","cp":1874.0,"ba":5},{"sy":"SBIN","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|momentum","cp":1018.4,"ba":6},{"sy":"SBIN","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cci|vwmacd","cp":1068.4,"ba":6},{"sy":"SBIN","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"macd|macd_hist|momentum|rsi|stoch|vwmacd","cp":1096.0,"ba":4},{"sy":"SBIN","tf":"Daily","dt":"2026-05-12 00:00","dr":"b","cf":5,"dv":"pos_hidden|pos_regular","in":"cmf|macd|macd_hist|rsi|vwmacd","cp":974.6,"ba":0},{"sy":"SBIN","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|macd|obv|vwmacd","cp":1093.9,"ba":19},{"sy":"SBIN","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":9,"dv":"pos_hidden|pos_regular","in":"cci|macd|macd_hist|mfi|momentum|obv|rsi|stoch|vwmacd","cp":1071.95,"ba":14},{"sy":"SBIN","tf":"4H","dt":"2026-05-05 12:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cmf|macd|macd_hist|rsi|stoch|vwmacd","cp":1060.0,"ba":10},{"sy":"SBIN","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":2,"dv":"neg_regular","in":"cmf|macd","cp":1091.0,"ba":7},{"sy":"SUNPHARMA","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|momentum|rsi","cp":1719.7,"ba":5},{"sy":"SUNPHARMA","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cmf|macd|mfi|obv|rsi|vwmacd","cp":1737.0,"ba":3},{"sy":"SUNPHARMA","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|macd","cp":1808.3,"ba":2},{"sy":"SUNPHARMA","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"cci|macd_hist|momentum|rsi","cp":1845.7,"ba":0},{"sy":"SUNPHARMA","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|momentum","cp":1778.7,"ba":8},{"sy":"SUNPHARMA","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"macd|macd_hist|momentum|obv|stoch|vwmacd","cp":1820.8,"ba":5},{"sy":"SUNPHARMA","tf":"Daily","dt":"2026-05-07 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"mfi|rsi|vwmacd","cp":1834.4,"ba":3},{"sy":"SUNPHARMA","tf":"Daily","dt":"2026-05-12 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"mfi|rsi|vwmacd","cp":1845.7,"ba":0},{"sy":"SUNPHARMA","tf":"1H","dt":"2026-05-08 09:15","dr":"b","cf":6,"dv":"pos_hidden","in":"macd|macd_hist|mfi|momentum|obv|rsi","cp":1845.3,"ba":20},{"sy":"SUNPHARMA","tf":"1H","dt":"2026-05-08 11:15","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"cci|macd|momentum|obv","cp":1850.6,"ba":18},{"sy":"SUNPHARMA","tf":"1H","dt":"2026-05-11 09:15","dr":"b","cf":3,"dv":"pos_hidden","in":"macd|obv|rsi","cp":1868.0,"ba":13},{"sy":"SUNPHARMA","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":4,"dv":"neg_regular","in":"macd|obv|stoch|vwmacd","cp":1872.9,"ba":11},{"sy":"SUNPHARMA","tf":"1H","dt":"2026-05-12 13:15","dr":"b","cf":7,"dv":"pos_hidden","in":"cci|macd|macd_hist|momentum|obv|rsi|stoch","cp":1858.4,"ba":2},{"sy":"SUNPHARMA","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":6,"dv":"pos_hidden","in":"macd|macd_hist|momentum|obv|rsi|stoch","cp":1844.8,"ba":0},{"sy":"SUNPHARMA","tf":"4H","dt":"2026-05-04 12:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|stoch","cp":1822.4,"ba":12},{"sy":"SUNPHARMA","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":3,"dv":"neg_regular","in":"cci|obv|rsi","cp":1841.6,"ba":7},{"sy":"SUNPHARMA","tf":"4H","dt":"2026-05-11 12:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|mfi","cp":1875.0,"ba":2},{"sy":"SUNPHARMA","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":2,"dv":"neg_regular","in":"cmf|obv","cp":1863.0,"ba":1},{"sy":"TCS","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":3,"dv":"pos_regular","in":"macd_hist|obv|stoch","cp":2473.9,"ba":1},{"sy":"TCS","tf":"Daily","dt":"2026-05-11 00:00","dr":"b","cf":2,"dv":"pos_regular","in":"cci|cmf","cp":2392.9,"ba":1},{"sy":"TCS","tf":"1H","dt":"2026-05-06 14:15","dr":"b","cf":7,"dv":"pos_regular","in":"cci|macd|macd_hist|mfi|obv|rsi|stoch","cp":2431.0,"ba":29},{"sy":"TCS","tf":"1H","dt":"2026-05-07 12:15","dr":"b","cf":8,"dv":"pos_regular","in":"cci|cmf|macd|macd_hist|mfi|momentum|rsi|stoch","cp":2412.5,"ba":24},{"sy":"TCS","tf":"1H","dt":"2026-05-08 12:15","dr":"b","cf":5,"dv":"pos_regular","in":"macd|macd_hist|mfi|momentum|rsi","cp":2386.2,"ba":17},{"sy":"TCS","tf":"1H","dt":"2026-05-11 09:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|macd_hist|rsi|stoch","cp":2387.0,"ba":13},{"sy":"TCS","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":3,"dv":"pos_regular","in":"cci|momentum|rsi","cp":2407.0,"ba":12},{"sy":"TCS","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|macd_hist|rsi|stoch","cp":2402.0,"ba":11},{"sy":"TCS","tf":"1H","dt":"2026-05-11 13:15","dr":"b","cf":5,"dv":"neg_hidden","in":"macd|macd_hist|momentum|rsi|stoch","cp":2403.7,"ba":9},{"sy":"TCS","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":3,"dv":"pos_regular","in":"macd_hist|momentum|rsi","cp":2302.8,"ba":3},{"sy":"TCS","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":2,"dv":"pos_regular","in":"macd_hist|stoch","cp":2438.3,"ba":11},{"sy":"TCS","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"cmf|momentum","cp":2403.0,"ba":6},{"sy":"TCS","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":7,"dv":"pos_hidden|pos_regular","in":"cci|cmf|macd_hist|momentum|obv|rsi|vwmacd","cp":2397.2,"ba":4},{"sy":"TCS","tf":"4H","dt":"2026-05-12 12:00","dr":"b","cf":4,"dv":"pos_regular","in":"macd_hist|momentum|obv|vwmacd","cp":2303.5,"ba":0},{"sy":"TATACONSUM","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":2,"dv":"pos_regular","in":"obv|stoch","cp":1144.6,"ba":1},{"sy":"TATACONSUM","tf":"Weekly","dt":"2026-04-06 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"rsi|vwmacd","cp":1093.7,"ba":5},{"sy":"TATACONSUM","tf":"Weekly","dt":"2026-04-13 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|momentum","cp":1113.2,"ba":4},{"sy":"TATACONSUM","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"macd|obv|vwmacd","cp":1144.6,"ba":2},{"sy":"TATACONSUM","tf":"Daily","dt":"2026-05-12 00:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd_hist|stoch","cp":1253.0,"ba":0},{"sy":"TATACONSUM","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":3,"dv":"neg_hidden","in":"mfi|obv|stoch","cp":1149.5,"ba":28},{"sy":"TATACONSUM","tf":"1H","dt":"2026-05-08 12:15","dr":"b","cf":2,"dv":"neg_hidden","in":"obv|rsi","cp":1177.8,"ba":17},{"sy":"TATACONSUM","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":3,"dv":"neg_regular","in":"cci|mfi|vwmacd","cp":1270.9,"ba":7},{"sy":"TATACONSUM","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":3,"dv":"pos_hidden","in":"cci|macd_hist|momentum","cp":1252.3,"ba":0},{"sy":"TATACONSUM","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":5,"dv":"neg_regular","in":"cmf|macd|macd_hist|rsi|vwmacd","cp":1219.2,"ba":12},{"sy":"TATACONSUM","tf":"4H","dt":"2026-05-04 08:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|momentum|rsi|vwmacd","cp":1158.6,"ba":13},{"sy":"TATACONSUM","tf":"4H","dt":"2026-05-07 08:00","dr":"b","cf":6,"dv":"pos_hidden|pos_regular","in":"cci|macd|momentum|obv|stoch|vwmacd","cp":1154.2,"ba":7},{"sy":"TATACONSUM","tf":"4H","dt":"2026-05-08 12:00","dr":"b","cf":5,"dv":"neg_hidden|neg_regular","in":"cci|macd|mfi|obv|vwmacd","cp":1176.6,"ba":4},{"sy":"TATACONSUM","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":3,"dv":"neg_regular","in":"macd|stoch|vwmacd","cp":1258.1,"ba":1},{"sy":"TATASTEEL","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"macd_hist|mfi|obv|rsi","cp":191.86,"ba":2},{"sy":"TATASTEEL","tf":"Weekly","dt":"2026-04-20 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cmf|obv","cp":210.07,"ba":3},{"sy":"TATASTEEL","tf":"Weekly","dt":"2026-05-11 00:00","dr":"b","cf":6,"dv":"neg_regular","in":"cci|macd|macd_hist|mfi|rsi|stoch","cp":212.0,"ba":0},{"sy":"TATASTEEL","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|momentum|rsi|stoch","cp":212.24,"ba":6},{"sy":"TATASTEEL","tf":"Daily","dt":"2026-05-06 00:00","dr":"b","cf":6,"dv":"pos_hidden","in":"cci|macd|macd_hist|rsi|stoch|vwmacd","cp":215.47,"ba":4},{"sy":"TATASTEEL","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":4,"dv":"neg_hidden|neg_regular","in":"cci|macd_hist|obv|rsi","cp":215.23,"ba":28},{"sy":"TATASTEEL","tf":"1H","dt":"2026-05-07 10:15","dr":"b","cf":3,"dv":"neg_regular","in":"cci|macd|vwmacd","cp":217.35,"ba":26},{"sy":"TATASTEEL","tf":"1H","dt":"2026-05-08 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|stoch","cp":214.6,"ba":14},{"sy":"TATASTEEL","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|macd_hist","cp":213.9,"ba":12},{"sy":"TATASTEEL","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"mfi|momentum","cp":212.0,"ba":7},{"sy":"TATASTEEL","tf":"1H","dt":"2026-05-12 09:15","dr":"b","cf":2,"dv":"pos_hidden","in":"rsi|vwmacd","cp":213.17,"ba":6},{"sy":"TATASTEEL","tf":"1H","dt":"2026-05-12 14:15","dr":"b","cf":6,"dv":"pos_regular","in":"cci|macd_hist|mfi|momentum|obv|rsi","cp":211.92,"ba":1},{"sy":"TATASTEEL","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":6,"dv":"neg_regular","in":"cci|macd|macd_hist|momentum|rsi|stoch","cp":217.1,"ba":6},{"sy":"TATASTEEL","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"mfi|vwmacd","cp":213.25,"ba":3},{"sy":"TATASTEEL","tf":"4H","dt":"2026-05-12 08:00","dr":"b","cf":2,"dv":"pos_hidden","in":"mfi|rsi","cp":212.67,"ba":1},{"sy":"TECHM","tf":"Monthly","dt":"2026-02-01 00:00","dr":"b","cf":6,"dv":"neg_hidden|neg_regular","in":"cci|macd|macd_hist|mfi|obv|rsi","cp":1357.8,"ba":3},{"sy":"TECHM","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"mfi|rsi","cp":1384.0,"ba":2},{"sy":"TECHM","tf":"Weekly","dt":"2026-04-27 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|vwmacd","cp":1473.5,"ba":2},{"sy":"TECHM","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"momentum|obv","cp":1454.4,"ba":25},{"sy":"TECHM","tf":"1H","dt":"2026-05-08 10:15","dr":"b","cf":4,"dv":"neg_hidden","in":"cci|macd_hist|momentum|rsi","cp":1463.0,"ba":19},{"sy":"TECHM","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":3,"dv":"pos_hidden|pos_regular","in":"macd|mfi|rsi","cp":1407.0,"ba":3},{"sy":"TECHM","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|momentum","cp":1454.4,"ba":11},{"sy":"TITAN","tf":"Monthly","dt":"2026-01-01 00:00","dr":"b","cf":3,"dv":"neg_regular","in":"macd|rsi|vwmacd","cp":3977.4,"ba":4},{"sy":"TITAN","tf":"Monthly","dt":"2026-03-01 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"cmf|macd|rsi|vwmacd","cp":3951.4,"ba":2},{"sy":"TITAN","tf":"Weekly","dt":"2026-03-30 00:00","dr":"b","cf":7,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|mfi|momentum|obv|rsi|stoch","cp":4097.2,"ba":6},{"sy":"TITAN","tf":"Daily","dt":"2026-05-05 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cmf|momentum|stoch|vwmacd","cp":4373.6,"ba":5},{"sy":"TITAN","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"cci|macd_hist","cp":4509.0,"ba":2},{"sy":"TITAN","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|cmf|macd_hist|mfi|vwmacd","cp":4357.6,"ba":28},{"sy":"TITAN","tf":"1H","dt":"2026-05-07 11:15","dr":"b","cf":4,"dv":"pos_regular","in":"cci|macd_hist|rsi|vwmacd","cp":4285.4,"ba":25},{"sy":"TITAN","tf":"1H","dt":"2026-05-08 14:15","dr":"b","cf":3,"dv":"neg_regular","in":"macd|mfi|stoch","cp":4514.9,"ba":15},{"sy":"TITAN","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":2,"dv":"pos_regular","in":"cci|rsi","cp":4210.0,"ba":12},{"sy":"TITAN","tf":"1H","dt":"2026-05-12 11:15","dr":"b","cf":2,"dv":"pos_regular","in":"cmf|rsi","cp":4128.8,"ba":4},{"sy":"TITAN","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":2,"dv":"pos_regular","in":"cci|cmf","cp":4388.0,"ba":14},{"sy":"TITAN","tf":"4H","dt":"2026-05-05 08:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|rsi|stoch|vwmacd","cp":4372.2,"ba":11},{"sy":"TITAN","tf":"4H","dt":"2026-05-07 12:00","dr":"b","cf":2,"dv":"pos_hidden","in":"rsi|vwmacd","cp":4309.0,"ba":6},{"sy":"TITAN","tf":"4H","dt":"2026-05-11 08:00","dr":"b","cf":2,"dv":"neg_regular","in":"macd|stoch","cp":4236.5,"ba":3},{"sy":"ULTRACEMCO","tf":"Monthly","dt":"2025-12-01 00:00","dr":"b","cf":7,"dv":"pos_hidden","in":"cci|macd|macd_hist|mfi|obv|rsi|stoch","cp":11784.0,"ba":5},{"sy":"ULTRACEMCO","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd|macd_hist|rsi","cp":11586.0,"ba":1},{"sy":"ULTRACEMCO","tf":"Daily","dt":"2026-04-29 00:00","dr":"b","cf":4,"dv":"pos_hidden","in":"cci|macd_hist|mfi|stoch","cp":11833.0,"ba":8},{"sy":"ULTRACEMCO","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":7,"dv":"pos_hidden","in":"cci|cmf|macd_hist|mfi|momentum|rsi|stoch","cp":11758.0,"ba":6},{"sy":"ULTRACEMCO","tf":"1H","dt":"2026-05-06 15:15","dr":"b","cf":3,"dv":"neg_hidden","in":"cci|momentum|vwmacd","cp":12100.0,"ba":28},{"sy":"ULTRACEMCO","tf":"1H","dt":"2026-05-08 13:15","dr":"b","cf":4,"dv":"pos_hidden","in":"macd_hist|momentum|rsi|stoch","cp":11963.0,"ba":16},{"sy":"ULTRACEMCO","tf":"1H","dt":"2026-05-11 10:15","dr":"b","cf":3,"dv":"pos_hidden","in":"mfi|momentum|rsi","cp":11841.0,"ba":12},{"sy":"ULTRACEMCO","tf":"1H","dt":"2026-05-11 15:15","dr":"b","cf":2,"dv":"pos_hidden","in":"cmf|obv","cp":11871.0,"ba":7},{"sy":"ULTRACEMCO","tf":"1H","dt":"2026-05-12 12:15","dr":"b","cf":2,"dv":"pos_hidden|pos_regular","in":"momentum|vwmacd","cp":11712.0,"ba":3},{"sy":"ULTRACEMCO","tf":"1H","dt":"2026-05-12 15:15","dr":"b","cf":3,"dv":"pos_hidden","in":"cmf|mfi|rsi","cp":11525.0,"ba":0},{"sy":"ULTRACEMCO","tf":"4H","dt":"2026-04-30 12:00","dr":"b","cf":5,"dv":"pos_hidden","in":"macd|mfi|obv|rsi|vwmacd","cp":11597.0,"ba":14},{"sy":"WIPRO","tf":"Monthly","dt":"2026-01-01 00:00","dr":"b","cf":4,"dv":"neg_regular","in":"cmf|macd|mfi|stoch","cp":236.9,"ba":4},{"sy":"WIPRO","tf":"Monthly","dt":"2026-04-01 00:00","dr":"b","cf":3,"dv":"pos_regular","in":"macd|obv|vwmacd","cp":200.65,"ba":1},{"sy":"WIPRO","tf":"Weekly","dt":"2026-04-13 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"cci|cmf","cp":204.32,"ba":4},{"sy":"WIPRO","tf":"Weekly","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"neg_hidden","in":"macd_hist|momentum","cp":197.91,"ba":1},{"sy":"WIPRO","tf":"Daily","dt":"2026-05-04 00:00","dr":"b","cf":2,"dv":"pos_hidden","in":"macd_hist|obv","cp":200.75,"ba":6},{"sy":"WIPRO","tf":"Daily","dt":"2026-05-08 00:00","dr":"b","cf":4,"dv":"pos_hidden|pos_regular","in":"cci|macd_hist|obv|stoch","cp":197.91,"ba":2},{"sy":"WIPRO","tf":"1H","dt":"2026-05-07 09:15","dr":"b","cf":2,"dv":"neg_hidden","in":"obv|stoch","cp":198.33,"ba":27},{"sy":"WIPRO","tf":"1H","dt":"2026-05-08 15:15","dr":"b","cf":5,"dv":"neg_hidden","in":"cci|macd_hist|momentum|rsi|stoch","cp":197.88,"ba":14},{"sy":"WIPRO","tf":"1H","dt":"2026-05-11 09:15","dr":"b","cf":3,"dv":"neg_hidden","in":"macd_hist|momentum|stoch","cp":197.15,"ba":13},{"sy":"WIPRO","tf":"1H","dt":"2026-05-11 11:15","dr":"b","cf":2,"dv":"neg_hidden","in":"momentum|stoch","cp":197.42,"ba":11},{"sy":"WIPRO","tf":"1H","dt":"2026-05-11 13:15","dr":"b","cf":7,"dv":"neg_hidden","in":"cmf|macd|mfi|momentum|rsi|stoch|vwmacd","cp":197.86,"ba":9}],"ss":[{"s":"ADANIENT","M":{"d":"b","c":3,"b":1,"i":"macd_hist|momentum|rsi"},"W":{"d":"b","c":5,"b":6,"i":"cci|mfi|momentum"},"4H":{"d":"b","c":4,"b":2,"i":"cci|macd_hist|mfi"},"1H":{"d":"b","c":3,"b":4,"i":"cci|mfi|momentum"}},{"s":"ADANIPORTS","M":{"d":"b","c":4,"b":1,"i":"cci|macd|momentum"},"D":{"d":"b","c":2,"b":7,"i":"macd_hist|stoch"},"4H":{"d":"b","c":3,"b":11,"i":"macd_hist|mfi|vwmacd"},"1H":{"d":"b","c":7,"b":0,"i":"macd|macd_hist|mfi"}},{"s":"APOLLOHOSP","M":{"d":"b","c":3,"b":3,"i":"macd_hist|rsi|vwmacd"},"W":{"d":"b","c":4,"b":0,"i":"macd|mfi|obv"},"D":{"d":"b","c":8,"b":1,"i":"cmf|macd|macd_hist"},"4H":{"d":"b","c":6,"b":14,"i":"cci|macd_hist|obv"},"1H":{"d":"b","c":5,"b":2,"i":"cmf|macd_hist|momentum"}},{"s":"ASIANPAINT","M":{"d":"b","c":5,"b":5,"i":"cci|macd_hist|momentum"},"W":{"d":"b","c":3,"b":0,"i":"macd_hist|momentum|rsi"},"4H":{"d":"b","c":4,"b":14,"i":"cci|macd_hist|momentum"},"1H":{"d":"b","c":6,"b":27,"i":"macd|macd_hist|mfi"}},{"s":"AXISBANK","M":{"d":"b","c":3,"b":5,"i":"cmf|macd|vwmacd"},"W":{"d":"b","c":2,"b":0,"i":"cmf|momentum"},"D":{"d":"b","c":3,"b":4,"i":"macd_hist|momentum|rsi"},"4H":{"d":"b","c":5,"b":7,"i":"cci|macd_hist|momentum"},"1H":{"d":"b","c":6,"b":27,"i":"macd|macd_hist|mfi"}},{"s":"BAJAJ-AUTO","M":{"d":"b","c":4,"b":2,"i":"cmf|macd|obv"},"W":{"d":"b","c":6,"b":0,"i":"cci|mfi|momentum"},"D":{"d":"b","c":4,"b":5,"i":"macd|macd_hist|momentum"},"4H":{"d":"b","c":6,"b":11,"i":"macd|macd_hist|momentum"},"1H":{"d":"b","c":7,"b":0,"i":"cci|macd_hist|mfi"}},{"s":"BAJFINANCE","M":{"d":"b","c":6,"b":1,"i":"cci|cmf|macd"},"W":{"d":"b","c":4,"b":0,"i":"cci|macd_hist|mfi"},"D":{"d":"b","c":5,"b":3,"i":"macd_hist|momentum|obv"},"4H":{"d":"b","c":8,"b":7,"i":"cci|macd_hist|mfi"},"1H":{"d":"b","c":6,"b":21,"i":"macd|macd_hist|mfi"}},{"s":"BAJAJFINSV","M":{"d":"b","c":5,"b":3,"i":"cci|macd|macd_hist"},"W":{"d":"b","c":4,"b":5,"i":"macd|macd_hist|obv"},"D":{"d":"b","c":2,"b":3,"i":"cci|rsi"},"4H":{"d":"b","c":5,"b":7,"i":"macd_hist|mfi|momentum"},"1H":{"d":"b","c":6,"b":19,"i":"cci|macd_hist|mfi"}},{"s":"BEL","M":{"d":"b","c":5,"b":1,"i":"cmf|macd_hist|momentum"},"W":{"d":"b","c":3,"b":6,"i":"cci|cmf|rsi"},"4H":{"d":"b","c":8,"b":5,"i":"cci|cmf|macd_hist"},"1H":{"d":"b","c":4,"b":19,"i":"cci|macd|obv"}},{"s":"BPCL","M":{"d":"b","c":8,"b":4,"i":"cmf|macd|macd_hist"},"W":{"d":"b","c":3,"b":5,"i":"macd|macd_hist|rsi"},"D":{"d":"b","c":4,"b":4,"i":"macd_hist|momentum|obv"},"4H":{"d":"b","c":6,"b":0,"i":"cci|cmf|macd"},"1H":{"d":"b","c":4,"b":12,"i":"cci|macd_hist|momentum"}},{"s":"BHARTIARTL","M":{"d":"b","c":8,"b":1,"i":"cci|cmf|macd"},"W":{"d":"b","c":2,"b":1,"i":"cci|macd_hist"},"D":{"d":"b","c":4,"b":7,"i":"macd_hist|momentum|obv"},"4H":{"d":"b","c":5,"b":2,"i":"cci|cmf|macd_hist"},"1H":{"d":"b","c":6,"b":0,"i":"cci|cmf|mfi"}},{"s":"BRITANNIA","M":{"d":"b","c":5,"b":1,"i":"cci|macd|macd_hist"},"W":{"d":"b","c":3,"b":5,"i":"macd_hist|obv|rsi"},"D":{"d":"b","c":8,"b":4,"i":"cmf|macd|macd_hist"},"4H":{"d":"b","c":5,"b":11,"i":"macd_hist|mfi|obv"},"1H":{"d":"b","c":4,"b":26,"i":"cci|macd_hist|rsi"}},{"s":"CIPLA","M":{"d":"b","c":4,"b":3,"i":"cci|cmf|macd"},"W":{"d":"b","c":7,"b":0,"i":"macd|macd_hist|mfi"},"D":{"d":"b","c":6,"b":9,"i":"cmf|macd|macd_hist"},"4H":{"d":"b","c":4,"b":4,"i":"cmf|macd_hist|rsi"},"1H":{"d":"b","c":5,"b":12,"i":"macd|mfi|momentum"}},{"s":"COALINDIA","M":{"d":"b","c":5,"b":3,"i":"cci|cmf|macd"},"W":{"d":"b","c":3,"b":4,"i":"macd_hist|mfi|rsi"},"D":{"d":"b","c":2,"b":6,"i":"macd|mfi"},"4H":{"d":"b","c":7,"b":4,"i":"cci|macd_hist|mfi"},"1H":{"d":"b","c":5,"b":4,"i":"cmf|macd_hist|momentum"}},{"s":"DRREDDY","M":{"d":"b","c":2,"b":0,"i":"cci|rsi"},"W":{"d":"b","c":3,"b":1,"i":"cci|macd|obv"},"D":{"d":"b","c":4,"b":8,"i":"macd|rsi|stoch"},"4H":{"d":"b","c":2,"b":3,"i":"cmf|mfi"},"1H":{"d":"b","c":9,"b":5,"i":"cci|macd|macd_hist"}},{"s":"EICHERMOT","W":{"d":"b","c":5,"b":5,"i":"cmf|macd|macd_hist"},"D":{"d":"b","c":3,"b":2,"i":"cci|mfi|rsi"},"4H":{"d":"b","c":6,"b":6,"i":"cci|cmf|macd"},"1H":{"d":"b","c":7,"b":14,"i":"macd|macd_hist|mfi"}},{"s":"ETERNAL","M":{"d":"b","c":4,"b":1,"i":"cci|macd_hist|rsi"},"W":{"d":"b","c":3,"b":0,"i":"macd_hist|mfi|momentum"},"D":{"d":"b","c":3,"b":4,"i":"macd_hist|momentum|stoch"},"4H":{"d":"b","c":3,"b":6,"i":"cci|macd_hist|obv"},"1H":{"d":"b","c":4,"b":17,"i":"macd_hist|momentum|rsi"}},{"s":"GRASIM","M":{"d":"b","c":3,"b":1,"i":"cci|macd_hist|rsi"},"W":{"d":"b","c":4,"b":0,"i":"cci|macd|mfi"},"D":{"d":"b","c":5,"b":7,"i":"macd|macd_hist|momentum"},"4H":{"d":"b","c":4,"b":11,"i":"cci|mfi|rsi"},"1H":{"d":"b","c":6,"b":0,"i":"macd|macd_hist|momentum"}},{"s":"HCLTECH","M":{"d":"b","c":2,"b":3,"i":"macd_hist|momentum"},"W":{"d":"b","c":2,"b":3,"i":"cci|cmf"},"4H":{"d":"b","c":7,"b":2,"i":"cci|cmf|macd"},"1H":{"d":"b","c":6,"b":7,"i":"cci|macd_hist|momentum"}},{"s":"HDFCBANK","M":{"d":"b","c":6,"b":1,"i":"cci|macd_hist|momentum"},"W":{"d":"b","c":2,"b":0,"i":"cci|macd_hist"},"D":{"d":"b","c":5,"b":3,"i":"macd_hist|mfi|momentum"},"4H":{"d":"b","c":3,"b":5,"i":"macd_hist|mfi|obv"},"1H":{"d":"b","c":6,"b":15,"i":"cmf|macd_hist|mfi"}},{"s":"HDFCLIFE","M":{"d":"b","c":7,"b":0,"i":"cmf|macd_hist|mfi"},"W":{"d":"b","c":3,"b":0,"i":"cci|cmf|mfi"},"D":{"d":"b","c":8,"b":2,"i":"cci|cmf|macd_hist"},"4H":{"d":"b","c":7,"b":14,"i":"cmf|macd|macd_hist"},"1H":{"d":"b","c":7,"b":0,"i":"cci|macd|macd_hist"}},{"s":"HEROMOTOCO","W":{"d":"b","c":2,"b":2,"i":"mfi|obv"},"D":{"d":"b","c":4,"b":2,"i":"cci|mfi|obv"},"4H":{"d":"b","c":4,"b":6,"i":"cci|cmf|obv"},"1H":{"d":"b","c":3,"b":0,"i":"cci|rsi|vwmacd"}},{"s":"HINDALCO","M":{"d":"b","c":3,"b":3,"i":"mfi|rsi|vwmacd"},"W":{"d":"b","c":7,"b":6,"i":"macd|macd_hist|mfi"},"D":{"d":"b","c":3,"b":0,"i":"macd|obv|rsi"},"4H":{"d":"b","c":6,"b":13,"i":"cci|macd|macd_hist"},"1H":{"d":"b","c":5,"b":19,"i":"cci|macd_hist|mfi"}},{"s":"HINDUNILVR","M":{"d":"b","c":6,"b":1,"i":"cci|cmf|macd_hist"},"4H":{"d":"b","c":5,"b":14,"i":"cci|macd_hist|momentum"},"1H":{"d":"b","c":8,"b":8,"i":"cci|cmf|macd_hist"}},{"s":"ICICIBANK","M":{"d":"b","c":7,"b":1,"i":"cci|cmf|macd"},"D":{"d":"b","c":5,"b":6,"i":"macd_hist|momentum|obv"},"4H":{"d":"b","c":3,"b":14,"i":"cmf|macd_hist|mfi"},"1H":{"d":"b","c":8,"b":26,"i":"cmf|macd|macd_hist"}},{"s":"ITC","M":{"d":"b","c":6,"b":1,"i":"macd|macd_hist|momentum"},"W":{"d":"b","c":6,"b":1,"i":"cci|macd|macd_hist"},"D":{"d":"b","c":3,"b":7,"i":"cmf|macd_hist|momentum"},"4H":{"d":"b","c":3,"b":4,"i":"mfi|momentum|obv"},"1H":{"d":"b","c":6,"b":21,"i":"cmf|macd|macd_hist"}},{"s":"INDUSINDBK","M":{"d":"b","c":4,"b":2,"i":"macd_hist|mfi|rsi"},"W":{"d":"b","c":4,"b":5,"i":"cmf|macd_hist|rsi"},"D":{"d":"b","c":7,"b":9,"i":"cci|cmf|macd"},"4H":{"d":"b","c":6,"b":7,"i":"cmf|macd|macd_hist"},"1H":{"d":"b","c":6,"b":1,"i":"cmf|macd|macd_hist"}},{"s":"INFY","M":{"d":"b","c":4,"b":3,"i":"cmf|macd|mfi"},"4H":{"d":"b","c":6,"b":0,"i":"macd|macd_hist|momentum"},"1H":{"d":"b","c":5,"b":10,"i":"cmf|macd|macd_hist"}},{"s":"JSWSTEEL","M":{"d":"b","c":2,"b":2,"i":"mfi|vwmacd"},"W":{"d":"b","c":4,"b":0,"i":"macd_hist|momentum|rsi"},"D":{"d":"b","c":7,"b":4,"i":"cci|macd|macd_hist"},"4H":{"d":"b","c":4,"b":6,"i":"cci|macd|momentum"},"1H":{"d":"b","c":8,"b":10,"i":"cci|cmf|macd"}},{"s":"JIOFIN","W":{"d":"b","c":6,"b":0,"i":"cci|macd_hist|mfi"},"D":{"d":"b","c":6,"b":9,"i":"cci|cmf|macd"},"4H":{"d":"b","c":5,"b":6,"i":"macd|macd_hist|mfi"},"1H":{"d":"b","c":4,"b":16,"i":"macd_hist|obv|rsi"}},{"s":"KOTAKBANK","M":{"d":"b","c":6,"b":1,"i":"cci|macd_hist|momentum"},"W":{"d":"b","c":4,"b":5,"i":"macd|mfi|obv"},"D":{"d":"b","c":2,"b":0,"i":"macd|obv"},"4H":{"d":"b","c":4,"b":8,"i":"cmf|macd|obv"},"1H":{"d":"b","c":3,"b":8,"i":"macd|macd_hist|rsi"}},{"s":"LT","M":{"d":"b","c":3,"b":2,"i":"macd|obv|vwmacd"},"W":{"d":"b","c":2,"b":7,"i":"macd_hist|rsi"},"D":{"d":"b","c":6,"b":3,"i":"cci|macd_hist|mfi"},"4H":{"d":"b","c":8,"b":8,"i":"cci|macd|macd_hist"},"1H":{"d":"b","c":5,"b":0,"i":"cci|macd_hist|obv"}},{"s":"M&M","M":{"d":"b","c":6,"b":1,"i":"cci|macd_hist|mfi"},"W":{"d":"b","c":3,"b":0,"i":"cci|macd_hist|mfi"},"D":{"d":"b","c":7,"b":2,"i":"macd|macd_hist|mfi"},"4H":{"d":"b","c":4,"b":6,"i":"cmf|macd|obv"},"1H":{"d":"b","c":4,"b":16,"i":"cci|cmf|rsi"}},{"s":"MARUTI","M":{"d":"b","c":2,"b":1,"i":"cci|rsi"},"W":{"d":"b","c":6,"b":6,"i":"cmf|macd|macd_hist"},"D":{"d":"b","c":5,"b":2,"i":"macd|macd_hist|momentum"},"4H":{"d":"b","c":7,"b":6,"i":"cmf|macd|macd_hist"},"1H":{"d":"b","c":6,"b":3,"i":"macd|macd_hist|mfi"}},{"s":"NTPC","M":{"d":"b","c":4,"b":2,"i":"cci|cmf|macd"},"W":{"d":"b","c":4,"b":2,"i":"macd_hist|mfi|rsi"},"4H":{"d":"b","c":7,"b":1,"i":"macd|macd_hist|momentum"},"1H":{"d":"b","c":8,"b":27,"i":"cci|cmf|macd"}},{"s":"NESTLEIND","M":{"d":"b","c":5,"b":3,"i":"macd_hist|mfi|momentum"},"W":{"d":"b","c":4,"b":5,"i":"macd|macd_hist|mfi"},"4H":{"d":"b","c":5,"b":12,"i":"cci|macd|mfi"},"1H":{"d":"b","c":7,"b":12,"i":"cci|cmf|macd"}},{"s":"ONGC","M":{"d":"b","c":4,"b":0,"i":"macd|obv|stoch"},"W":{"d":"b","c":3,"b":0,"i":"macd_hist|momentum|rsi"},"4H":{"d":"b","c":5,"b":7,"i":"cci|macd_hist|mfi"},"1H":{"d":"b","c":7,"b":7,"i":"cci|macd|macd_hist"}},{"s":"POWERGRID","M":{"d":"b","c":5,"b":0,"i":"cci|cmf|macd"},"W":{"d":"b","c":2,"b":3,"i":"cci|rsi"},"4H":{"d":"b","c":4,"b":7,"i":"macd_hist|momentum|rsi"},"1H":{"d":"b","c":5,"b":2,"i":"cci|cmf|momentum"}},{"s":"RELIANCE","M":{"d":"b","c":2,"b":1,"i":"macd|mfi"},"W":{"d":"b","c":5,"b":0,"i":"cci|macd_hist|momentum"},"D":{"d":"b","c":2,"b":4,"i":"macd|mfi"},"4H":{"d":"b","c":2,"b":1,"i":"cci|momentum"},"1H":{"d":"b","c":4,"b":21,"i":"cmf|mfi|obv"}},{"s":"SBILIFE","M":{"d":"b","c":5,"b":1,"i":"cci|macd_hist|momentum"},"W":{"d":"b","c":5,"b":2,"i":"cmf|macd|mfi"},"4H":{"d":"b","c":2,"b":5,"i":"macd_hist|stoch"},"1H":{"d":"b","c":5,"b":8,"i":"macd|macd_hist|momentum"}},{"s":"SBIN","W":{"d":"b","c":2,"b":6,"i":"cmf|momentum"},"D":{"d":"b","c":6,"b":4,"i":"macd|macd_hist|momentum"},"4H":{"d":"b","c":9,"b":14,"i":"cci|macd|macd_hist"},"1H":{"d":"b","c":4,"b":19,"i":"cci|macd|obv"}},{"s":"SUNPHARMA","M":{"d":"b","c":6,"b":3,"i":"cmf|macd|mfi"},"W":{"d":"b","c":4,"b":0,"i":"cci|macd_hist|momentum"},"D":{"d":"b","c":6,"b":5,"i":"macd|macd_hist|momentum"},"4H":{"d":"b","c":3,"b":7,"i":"cci|obv|rsi"},"1H":{"d":"b","c":7,"b":2,"i":"cci|macd|macd_hist"}},{"s":"TCS","M":{"d":"b","c":3,"b":1,"i":"macd_hist|obv|stoch"},"D":{"d":"b","c":2,"b":1,"i":"cci|cmf"},"4H":{"d":"b","c":7,"b":4,"i":"cci|cmf|macd_hist"},"1H":{"d":"b","c":8,"b":24,"i":"cci|cmf|macd"}},{"s":"TATACONSUM","M":{"d":"b","c":2,"b":1,"i":"obv|stoch"},"W":{"d":"b","c":3,"b":2,"i":"macd|obv|vwmacd"},"D":{"d":"b","c":2,"b":0,"i":"macd_hist|stoch"},"4H":{"d":"b","c":6,"b":7,"i":"cci|macd|momentum"},"1H":{"d":"b","c":5,"b":12,"i":"cmf|macd|macd_hist"}},{"s":"TATAMOTORS"},{"s":"TATASTEEL","M":{"d":"b","c":4,"b":2,"i":"macd_hist|mfi|obv"},"W":{"d":"b","c":6,"b":0,"i":"cci|macd|macd_hist"},"D":{"d":"b","c":6,"b":4,"i":"cci|macd|macd_hist"},"4H":{"d":"b","c":6,"b":6,"i":"cci|macd|macd_hist"},"1H":{"d":"b","c":6,"b":1,"i":"cci|macd_hist|mfi"}},{"s":"TECHM","M":{"d":"b","c":6,"b":3,"i":"cci|macd|macd_hist"},"W":{"d":"b","c":2,"b":2,"i":"cmf|vwmacd"},"4H":{"d":"b","c":2,"b":11,"i":"macd_hist|momentum"},"1H":{"d":"b","c":4,"b":19,"i":"cci|macd_hist|momentum"}},{"s":"TITAN","M":{"d":"b","c":4,"b":2,"i":"cmf|macd|rsi"},"W":{"d":"b","c":7,"b":6,"i":"cci|macd_hist|mfi"},"D":{"d":"b","c":4,"b":5,"i":"cmf|momentum|stoch"},"4H":{"d":"b","c":4,"b":11,"i":"cci|rsi|stoch"},"1H":{"d":"b","c":5,"b":28,"i":"cci|cmf|macd_hist"}},{"s":"ULTRACEMCO","M":{"d":"b","c":7,"b":5,"i":"cci|macd|macd_hist"},"D":{"d":"b","c":7,"b":6,"i":"cci|cmf|macd_hist"},"4H":{"d":"b","c":5,"b":14,"i":"macd|mfi|obv"},"1H":{"d":"b","c":4,"b":16,"i":"macd_hist|momentum|rsi"}},{"s":"WIPRO","M":{"d":"b","c":4,"b":4,"i":"cmf|macd|mfi"},"W":{"d":"b","c":2,"b":1,"i":"macd_hist|momentum"},"D":{"d":"b","c":4,"b":2,"i":"cci|macd_hist|obv"},"1H":{"d":"b","c":7,"b":9,"i":"cmf|macd|mfi"}}],"al":[{"s":"LT","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":2},{"t":"Daily","c":6},{"t":"1H","c":5},{"t":"4H","c":8}],"n":5,"mc":8,"sc":81,"cp":4014.0},{"s":"INDUSINDBK","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"Weekly","c":2},{"t":"Daily","c":7},{"t":"1H","c":4},{"t":"4H","c":6}],"n":5,"mc":7,"sc":80,"cp":752.45},{"s":"BPCL","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"Weekly","c":3},{"t":"Daily","c":4},{"t":"1H","c":4},{"t":"4H","c":6}],"n":5,"mc":6,"sc":79,"cp":300.45},{"s":"M&M","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":3},{"t":"Daily","c":7},{"t":"1H","c":3},{"t":"4H","c":4}],"n":5,"mc":7,"sc":79,"cp":3709.2},{"s":"BAJAJFINSV","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":4},{"t":"Daily","c":2},{"t":"1H","c":6},{"t":"4H","c":4}],"n":5,"mc":6,"sc":77,"cp":1993.4},{"s":"SUNPHARMA","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Weekly","c":4},{"t":"Daily","c":6},{"t":"1H","c":4},{"t":"4H","c":3}],"n":5,"mc":6,"sc":76,"cp":1719.7},{"s":"KOTAKBANK","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"Weekly","c":4},{"t":"Daily","c":2},{"t":"1H","c":3},{"t":"4H","c":4}],"n":5,"mc":6,"sc":75,"cp":383.3},{"s":"SBIN","d":"b","tfs":[{"t":"Weekly","c":2},{"t":"Daily","c":6},{"t":"1H","c":4},{"t":"4H","c":9}],"n":4,"mc":9,"sc":70,"cp":1018.4},{"s":"ULTRACEMCO","d":"b","tfs":[{"t":"Monthly","c":7},{"t":"Daily","c":7},{"t":"1H","c":4},{"t":"4H","c":5}],"n":4,"mc":7,"sc":70,"cp":11784.0},{"s":"BHARTIARTL","d":"b","tfs":[{"t":"Monthly","c":8},{"t":"Daily","c":2},{"t":"1H","c":6},{"t":"4H","c":5}],"n":4,"mc":8,"sc":69,"cp":1886.8},{"s":"HINDALCO","d":"b","tfs":[{"t":"Weekly","c":7},{"t":"Daily","c":3},{"t":"1H","c":5},{"t":"4H","c":6}],"n":4,"mc":7,"sc":68,"cp":866.7},{"s":"TCS","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Daily","c":2},{"t":"1H","c":8},{"t":"4H","c":7}],"n":4,"mc":8,"sc":68,"cp":2473.9},{"s":"BAJFINANCE","d":"b","tfs":[{"t":"Weekly","c":4},{"t":"Daily","c":5},{"t":"1H","c":2},{"t":"4H","c":8}],"n":4,"mc":8,"sc":67,"cp":904.2},{"s":"HDFCLIFE","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":3},{"t":"Daily","c":8},{"t":"4H","c":6}],"n":4,"mc":8,"sc":67,"cp":749.85},{"s":"ICICIBANK","d":"b","tfs":[{"t":"Monthly","c":7},{"t":"Daily","c":5},{"t":"1H","c":5},{"t":"4H","c":3}],"n":4,"mc":7,"sc":67,"cp":1263.4},{"s":"BAJAJ-AUTO","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"Weekly","c":6},{"t":"Daily","c":4},{"t":"4H","c":6}],"n":4,"mc":6,"sc":66,"cp":8781.5},{"s":"JIOFIN","d":"b","tfs":[{"t":"Weekly","c":6},{"t":"Daily","c":6},{"t":"1H","c":3},{"t":"4H","c":5}],"n":4,"mc":6,"sc":66,"cp":246.37},{"s":"MARUTI","d":"b","tfs":[{"t":"Weekly","c":2},{"t":"Daily","c":5},{"t":"1H","c":5},{"t":"4H","c":7}],"n":4,"mc":7,"sc":66,"cp":13172.0},{"s":"TATASTEEL","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"Weekly","c":6},{"t":"1H","c":4},{"t":"4H","c":6}],"n":4,"mc":6,"sc":66,"cp":191.86},{"s":"TITAN","d":"b","tfs":[{"t":"Weekly","c":7},{"t":"Daily","c":4},{"t":"1H","c":4},{"t":"4H","c":4}],"n":4,"mc":7,"sc":66,"cp":4097.2},{"s":"BAJFINANCE","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"Daily","c":3},{"t":"1H","c":6},{"t":"4H","c":4}],"n":4,"mc":6,"sc":65,"cp":995.9},{"s":"CIPLA","d":"b","tfs":[{"t":"Weekly","c":7},{"t":"Daily","c":6},{"t":"1H","c":2},{"t":"4H","c":3}],"n":4,"mc":7,"sc":65,"cp":1292.3},{"s":"NESTLEIND","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":2},{"t":"1H","c":7},{"t":"4H","c":4}],"n":4,"mc":7,"sc":65,"cp":1291.7},{"s":"HCLTECH","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":2},{"t":"1H","c":6},{"t":"4H","c":7}],"n":4,"mc":7,"sc":64,"cp":1389.1},{"s":"MARUTI","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":6},{"t":"Daily","c":4},{"t":"1H","c":6}],"n":4,"mc":6,"sc":64,"cp":13314.0},{"s":"BPCL","d":"b","tfs":[{"t":"Monthly","c":8},{"t":"Daily","c":2},{"t":"1H","c":3},{"t":"4H","c":2}],"n":4,"mc":8,"sc":63,"cp":364.5},{"s":"COALINDIA","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":3},{"t":"1H","c":4},{"t":"4H","c":7}],"n":4,"mc":7,"sc":63,"cp":399.0},{"s":"AXISBANK","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Weekly","c":2},{"t":"1H","c":6},{"t":"4H","c":5}],"n":4,"mc":6,"sc":62,"cp":1269.4},{"s":"HDFCBANK","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"Daily","c":2},{"t":"1H","c":6},{"t":"4H","c":2}],"n":4,"mc":6,"sc":62,"cp":771.7},{"s":"ITC","d":"b","tfs":[{"t":"Weekly","c":6},{"t":"Daily","c":3},{"t":"1H","c":5},{"t":"4H","c":2}],"n":4,"mc":6,"sc":62,"cp":301.6},{"s":"JSWSTEEL","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":4},{"t":"1H","c":6},{"t":"4H","c":4}],"n":4,"mc":6,"sc":62,"cp":1122.5},{"s":"BAJAJFINSV","d":"b","tfs":[{"t":"Weekly","c":2},{"t":"Daily","c":2},{"t":"1H","c":6},{"t":"4H","c":5}],"n":4,"mc":6,"sc":61,"cp":1744.8},{"s":"GRASIM","d":"b","tfs":[{"t":"Weekly","c":4},{"t":"Daily","c":5},{"t":"1H","c":3},{"t":"4H","c":4}],"n":4,"mc":5,"sc":61,"cp":2903.0},{"s":"ADANIENT","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Weekly","c":5},{"t":"1H","c":3},{"t":"4H","c":4}],"n":4,"mc":5,"sc":60,"cp":2161.8},{"s":"NTPC","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"Weekly","c":4},{"t":"1H","c":5},{"t":"4H","c":2}],"n":4,"mc":5,"sc":60,"cp":370.65},{"s":"TATACONSUM","d":"b","tfs":[{"t":"Weekly","c":3},{"t":"Daily","c":2},{"t":"1H","c":5},{"t":"4H","c":5}],"n":4,"mc":5,"sc":60,"cp":1113.2},{"s":"ADANIPORTS","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Daily","c":2},{"t":"1H","c":6},{"t":"4H","c":3}],"n":4,"mc":6,"sc":59,"cp":1469.8},{"s":"ASIANPAINT","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Weekly","c":2},{"t":"1H","c":5},{"t":"4H","c":4}],"n":4,"mc":5,"sc":59,"cp":2444.5},{"s":"BRITANNIA","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":3},{"t":"Daily","c":2},{"t":"1H","c":4}],"n":4,"mc":5,"sc":59,"cp":5726.0},{"s":"TATACONSUM","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":2},{"t":"1H","c":3},{"t":"4H","c":6}],"n":4,"mc":6,"sc":59,"cp":1144.6},{"s":"HDFCLIFE","d":"b","tfs":[{"t":"Monthly","c":7},{"t":"1H","c":7},{"t":"4H","c":7}],"n":3,"mc":7,"sc":58,"cp":601.8},{"s":"ETERNAL","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"Daily","c":3},{"t":"1H","c":4},{"t":"4H","c":2}],"n":4,"mc":4,"sc":57,"cp":247.03},{"s":"AXISBANK","d":"b","tfs":[{"t":"Weekly","c":2},{"t":"Daily","c":3},{"t":"1H","c":3},{"t":"4H","c":4}],"n":4,"mc":4,"sc":56,"cp":1260.1},{"s":"BHARTIARTL","d":"b","tfs":[{"t":"Weekly","c":2},{"t":"Daily","c":4},{"t":"1H","c":2},{"t":"4H","c":4}],"n":4,"mc":4,"sc":56,"cp":1834.5},{"s":"DRREDDY","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":3},{"t":"Daily","c":4},{"t":"1H","c":3}],"n":4,"mc":4,"sc":56,"cp":1270.0},{"s":"JSWSTEEL","d":"b","tfs":[{"t":"Daily","c":7},{"t":"1H","c":8},{"t":"4H","c":3}],"n":3,"mc":8,"sc":56,"cp":1266.6},{"s":"NTPC","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"1H","c":8},{"t":"4H","c":7}],"n":3,"mc":8,"sc":55,"cp":329.55},{"s":"BRITANNIA","d":"b","tfs":[{"t":"Daily","c":8},{"t":"1H","c":3},{"t":"4H","c":5}],"n":3,"mc":8,"sc":54,"cp":5783.0},{"s":"ETERNAL","d":"b","tfs":[{"t":"Weekly","c":3},{"t":"Daily","c":3},{"t":"1H","c":2},{"t":"4H","c":3}],"n":4,"mc":3,"sc":54,"cp":247.03},{"s":"APOLLOHOSP","d":"b","tfs":[{"t":"Weekly","c":4},{"t":"Daily","c":8},{"t":"4H","c":3}],"n":3,"mc":8,"sc":53,"cp":8022.5},{"s":"SUNPHARMA","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"Weekly","c":2},{"t":"1H","c":7}],"n":3,"mc":7,"sc":52,"cp":1737.0},{"s":"ADANIPORTS","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"1H","c":7},{"t":"4H","c":3}],"n":3,"mc":7,"sc":51,"cp":1657.3},{"s":"EICHERMOT","d":"b","tfs":[{"t":"Daily","c":3},{"t":"1H","c":6},{"t":"4H","c":6}],"n":3,"mc":6,"sc":51,"cp":7301.5},{"s":"ITC","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"1H","c":6},{"t":"4H","c":3}],"n":3,"mc":6,"sc":51,"cp":314.9},{"s":"APOLLOHOSP","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"1H","c":5},{"t":"4H","c":6}],"n":3,"mc":6,"sc":50,"cp":7821.5},{"s":"ASIANPAINT","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":3},{"t":"1H","c":6}],"n":3,"mc":6,"sc":50,"cp":2769.5},{"s":"ONGC","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"Weekly","c":2},{"t":"1H","c":7}],"n":3,"mc":7,"sc":50,"cp":294.5},{"s":"TATASTEEL","d":"b","tfs":[{"t":"Daily","c":6},{"t":"1H","c":6},{"t":"4H","c":2}],"n":3,"mc":6,"sc":50,"cp":212.24},{"s":"WIPRO","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"Weekly","c":2},{"t":"1H","c":7}],"n":3,"mc":7,"sc":50,"cp":236.9},{"s":"NESTLEIND","d":"b","tfs":[{"t":"Weekly","c":4},{"t":"1H","c":5},{"t":"4H","c":5}],"n":3,"mc":5,"sc":49,"cp":1191.3},{"s":"SBILIFE","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":5},{"t":"1H","c":4}],"n":3,"mc":5,"sc":49,"cp":1819.0},{"s":"CIPLA","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"1H","c":5},{"t":"4H","c":4}],"n":3,"mc":5,"sc":48,"cp":1348.2},{"s":"INFY","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"1H","c":5},{"t":"4H","c":4}],"n":3,"mc":5,"sc":48,"cp":1300.1},{"s":"TECHM","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"1H","c":4},{"t":"4H","c":2}],"n":3,"mc":6,"sc":48,"cp":1357.8},{"s":"COALINDIA","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Daily","c":2},{"t":"1H","c":5}],"n":3,"mc":5,"sc":47,"cp":430.65},{"s":"GRASIM","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Weekly","c":2},{"t":"1H","c":6}],"n":3,"mc":6,"sc":47,"cp":2794.5},{"s":"KOTAKBANK","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"Daily","c":2},{"t":"1H","c":3}],"n":3,"mc":6,"sc":47,"cp":408.0},{"s":"POWERGRID","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"1H","c":5},{"t":"4H","c":4}],"n":3,"mc":5,"sc":47,"cp":264.6},{"s":"POWERGRID","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":2},{"t":"1H","c":5}],"n":3,"mc":5,"sc":47,"cp":296.1},{"s":"BEL","d":"b","tfs":[{"t":"Monthly","c":5},{"t":"Weekly","c":3},{"t":"4H","c":3}],"n":3,"mc":5,"sc":46,"cp":431.3},{"s":"SBILIFE","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"1H","c":5},{"t":"4H","c":2}],"n":3,"mc":5,"sc":46,"cp":1998.5},{"s":"TITAN","d":"b","tfs":[{"t":"Monthly","c":4},{"t":"1H","c":5},{"t":"4H","c":2}],"n":3,"mc":5,"sc":46,"cp":3977.4},{"s":"HDFCBANK","d":"b","tfs":[{"t":"Weekly","c":2},{"t":"Daily","c":5},{"t":"4H","c":3}],"n":3,"mc":5,"sc":45,"cp":784.85},{"s":"RELIANCE","d":"b","tfs":[{"t":"Weekly","c":5},{"t":"Daily","c":2},{"t":"1H","c":3}],"n":3,"mc":5,"sc":45,"cp":1348.1},{"s":"HINDALCO","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Daily","c":2},{"t":"1H","c":4}],"n":3,"mc":4,"sc":43,"cp":924.7},{"s":"RELIANCE","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"1H","c":4},{"t":"4H","c":2}],"n":3,"mc":4,"sc":42,"cp":1430.8},{"s":"BEL","d":"b","tfs":[{"t":"1H","c":4},{"t":"4H","c":8}],"n":2,"mc":8,"sc":40,"cp":438.1},{"s":"DRREDDY","d":"b","tfs":[{"t":"1H","c":9},{"t":"4H","c":2}],"n":2,"mc":9,"sc":40,"cp":1299.0},{"s":"TECHM","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":2},{"t":"1H","c":3}],"n":3,"mc":3,"sc":40,"cp":1384.0},{"s":"EICHERMOT","d":"b","tfs":[{"t":"Weekly","c":5},{"t":"1H","c":7}],"n":2,"mc":7,"sc":39,"cp":7424.0},{"s":"ADANIENT","d":"b","tfs":[{"t":"Monthly","c":2},{"t":"Weekly","c":2},{"t":"1H","c":2}],"n":3,"mc":2,"sc":38,"cp":2405.2},{"s":"BAJAJ-AUTO","d":"b","tfs":[{"t":"Weekly","c":4},{"t":"1H","c":7}],"n":2,"mc":7,"sc":38,"cp":9813.5},{"s":"ICICIBANK","d":"b","tfs":[{"t":"1H","c":8},{"t":"4H","c":2}],"n":2,"mc":8,"sc":38,"cp":1279.6},{"s":"HINDUNILVR","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"4H","c":5}],"n":2,"mc":6,"sc":37,"cp":2250.9},{"s":"HCLTECH","d":"b","tfs":[{"t":"1H","c":6},{"t":"4H","c":4}],"n":2,"mc":6,"sc":36,"cp":1186.5},{"s":"INDUSINDBK","d":"b","tfs":[{"t":"Weekly","c":4},{"t":"1H","c":6}],"n":2,"mc":6,"sc":36,"cp":778.7},{"s":"INFY","d":"b","tfs":[{"t":"1H","c":4},{"t":"4H","c":6}],"n":2,"mc":6,"sc":36,"cp":1166.4},{"s":"M&M","d":"b","tfs":[{"t":"Monthly","c":6},{"t":"1H","c":4}],"n":2,"mc":6,"sc":36,"cp":3097.5},{"s":"ONGC","d":"b","tfs":[{"t":"Weekly","c":3},{"t":"4H","c":5}],"n":2,"mc":5,"sc":33,"cp":294.5},{"s":"HEROMOTOCO","d":"b","tfs":[{"t":"Daily","c":4},{"t":"4H","c":4}],"n":2,"mc":4,"sc":32,"cp":5322.0},{"s":"JIOFIN","d":"b","tfs":[{"t":"1H","c":4},{"t":"4H","c":3}],"n":2,"mc":4,"sc":31,"cp":252.29},{"s":"LT","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"1H","c":4}],"n":2,"mc":4,"sc":31,"cp":3504.1},{"s":"WIPRO","d":"b","tfs":[{"t":"Monthly","c":3},{"t":"Daily","c":4}],"n":2,"mc":4,"sc":31,"cp":200.65},{"s":"HEROMOTOCO","d":"b","tfs":[{"t":"Weekly","c":2},{"t":"1H","c":3}],"n":2,"mc":3,"sc":28,"cp":5099.0}]};
+
+// ============================================================
+//  CONSTANTS & HELPERS
+// ============================================================
+const TFS = ['Monthly','Weekly','Daily','4H','1H'];
+const TF_SHORT = {Monthly:'M',Weekly:'W',Daily:'D','4H':'4H','1H':'1H'};
+const TF_LONG = {M:'Monthly',W:'Weekly',D:'Daily','4H':'4H','1H':'1H'};
+const TF_COLORS = {
+  M:'var(--purple)',W:'var(--blue)',D:'var(--cyan)',
+  '4H':'var(--orange)','1H':'var(--yellow)'
+};
+const DIV_LABELS = {
+  pos_regular:'Pos Regular',neg_regular:'Neg Regular',
+  pos_hidden:'Pos Hidden',neg_hidden:'Neg Hidden'
+};
+
+const isBull = d => d === 'b';
+const dirClass = d => isBull(d) ? 'bull' : 'bear';
+const dirLabel = d => isBull(d) ? 'BULLISH' : 'BEARISH';
+const dirArrow = d => isBull(d) ? '▲' : '▼';
+const fmtPrice = p => p != null ? '₹' + Number(p).toLocaleString('en-IN',{minimumFractionDigits:1,maximumFractionDigits:1}) : '--';
+const fmtInds = s => s ? s.split('|').map(i=>i.toUpperCase()) : [];
+const fmtDivs = s => s ? s.split('|').map(d=>DIV_LABELS[d]||d) : [];
+
+// Build lookup maps
+const stockMap = {};
+DATA.ss.forEach(s => { stockMap[s.s] = s; });
+const alignMap = {};
+DATA.al.forEach(a => { alignMap[a.s] = a; });
+const signalsByStock = {};
+DATA.sg.forEach(s => {
+  if (!signalsByStock[s.sy]) signalsByStock[s.sy] = [];
+  signalsByStock[s.sy].push(s);
+});
+const allSymbols = DATA.ss.map(s => s.s).sort();
+const totalBull = Object.values(DATA.ts).reduce((a,v)=>a+v.bullish,0);
+const totalBear = Object.values(DATA.ts).reduce((a,v)=>a+v.bearish,0);
+const totalSignals = DATA.sg.length;
+
+// ============================================================
+//  INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Timestamps
+  document.getElementById('sidebar-ts').textContent = DATA.t;
+  document.getElementById('headerTs').textContent = 'Last scan: ' + DATA.t;
+
+  // Summary pills
+  document.getElementById('summaryPills').innerHTML =
+    `<span class="pill pill-total">${totalSignals} signals</span>` +
+    `<span class="pill pill-bull">▲ ${totalBull}</span>` +
+    `<span class="pill pill-bear">▼ ${totalBear}</span>`;
+
+  // Tab badges
+  document.getElementById('badge-heatmap').textContent = DATA.ss.length;
+  document.getElementById('badge-alignments').textContent = DATA.al.length;
+  document.getElementById('badge-signals').textContent = DATA.sg.length;
+
+  // Init all views
+  initTabs();
+  initHeatmap();
+  initAlignments();
+  initSignals();
+  initDeepDive();
+  initDrillDown();
+  initKeyboard();
+  initRefresh();
+
+  // URL hash
+  const hash = location.hash.replace('#','');
+  if (['heatmap','alignments','signals','deepdive'].includes(hash)) switchTab(hash);
+});
+
+// ============================================================
+//  TAB MANAGEMENT
+// ============================================================
+function initTabs() {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => switchTab(t.dataset.tab));
+  });
+}
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  location.hash = name;
+}
+
+// ============================================================
+//  HEATMAP
+// ============================================================
+let hmSortCol = null, hmSortAsc = true, hmDirFilter = 'all', hmSearch = '', hmAlignOnly = false;
+
+function initHeatmap() {
+  // Direction filters
+  document.querySelectorAll('#heatmap-filters [data-dir]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#heatmap-filters [data-dir]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      hmDirFilter = btn.dataset.dir;
+      renderHeatmap();
+    });
+  });
+  // Search
+  document.getElementById('heatmapSearch').addEventListener('input', e => {
+    hmSearch = e.target.value.toLowerCase();
+    renderHeatmap();
+  });
+  // Align toggle
+  const sw = document.getElementById('alignSwitch');
+  document.getElementById('alignToggle').addEventListener('click', () => {
+    hmAlignOnly = !hmAlignOnly;
+    sw.classList.toggle('on', hmAlignOnly);
+    renderHeatmap();
+  });
+  renderHeatmap();
+}
+
+function renderHeatmap() {
+  let rows = DATA.ss.slice();
+
+  // Filters
+  if (hmSearch) rows = rows.filter(r => r.s.toLowerCase().includes(hmSearch));
+  if (hmAlignOnly) {
+    const aligned = new Set(DATA.al.map(a => a.s));
+    rows = rows.filter(r => aligned.has(r.s));
+  }
+  if (hmDirFilter !== 'all') {
+    rows = rows.filter(r => {
+      return ['M','W','D','4H','1H'].some(tf => {
+        if (!r[tf]) return false;
+        return hmDirFilter === 'bull' ? isBull(r[tf].d) : !isBull(r[tf].d);
+      });
+    });
+  }
+
+  // Sort
+  if (hmSortCol) {
+    const tf = hmSortCol;
+    rows.sort((a, b) => {
+      if (tf === 'symbol') return hmSortAsc ? a.s.localeCompare(b.s) : b.s.localeCompare(a.s);
+      const ca = a[tf] ? a[tf].c : 0;
+      const cb = b[tf] ? b[tf].c : 0;
+      return hmSortAsc ? cb - ca : ca - cb;
+    });
+  } else {
+    rows.sort((a,b) => a.s.localeCompare(b.s));
+  }
+
+  const cols = ['M','W','D','4H','1H'];
+  const colLabels = {M:'Monthly',W:'Weekly',D:'Daily','4H':'4H','1H':'1H'};
+
+  let html = '<table class="heatmap-table"><thead><tr>';
+  html += `<th class="${hmSortCol==='symbol'?'sorted':''}" data-hmsort="symbol">Symbol<span class="sort-arrow">${hmSortCol==='symbol'?(hmSortAsc?'▲':'▼'):'▲'}</span></th>`;
+  cols.forEach(c => {
+    html += `<th class="${hmSortCol===c?'sorted':''}" data-hmsort="${c}" style="text-align:center">${colLabels[c]}<span class="sort-arrow">${hmSortCol===c?(hmSortAsc?'▲':'▼'):'▲'}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  if (rows.length === 0) {
+    html += `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">No stocks match the current filters</td></tr>`;
+  }
+
+  rows.forEach(r => {
+    html += `<tr data-stock="${r.s}"><td class="stock-cell"><a href="https://www.tradingview.com/chart/?symbol=NSE:${r.s}" target="_blank" class="tv-sym-link">${r.s}</a></td>`;
+    cols.forEach(c => {
+      const sig = r[c];
+      if (sig) {
+        const cls = dirClass(sig.d);
+        const arrow = dirArrow(sig.d);
+        const inds = fmtInds(sig.i);
+        // Find matching signal for tooltip detail
+        // Get the most recent signal (lowest bars_ago) for this stock+TF
+        const tfSigs = (signalsByStock[r.s]||[]).filter(s => TF_SHORT[s.tf] === c);
+        const matchSig = tfSigs.length ? tfSigs.reduce((best, s) => (!best || (s.ba != null && s.ba < best.ba)) ? s : best, null) : null;
+        const divTypes = matchSig ? fmtDivs(matchSig.dv) : [];
+        const dt = matchSig ? matchSig.dt : '';
+        const ba = sig.b != null ? sig.b + ' bars ago' : '';
+
+        html += `<td><div class="heatmap-cell"><span class="signal-chip ${cls}">`;
+        html += `<span class="chip-arrow">${arrow}</span>${sig.c}`;
+        html += `<div class="chip-tooltip">`;
+        html += `<div class="tooltip-row"><span class="tooltip-key">Direction</span><span class="tooltip-val" style="color:var(--${cls})">${dirLabel(sig.d)}</span></div>`;
+        html += `<div class="tooltip-row"><span class="tooltip-key">Confluence</span><span class="tooltip-val">${sig.c}</span></div>`;
+        if (inds.length) html += `<div class="tooltip-row"><span class="tooltip-key">Indicators</span><span class="tooltip-val">${inds.join(', ')}</span></div>`;
+        if (divTypes.length) html += `<div class="tooltip-row"><span class="tooltip-key">Div Types</span><span class="tooltip-val">${divTypes.join(', ')}</span></div>`;
+        if (dt) html += `<div class="tooltip-row"><span class="tooltip-key">Date</span><span class="tooltip-val">${dt}</span></div>`;
+        if (ba) html += `<div class="tooltip-row"><span class="tooltip-key">Recency</span><span class="tooltip-val">${ba}</span></div>`;
+        html += `</div></span></div></td>`;
+      } else {
+        html += `<td><div class="heatmap-cell"><span class="signal-chip none">&mdash;</span></div></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('heatmapContainer').innerHTML = html;
+
+  // Sort listeners
+  document.querySelectorAll('[data-hmsort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.hmsort;
+      if (hmSortCol === col) hmSortAsc = !hmSortAsc;
+      else { hmSortCol = col; hmSortAsc = true; }
+      renderHeatmap();
+    });
+  });
+
+  // Row click → drilldown
+  document.querySelectorAll('.heatmap-table tbody tr[data-stock]').forEach(tr => {
+    tr.addEventListener('click', () => openDrillDown(tr.dataset.stock));
+  });
+}
+
+// ============================================================
+//  ALIGNMENTS
+// ============================================================
+let aDirFilter = 'all', aMinTfs = 2, aSortBy = 'score';
+
+function initAlignments() {
+  document.querySelectorAll('#align-filters [data-adir]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#align-filters [data-adir]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      aDirFilter = btn.dataset.adir;
+      renderAlignments();
+    });
+  });
+  document.querySelectorAll('#align-filters [data-mintfs]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#align-filters [data-mintfs]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      aMinTfs = parseInt(btn.dataset.mintfs);
+      renderAlignments();
+    });
+  });
+  document.getElementById('alignSort').addEventListener('change', e => {
+    aSortBy = e.target.value;
+    renderAlignments();
+  });
+  renderAlignments();
+}
+
+function renderAlignments() {
+  let items = DATA.al.slice();
+  if (aDirFilter !== 'all') {
+    items = items.filter(a => aDirFilter === 'bull' ? isBull(a.d) : !isBull(a.d));
+  }
+  items = items.filter(a => a.n >= aMinTfs);
+  if (aSortBy === 'score') items.sort((a,b) => b.sc - a.sc);
+  else if (aSortBy === 'ntfs') items.sort((a,b) => b.n - a.n || b.sc - a.sc);
+  else items.sort((a,b) => a.s.localeCompare(b.s));
+
+  if (items.length === 0) {
+    document.getElementById('alignGrid').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">&#x1f50d;</div><div class="empty-text">No alignments match current filters</div></div>';
+    return;
+  }
+
+  // Collect indicators for each alignment
+  const getAlignIndicators = (al) => {
+    const ss = stockMap[al.s];
+    if (!ss) return [];
+    const inds = new Set();
+    al.tfs.forEach(tf => {
+      const key = TF_SHORT[tf.t];
+      if (ss[key] && ss[key].i) ss[key].i.split('|').forEach(i => inds.add(i.toUpperCase()));
+    });
+    return [...inds];
+  };
+
+  let html = '';
+  items.forEach(al => {
+    const cls = dirClass(al.d);
+    const isStrong = al.n >= 4;
+    const inds = getAlignIndicators(al);
+    html += `<div class="align-card ${isStrong ? 'strong' : ''}" data-stock="${al.s}" style="cursor:pointer">`;
+    if (isStrong) html += `<div class="strong-badge">&#x26A1; Strong Alignment</div>`;
+    html += `<div class="align-card-header">`;
+    html += `<div><a href="https://www.tradingview.com/chart/?symbol=NSE:${al.s}" target="_blank" class="tv-sym-link"><div class="align-stock-name">${al.s}</div></a><div class="align-price">${fmtPrice(al.cp)}</div></div>`;
+    html += `<div class="direction-badge ${cls}">${dirLabel(al.d)}</div>`;
+    html += `</div>`;
+    html += `<div class="tf-chips">`;
+    al.tfs.forEach(tf => {
+      const key = TF_SHORT[tf.t];
+      html += `<div class="tf-chip tf-${key}"><span class="tf-name">${key}</span><span class="tf-conf">${tf.c}</span></div>`;
+    });
+    html += `</div>`;
+    // Score bar
+    html += `<div class="score-bar-wrap"><div class="score-label"><span>Score</span><span>${al.sc}/100</span></div>`;
+    html += `<div class="score-bar"><div class="score-bar-fill ${cls}" style="width:${al.sc}%"></div></div></div>`;
+    // Indicators
+    if (inds.length) {
+      html += `<div class="indicator-tags">`;
+      inds.forEach(i => { html += `<span class="ind-tag">${i}</span>`; });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('alignGrid').innerHTML = html;
+
+  // Card click → drilldown
+  document.querySelectorAll('.align-card[data-stock]').forEach(card => {
+    card.addEventListener('click', () => openDrillDown(card.dataset.stock));
+  });
+}
+
+// ============================================================
+//  SIGNALS TABLE
+// ============================================================
+let sDirFilter = 'all', sTfFilter = new Set(TFS), sMinConf = 2, sSearch = '';
+let sSort = {col:'cf',asc:false}, sPage = 1;
+const PAGE_SIZE = 25;
+
+function initSignals() {
+  // Direction
+  document.querySelectorAll('#signal-filters [data-sdir]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#signal-filters [data-sdir]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sDirFilter = btn.dataset.sdir;
+      sPage = 1;
+      renderSignals();
+    });
+  });
+
+  // TF multiselect
+  const menu = document.getElementById('tfMenu');
+  TFS.forEach(tf => {
+    const opt = document.createElement('div');
+    opt.className = 'ms-option selected';
+    opt.dataset.tf = tf;
+    opt.innerHTML = `<span class="ms-check">✓</span>${tf}`;
+    opt.addEventListener('click', e => {
+      e.stopPropagation();
+      opt.classList.toggle('selected');
+      if (opt.classList.contains('selected')) sTfFilter.add(tf);
+      else sTfFilter.delete(tf);
+      updateTfTriggerLabel();
+      sPage = 1;
+      renderSignals();
+    });
+    menu.appendChild(opt);
+  });
+  const trigger = document.getElementById('tfTrigger');
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('tfDropdown').classList.toggle('open');
+  });
+  document.addEventListener('click', () => document.getElementById('tfDropdown').classList.remove('open'));
+
+  // Confluence slider
+  const slider = document.getElementById('confSlider');
+  const valEl = document.getElementById('confValue');
+  slider.addEventListener('input', () => {
+    sMinConf = parseInt(slider.value);
+    valEl.textContent = sMinConf;
+    sPage = 1;
+    renderSignals();
+  });
+
+  // Search
+  document.getElementById('signalSearch').addEventListener('input', e => {
+    sSearch = e.target.value.toLowerCase();
+    sPage = 1;
+    renderSignals();
+  });
+
+  renderSignals();
+}
+
+function updateTfTriggerLabel() {
+  const trigger = document.getElementById('tfTrigger');
+  if (sTfFilter.size === TFS.length) trigger.textContent = 'All TFs';
+  else if (sTfFilter.size === 0) trigger.textContent = 'None';
+  else trigger.textContent = [...sTfFilter].join(', ');
+}
+
+function getFilteredSignals() {
+  let sigs = DATA.sg.slice();
+  if (sDirFilter !== 'all') {
+    sigs = sigs.filter(s => sDirFilter === 'bull' ? isBull(s.dr) : !isBull(s.dr));
+  }
+  sigs = sigs.filter(s => sTfFilter.has(s.tf));
+  sigs = sigs.filter(s => s.cf >= sMinConf);
+  if (sSearch) sigs = sigs.filter(s => s.sy.toLowerCase().includes(sSearch));
+
+  // Sort
+  const {col, asc} = sSort;
+  sigs.sort((a, b) => {
+    let va, vb;
+    switch(col) {
+      case 'sy': va = a.sy; vb = b.sy; return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+      case 'tf': va = TFS.indexOf(a.tf); vb = TFS.indexOf(b.tf); break;
+      case 'dt': va = a.dt; vb = b.dt; return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+      case 'dr': va = a.dr==='b'?0:1; vb = b.dr==='b'?0:1; break;
+      case 'cf': va = a.cf; vb = b.cf; break;
+      case 'cp': va = a.cp||0; vb = b.cp||0; break;
+      case 'ba': va = a.ba||999; vb = b.ba||999; break;
+      default: return 0;
+    }
+    return asc ? va - vb : vb - va;
+  });
+  return sigs;
+}
+
+function renderSignals() {
+  const sigs = getFilteredSignals();
+  const totalPages = Math.max(1, Math.ceil(sigs.length / PAGE_SIZE));
+  if (sPage > totalPages) sPage = totalPages;
+  const start = (sPage - 1) * PAGE_SIZE;
+  const page = sigs.slice(start, start + PAGE_SIZE);
+
+  const cols = [
+    {key:'sy',label:'Symbol'},{key:'tf',label:'TF'},{key:'dt',label:'Date'},
+    {key:'dr',label:'Dir'},{key:'cf',label:'Conf'},
+    {key:'dv',label:'Div Types',sortable:false},{key:'in',label:'Indicators',sortable:false},
+    {key:'cp',label:'Price'},{key:'ba',label:'Bars Ago'}
+  ];
+
+  let html = '<table class="signals-table"><thead><tr>';
+  cols.forEach(c => {
+    const sortable = c.sortable !== false;
+    const sorted = sSort.col === c.key;
+    html += `<th class="${sorted?'sorted':''}" ${sortable?'data-ssort="'+c.key+'"':''}>${c.label}`;
+    if (sortable) html += `<span class="sort-arrow">${sorted?(sSort.asc?'▲':'▼'):''}</span>`;
+    html += `</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  if (page.length === 0) {
+    html += `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted)">No signals match filters</td></tr>`;
+  }
+
+  page.forEach(s => {
+    const cls = dirClass(s.dr);
+    html += `<tr class="row-${cls}">`;
+    html += `<td style="font-weight:600">${s.sy}</td>`;
+    html += `<td><span class="mini-badge" style="background:rgba(68,138,255,.08);color:var(--info)">${s.tf}</span></td>`;
+    html += `<td class="mono" style="color:var(--text-secondary);font-size:11px">${s.dt}</td>`;
+    html += `<td><span class="mini-badge ${cls}">${dirArrow(s.dr)} ${dirLabel(s.dr)}</span></td>`;
+    html += `<td class="mono" style="font-weight:700;color:var(--${cls})">${s.cf}</td>`;
+    html += `<td>${fmtDivs(s.dv).map(d=>`<span class="div-type-tag">${d}</span>`).join('')}</td>`;
+    html += `<td>${fmtInds(s.in).map(i=>`<span class="ind-tag">${i}</span>`).join(' ')}</td>`;
+    html += `<td class="mono">${fmtPrice(s.cp)}</td>`;
+    html += `<td class="mono" style="color:var(--text-secondary)">${s.ba != null ? s.ba : '--'}</td>`;
+    html += `</tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('signalsTableWrap').innerHTML = html;
+
+  // Sort listeners
+  document.querySelectorAll('[data-ssort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.ssort;
+      if (sSort.col === col) sSort.asc = !sSort.asc;
+      else { sSort.col = col; sSort.asc = col === 'sy'; }
+      renderSignals();
+    });
+  });
+
+  // Pagination
+  let pHtml = '';
+  pHtml += `<button class="page-btn" ${sPage<=1?'disabled':''} data-page="${sPage-1}">←</button>`;
+  const maxVisible = 7;
+  let pStart = Math.max(1, sPage - Math.floor(maxVisible/2));
+  let pEnd = Math.min(totalPages, pStart + maxVisible - 1);
+  if (pEnd - pStart < maxVisible - 1) pStart = Math.max(1, pEnd - maxVisible + 1);
+
+  if (pStart > 1) {
+    pHtml += `<button class="page-btn" data-page="1">1</button>`;
+    if (pStart > 2) pHtml += `<span class="page-info">…</span>`;
+  }
+  for (let i = pStart; i <= pEnd; i++) {
+    pHtml += `<button class="page-btn ${i===sPage?'active':''}" data-page="${i}">${i}</button>`;
+  }
+  if (pEnd < totalPages) {
+    if (pEnd < totalPages - 1) pHtml += `<span class="page-info">…</span>`;
+    pHtml += `<button class="page-btn" data-page="${totalPages}">${totalPages}</button>`;
+  }
+  pHtml += `<button class="page-btn" ${sPage>=totalPages?'disabled':''} data-page="${sPage+1}">→</button>`;
+  pHtml += `<span class="page-info">${start+1}-${Math.min(start+PAGE_SIZE,sigs.length)} of ${sigs.length}</span>`;
+
+  document.getElementById('signalsPagination').innerHTML = pHtml;
+  document.querySelectorAll('#signalsPagination [data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      sPage = parseInt(btn.dataset.page);
+      renderSignals();
+      document.getElementById('signalsTableWrap').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+}
+
+// ============================================================
+//  DEEP DIVE
+// ============================================================
+function initDeepDive() {
+  const sel = document.getElementById('ddSelect');
+  allSymbols.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', () => renderDeepDive(sel.value));
+  renderDeepDive(allSymbols[0]);
+}
+
+function renderDeepDive(symbol) {
+  const ss = stockMap[symbol];
+  const al = alignMap[symbol];
+  const sigs = (signalsByStock[symbol] || []).slice(); // copy to avoid mutating shared array
+  let html = '';
+
+  // Alignment status
+  if (al) {
+    html += `<div class="align-status-bar aligned">${dirArrow(al.d)} ${al.n}-TF ${dirLabel(al.d)} Alignment &mdash; Score: ${al.sc}/100</div>`;
+  } else {
+    html += `<div class="align-status-bar not-aligned">No multi-timeframe alignment detected</div>`;
+  }
+
+  // TF cards
+  html += '<div class="tf-cards-row">';
+  const tfs = ['M','W','D','4H','1H'];
+  const tfLabels = {M:'Monthly',W:'Weekly',D:'Daily','4H':'4H','1H':'1H'};
+  tfs.forEach(tf => {
+    const sig = ss ? ss[tf] : null;
+    if (sig) {
+      const cls = dirClass(sig.d);
+      const inds = fmtInds(sig.i);
+      // Find the most recent signal for date
+      const tfSigs = sigs.filter(s => TF_SHORT[s.tf] === tf);
+      const matchSig = tfSigs.length ? tfSigs.reduce((best, s) => (!best || (s.ba != null && s.ba < best.ba)) ? s : best, null) : null;
+      const dt = matchSig ? matchSig.dt : '';
+      html += `<div class="tf-detail-card has-signal" style="border-top:3px solid var(--${cls})">`;
+      html += `<div class="tf-card-name">${tfLabels[tf]}</div>`;
+      html += `<div class="tf-card-arrow" style="color:var(--${cls})">${dirArrow(sig.d)}</div>`;
+      html += `<div class="tf-card-conf" style="color:var(--${cls})">${sig.c}</div>`;
+      html += `<div class="tf-card-conf-label">confluence</div>`;
+      html += `<div class="tf-card-indicators">${inds.map(i=>`<span class="ind-tag">${i}</span>`).join('')}</div>`;
+      html += `<div class="tf-card-meta">${sig.b != null ? sig.b + ' bars ago' : ''}</div>`;
+      if (dt) html += `<div class="tf-card-meta" style="margin-top:2px">${dt}</div>`;
+      html += `</div>`;
+    } else {
+      html += `<div class="tf-detail-card no-signal">`;
+      html += `<div class="tf-card-name">${tfLabels[tf]}</div>`;
+      html += `<div class="tf-card-nosignal" style="margin-top:24px">No recent<br>signal</div>`;
+      html += `</div>`;
+    }
+  });
+  html += '</div>';
+
+  // Signal history table
+  if (sigs.length > 0) {
+    html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-secondary)">Signal History</h3>';
+    html += '<table class="signals-table"><thead><tr>';
+    html += '<th>TF</th><th>Date</th><th>Dir</th><th>Conf</th><th>Div Types</th><th>Indicators</th><th>Price</th><th>Bars Ago</th>';
+    html += '</tr></thead><tbody>';
+    sigs.sort((a,b) => TFS.indexOf(a.tf) - TFS.indexOf(b.tf));
+    sigs.forEach(s => {
+      const cls = dirClass(s.dr);
+      html += `<tr class="row-${cls}">`;
+      html += `<td><span class="mini-badge" style="background:rgba(68,138,255,.08);color:var(--info)">${s.tf}</span></td>`;
+      html += `<td class="mono" style="font-size:11px;color:var(--text-secondary)">${s.dt}</td>`;
+      html += `<td><span class="mini-badge ${cls}">${dirArrow(s.dr)}</span></td>`;
+      html += `<td class="mono" style="font-weight:700;color:var(--${cls})">${s.cf}</td>`;
+      html += `<td>${fmtDivs(s.dv).map(d=>`<span class="div-type-tag">${d}</span>`).join('')}</td>`;
+      html += `<td>${fmtInds(s.in).map(i=>`<span class="ind-tag">${i}</span>`).join(' ')}</td>`;
+      html += `<td class="mono">${fmtPrice(s.cp)}</td>`;
+      html += `<td class="mono" style="color:var(--text-secondary)">${s.ba != null ? s.ba : '--'}</td>`;
+      html += `</tr>`;
+    });
+    html += '</tbody></table>';
+  }
+
+  document.getElementById('deepdiveContent').innerHTML = html;
+}
+
+// ============================================================
+//  DRILL-DOWN PANEL
+// ============================================================
+function initDrillDown() {
+  document.getElementById('ddClose').addEventListener('click', closeDrillDown);
+  document.getElementById('ddOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('ddOverlay')) closeDrillDown();
+  });
+}
+
+function openDrillDown(symbol) {
+  const ss = stockMap[symbol];
+  const al = alignMap[symbol];
+  const sigs = signalsByStock[symbol] || [];
+
+  document.getElementById('ddName').textContent = symbol;
+  // Get price from alignment or signal
+  const price = al ? al.cp : (sigs.length ? sigs[0].cp : null);
+  document.getElementById('ddPrice').textContent = fmtPrice(price);
+
+  let html = '';
+
+  // Alignment badge
+  if (al) {
+    const cls = dirClass(al.d);
+    html += `<div class="dd-align-badge ${cls}">${dirArrow(al.d)} ${al.n}-TF ${dirLabel(al.d)} Alignment &mdash; Score ${al.sc}</div>`;
+  }
+
+  // TF cards
+  html += '<div class="dd-section"><div class="dd-section-title">Timeframe Signals</div>';
+  const tfs = ['M','W','D','4H','1H'];
+  const tfLabels = {M:'Monthly',W:'Weekly',D:'Daily','4H':'4H','1H':'1H'};
+  tfs.forEach(tf => {
+    const sig = ss ? ss[tf] : null;
+    if (sig) {
+      const cls = dirClass(sig.d);
+      const inds = fmtInds(sig.i);
+      const ddTfSigs = sigs.filter(s => TF_SHORT[s.tf] === tf);
+      const matchSig = ddTfSigs.length ? ddTfSigs.reduce((best, s) => (!best || (s.ba != null && s.ba < best.ba)) ? s : best, null) : null;
+      html += `<div class="dd-tf-card">`;
+      html += `<div class="dd-tf-label" style="color:${TF_COLORS[tf]}">${tfLabels[tf]}</div>`;
+      html += `<div class="dd-tf-arrow" style="color:var(--${cls})">${dirArrow(sig.d)}</div>`;
+      html += `<div class="dd-tf-info">`;
+      html += `<div class="dd-tf-conf" style="color:var(--${cls})">Confluence: ${sig.c}</div>`;
+      html += `<div class="dd-tf-indicators">${inds.map(i=>`<span class="ind-tag">${i}</span>`).join('')}</div>`;
+      if (matchSig) html += `<div class="dd-tf-meta">${matchSig.dt} &middot; ${sig.b != null ? sig.b + ' bars ago' : ''}</div>`;
+      html += `</div></div>`;
+    } else {
+      html += `<div class="dd-tf-card no-sig"><div class="dd-tf-label">${tfLabels[tf]}</div><div class="dd-tf-arrow" style="color:var(--text-muted)">&mdash;</div><div class="dd-tf-info"><span style="color:var(--text-muted);font-size:12px">No signal</span></div></div>`;
+    }
+  });
+  html += '</div>';
+
+  // TradingView link
+  html += `<a class="tv-link" href="https://www.tradingview.com/chart/?symbol=NSE:${symbol}" target="_blank" rel="noopener noreferrer">`;
+  html += `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+  html += `View on TradingView</a>`;
+
+  document.getElementById('ddBody').innerHTML = html;
+  document.getElementById('ddOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrillDown() {
+  document.getElementById('ddOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ============================================================
+//  KEYBOARD SHORTCUTS
+// ============================================================
+function initKeyboard() {
+  document.addEventListener('keydown', e => {
+    // Ignore when typing in inputs
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === '1') switchTab('heatmap');
+    else if (e.key === '2') switchTab('alignments');
+    else if (e.key === '3') switchTab('signals');
+    else if (e.key === '4') switchTab('deepdive');
+    else if (e.key === 'Escape') closeDrillDown();
+  });
+}
+
+// ============================================================
+//  LIVE TRACKING — AUTO-REFRESH ENGINE
+// ============================================================
+const REFRESH_INTERVAL = 300;   // 5 minutes in seconds
+let autoRefreshEnabled = true;
+let refreshCountdown = REFRESH_INTERVAL;
+let countdownTimer = null;
+let isScanning = false;
+
+function initRefresh() {
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    window.refreshScan();
+  });
+  document.getElementById('autoRefreshToggle').addEventListener('click', toggleAutoRefresh);
+  startCountdown();
+  updateLiveBadge();
+}
+
+function toggleAutoRefresh() {
+  autoRefreshEnabled = !autoRefreshEnabled;
+  const btn = document.getElementById('autoRefreshToggle');
+  const label = document.getElementById('autoRefreshLabel');
+  if (autoRefreshEnabled) {
+    btn.classList.remove('off');
+    label.textContent = 'Auto: ON';
+    refreshCountdown = REFRESH_INTERVAL;
+    startCountdown();
+  } else {
+    btn.classList.add('off');
+    label.textContent = 'Auto: OFF';
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  }
+  updateLiveBadge();
+}
+
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  refreshCountdown = REFRESH_INTERVAL;
+  countdownTimer = setInterval(() => {
+    if (!autoRefreshEnabled) return;
+    refreshCountdown--;
+    updateCountdownDisplay();
+    if (refreshCountdown <= 0) {
+      window.refreshScan();
+    }
+  }, 1000);
+  updateCountdownDisplay();
+}
+
+function updateCountdownDisplay() {
+  const el = document.getElementById('nextRefresh');
+  if (!autoRefreshEnabled || isScanning) {
+    el.textContent = '';
+    return;
+  }
+  const m = Math.floor(refreshCountdown / 60);
+  const s = refreshCountdown % 60;
+  el.textContent = m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}s`;
+}
+
+function updateLiveBadge() {
+  const badge = document.getElementById('liveBadge');
+  const text = badge.querySelector('.live-text');
+  badge.classList.remove('paused', 'scanning');
+  if (isScanning) {
+    badge.classList.add('scanning');
+    text.textContent = 'SCANNING';
+  } else if (autoRefreshEnabled) {
+    text.textContent = 'LIVE';
+  } else {
+    badge.classList.add('paused');
+    text.textContent = 'PAUSED';
+  }
+}
+
+window.refreshScan = function() {
+  if (isScanning) return;
+  isScanning = true;
+  updateLiveBadge();
+
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('refresh-spinning');
+  btn.disabled = true;
+
+  // Try fetching live data from /api/scan
+  fetch('/api/scan')
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    })
+    .then(newData => {
+      // Map compact keys back to DATA structure
+      if (newData.t) {
+        // It's compact format — update DATA in place
+        DATA.t = newData.t;
+        DATA.ts = newData.ts;
+        DATA.sg = newData.sg || [];
+        DATA.ss = newData.ss || [];
+        DATA.al = newData.al || [];
+      } else if (newData.scan_time) {
+        // Full format — convert to compact
+        DATA.t = newData.scan_time;
+        DATA.ts = newData.tf_summary;
+        DATA.sg = (newData.signals || []).map(s => ({
+          sy: s.symbol, tf: s.timeframe, dt: s.date,
+          dr: s.direction[0], cf: s.confluence,
+          dv: Array.isArray(s.div_types) ? s.div_types.join('|') : s.div_types,
+          in: Array.isArray(s.indicators) ? s.indicators.join('|') : s.indicators,
+          cp: s.close_price, ba: s.bars_ago,
+        }));
+        DATA.ss = (newData.stock_summary || []).map(s => {
+          const row = { s: s.symbol };
+          const tfMap = { Monthly:'M', Weekly:'W', Daily:'D', '4H':'4H', '1H':'1H' };
+          for (const [full, short] of Object.entries(tfMap)) {
+            if (s[full]) {
+              const k = (short === '4H' || short === '1H') ? full : short;
+              row[k] = {
+                d: s[full].direction[0],
+                c: s[full].confluence,
+                b: s[full].bars_ago,
+                i: Array.isArray(s[full].indicators) ? s[full].indicators.slice(0,3).join('|') : s[full].indicators,
+              };
+            }
+          }
+          return row;
+        });
+        DATA.al = (newData.alignments || []).map(a => ({
+          s: a.symbol, d: a.direction[0],
+          tfs: a.timeframes.map(t => ({ t: t.tf, c: t.confluence })),
+          n: a.n_tfs, mc: a.max_confluence,
+          sc: a.score, cp: a.close_price,
+        }));
+      }
+
+      // Re-render all views
+      renderSummary();
+      renderHeatmap();
+      renderAlignments();
+      renderSignals();
+
+      // Flash success
+      showToast('Data refreshed — ' + DATA.t, 'success');
+    })
+    .catch(err => {
+      console.warn('Refresh failed:', err.message);
+      showToast('Refresh failed: ' + err.message, 'error');
+    })
+    .finally(() => {
+      isScanning = false;
+      btn.classList.remove('refresh-spinning');
+      btn.disabled = false;
+      refreshCountdown = REFRESH_INTERVAL;
+      updateLiveBadge();
+      updateCountdownDisplay();
+    });
+};
+
+// Trigger a new backend scan (rate-limited by server to 1 per 5 min)
+window.triggerNewScan = function() {
+  if (isScanning) return;
+  fetch('/api/scan/refresh', { method: 'POST' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'scan_started') {
+        showToast('New scan started — results in ~5 min', 'info');
+      } else {
+        showToast(d.error || 'Rate limited', 'warn');
+      }
+    })
+    .catch(() => showToast('Could not trigger scan', 'error'));
+};
+
+// Toast notification system
+function showToast(msg, type) {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.style.cssText = 'position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none';
+    document.body.appendChild(container);
+  }
+  const colors = { success: 'var(--bull)', error: 'var(--bear)', info: 'var(--info)', warn: 'var(--gold)' };
+  const toast = document.createElement('div');
+  toast.style.cssText = `padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;
+    background:var(--panel);border:1px solid ${colors[type]||'var(--border)'};color:${colors[type]||'var(--text)'};
+    box-shadow:var(--shadow);opacity:0;transform:translateX(20px);transition:all .3s;pointer-events:auto`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(0)'; });
+  setTimeout(() => {
+    toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+</script>
+</body>
+</html>
