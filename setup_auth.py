@@ -4,14 +4,18 @@ setup_auth.py - Create auth_config.json with hashed credentials.
 
 Usage:
   python3 setup_auth.py <username> <password> [role]
-  python3 setup_auth.py --set-chat-key <perplexity-api-key>
+  python3 setup_auth.py --set-key <provider> <api-key>
+  python3 setup_auth.py --set-chat-key <perplexity-api-key>   (legacy alias)
 
   role: "admin" (default) or "user"
+  provider: "perplexity" or "nvidia"
 
 Examples:
-  python3 setup_auth.py amit MyPass123 admin          # admin account
-  python3 setup_auth.py guest ViewOnly1 user          # restricted user
-  python3 setup_auth.py --set-chat-key pplx-xxxxxx    # set Perplexity API key
+  python3 setup_auth.py amit MyPass123 admin              # admin account
+  python3 setup_auth.py guest ViewOnly1 user              # restricted user
+  python3 setup_auth.py --set-key perplexity pplx-xxxxxx  # set Perplexity key
+  python3 setup_auth.py --set-key nvidia nvapi-xxxxxx     # set NVIDIA NIM key
+  python3 setup_auth.py --set-chat-key pplx-xxxxxx        # legacy Perplexity
 
 Run before starting auth_proxy.py. Can be run multiple times to add users.
 """
@@ -69,7 +73,33 @@ def main():
 
     print("\n=== Quantra Terminal - Auth Setup ===\n")
 
-    # Handle --set-chat-key flag
+    # Provider key mapping
+    PROVIDER_KEYS = {
+        "perplexity": "perplexity_api_key",
+        "nvidia": "nvidia_api_key",
+    }
+
+    # Handle --set-key <provider> <key>
+    if len(sys.argv) >= 4 and sys.argv[1] == "--set-key":
+        provider = sys.argv[2].strip().lower()
+        api_key = sys.argv[3].strip()
+        if provider not in PROVIDER_KEYS:
+            print(f"Unknown provider '{provider}'. Must be: {', '.join(PROVIDER_KEYS.keys())}")
+            sys.exit(1)
+        if not api_key:
+            print("API key cannot be empty")
+            sys.exit(1)
+        config[PROVIDER_KEYS[provider]] = api_key
+        if "session_secret" not in config:
+            config["session_secret"] = secrets.token_hex(32)
+        with open(config_file, "w") as f:
+            json.dump(config, f, indent=2)
+        masked = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
+        print(f"{provider.upper()} API key set: {masked}")
+        print(f"Restart auth_proxy.py to pick up the change.")
+        return
+
+    # Handle --set-chat-key flag (legacy alias for --set-key perplexity)
     if len(sys.argv) >= 3 and sys.argv[1] == "--set-chat-key":
         api_key = sys.argv[2].strip()
         if not api_key:

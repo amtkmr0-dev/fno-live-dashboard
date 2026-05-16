@@ -972,6 +972,86 @@ a:hover { text-decoration: underline; }
     </div>
   </div>
 
+  <!-- AI Settings -->
+  <div class="card" id="aiCard">
+    <div class="card-header">
+      <span class="ch-icon">&#129302;</span>
+      <h2>AI Settings</h2>
+      <span class="ch-badge badge-ok" id="aiBadge">LOADING</span>
+    </div>
+    <div class="card-body">
+      <!-- Active Provider Toggle -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding:12px 14px;background:rgba(255,255,255,0.02);border-radius:var(--radius-md);border:1px solid var(--border)">
+        <span style="font-size:var(--fs-xs);font-weight:var(--fw-bold);color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Active Provider</span>
+        <div style="display:flex;gap:4px;margin-left:auto">
+          <button class="q-btn q-btn-sm provider-btn active" id="provBtnPerplexity" onclick="setProvider('perplexity')">Perplexity</button>
+          <button class="q-btn q-btn-sm provider-btn" id="provBtnNvidia" onclick="setProvider('nvidia')">NVIDIA NIM</button>
+        </div>
+      </div>
+      <style>
+        .provider-btn { background:var(--surface-hover);color:var(--text-dim);border:1px solid var(--border);cursor:pointer;transition:all 0.15s }
+        .provider-btn:hover { color:var(--text);border-color:var(--border-light) }
+        .provider-btn.active { background:var(--blue-soft);color:var(--blue);border-color:rgba(59,130,246,0.3);box-shadow:0 0 8px rgba(59,130,246,0.15) }
+        .ai-provider-section { padding:14px;background:rgba(255,255,255,0.02);border-radius:var(--radius-md);border:1px solid var(--border);margin-bottom:12px }
+        .ai-provider-section h3 { font-size:var(--fs-sm);font-weight:var(--fw-bold);color:var(--text-bright);margin-bottom:10px;display:flex;align-items:center;gap:8px }
+        .ai-provider-section h3 .prov-status { font-size:10px;padding:2px 8px;border-radius:999px;font-weight:var(--fw-bold) }
+        .ai-key-row { display:flex;gap:8px;align-items:flex-start;margin-bottom:8px }
+        .ai-key-input { flex:1;min-width:0 }
+      </style>
+
+      <!-- Perplexity Section -->
+      <div class="ai-provider-section">
+        <h3>
+          <span>Perplexity</span>
+          <span class="prov-status" id="perplexityStatus" style="background:var(--red-soft);color:var(--red-text)">NO KEY</span>
+        </h3>
+        <div class="ai-key-row">
+          <input type="password" class="q-input ai-key-input" id="perplexityKeyInput" placeholder="pplx-xxxxxxxx..." autocomplete="off">
+          <button class="q-btn q-btn-ghost q-btn-sm" onclick="toggleKeyVis('perplexityKeyInput',this)" title="Show/Hide">&#128065;</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <label style="font-size:10px;font-weight:var(--fw-bold);color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Model</label>
+          <select class="q-select" id="perplexityModel" style="flex:1;max-width:280px">
+            <option value="sonar">sonar</option>
+            <option value="sonar-pro">sonar-pro</option>
+            <option value="sonar-reasoning">sonar-reasoning</option>
+          </select>
+          <button class="q-btn q-btn-ghost q-btn-sm" onclick="testProvider('perplexity')" id="testPerplexityBtn">&#9889; Test</button>
+        </div>
+      </div>
+
+      <!-- NVIDIA Section -->
+      <div class="ai-provider-section">
+        <h3>
+          <span>NVIDIA NIM</span>
+          <span class="prov-status" id="nvidiaStatus" style="background:var(--red-soft);color:var(--red-text)">NO KEY</span>
+        </h3>
+        <div class="ai-key-row">
+          <input type="password" class="q-input ai-key-input" id="nvidiaKeyInput" placeholder="nvapi-xxxxxxxx..." autocomplete="off">
+          <button class="q-btn q-btn-ghost q-btn-sm" onclick="toggleKeyVis('nvidiaKeyInput',this)" title="Show/Hide">&#128065;</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <label style="font-size:10px;font-weight:var(--fw-bold);color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Model</label>
+          <select class="q-select" id="nvidiaModel" style="flex:1;max-width:340px">
+            <option value="meta/llama-3.3-70b-instruct">meta/llama-3.3-70b-instruct</option>
+            <option value="nvidia/llama-3.3-nemotron-super-49b-v1">nvidia/llama-3.3-nemotron-super-49b-v1</option>
+            <option value="deepseek-ai/deepseek-r1">deepseek-ai/deepseek-r1</option>
+          </select>
+          <button class="q-btn q-btn-ghost q-btn-sm" onclick="testProvider('nvidia')" id="testNvidiaBtn">&#9889; Test</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="q-btn q-btn-success" onclick="saveAiSettings()">Save AI Settings</button>
+        <span id="aiSaveStatus" style="font-size:var(--fs-xs);color:var(--text-dim);align-self:center"></span>
+      </div>
+      <div class="token-info" style="margin-top:10px">
+        Get Perplexity keys at <a href="https://www.perplexity.ai/settings/api" target="_blank" style="color:var(--blue)">perplexity.ai/settings/api</a> &middot;
+        Get NVIDIA keys at <a href="https://build.nvidia.com/explore/discover" target="_blank" style="color:var(--blue)">build.nvidia.com</a>
+      </div>
+    </div>
+  </div>
+
   <!-- Server Status -->
   <div class="card">
     <div class="card-header">
@@ -1289,9 +1369,141 @@ function showToast(msg, level) {
  toastTimer = setTimeout(() =>el.classList.remove('show'), 5000);
 }
 
+// ----- AI Settings -----
+let _activeProvider = 'perplexity';
+
+async function loadAiSettings() {
+ try {
+  const resp = await fetch('/api/admin/ai-settings');
+  if (resp.status === 403) return; // not admin
+  const data = await resp.json();
+  _activeProvider = data.active_provider || 'perplexity';
+  updateProviderButtons();
+
+  for (const [pid, prov] of Object.entries(data.providers || {})) {
+   const statusEl = document.getElementById(pid + 'Status');
+   if (statusEl) {
+    if (prov.has_key) {
+     statusEl.textContent = 'KEY SET';
+     statusEl.style.background = 'var(--green-soft)';
+     statusEl.style.color = 'var(--green-text)';
+    } else {
+     statusEl.textContent = 'NO KEY';
+     statusEl.style.background = 'var(--red-soft)';
+     statusEl.style.color = 'var(--red-text)';
+    }
+   }
+   const modelEl = document.getElementById(pid + 'Model');
+   if (modelEl && prov.model) modelEl.value = prov.model;
+   // Don't prefill key inputs (security) — show masked placeholder
+   const keyEl = document.getElementById(pid + 'KeyInput');
+   if (keyEl && prov.has_key) keyEl.placeholder = prov.key_masked || '••••••••';
+  }
+
+  // Update badge
+  const badge = document.getElementById('aiBadge');
+  const activeProv = data.providers[_activeProvider];
+  if (activeProv && activeProv.has_key) {
+   badge.textContent = data.providers[_activeProvider].name.toUpperCase();
+   badge.className = 'ch-badge badge-ok';
+  } else {
+   badge.textContent = 'NO KEY';
+   badge.className = 'ch-badge badge-err';
+  }
+ } catch (e) {
+  console.error('Failed to load AI settings', e);
+ }
+}
+
+function updateProviderButtons() {
+ document.getElementById('provBtnPerplexity').className = 'q-btn q-btn-sm provider-btn' + (_activeProvider === 'perplexity' ? ' active' : '');
+ document.getElementById('provBtnNvidia').className = 'q-btn q-btn-sm provider-btn' + (_activeProvider === 'nvidia' ? ' active' : '');
+}
+
+function setProvider(pid) {
+ _activeProvider = pid;
+ updateProviderButtons();
+}
+
+function toggleKeyVis(inputId, btn) {
+ const el = document.getElementById(inputId);
+ if (el.type === 'password') { el.type = 'text'; btn.innerHTML = '&#128064;'; }
+ else { el.type = 'password'; btn.innerHTML = '&#128065;'; }
+}
+
+async function saveAiSettings() {
+ const payload = {
+  active_provider: _activeProvider,
+  perplexity_model: document.getElementById('perplexityModel').value,
+  nvidia_model: document.getElementById('nvidiaModel').value,
+ };
+ // Only send keys if user typed something new (not empty placeholder)
+ const pKey = document.getElementById('perplexityKeyInput').value.trim();
+ const nKey = document.getElementById('nvidiaKeyInput').value.trim();
+ if (pKey) payload.perplexity_key = pKey;
+ if (nKey) payload.nvidia_key = nKey;
+
+ const statusEl = document.getElementById('aiSaveStatus');
+ statusEl.textContent = 'Saving...';
+ statusEl.style.color = 'var(--text-dim)';
+
+ try {
+  const resp = await fetch('/api/admin/ai-settings', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify(payload),
+  });
+  const data = await resp.json();
+  if (data.ok) {
+   showToast('AI settings saved: ' + data.updated.join(', '), 'success');
+   statusEl.textContent = 'Saved!';
+   statusEl.style.color = 'var(--green)';
+   // Clear key inputs after save
+   if (pKey) document.getElementById('perplexityKeyInput').value = '';
+   if (nKey) document.getElementById('nvidiaKeyInput').value = '';
+   loadAiSettings(); // refresh status badges
+  } else {
+   showToast('Failed: ' + (data.error || 'Unknown'), 'error');
+   statusEl.textContent = 'Failed';
+   statusEl.style.color = 'var(--red)';
+  }
+ } catch (e) {
+  showToast('Error: ' + e.message, 'error');
+  statusEl.textContent = '';
+ }
+ setTimeout(() => { statusEl.textContent = ''; }, 4000);
+}
+
+async function testProvider(pid) {
+ const btn = document.getElementById('test' + pid.charAt(0).toUpperCase() + pid.slice(1) + 'Btn');
+ const origText = btn.innerHTML;
+ btn.innerHTML = '&#8987; Testing...';
+ btn.disabled = true;
+
+ try {
+  const resp = await fetch('/api/admin/ai-test', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({ provider: pid }),
+  });
+  const data = await resp.json();
+  if (data.ok) {
+   showToast(AI_NAMES[pid] + ' connected! Model: ' + data.model + ' — Reply: "' + data.reply + '"', 'success');
+  } else {
+   showToast(AI_NAMES[pid] + ' test failed: ' + (data.error || 'HTTP ' + data.status), 'error');
+  }
+ } catch (e) {
+  showToast('Test error: ' + e.message, 'error');
+ }
+ btn.innerHTML = origText;
+ btn.disabled = false;
+}
+const AI_NAMES = { perplexity: 'Perplexity', nvidia: 'NVIDIA NIM' };
+
 // ----- Init -----
 loadStatus();
 loadSettings();
+loadAiSettings();
 loadLogs();
 // Auto-refresh status every 15s
 setInterval(loadStatus, 15000);

@@ -237,11 +237,29 @@ async def handle_logout_api(request):
 
 
 # ============================================================
-# AI CHAT (Perplexity API)
+# AI CHAT (Multi-Provider: Perplexity + NVIDIA NIM)
 # ============================================================
 
-PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
-PERPLEXITY_MODEL = "sonar"  # fast, web-search enabled
+AI_PROVIDERS = {
+    "perplexity": {
+        "name": "Perplexity",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "default_model": "sonar",
+        "models": ["sonar", "sonar-pro", "sonar-reasoning"],
+        "config_key_field": "perplexity_api_key",
+    },
+    "nvidia": {
+        "name": "NVIDIA NIM",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+        "default_model": "meta/llama-3.3-70b-instruct",
+        "models": [
+            "meta/llama-3.3-70b-instruct",
+            "nvidia/llama-3.3-nemotron-super-49b-v1",
+            "deepseek-ai/deepseek-r1",
+        ],
+        "config_key_field": "nvidia_api_key",
+    },
+}
 
 CHAT_SYSTEM_PROMPT = """You are Quantra AI, the built-in assistant for the Quantra Terminal - an F&O (Futures & Options) analytics platform for the Indian stock market (NSE).
 
@@ -264,23 +282,31 @@ Guidelines:
 - For stock-specific questions, note that premium >= Rs 15 is the minimum for tradeable options"""
 
 
-def get_perplexity_key():
-    """Get Perplexity API key from config."""
-    return _config.get("perplexity_api_key", "")
+def get_ai_config():
+    """Return (provider_id, api_url, api_key, model) for the active AI provider."""
+    active = _config.get("active_ai_provider", "perplexity")
+    if active not in AI_PROVIDERS:
+        active = "perplexity"
+    prov = AI_PROVIDERS[active]
+    api_key = _config.get(prov["config_key_field"], "")
+    model = _config.get(f"{active}_model", prov["default_model"])
+    return active, prov["url"], api_key, model
 
 
 async def handle_chat_api(request):
-    """POST /api/chat - AI chat via Perplexity."""
+    """POST /api/chat - AI chat via active provider (Perplexity or NVIDIA)."""
     # Auth check
     token = get_session_from_request(request)
     session = validate_session(token)
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
 
-    api_key = get_perplexity_key()
+    provider_id, api_url, api_key, model = get_ai_config()
+    provider_name = AI_PROVIDERS[provider_id]["name"]
+
     if not api_key:
         return web.json_response({
-            "reply": "Chat not configured. Admin needs to set the Perplexity API key.\n\nGo to the chat setup or ask your admin to run:\npython3 setup_auth.py --set-chat-key <your-perplexity-api-key>"
+            "reply": f"Chat not configured. Admin needs to set the {provider_name} API key in Admin > AI Settings."
         })
 
     try:
@@ -295,7 +321,7 @@ async def handle_chat_api(request):
     history = data.get("history", [])
     focused_stock = data.get("focused_stock")
 
-    # Build messages array for Perplexity
+    # Build messages array (OpenAI-compatible for both providers)
     system_content = CHAT_SYSTEM_PROMPT
     if focused_stock:
         system_content += f"\n\nThe user is currently viewing {focused_stock} in the analysis panel. Focus your answer on this stock's F&O setup."
@@ -313,44 +339,71 @@ async def handle_chat_api(request):
     if not messages or messages[-1].get("content") != user_message:
         messages.append({"role": "user", "content": user_message})
 
-    # Call Perplexity API
+    # Call provider API (both use OpenAI-compatible format)
     headers = {
         "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
     payload = {
-        "model": _config.get("chat_model", PERPLEXITY_MODEL),
+        "model": model,
         "messages": messages,
         "max_tokens": 1024,
         "temperature": 0.7,
-        "stream": False
+        "stream": False,
     }
 
     try:
         async with ClientSession() as cs:
-            async with cs.post(PERPLEXITY_URL, headers=headers, json=payload, timeout=30) as resp:
+            async with cs.post(api_url, headers=headers, json=payload, timeout=45) as resp:
                 if resp.status == 401:
-                    return web.json_response({"reply": "Perplexity API key is invalid. Ask admin to update it."})
+                    return web.json_response({"reply": f"{provider_name} API key is invalid or expired. Ask admin to update it in Admin > AI Settings."})
                 if resp.status == 429:
-                    return web.json_response({"reply": "Rate limited by Perplexity. Try again in a few seconds."})
+                    return web.json_response({"reply": f"Rate limited by {provider_name}. Try again in a few seconds."})
                 if resp.status != 200:
                     body = await resp.text()
-                    log.error(f"Perplexity API error {resp.status}: {body[:200]}")
-                    return web.json_response({"reply": f"AI service error ({resp.status}). Try again."})
+                    log.error(f"{provider_name} API error {resp.status}: {body[:200]}")
+                    return web.json_response({"reply": f"AI service error ({resp.status}) from {provider_name}. Try again."})
 
                 result = await resp.json()
                 reply = result.get("choices", [{}])[0].get("message", {}).get("content", "No response.")
-                return web.json_response({"reply": reply})
+                return web.json_response({"reply": reply, "provider": provider_id})
 
     except asyncio.TimeoutError:
-        return web.json_response({"reply": "AI response timed out. Try a shorter question."})
+        return web.json_response({"reply": f"{provider_name} response timed out. Try a shorter question."})
     except Exception as e:
-        log.error(f"Chat error: {e}")
-        return web.json_response({"reply": f"Connection error: {str(e)}"})
+        log.error(f"Chat error ({provider_name}): {e}")
+        return web.json_response({"reply": f"Connection error with {provider_name}: {str(e)}"})
 
 
-async def handle_chat_key_api(request):
-    """POST /api/admin/chat-key - Save Perplexity API key (admin only)."""
+async def handle_ai_settings_get(request):
+    """GET /api/admin/ai-settings - Return current AI config (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    active = _config.get("active_ai_provider", "perplexity")
+    result = {
+        "active_provider": active,
+        "providers": {},
+    }
+    for pid, prov in AI_PROVIDERS.items():
+        raw_key = _config.get(prov["config_key_field"], "")
+        masked = ""
+        if raw_key:
+            masked = raw_key[:6] + "..." + raw_key[-4:] if len(raw_key) > 12 else "****"
+        result["providers"][pid] = {
+            "name": prov["name"],
+            "has_key": bool(raw_key),
+            "key_masked": masked,
+            "model": _config.get(f"{pid}_model", prov["default_model"]),
+            "available_models": prov["models"],
+        }
+    return web.json_response(result)
+
+
+async def handle_ai_settings_post(request):
+    """POST /api/admin/ai-settings - Update AI config (admin only)."""
     token = get_session_from_request(request)
     session = validate_session(token)
     if not session or session["role"] != "admin":
@@ -361,17 +414,97 @@ async def handle_chat_key_api(request):
     except Exception:
         return web.json_response({"error": "Invalid JSON"}, status=400)
 
-    key = data.get("key", "").strip()
-    if not key:
-        return web.json_response({"error": "API key required"}, status=400)
+    updated = []
 
-    # Save to config
-    _config["perplexity_api_key"] = key
+    # Active provider
+    if "active_provider" in data:
+        ap = data["active_provider"]
+        if ap in AI_PROVIDERS:
+            _config["active_ai_provider"] = ap
+            updated.append(f"active_provider={ap}")
+        else:
+            return web.json_response({"error": f"Unknown provider: {ap}"}, status=400)
+
+    # Provider-specific keys and models
+    for pid, prov in AI_PROVIDERS.items():
+        key_field = f"{pid}_key"
+        if key_field in data:
+            new_key = data[key_field].strip()
+            if new_key:
+                _config[prov["config_key_field"]] = new_key
+                updated.append(f"{pid}_key")
+
+        model_field = f"{pid}_model"
+        if model_field in data:
+            new_model = data[model_field].strip()
+            if new_model:
+                _config[f"{pid}_model"] = new_model
+                updated.append(f"{pid}_model={new_model}")
+
+    if not updated:
+        return web.json_response({"error": "No valid fields to update"}, status=400)
+
+    # Persist to disk
     with open(CONFIG_FILE, "w") as f:
         json.dump(_config, f, indent=2)
 
-    log.info(f"Perplexity API key updated by {session['user']}")
-    return web.json_response({"ok": True})
+    log.info(f"AI settings updated by {session['user']}: {', '.join(updated)}")
+    return web.json_response({"ok": True, "updated": updated})
+
+
+async def handle_ai_test(request):
+    """POST /api/admin/ai-test - Test the active (or specified) provider connection."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+
+    # Allow testing a specific provider, or default to active
+    test_provider = data.get("provider", _config.get("active_ai_provider", "perplexity"))
+    if test_provider not in AI_PROVIDERS:
+        return web.json_response({"error": f"Unknown provider: {test_provider}"}, status=400)
+
+    prov = AI_PROVIDERS[test_provider]
+    api_key = _config.get(prov["config_key_field"], "")
+    model = _config.get(f"{test_provider}_model", prov["default_model"])
+
+    if not api_key:
+        return web.json_response({"ok": False, "error": f"No API key set for {prov['name']}"})
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Say OK in one word."},
+        ],
+        "max_tokens": 10,
+        "temperature": 0,
+        "stream": False,
+    }
+
+    try:
+        async with ClientSession() as cs:
+            async with cs.post(prov["url"], headers=headers, json=payload, timeout=15) as resp:
+                if resp.status == 200:
+                    result = await resp.json()
+                    reply = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    return web.json_response({"ok": True, "provider": test_provider, "model": model, "reply": reply})
+                else:
+                    body = await resp.text()
+                    return web.json_response({"ok": False, "status": resp.status, "error": body[:300]})
+    except asyncio.TimeoutError:
+        return web.json_response({"ok": False, "error": "Connection timed out"})
+    except Exception as e:
+        return web.json_response({"ok": False, "error": str(e)})
 
 
 # ============================================================
@@ -530,7 +663,9 @@ def create_app():
 
     # AI Chat routes (handled directly, not proxied)
     app.router.add_post("/api/chat", handle_chat_api)
-    app.router.add_post("/api/admin/chat-key", handle_chat_key_api)
+    app.router.add_get("/api/admin/ai-settings", handle_ai_settings_get)
+    app.router.add_post("/api/admin/ai-settings", handle_ai_settings_post)
+    app.router.add_post("/api/admin/ai-test", handle_ai_test)
 
     # WebSocket proxy
     app.router.add_get("/ws", proxy_websocket)
