@@ -1614,11 +1614,24 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 </head>
 <body>
 <script>
-// Auth gate: verify session, redirect to login if expired
+// Auth gate: verify session, enforce role-based nav visibility
 (function(){
   fetch('/api/auth/verify',{credentials:'same-origin'})
     .then(function(r){if(!r.ok)throw r;return r.json()})
-    .then(function(d){if(!d.ok)window.location.href='/login'})
+    .then(function(d){
+      if(!d.ok){window.location.href='/login';return}
+      window.__quantra_role=d.role;
+      window.__quantra_user=d.user;
+      if(d.role!=='admin'&&d.admin_paths){
+        var links=document.querySelectorAll('.q-nav-links a');
+        links.forEach(function(a){
+          var href=a.getAttribute('href');
+          if(d.admin_paths.indexOf(href)!==-1){
+            a.style.display='none';
+          }
+        });
+      }
+    })
     .catch(function(){window.location.href='/login'});
 })();
 </script>
