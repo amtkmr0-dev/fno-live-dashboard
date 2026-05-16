@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin â F&amp;O Live Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #131722;
+  --surface: #1E222D;
+  --surface-alt: #1a1e2a;
+  --surface-hover: #2A2E39;
+  --border: #363A45;
+  --text: #D1D4DC;
+  --text-dim: #787B86;
+  --text-vdim: #545862;
+  --blue: #2962FF;
+  --green: #26A69A;
+  --red: #EF5350;
+  --gold: #FFD700;
+  --orange: #FF9800;
+  --purple: #AB47BC;
+  --cyan: #00BCD4;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+/* Header */
+/* old .header removed */
+
+
+.back-link {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.back-link:hover { border-color: var(--blue); color: var(--blue); }
+
+
+/* Main grid */
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.01);
+}
+.card-header .ch-icon { font-size: 16px; }
+.card-header h2 {
+  font-size: 14px;
+  font-weight: 700;
+}
+.card-header .ch-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.badge-ok { background: rgba(38,166,154,0.15); color: var(--green); }
+.badge-warn { background: rgba(255,152,0,0.15); color: var(--orange); }
+.badge-err { background: rgba(239,83,80,0.15); color: var(--red); }
+
+.card-body {
+  padding: 18px;
+}
+
+/* Status grid */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.stat-item {
+  text-align: center;
+  padding: 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(54,58,69,0.3);
+}
+.stat-item .si-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-vdim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+}
+.stat-item .si-val {
+  font-size: 16px;
+  font-weight: 700;
+}
+.si-val.ok { color: var(--green); }
+.si-val.warn { color: var(--orange); }
+.si-val.err { color: var(--red); }
+
+/* Token section */
+.token-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.token-input {
+  flex: 1;
+  min-width: 280px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'Inter', monospace;
+  font-size: 12px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.token-input:focus { border-color: var(--blue); }
+.token-input::placeholder { color: var(--text-vdim); }
+
+.token-info {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  line-height: 1.6;
+}
+.token-info code {
+  background: rgba(255,255,255,0.05);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--text-dim); color: var(--text); }
+.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-success { border-color: rgba(38,166,154,0.4); color: var(--green); }
+.btn-success:hover { background: rgba(38,166,154,0.1); border-color: var(--green); }
+.btn-danger { border-color: rgba(239,83,80,0.3); color: var(--red); }
+.btn-danger:hover { background: rgba(239,83,80,0.1); border-color: var(--red); }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Settings form */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 600px) { .settings-grid { grid-template-columns: 1fr; } }
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.setting-item label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.setting-item input, .setting-item select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+}
+.setting-item input:focus, .setting-item select:focus { border-color: var(--blue); }
+
+/* Toggle switch */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+.toggle {
+  position: relative;
+  width: 38px;
+  height: 20px;
+  cursor: pointer;
+}
+.toggle input { display: none; }
+.toggle .slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 20px;
+  transition: background 0.2s;
+}
+.toggle .slider::before {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.toggle input:checked + .slider { background: var(--green); }
+.toggle input:checked + .slider::before { transform: translateX(18px); background: #fff; }
+.toggle-label { font-size: 12px; color: var(--text); }
+
+/* Paper trades summary */
+.trades-summary {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.ts-stat {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.ts-stat strong { color: var(--text); }
+
+.trades-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Log viewer */
+.log-viewer {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #8b949e;
+}
+.log-viewer::-webkit-scrollbar { width: 6px; }
+.log-viewer::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.log-line { white-space: pre-wrap; word-break: break-all; }
+.log-line.err { color: var(--red); }
+.log-line.warn { color: var(--orange); }
+.log-line.info { color: #58a6ff; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text);
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  max-width: 400px;
+}
+.toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast.error { border-color: var(--red); }
+.toast.success { border-color: var(--green); }
+
+/* Quick nav pills */
+.nav-pills {
+  display: flex;
+  gap: 6px;
+  padding: 0 20px 0;
+}
+.nav-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.nav-pill:hover { border-color: var(--text-dim); color: var(--text); }
+.nav-pill.active { border-color: var(--blue); color: var(--blue); background: rgba(41,98,255,0.08); }
+
+/* ── Unified Site Navigation ── */
+.site-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.site-nav .nav-logo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+  padding-right: 24px;
+  border-right: 1px solid var(--border);
+  margin-right: 16px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+}
+.site-nav .nav-links { display: flex; gap: 2px; flex: 1; }
+.site-nav .nav-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.site-nav .nav-links a:hover { color: var(--text); background: var(--surface-hover); }
+.site-nav .nav-links a.active { color: var(--blue); background: rgba(41,98,255,0.12); }
+.site-nav .nav-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: auto;
+  white-space: nowrap;
+}
+.site-nav .nav-status .conn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #EF5350;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.site-nav .nav-status .conn-dot.on { background: #26A69A; }
+.site-nav .pulse-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #26A69A;
+  display: inline-block;
+  animation: pulse-glow 2s infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
+  50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
+}
+
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- Navigation Bar -->
+<nav class="site-nav">
+  <a class="nav-logo" href="/">
+    <span class="pulse-dot" id="pulseDot"></span>
+    F&amp;O LIVE
+  </a>
+  <div class="nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/paper">Paper Trades</a>
+    <a href="/sectors">Sectors</a>
+    <a href="/rsi">RSI Scanner</a>
+    <a href="/rsi-analysis">Stock Analysis</a>
+    <a href="/admin" class="active">Admin</a>
+  </div>
+</nav>
+
+
+<div class="main">
+
+<!-- ââ Token Management ââ -->
+<div class="card" id="tokenCard">
+  <div class="card-header">
+    <span class="ch-icon">ð</span>
+    <h2>Upstox Token</h2>
+    <span class="ch-badge" id="tokenBadge">CHECKING...</span>
+  </div>
+  <div class="card-body">
+    <div class="token-row">
+      <textarea class="token-input" id="tokenInput" rows="2"
+        placeholder="Paste your Upstox JWT here (eyJ...)"></textarea>
+      <button class="btn btn-primary" id="tokenBtn" onclick="updateToken()">
+        Update Token
+      </button>
+    </div>
+    <div class="token-info">
+      Current: <code id="tokenPreview">â</code> Â·
+      Length: <span id="tokenLen">â</span> chars Â·
+      Status: <span id="tokenStatus">â</span><br>
+      Tokens expire daily ~03:30 IST. Get new one from
+      <a href="https://account.upstox.com/developer/apps" target="_blank" style="color:var(--blue)">account.upstox.com</a>.
+      Token is saved to <code>config.env</code> and the admin data store â persists across restarts.
+    </div>
+  </div>
+</div>
+
+<!-- ââ Server Status ââ -->
+<div class="card">
+  <div class="card-header">
+    <span class="ch-icon">ð¡</span>
+    <h2>Server Status</h2>
+    <span class="ch-badge badge-ok" id="serverBadge">RUNNING</span>
+  </div>
+  <div class="card-body">
+    <div class="status-grid" id="statusGrid">
+      <div class="stat-item"><div class="si-label">Uptime</div><div class="si-val" id="sUptime">â</div></div>
+      <div class="stat-item"><div class="si-label">WS Clients</div><div class="si-val" id="sClients">â</div></div>
+      <div class="stat-item"><div class="si-label">Stocks Loaded</div><div class="si-val" id="sStocks">â</div></div>
+      <div class="stat-item"><div class="si-label">Chain Data</div><div class="si-val" id="sChain">â</div></div>
+      <div class="stat-item"><div class="si-label">Expiry</div><div class="si-val" id="sExpiry">â</div></div>
+      <div class="stat-item"><div class="si-label">Port</div><div class="si-val" id="sPort">â</div></div>
+      <div class="stat-item"><div class="si-label">Open Trades</div><div class="si-val" id="sOpenTrades">â</div></div>
+      <div class="stat-item"><div class="si-label">Closed Trades</div><div class="si-val" id="sClosedTrades">â</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ââ Settings ââ -->
+<div class="card">
+  <div class="card-header">
+    <span class="ch-icon">ð ï¸</span>
+    <h2>Settings</h2>
+  </div>
+  <div class="card-body">
+    <div class="settings-grid" id="settingsForm">
+      <div class="setting-item">
+        <label>Admin PIN</label>
+        <input type="text" id="setPin" placeholder="1234" maxlength="8">
+      </div>
+      <div class="setting-item">
+        <label>Max Paper Trades / Day</label>
+        <input type="number" id="setMaxTrades" min="1" max="10" value="2">
+      </div>
+      <div class="setting-item">
+        <label>Default Lots</label>
+        <input type="number" id="setLots" min="1" max="20" value="1">
+      </div>
+      <div class="setting-item">
+        <label>Auto-Exit (SL / T2)</label>
+        <div class="toggle-wrap">
+          <label class="toggle"><input type="checkbox" id="setAutoExit" checked><span class="slider"></span></label>
+          <span class="toggle-label" id="autoExitLabel">Enabled</span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label>Trail SL to Entry on T1 Hit</label>
+        <div class="toggle-wrap">
+          <label class="toggle"><input type="checkbox" id="setTrailSL" checked><span class="slider"></span></label>
+          <span class="toggle-label" id="trailSLLabel">Enabled</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-success" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ââ Paper Trades Management ââ -->
+<div class="card">
+  <div class="card-header">
+    <span class="ch-icon">ð</span>
+    <h2>Paper Trades Data</h2>
+  </div>
+  <div class="card-body">
+    <div class="trades-summary" id="tradesSummary">
+      <span class="ts-stat">Total: <strong id="ptTotal">â</strong></span>
+      <span class="ts-stat">Open: <strong id="ptOpen">â</strong></span>
+      <span class="ts-stat">Closed: <strong id="ptClosed">â</strong></span>
+      <span class="ts-stat">Data dir: <code id="ptDataDir">â</code></span>
+    </div>
+    <div class="trades-actions">
+      <button class="btn btn-success btn-sm" onclick="exportTrades()">ð¥ Export JSON</button>
+      <button class="btn btn-danger btn-sm" onclick="clearClosed()">ðï¸ Clear Closed Trades</button>
+      <button class="btn btn-danger btn-sm" onclick="clearAll()">â ï¸ Clear ALL Trades</button>
+    </div>
+  </div>
+</div>
+
+<!-- ââ Server Logs ââ -->
+<div class="card">
+  <div class="card-header">
+    <span class="ch-icon">ð</span>
+    <h2>Server Logs</h2>
+    <button class="btn btn-sm" style="margin-left:auto" onclick="loadLogs()">Refresh</button>
+  </div>
+  <div class="card-body">
+    <div class="log-viewer" id="logViewer">
+      <div class="log-line" style="color:var(--text-vdim)">Loading logs...</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// âââ Status polling âââ
+async function loadStatus() {
+  try {
+    const resp = await fetch('/api/admin/status');
+    const s = await resp.json();
+
+    document.getElementById('sUptime').textContent = s.uptime_human || 'â';
+    document.getElementById('sClients').textContent = s.ws_clients;
+    document.getElementById('sClients').className = 'si-val' + (s.ws_clients > 0 ? ' ok' : '');
+    document.getElementById('sStocks').textContent = s.stocks_loaded;
+    document.getElementById('sChain').textContent = s.chain_populated + ' / ' + s.stocks_loaded;
+    document.getElementById('sChain').className = 'si-val' + (s.chain_populated > 0 ? ' ok' : ' warn');
+    document.getElementById('sExpiry').textContent = s.nearest_expiry || 'â';
+    document.getElementById('sPort').textContent = s.port;
+    document.getElementById('sOpenTrades').textContent = s.paper_trades_open;
+    document.getElementById('sOpenTrades').className = 'si-val' + (s.paper_trades_open > 0 ? ' ok' : '');
+    document.getElementById('sClosedTrades').textContent = s.paper_trades_closed;
+
+    // Token status
+    document.getElementById('tokenPreview').textContent = s.token_preview || 'â';
+    document.getElementById('tokenLen').textContent = s.token_length || '0';
+    const tokenOk = s.token_length > 20 && !s.token_expired;
+    const tokenBadge = document.getElementById('tokenBadge');
+    document.getElementById('tokenStatus').textContent = s.token_expired ? 'EXPIRED' : (s.token_length > 20 ? 'ACTIVE' : 'NOT SET');
+    document.getElementById('tokenStatus').style.color = tokenOk ? 'var(--green)' : 'var(--red)';
+    tokenBadge.textContent = s.token_expired ? 'EXPIRED' : (s.token_length > 20 ? 'ACTIVE' : 'MISSING');
+    tokenBadge.className = 'ch-badge ' + (tokenOk ? 'badge-ok' : s.token_length > 20 ? 'badge-warn' : 'badge-err');
+
+    // Server badge
+    const sb = document.getElementById('serverBadge');
+    if (s.polling_active) { sb.textContent = 'RUNNING'; sb.className = 'ch-badge badge-ok'; }
+    else { sb.textContent = 'STOPPED'; sb.className = 'ch-badge badge-err'; }
+
+    document.getElementById('serverStatus').textContent = 'Uptime: ' + s.uptime_human;
+
+    // Trade stats
+    document.getElementById('ptTotal').textContent = s.paper_trades_total;
+    document.getElementById('ptOpen').textContent = s.paper_trades_open;
+    document.getElementById('ptClosed').textContent = s.paper_trades_closed;
+    document.getElementById('ptDataDir').textContent = s.data_dir || 'â';
+  } catch (e) {
+    document.getElementById('serverStatus').textContent = 'Error: ' + e.message;
+  }
+}
+
+// âââ Token âââ
+async function updateToken() {
+  const token = document.getElementById('tokenInput').value.trim();
+  if (!token) { showToast('Paste a token first', 'error'); return; }
+  if (token.length < 20) { showToast('Token looks too short', 'error'); return; }
+
+  const btn = document.getElementById('tokenBtn');
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  try {
+    const resp = await fetch('/api/admin/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Token updated! API polling will resume.', 'success');
+      document.getElementById('tokenInput').value = '';
+      loadStatus();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown error'), 'error');
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Update Token';
+  }
+}
+
+// âââ Settings âââ
+async function loadSettings() {
+  try {
+    const resp = await fetch('/api/admin/settings');
+    const s = await resp.json();
+    document.getElementById('setPin').value = s.admin_pin || '';
+    document.getElementById('setMaxTrades').value = s.max_paper_trades_per_day || 2;
+    document.getElementById('setLots').value = s.default_lots || 1;
+    document.getElementById('setAutoExit').checked = s.auto_exit_enabled !== false;
+    document.getElementById('setTrailSL').checked = s.auto_trail_sl_on_t1 !== false;
+    updateToggleLabels();
+  } catch (e) {
+    showToast('Failed to load settings', 'error');
+  }
+}
+
+function updateToggleLabels() {
+  document.getElementById('autoExitLabel').textContent = document.getElementById('setAutoExit').checked ? 'Enabled' : 'Disabled';
+  document.getElementById('trailSLLabel').textContent = document.getElementById('setTrailSL').checked ? 'Enabled' : 'Disabled';
+}
+document.getElementById('setAutoExit').addEventListener('change', updateToggleLabels);
+document.getElementById('setTrailSL').addEventListener('change', updateToggleLabels);
+
+async function saveSettings() {
+  const settings = {
+    admin_pin: document.getElementById('setPin').value,
+    max_paper_trades_per_day: parseInt(document.getElementById('setMaxTrades').value) || 2,
+    default_lots: parseInt(document.getElementById('setLots').value) || 1,
+    auto_exit_enabled: document.getElementById('setAutoExit').checked,
+    auto_trail_sl_on_t1: document.getElementById('setTrailSL').checked,
+  };
+  try {
+    const resp = await fetch('/api/admin/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Settings saved: ' + data.updated.join(', '), 'success');
+    } else {
+      showToast('Failed to save settings', 'error');
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// âââ Paper Trades âââ
+async function exportTrades() {
+  try {
+    const resp = await fetch('/api/admin/trades/export');
+    const data = await resp.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'paper_trades_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported ' + data.total + ' trades', 'success');
+  } catch (e) {
+    showToast('Export failed: ' + e.message, 'error');
+  }
+}
+
+async function clearClosed() {
+  if (!confirm('Clear all CLOSED paper trades? Open trades will be kept.')) return;
+  try {
+    const resp = await fetch('/api/admin/trades/clear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clear_all: false }),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Cleared ' + data.cleared + ' closed trades', 'success');
+      loadStatus();
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+async function clearAll() {
+  if (!confirm('Clear ALL paper trades including open positions? This cannot be undone.')) return;
+  if (!confirm('Are you sure? This will delete everything.')) return;
+  try {
+    const resp = await fetch('/api/admin/trades/clear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clear_all: true }),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Cleared all ' + data.cleared + ' trades', 'success');
+      loadStatus();
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// âââ Logs âââ
+async function loadLogs() {
+  const viewer = document.getElementById('logViewer');
+  try {
+    const resp = await fetch('/api/admin/logs?lines=150');
+    const data = await resp.json();
+    if (data.error && !data.lines.length) {
+      viewer.innerHTML = '<div class="log-line" style="color:var(--text-vdim)">' + data.error + '</div>';
+      return;
+    }
+    viewer.innerHTML = '';
+    for (const line of data.lines) {
+      const div = document.createElement('div');
+      div.className = 'log-line';
+      if (line.includes('[ERROR]') || line.includes('ERROR')) div.className += ' err';
+      else if (line.includes('[WARNING]') || line.includes('WARNING')) div.className += ' warn';
+      else if (line.includes('[INFO]')) div.className += ' info';
+      div.textContent = line;
+      viewer.appendChild(div);
+    }
+    viewer.scrollTop = viewer.scrollHeight;
+  } catch (e) {
+    viewer.innerHTML = '<div class="log-line err">Failed to load logs: ' + e.message + '</div>';
+  }
+}
+
+// âââ Toast âââ
+let toastTimer = null;
+function showToast(msg, level) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (level === 'error' ? ' error' : level === 'success' ? ' success' : '');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+// âââ Init âââ
+loadStatus();
+loadSettings();
+loadLogs();
+// Auto-refresh status every 15s
+setInterval(loadStatus, 15000);
+</script>
+</body>
+</html>
