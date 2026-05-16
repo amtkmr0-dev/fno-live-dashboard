@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSI Scanner — F&O Live</title>
+<title>RSI Scanner - F&amp;O Live</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -22,7 +22,7 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 a { color: inherit; }
 
-/* ── Unified Site Navigation ── */
+/* &#9472;&#9472; Unified Site Navigation &#9472;&#9472; */
 .site-nav {
  background: var(--surface);
  border-bottom: 1px solid var(--border);
@@ -92,7 +92,7 @@ a { color: inherit; }
  50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
 }
 
-/* ── Controls Bar ── */
+/* &#9472;&#9472; Controls Bar &#9472;&#9472; */
 .controls {
  display: flex;
  align-items: center;
@@ -166,7 +166,7 @@ a { color: inherit; }
 .refresh-btn:hover { background: rgba(41,98,255,0.25); }
 .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── Stats Strip ── */
+/* &#9472;&#9472; Stats Strip &#9472;&#9472; */
 .stats-strip {
  display: flex;
  gap: 0;
@@ -187,7 +187,7 @@ a { color: inherit; }
 .stat-card.overbought .stat-value { color: var(--red); }
 .stat-card.neutral .stat-value { color: var(--text-dim); }
 
-/* ── Table ── */
+/* &#9472;&#9472; Table &#9472;&#9472; */
 .table-wrap {
  padding: 0;
  overflow-x: auto;
@@ -357,17 +357,17 @@ td.rsi.loading { color: var(--text-dim); font-weight: 400; font-style: italic; }
  <div class="scan-info">
  <span id="scanStatus">Waiting for data...</span>
  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
- <button class="refresh-btn" id="refreshBtn" onclick="startScan()">⟳ Scan RSI</button>
+ <button class="refresh-btn" id="refreshBtn" onclick="startScan()">&#10227; Scan RSI</button>
  </div>
 </div>
 
 <!-- Stats Strip -->
 <div class="stats-strip">
- <div class="stat-card oversold"><div class="stat-value" id="statOversold">—</div><div class="stat-label">Oversold &lt;30</div></div>
- <div class="stat-card overbought"><div class="stat-value" id="statOverbought">—</div><div class="stat-label">Overbought &gt;70</div></div>
- <div class="stat-card neutral"><div class="stat-value" id="statNeutral">—</div><div class="stat-label">Neutral 30–70</div></div>
- <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Scanned</div></div>
- <div class="stat-card"><div class="stat-value" id="statAvgRsi">—</div><div class="stat-label">Avg RSI</div></div>
+ <div class="stat-card oversold"><div class="stat-value" id="statOversold">&mdash;</div><div class="stat-label">Oversold &lt;30</div></div>
+ <div class="stat-card overbought"><div class="stat-value" id="statOverbought">&mdash;</div><div class="stat-label">Overbought &gt;70</div></div>
+ <div class="stat-card neutral"><div class="stat-value" id="statNeutral">&mdash;</div><div class="stat-label">Neutral 30&ndash;70</div></div>
+ <div class="stat-card"><div class="stat-value" id="statTotal">&mdash;</div><div class="stat-label">Total Scanned</div></div>
+ <div class="stat-card"><div class="stat-value" id="statAvgRsi">&mdash;</div><div class="stat-label">Avg RSI</div></div>
 </div>
 
 <!-- Table -->
@@ -379,7 +379,7 @@ td.rsi.loading { color: var(--text-dim); font-weight: 400; font-style: italic; }
  <th data-col="sector">Sector</th>
  <th data-col="ltp">LTP <span class="sort-arrow"></span></th>
  <th data-col="chg_pct">Chg% <span class="sort-arrow"></span></th>
- <th data-col="rsi_5m" class="sorted">RSI 5m <span class="sort-arrow">▲</span></th>
+ <th data-col="rsi_5m" class="sorted">RSI 5m <span class="sort-arrow">&#9650;</span></th>
  <th data-col="rsi_15m">RSI 15m <span class="sort-arrow"></span></th>
  <th data-col="vol_surge">Vol Surge <span class="sort-arrow"></span></th>
  <th data-col="buildup">Buildup</th>
@@ -392,12 +392,12 @@ td.rsi.loading { color: var(--text-dim); font-weight: 400; font-style: italic; }
  </table>
  <div class="empty-state" id="emptyState">
  <div class="icon"></div>
- <div class="msg">Connecting to server — RSI scan will start automatically</div>
+ <div class="msg">Connecting to server &mdash; RSI scan will start automatically</div>
  </div>
 </div>
 
 <script>
-// ── State ──
+// \u2500\u2500 State \u2500\u2500
 const stocks = {};
 let rsiData = {}; // { symbol: { rsi_5m: number, rsi_15m: number } }
 let sortCol = 'rsi_5m', sortDir = 'asc';
@@ -409,7 +409,7 @@ let ws = null;
 let reconnectTimer = null;
 let reconnectDelay = 3000;
 
-// ── DOM refs ──
+// \u2500\u2500 DOM refs \u2500\u2500
 const tbody = document.getElementById('tbody');
 const emptyState = document.getElementById('emptyState');
 const connDot = document.getElementById('connDot');
@@ -419,7 +419,7 @@ const progressFill = document.getElementById('progressFill');
 const scanStatus = document.getElementById('scanStatus');
 const refreshBtn = document.getElementById('refreshBtn');
 
-// ── Wilder's RSI (period 14) ──
+// \u2500\u2500 Wilder's RSI (period 14) \u2500\u2500
 function wilderRSI(closes, period = 14) {
  if (closes.length < period + 1) return null;
  let gains = 0, losses = 0;
@@ -440,7 +440,7 @@ function wilderRSI(closes, period = 14) {
  return 100 - (100 / (1 + rs));
 }
 
-// ── Fetch candles + compute RSI ──
+// \u2500\u2500 Fetch candles + compute RSI \u2500\u2500
 async function fetchRSI(symbol, interval) {
  try {
  const res = await fetch(`/api/candles?symbol=${encodeURIComponent(symbol)}&interval=${interval}minute`);
@@ -454,7 +454,7 @@ async function fetchRSI(symbol, interval) {
  }
 }
 
-// ── Scan all stocks ──
+// \u2500\u2500 Scan all stocks \u2500\u2500
 async function startScan() {
  if (scanning) return;
  const syms = Object.keys(stocks);
@@ -497,7 +497,7 @@ async function startScan() {
  updateStats();
 }
 
-// ── Update stats ──
+// \u2500\u2500 Update stats \u2500\u2500
 function updateStats() {
  let oversold = 0, overbought = 0, neutral = 0, total = 0, rsiSum = 0;
  const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
@@ -514,10 +514,10 @@ function updateStats() {
  document.getElementById('statOverbought').textContent = overbought;
  document.getElementById('statNeutral').textContent = neutral;
  document.getElementById('statTotal').textContent = total;
- document.getElementById('statAvgRsi').textContent = total >0 ? (rsiSum / total).toFixed(1) : '—';
+ document.getElementById('statAvgRsi').textContent = total >0 ? (rsiSum / total).toFixed(1) : '\u2014';
 }
 
-// ── Render table ──
+// \u2500\u2500 Render table \u2500\u2500
 function renderTable() {
  const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
  let rows = Object.keys(stocks).map(sym =>{
@@ -575,16 +575,16 @@ function renderTable() {
  const scoreColor = r.score >= 65 ? 'var(--green)' : r.score >= 40 ? 'var(--yellow)' : 'var(--red)';
  return `<tr>
  <td class="symbol"><a href="/rsi-analysis#${r.symbol}" target="_blank">${r.symbol}</a></td>
- <td><span class="sector-pill">${r.sector || '—'}</span></td>
- <td class="ltp">${r.ltp ? r.ltp.toFixed(2) : '—'}</td>
- <td class="chg ${chgCls}">${r.chg_pct ? (r.chg_pct >0 ? '+' : '') + r.chg_pct.toFixed(2) + '%' : '—'}</td>
+ <td><span class="sector-pill">${r.sector || '\u2014'}</span></td>
+ <td class="ltp">${r.ltp ? r.ltp.toFixed(2) : '\u2014'}</td>
+ <td class="chg ${chgCls}">${r.chg_pct ? (r.chg_pct >0 ? '+' : '') + r.chg_pct.toFixed(2) + '%' : '\u2014'}</td>
  <td class="rsi ${rsi5Cls}">${rsi5Val}</td>
  <td class="rsi ${rsi15Cls}">${rsi15Val}</td>
- <td>${r.vol_surge ? r.vol_surge.toFixed(1) + 'x' : '—'}</td>
+ <td>${r.vol_surge ? r.vol_surge.toFixed(1) + 'x' : '\u2014'}</td>
  <td><span class="buildup-badge ${r.buildup}">${formatBuildup(r.buildup)}</span></td>
  <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${r.score}%;background:${scoreColor}"></div></div><span class="score-val" style="color:${scoreColor}">${r.score}</span></div></td>
- <td>${r.atm_iv ? r.atm_iv.toFixed(1) + '%' : '—'}</td>
- <td>${r.pcr ? r.pcr.toFixed(2) : '—'}</td>
+ <td>${r.atm_iv ? r.atm_iv.toFixed(1) + '%' : '\u2014'}</td>
+ <td>${r.pcr ? r.pcr.toFixed(2) : '\u2014'}</td>
  </tr>`;
  }).join('');
 }
@@ -597,11 +597,11 @@ function rsiClass(val) {
 }
 
 function formatBuildup(b) {
- if (!b) return '—';
+ if (!b) return '\u2014';
  return b.replace(/_/g, ' ');
 }
 
-// ── Sort headers ──
+// \u2500\u2500 Sort headers \u2500\u2500
 document.querySelectorAll('thead th[data-col]').forEach(th =>{
  th.addEventListener('click', () =>{
  const col = th.dataset.col;
@@ -613,12 +613,12 @@ document.querySelectorAll('thead th[data-col]').forEach(th =>{
  h.querySelector('.sort-arrow') && (h.querySelector('.sort-arrow').textContent = '');
  });
  th.classList.add('sorted');
- th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '▲' : '▼';
+ th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '\u25B2' : '\u25BC';
  renderTable();
  });
 });
 
-// ── Filter buttons ──
+// \u2500\u2500 Filter buttons \u2500\u2500
 document.getElementById('rsiFilter').addEventListener('click', e =>{
  if (!e.target.classList.contains('filter-btn')) return;
  document.querySelectorAll('#rsiFilter .filter-btn').forEach(b =>b.classList.remove('active'));
@@ -641,13 +641,13 @@ document.getElementById('tfFilter').addEventListener('click', e =>{
  updateStats();
 });
 
-// ── Search ──
+// \u2500\u2500 Search \u2500\u2500
 document.getElementById('searchBox').addEventListener('input', e =>{
  searchQuery = e.target.value.trim();
  renderTable();
 });
 
-// ── WebSocket ──
+// \u2500\u2500 WebSocket \u2500\u2500
 function setConnStatus(status) {
  connDot.className = 'conn-dot' + (status === 'on' ? ' on' : '');
  connText.textContent = status === 'on' ? 'Connected' : status === 'off' ? 'Disconnected' : 'Reconnecting...';
@@ -725,7 +725,7 @@ function scheduleReconnect() {
  }, reconnectDelay);
 }
 
-// ── Init ──
+// \u2500\u2500 Init \u2500\u2500
 connectWS();
 </script>
 </body>
