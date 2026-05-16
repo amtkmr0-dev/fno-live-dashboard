@@ -320,10 +320,66 @@ async def handle_chat_api(request):
 
     history = data.get("history", [])
     focused_stock = data.get("focused_stock")
+    dash_context = data.get("context", {})
 
     # Build messages array (OpenAI-compatible for both providers)
     system_content = CHAT_SYSTEM_PROMPT
-    if focused_stock:
+
+    # Inject live dashboard data as context
+    context_parts = []
+    if dash_context.get("market_summary"):
+        ms = dash_context["market_summary"]
+        context_parts.append(
+            f"LIVE MARKET SNAPSHOT: {ms.get('total_stocks',0)} F&O stocks tracked. "
+            f"Advancing: {ms.get('advancing',0)}, Declining: {ms.get('declining',0)}, "
+            f"Unchanged: {ms.get('unchanged',0)}. Breadth ratio: {ms.get('breadth_ratio',0)}"
+        )
+
+    if dash_context.get("trade_ready_picks"):
+        picks = dash_context["trade_ready_picks"]
+        lines = []
+        for p in picks[:8]:
+            lines.append(
+                f"  {p['symbol']} ({p.get('direction','?')}) "
+                f"LTP={p.get('ltp','?')} Chg={p.get('chg_pct','?')}% "
+                f"Score={p.get('score','?')} Buildup={p.get('buildup','?')} "
+                f"PCR={p.get('pcr','?')} IV={p.get('atm_iv','?')} "
+                f"CE={p.get('atm_ce','?')} PE={p.get('atm_pe','?')} "
+                f"VolSurge={p.get('vol_surge','?')}x Sector={p.get('sector','?')}"
+            )
+        context_parts.append(
+            f"TRADE-READY STOCKS ({dash_context.get('trade_ready_count',len(picks))} total, top {len(lines)}):\n"
+            + "\n".join(lines)
+        )
+
+    if dash_context.get("top_movers"):
+        movers = dash_context["top_movers"]
+        ml = [f"  {m['symbol']} {m.get('chg_pct',0):+.2f}% LTP={m.get('ltp','?')} {m.get('buildup','')}" for m in movers]
+        context_parts.append("TOP MOVERS:\n" + "\n".join(ml))
+
+    if dash_context.get("focused_stock_data"):
+        fd = dash_context["focused_stock_data"]
+        context_parts.append(
+            f"FOCUSED STOCK: {fd.get('symbol')} (Sector: {fd.get('sector')}, "
+            f"N50: {fd.get('is_n50')}, Lot: {fd.get('lot')})\n"
+            f"  Price: LTP={fd.get('ltp')} O={fd.get('open')} H={fd.get('high')} L={fd.get('low')} "
+            f"Chg={fd.get('chg_pct','?')}% Gap={fd.get('gap_pct','?')}% Range={fd.get('range_pct','?')}%\n"
+            f"  Volume: {fd.get('vol','?')} VolSurge={fd.get('vol_surge','?')}x\n"
+            f"  OI: CE_OI_Chg={fd.get('ce_oi_chg','?')} PE_OI_Chg={fd.get('pe_oi_chg','?')} "
+            f"Net_OI={fd.get('net_oi','?')} Buildup={fd.get('buildup','?')}\n"
+            f"  Options: PCR={fd.get('pcr','?')} PCR_Sig={fd.get('pcr_sig','?')} "
+            f"ATM_Strike={fd.get('atm_strike','?')} ATM_IV={fd.get('atm_iv','?')}%\n"
+            f"  Premiums: CE={fd.get('atm_ce','?')} PE={fd.get('atm_pe','?')} "
+            f"Prem_OK={fd.get('prem_ok','?')}\n"
+            f"  Max Pain: {fd.get('max_pain','?')} (Dist={fd.get('mp_dist','?')}%)\n"
+            f"  Score={fd.get('score','?')} Direction={fd.get('direction','?')} "
+            f"TradeReady={fd.get('is_trade_ready',False)} PoisedScore={fd.get('poised_score','?')}"
+        )
+
+    if context_parts:
+        system_content += "\n\n--- LIVE DASHBOARD DATA (real-time, use these numbers in your analysis) ---\n"
+        system_content += "\n\n".join(context_parts)
+    elif focused_stock:
         system_content += f"\n\nThe user is currently viewing {focused_stock} in the analysis panel. Focus your answer on this stock's F&O setup."
 
     messages = [{"role": "system", "content": system_content}]

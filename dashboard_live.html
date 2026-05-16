@@ -3110,6 +3110,107 @@ function askQuantaAbout() {
   input.focus();
 }
 
+// Build live dashboard context snapshot for AI chat
+function buildDashboardContext() {
+  const ctx = {};
+  const allSyms = Object.keys(stocks);
+  if (!allSyms.length) return ctx;
+
+  // Market summary
+  let adv = 0, dec = 0, unch = 0;
+  allSyms.forEach(s => {
+    const c = stocks[s].chg_pct || 0;
+    if (c > 0.1) adv++;
+    else if (c < -0.1) dec++;
+    else unch++;
+  });
+  ctx.market_summary = {
+    total_stocks: allSyms.length,
+    advancing: adv,
+    declining: dec,
+    unchanged: unch,
+    breadth_ratio: adv > 0 ? +(adv / (adv + dec)).toFixed(2) : 0
+  };
+
+  // Top trade-ready picks (poised)
+  const poisedList = allSyms
+    .filter(s => isPoised(stocks[s]))
+    .sort((a, b) => poisedScore(stocks[b]) - poisedScore(stocks[a]))
+    .slice(0, 10);
+
+  ctx.trade_ready_count = poisedList.length;
+  ctx.trade_ready_picks = poisedList.map(s => {
+    const d = stocks[s];
+    return {
+      symbol: s,
+      direction: getDirection(d),
+      score: d.score,
+      poised_score: poisedScore(d),
+      ltp: d.ltp,
+      chg_pct: +(d.chg_pct || 0).toFixed(2),
+      buildup: d.buildup,
+      pcr: d.pcr,
+      pcr_sig: d.pcr_sig,
+      atm_iv: d.atm_iv,
+      atm_ce: d.atm_ce,
+      atm_pe: d.atm_pe,
+      vol_surge: d.vol_surge,
+      lot: d.lot,
+      sector: d.sector
+    };
+  });
+
+  // Top movers (by absolute change%)
+  const movers = [...allSyms]
+    .sort((a, b) => Math.abs(stocks[b].chg_pct || 0) - Math.abs(stocks[a].chg_pct || 0))
+    .slice(0, 5);
+  ctx.top_movers = movers.map(s => ({
+    symbol: s,
+    chg_pct: +(stocks[s].chg_pct || 0).toFixed(2),
+    ltp: stocks[s].ltp,
+    buildup: stocks[s].buildup
+  }));
+
+  // Focused stock full data
+  if (analysisSym && stocks[analysisSym]) {
+    const d = stocks[analysisSym];
+    ctx.focused_stock_data = {
+      symbol: d.symbol,
+      sector: d.sector,
+      is_n50: d.is_n50,
+      lot: d.lot,
+      ltp: d.ltp,
+      chg_pct: +(d.chg_pct || 0).toFixed(2),
+      open: d.open,
+      high: d.high,
+      low: d.low,
+      gap_pct: d.gap_pct,
+      range_pct: d.range_pct,
+      vol: d.vol,
+      vol_surge: d.vol_surge,
+      score: d.score,
+      buildup: d.buildup,
+      pcr: d.pcr,
+      pcr_sig: d.pcr_sig,
+      ce_oi_chg: d.ce_oi_chg,
+      pe_oi_chg: d.pe_oi_chg,
+      net_oi: d.net_oi,
+      atm_iv: d.atm_iv,
+      atm_strike: d.atm_strike,
+      atm_ce: d.atm_ce,
+      atm_pe: d.atm_pe,
+      prem_ok: d.prem_ok,
+      max_pain: d.max_pain,
+      mp_dist: d.mp_dist,
+      direction: getDirection(d),
+      is_trade_ready: isPoised(d),
+      poised_score: poisedScore(d)
+    };
+  }
+
+  return ctx;
+}
+
 async function sendChatMessage() {
   const input = document.getElementById('chatInput');
   const text = (input.value || '').trim();
@@ -3126,6 +3227,9 @@ async function sendChatMessage() {
   document.getElementById('chatSendBtn').disabled = true;
   setTyping(true);
 
+  // Snapshot live dashboard data for AI context
+  const dashContext = buildDashboardContext();
+
   try {
     const resp = await fetch('/api/chat', {
       method: 'POST',
@@ -3134,6 +3238,7 @@ async function sendChatMessage() {
         message: text,
         history: chatHistory.slice(-10),
         focused_stock: analysisSym || null,
+        context: dashContext,
       }),
     });
     const data = await resp.json();
