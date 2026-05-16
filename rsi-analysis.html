@@ -636,6 +636,28 @@ a:hover { text-decoration: underline; }
   .q-nav-links a { padding: 5px 9px; font-size: var(--fs-xs); }
   .q-stats-row { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Logout button in nav */
+.q-nav-logout {
+  margin-left: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.q-nav-logout:hover {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(239,68,68,0.08);
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
@@ -1138,6 +1160,16 @@ tbody td {
 </style>
 </head>
 <body>
+<script>
+// Auth gate: verify session, redirect to login if expired
+(function(){
+  fetch('/api/auth/verify',{credentials:'same-origin'})
+    .then(function(r){if(!r.ok)throw r;return r.json()})
+    .then(function(d){if(!d.ok)window.location.href='/login'})
+    .catch(function(){window.location.href='/login'});
+})();
+</script>
+
 
 <nav class="q-nav">
   <a href="/" class="q-nav-brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAXCAIAAADsjHrMAAAEAElEQVR42p1VXWgcVRQ+596Z3exf2ibdJjFUiIWmpqQkKKmKDyLYRktNEawWrSAUnyp5Kf4+1Bctgr4GX1oRqQhFQQWRoKJIKpUWitGWxDZpmtZszGZ/53/uvceHZDazm81m9T7MXObcO9/5vvOH0NID4YUABE0sBAQgWv+5ch2x1s5qTzeJBPWQgusI9e0M/vtCDP4XvEKbRg7/HzAiCtwmRKyF2tjJTcGoGWWp0RlsnhmGhFkHjEBETbi7umGbEaLgQQCAyBhjAMQ4R0SgJhXEBswqqlD4MOcaua6yigikzBxJgZwDNRYwLAxw0LZVE8Ka5EIAxjkpIjvX1n3PC6dPH337NYil7v4xKcw86jFkKwWFTRCsKerqqCBjCKisoh6LD798/NDJ0WRH2rAAo3Dj96mvPzgz9d23AAwTKVJyU8j1zMJInGybfPOBgwdPjo09fvyYqxK5vOMpVsi72NbZe+hIa+++7Oy0/fcMoA5cg4ZhrGFGocplZBvdvbufff3U0OERKaGQs3kihjosZW0/GcvnlOn4Ih4tldzrX5y9dX7MK+QwGiNSG+GtMCOAqtRijJNr7B8ZOfXZ+Z39/aWC73oUT0eXFjJfvvveN++/ZRh+qm/Q0qP5rOtIPTUwlHp0pDh5yV+6C1qkbpFVwCpJgQErRp75zJvvdPT1ZjN2NB4VqH44d/aT0Vf/mvjRLnnzF8dnfxnHLZ0tPXsMi0rLNqXb3eyydXUcI8nqFF1rblpNIwKsNFmtYHqmTSoSuXknc2H0xNzlCdCSLNFGSiGLFaenrrzx4vYDz28/8SEoXZRJuH7jLqGtFRbiKtJqr1WIkHdxpsBnrt6euzzBEu2klJISAEgKjCVIeNmL38snDT2einIUkuqNKaoGW43WWtBWZMgYWFyAsgOWZKgnSMqwOqQUELF40rGF7brc06WnGs8oLeCxQo5CNY+3i7DDAiHA9lZ6YJXHyBkQI6GE5YLGhNSU6a8mWkMZIQRJFXpCUtkGX4BlS1ASGAclgAg4B6nILAIo1tqplA6WDTqALwKHKp5hzTyr7rkhq+2R6ULZUBbfirEkWDlAhlwHywLfufeVl9JPDaula/TrORJIjk+eUzfjw6m/NRjza8cQGfhO5JFjqv0+p2ioljS7/wAZyypzDdxyamDfg59/1PXc023DD/uOXbowBktzuPMhWJyCO7+BHguRqwMWmNbixUC6kNxBux6TrhKWpVrace9h7Oil5VtgZLYMDmJX2ikXU08MYU+X8dWnavoKOstgLgLTN+IXgNUqTKBFxY1L/vwkdPUrlpBWSRol2LYL+o6I2T8XPz4Dre0tA7uNfxb0vd2R/Xucn35W8zchGg+Kdb2S+C9oNgc7Ni61CwAAAABJRU5ErkJggg==" alt="Quantra" style="height:28px;width:auto;"></a>
@@ -1155,6 +1187,7 @@ tbody td {
     <span id="connText">Static Data</span>
     <span id="updateTime"></span>
   </div>
+  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
 </nav>
 
 <main class="page-main">
