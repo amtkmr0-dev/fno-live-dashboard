@@ -1821,11 +1821,11 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   <div class="chat-setup" id="chatSetup" style="display:none;">
     <div class="setup-icon">&#128273;</div>
     <div class="setup-title">Connect Quantra AI</div>
-    <div class="setup-desc">Enter your Anthropic API key to enable<br>AI-powered trading chat.</div>
-    <input type="password" id="chatKeyInput" placeholder="sk-ant-api03-..." autocomplete="off">
+    <div class="setup-desc">Enter your Perplexity API key to enable<br>AI-powered trading chat with web search.</div>
+    <input type="password" id="chatKeyInput" placeholder="pplx-..." autocomplete="off">
     <button onclick="saveChatKey()">Activate</button>
     <div class="setup-desc" style="font-size:10px;margin-top:4px;">
-      Get key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="color:var(--blue);">console.anthropic.com</a>
+      Get key at <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener" style="color:var(--blue);">perplexity.ai/settings/api</a>
     </div>
   </div>
 
@@ -3140,7 +3140,7 @@ async function sendChatMessage() {
     const reply = data.reply || 'No response.';
 
     // Check if the reply indicates missing API key
-    if (reply.includes('Chat not configured') || reply.includes('ANTHROPIC_API_KEY')) {
+    if (reply.includes('Chat not configured') || reply.includes('API key')) {
       showChatSetup();
     } else {
       addChatBubble('agent', reply);
