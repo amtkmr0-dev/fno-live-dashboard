@@ -3,648 +3,644 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSI Stock Analysis - F&amp;O Live</title>
+<title>Stock Analysis - Quanta Terminal</title>
+<link rel="stylesheet" href="/theme.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
-:root {
- --bg: #131722; --surface: #1E222D; --surface-hover: #2A2E39;
- --border: #363A45; --text: #D1D4DC; --text-dim: #787B86; --text-vdim: #545862;
- --blue: #2962FF; --green: #26A69A; --red: #EF5350;
- --gold: #FFD700; --orange: #FF9800; --purple: #AB47BC; --cyan: #00BCD4;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; }
-body {
- font-family: 'Inter', sans-serif;
- background: var(--bg);
- color: var(--text);
- min-height: 100vh;
- line-height: 1.5;
+/* ============================================================
+   Stock Analysis - Page-specific styles
+   ============================================================ */
+
+/* Main content area */
+.page-main {
+  padding: 20px 24px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-/* NAV &mdash; see unified .site-nav below */
-
-/* MAIN LAYOUT */
-main { padding: 24px; max-width: 1600px; margin: 0 auto; }
-h2 {
- font-size: 11px;
- font-weight: 700;
- letter-spacing: 1.5px;
- text-transform: uppercase;
- color: var(--text-dim);
- margin-bottom: 14px;
- display: flex;
- align-items: center;
- gap: 8px;
+/* Section headers */
+.section-header {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-h2::after {
- content: '';
- flex: 1;
- height: 1px;
- background: var(--border);
+.section-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
-section { margin-bottom: 32px; }
+section {
+  margin-bottom: 28px;
+}
 
-/* CARDS */
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+/* Summary cards grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
 .card {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
 }
 .card-label {
- font-size: 10px;
- font-weight: 700;
- letter-spacing: 1px;
- text-transform: uppercase;
- color: var(--text-vdim);
- margin-bottom: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-vdim);
+  margin-bottom: 5px;
 }
 .card-value {
- font-size: 22px;
- font-weight: 800;
- color: var(--text);
- line-height: 1.2;
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--text-bright);
+  line-height: 1.2;
 }
 .card-sub {
- font-size: 11px;
- color: var(--text-dim);
- margin-top: 4px;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  margin-top: 4px;
 }
-.c-green { color: var(--green) !important; }
-.c-red { color: var(--red) !important; }
-.c-gold { color: var(--gold) !important; }
-.c-cyan { color: var(--cyan) !important; }
-.c-blue { color: var(--blue) !important; }
+
+/* Color utility classes used by JS */
+.c-green  { color: var(--green) !important; }
+.c-red    { color: var(--red) !important; }
+.c-gold   { color: var(--gold) !important; }
+.c-cyan   { color: var(--cyan) !important; }
+.c-blue   { color: var(--blue) !important; }
 .c-orange { color: var(--orange) !important; }
 
-/* CHARTS */
-.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* Charts row */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
 .chart-box {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
 }
 .chart-title {
- font-size: 11px;
- font-weight: 700;
- letter-spacing: 1px;
- text-transform: uppercase;
- color: var(--text-dim);
- margin-bottom: 12px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
 }
-.chart-area { height: 240px; }
+.chart-area {
+  height: 400px;
+}
 
-/* COMPARISON */
-.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* Comparison grid */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
 .compare-card {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
 }
 .compare-card h3 {
- font-size: 11px;
- font-weight: 700;
- letter-spacing: 1.2px;
- text-transform: uppercase;
- color: var(--text-dim);
- margin-bottom: 16px;
- padding-bottom: 10px;
- border-bottom: 1px solid var(--border);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
 }
 .compare-row {
- display: flex;
- justify-content: space-between;
- align-items: center;
- padding: 8px 0;
- border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
 }
 .compare-row:last-child { border-bottom: none; }
-.compare-label { font-size: 12px; color: var(--text-dim); }
-.compare-val { font-size: 13px; font-weight: 700; color: var(--text); }
-.arrow-up { color: var(--green); font-size: 16px; margin-left: 6px; }
-.arrow-down { color: var(--red); font-size: 16px; margin-left: 6px; }
+.compare-label {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.compare-val {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.arrow-up {
+  color: var(--green);
+  font-size: 16px;
+  margin-left: 6px;
+}
+.arrow-down {
+  color: var(--red);
+  font-size: 16px;
+  margin-left: 6px;
+}
 
-/* TABLE CONTROLS */
+/* Table controls bar */
 .table-controls {
- display: flex;
- flex-wrap: wrap;
- gap: 10px;
- align-items: center;
- margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
 }
 .search-box {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 6px;
- color: var(--text);
- font-family: 'Inter', sans-serif;
- font-size: 13px;
- padding: 7px 12px;
- outline: none;
- width: 200px;
- transition: border-color 0.15s;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  padding: 7px 12px;
+  outline: none;
+  width: 200px;
+  transition: border-color 0.15s;
 }
-.search-box:focus { border-color: var(--blue); }
+.search-box:focus { border-color: var(--border-focus); }
 .search-box::placeholder { color: var(--text-vdim); }
-.filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
-.btn {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 5px;
- color: var(--text-dim);
- cursor: pointer;
- font-family: 'Inter', sans-serif;
- font-size: 11px;
- font-weight: 600;
- padding: 5px 10px;
- transition: all 0.15s;
- letter-spacing: 0.3px;
+.filter-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
 }
-.btn:hover { background: var(--surface-hover); color: var(--text); }
+.btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  padding: 5px 10px;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+.btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
 .btn.active {
- background: rgba(41,98,255,0.15);
- border-color: var(--blue);
- color: var(--blue);
+  background: var(--blue-soft);
+  border-color: var(--blue);
+  color: var(--blue);
 }
 .btn-export {
- margin-left: auto;
- background: rgba(38,166,154,0.12);
- border-color: rgba(38,166,154,0.4);
- color: var(--green);
- font-size: 12px;
- padding: 6px 14px;
+  margin-left: auto;
+  background: var(--green-soft);
+  border-color: rgba(38,166,154,0.4);
+  color: var(--green);
+  font-size: var(--fs-sm);
+  padding: 6px 14px;
 }
 .btn-export:hover {
- background: rgba(38,166,154,0.2);
- color: var(--green);
+  background: rgba(38,166,154,0.2);
+  color: var(--green);
 }
 
-/* MAIN TABLE */
+/* Main data table */
 .table-wrap {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 table {
- width: 100%;
- border-collapse: collapse;
- font-size: 12.5px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
 }
 thead th {
- background: #171B26;
- color: var(--text-dim);
- font-size: 10px;
- font-weight: 700;
- letter-spacing: 0.8px;
- text-transform: uppercase;
- padding: 10px 12px;
- text-align: left;
- border-bottom: 1px solid var(--border);
- white-space: nowrap;
- cursor: pointer;
- user-select: none;
- position: sticky;
- top: 52px;
- z-index: 10;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  top: var(--nav-height);
+  z-index: 10;
 }
-thead th:hover { color: var(--text); background: var(--surface-hover); }
-thead th.sort-asc::after { content: ' &#226;&#134;&#145;'; color: var(--blue); }
-thead th.sort-desc::after { content: ' &#226;&#134;&#147;'; color: var(--blue); }
+thead th:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+thead th.sort-asc::after { content: ' \2191'; color: var(--blue); }
+thead th.sort-desc::after { content: ' \2193'; color: var(--blue); }
 tbody tr {
- border-bottom: 1px solid rgba(54,58,69,0.5);
- transition: background 0.1s;
- cursor: pointer;
+  border-bottom: 1px solid rgba(54,58,69,0.5);
+  transition: background 0.1s;
+  cursor: pointer;
 }
 tbody tr:hover { background: var(--surface-hover); }
 tbody tr.expanded { background: rgba(41,98,255,0.06); }
 tbody td {
- padding: 9px 12px;
- vertical-align: middle;
+  padding: 9px 12px;
+  vertical-align: middle;
 }
-.sym-cell { font-weight: 700; font-size: 13px; color: var(--text); }
-.rank-cell { color: var(--text-vdim); font-size: 11px; width: 36px; }
+.sym-cell {
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-base);
+  color: var(--text-bright);
+}
+.rank-cell {
+  color: var(--text-vdim);
+  font-size: var(--fs-xs);
+  width: 36px;
+}
 
-/* BADGES */
+/* Badges for TF and Side */
 .badge {
- display: inline-block;
- font-size: 10px;
- font-weight: 700;
- padding: 2px 7px;
- border-radius: 4px;
- letter-spacing: 0.5px;
+  display: inline-block;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
 }
-.badge-1m { background: rgba(0,188,212,0.15); color: var(--cyan); border: 1px solid rgba(0,188,212,0.3); }
-.badge-3m { background: rgba(41,98,255,0.15); color: var(--blue); border: 1px solid rgba(41,98,255,0.3); }
-.badge-5m { background: rgba(171,71,188,0.15); color: var(--purple); border: 1px solid rgba(171,71,188,0.3); }
-.badge-15m { background: rgba(255,152,0,0.15); color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
-.badge-30m { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
-.badge-1h { background: rgba(239,83,80,0.15); color: var(--red); border: 1px solid rgba(239,83,80,0.3); }
-.badge-bull { background: rgba(38,166,154,0.15); color: var(--green); border: 1px solid rgba(38,166,154,0.3); }
-.badge-bear { background: rgba(239,83,80,0.15); color: var(--red); border: 1px solid rgba(239,83,80,0.3); }
+.badge-1m  { background: rgba(0,188,212,0.15);  color: var(--cyan);   border: 1px solid rgba(0,188,212,0.3); }
+.badge-3m  { background: rgba(41,98,255,0.15);   color: var(--blue);   border: 1px solid rgba(41,98,255,0.3); }
+.badge-5m  { background: rgba(171,71,188,0.15);  color: var(--purple); border: 1px solid rgba(171,71,188,0.3); }
+.badge-15m { background: rgba(255,152,0,0.15);   color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
+.badge-30m { background: rgba(255,215,0,0.15);   color: var(--gold);   border: 1px solid rgba(255,215,0,0.3); }
+.badge-1h  { background: rgba(239,83,80,0.15);   color: var(--red);    border: 1px solid rgba(239,83,80,0.3); }
+.badge-bull { background: rgba(38,166,154,0.15); color: var(--green);  border: 1px solid rgba(38,166,154,0.3); }
+.badge-bear { background: rgba(239,83,80,0.15);  color: var(--red);    border: 1px solid rgba(239,83,80,0.3); }
 
-/* EXPANDED ROW */
+/* Expanded detail row */
 .detail-row td { padding: 0 !important; }
 .detail-panel {
- padding: 14px 16px;
- background: #171B26;
- border-top: 1px solid var(--border);
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
 }
 .detail-panel h4 {
- font-size: 10px;
- font-weight: 700;
- letter-spacing: 1px;
- text-transform: uppercase;
- color: var(--text-dim);
- margin-bottom: 10px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
 }
-.detail-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-xs);
+}
 .detail-table th {
- color: var(--text-vdim);
- font-size: 9.5px;
- font-weight: 700;
- letter-spacing: 0.8px;
- text-transform: uppercase;
- padding: 5px 10px;
- text-align: left;
- border-bottom: 1px solid var(--border);
+  color: var(--text-vdim);
+  font-size: 9.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
 }
 .detail-table td {
- padding: 5px 10px;
- border-bottom: 1px solid rgba(54,58,69,0.4);
+  padding: 5px 10px;
+  border-bottom: 1px solid rgba(54,58,69,0.4);
 }
 .detail-table tr.best-combo td {
- background: rgba(41,98,255,0.08);
- font-weight: 600;
+  background: rgba(41,98,255,0.08);
+  font-weight: var(--fw-semibold);
 }
 .detail-table tr.best-combo td:first-child {
- border-left: 2px solid var(--blue);
- padding-left: 8px;
+  border-left: 2px solid var(--blue);
+  padding-left: 8px;
 }
-.no-data { color: var(--text-vdim); font-style: italic; font-size: 11px; }
+.no-data {
+  color: var(--text-vdim);
+  font-style: italic;
+  font-size: var(--fs-xs);
+}
 
-/* RANKINGS TABS */
+/* Rankings tabs */
 .tabs-nav {
- display: flex;
- gap: 0;
- border-bottom: 1px solid var(--border);
- margin-bottom: 0;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
 }
 .tab-btn {
- background: none;
- border: none;
- border-bottom: 2px solid transparent;
- color: var(--text-dim);
- cursor: pointer;
- font-family: 'Inter', sans-serif;
- font-size: 12px;
- font-weight: 600;
- padding: 10px 18px;
- transition: all 0.15s;
- margin-bottom: -1px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  padding: 10px 18px;
+  transition: all 0.15s;
+  margin-bottom: -1px;
 }
 .tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-btn.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
 .tabs-content {
- background: var(--surface);
- border: 1px solid var(--border);
- border-top: none;
- border-radius: 0 0 10px 10px;
- overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  overflow: hidden;
 }
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
-.rank-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rank-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
 .rank-table th {
- background: #171B26;
- color: var(--text-vdim);
- font-size: 10px;
- font-weight: 700;
- letter-spacing: 0.8px;
- text-transform: uppercase;
- padding: 9px 12px;
- text-align: left;
- border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-vdim);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
 }
 .rank-table td {
- padding: 7px 12px;
- border-bottom: 1px solid rgba(54,58,69,0.4);
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(54,58,69,0.4);
 }
 .rank-table tr:last-child td { border-bottom: none; }
 .rank-num {
- background: rgba(41,98,255,0.12);
- color: var(--blue);
- font-size: 10px;
- font-weight: 700;
- padding: 2px 6px;
- border-radius: 4px;
- min-width: 24px;
- text-align: center;
- display: inline-block;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  min-width: 24px;
+  text-align: center;
+  display: inline-block;
 }
 
-/* BEST TF LOOKUP */
+/* Best TF Lookup */
 .lookup-stats {
- font-size: 13px;
- color: var(--text-dim);
- margin-bottom: 12px;
- padding: 10px 14px;
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 8px;
- display: inline-block;
+  font-size: var(--fs-base);
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: inline-block;
 }
-.lookup-stats strong { color: var(--text); }
-.agree-row td { background: rgba(38,166,154,0.05) !important; }
-.disagree-row td { background: rgba(255,152,0,0.04) !important; }
-.agree-badge {
- font-size: 10px;
- font-weight: 700;
- padding: 2px 7px;
- border-radius: 4px;
- background: rgba(38,166,154,0.15);
- color: var(--green);
- border: 1px solid rgba(38,166,154,0.3);
-}
-.disagree-badge {
- font-size: 10px;
- font-weight: 700;
- padding: 2px 7px;
- border-radius: 4px;
- background: rgba(255,152,0,0.15);
- color: var(--orange);
- border: 1px solid rgba(255,152,0,0.3);
-}
+.lookup-stats strong { color: var(--text-bright); }
 .lookup-search {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 6px;
- color: var(--text);
- font-family: 'Inter', sans-serif;
- font-size: 13px;
- padding: 7px 12px;
- outline: none;
- width: 220px;
- margin-bottom: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  padding: 7px 12px;
+  outline: none;
+  width: 220px;
+  margin-bottom: 12px;
+  transition: border-color 0.15s;
 }
-.lookup-search:focus { border-color: var(--blue); }
+.lookup-search:focus { border-color: var(--border-focus); }
 .lookup-search::placeholder { color: var(--text-vdim); }
 .lookup-table-wrap {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- overflow: hidden;
- max-height: 400px;
- overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-height: 400px;
+  overflow-y: auto;
 }
-.lookup-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.lookup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
 .lookup-table th {
- background: #171B26;
- color: var(--text-vdim);
- font-size: 10px;
- font-weight: 700;
- letter-spacing: 0.8px;
- text-transform: uppercase;
- padding: 9px 14px;
- text-align: left;
- border-bottom: 1px solid var(--border);
- position: sticky;
- top: 0;
- z-index: 5;
+  background: var(--bg-elevated);
+  color: var(--text-vdim);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 .lookup-table td {
- padding: 6px 14px;
- border-bottom: 1px solid rgba(54,58,69,0.4);
+  padding: 6px 14px;
+  border-bottom: 1px solid rgba(54,58,69,0.4);
 }
 .lookup-table tr:last-child td { border-bottom: none; }
+.agree-row td   { background: rgba(38,166,154,0.05) !important; }
+.disagree-row td { background: rgba(255,152,0,0.04) !important; }
+.agree-badge {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: rgba(38,166,154,0.15);
+  color: var(--green);
+  border: 1px solid rgba(38,166,154,0.3);
+}
+.disagree-badge {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,152,0,0.15);
+  color: var(--orange);
+  border: 1px solid rgba(255,152,0,0.3);
+}
 
-/* SCROLLBAR */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
+/* Table count footer */
+.table-count-text {
+  color: var(--text-vdim);
+  font-size: var(--fs-xs);
+  margin-top: 8px;
+}
 
-/* RESPONSIVE */
+/* Responsive */
 @media (max-width: 900px) {
- .charts-row, .compare-grid { grid-template-columns: 1fr; }
- .cards { grid-template-columns: repeat(2, 1fr); }
+  .charts-row, .compare-grid { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
- main { padding: 14px; }
- .cards { grid-template-columns: 1fr 1fr; }
+  .page-main { padding: 14px; }
+  .cards { grid-template-columns: 1fr 1fr; }
 }
-
-/* &#9472;&#9472; Unified Site Navigation &#9472;&#9472; */
-.site-nav {
- background: var(--surface);
- border-bottom: 1px solid var(--border);
- padding: 0 24px;
- display: flex;
- align-items: center;
- gap: 0;
- height: 52px;
- position: sticky;
- top: 0;
- z-index: 100;
-}
-.site-nav .nav-logo {
- font-size: 15px;
- font-weight: 800;
- color: var(--text);
- text-decoration: none;
- padding-right: 24px;
- border-right: 1px solid var(--border);
- margin-right: 16px;
- white-space: nowrap;
- display: flex;
- align-items: center;
- gap: 8px;
- letter-spacing: 0.5px;
-}
-.site-nav .nav-links { display: flex; gap: 2px; flex: 1; }
-.site-nav .nav-links a {
- color: var(--text-dim);
- text-decoration: none;
- font-size: 13px;
- font-weight: 500;
- padding: 6px 14px;
- border-radius: 6px;
- transition: all 0.15s;
- white-space: nowrap;
-}
-.site-nav .nav-links a:hover { color: var(--text); background: var(--surface-hover); }
-.site-nav .nav-links a.active { color: var(--blue); background: rgba(41,98,255,0.12); }
-.site-nav .nav-status {
- display: flex;
- align-items: center;
- gap: 10px;
- font-size: 11px;
- color: var(--text-dim);
- margin-left: auto;
- white-space: nowrap;
-}
-.site-nav .nav-status .conn-dot {
- width: 8px; height: 8px;
- border-radius: 50%;
- background: #EF5350;
- display: inline-block;
- flex-shrink: 0;
-}
-.site-nav .nav-status .conn-dot.on { background: #26A69A; }
-.site-nav .pulse-dot {
- width: 8px; height: 8px;
- border-radius: 50%;
- background: #26A69A;
- display: inline-block;
- animation: pulse-glow 2s infinite;
- flex-shrink: 0;
-}
-@keyframes pulse-glow {
- 0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
- 50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
-}
-
 </style>
 </head>
 <body>
 
-<nav class="site-nav">
- <a class="nav-logo" href="/">
- <span class="pulse-dot" id="pulseDot"></span>
- F&amp;O LIVE
- </a>
- <div class="nav-links">
- <a href="/">Dashboard</a>
- <a href="/paper">Paper Trades</a>
- <a href="/sectors">Sectors</a>
- <a href="/rsi">RSI Scanner</a>
- <a href="/rsi-analysis" class="active">Stock Analysis</a>
- <a href="/divergence">Divergence</a>
- <a href="/admin">Admin</a>
- </div>
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand"><span class="brand-icon">Q</span>QUANTA</a>
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/paper">Paper Trades</a>
+    <a href="/sectors">Sectors</a>
+    <a href="/rsi">RSI Scanner</a>
+    <a href="/rsi-analysis" class="active">Stock Analysis</a>
+    <a href="/divergence">Divergence</a>
+    <a href="/admin">Admin</a>
+  </div>
+  <div class="q-nav-status">
+    <span class="conn-dot off" id="connDot"></span>
+    <span id="connText">Static Data</span>
+    <span id="updateTime"></span>
+  </div>
 </nav>
 
-<main>
+<main class="page-main">
 
- <!-- SECTION 1: SUMMARY CARDS -->
- <section id="s-summary">
- <h2>Summary &#226;&#128;&#148; TEST Period</h2>
- <div class="cards" id="summary-cards">
- <!-- Populated by JS -->
- </div>
- </section>
+  <!-- SECTION 1: SUMMARY CARDS -->
+  <section id="s-summary">
+    <h2 class="section-header">Summary &mdash; TEST Period</h2>
+    <div class="cards" id="summary-cards">
+      <!-- Populated by JS -->
+    </div>
+  </section>
 
- <!-- SECTION 2: DISTRIBUTION CHARTS -->
- <section id="s-charts">
- <h2>Distribution</h2>
- <div class="charts-row">
- <div class="chart-box">
- <div class="chart-title">Best TF Distribution (TEST)</div>
- <div class="chart-area" id="chart-tf-pie"></div>
- </div>
- <div class="chart-box">
- <div class="chart-title">Bull vs Bear by TF (TEST)</div>
- <div class="chart-area" id="chart-bullbear"></div>
- </div>
- </div>
- </section>
+  <!-- SECTION 2: DISTRIBUTION CHARTS -->
+  <section id="s-charts">
+    <h2 class="section-header">Distribution</h2>
+    <div class="charts-row">
+      <div class="chart-box">
+        <div class="chart-title">Best TF Distribution (TEST)</div>
+        <div class="chart-area" id="chart-tf-pie"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Bull vs Bear by TF (TEST)</div>
+        <div class="chart-area" id="chart-bullbear"></div>
+      </div>
+    </div>
+  </section>
 
- <!-- SECTION 3: TRAIN vs TEST COMPARISON -->
- <section id="s-compare">
- <h2>Train vs Test Comparison</h2>
- <div class="compare-grid" id="compare-grid">
- <!-- Populated by JS -->
- </div>
- </section>
+  <!-- SECTION 3: TRAIN vs TEST COMPARISON -->
+  <section id="s-comparison">
+    <h2 class="section-header">Train vs Test Comparison</h2>
+    <div class="compare-grid" id="compare-grid">
+      <!-- Populated by JS -->
+    </div>
+  </section>
 
- <!-- SECTION 4: MAIN STOCK TABLE -->
- <section id="s-table">
- <h2>Stock Performance Table (TEST)</h2>
- <div class="table-controls">
- <input type="text" class="search-box" id="stock-search" placeholder="Search symbol...">
- <div class="filter-group" id="filter-btns">
- <button class="btn active" data-filter="all">All</button>
- <button class="btn" data-filter="profitable">Profitable Only</button>
- <button class="btn" data-filter="bull">Bull Best</button>
- <button class="btn" data-filter="bear">Bear Best</button>
- </div>
- <div class="filter-group" id="tf-filter-btns">
- <button class="btn active" data-tf="all">All TF</button>
- <button class="btn" data-tf="1m">1m</button>
- <button class="btn" data-tf="3m">3m</button>
- <button class="btn" data-tf="5m">5m</button>
- <button class="btn" data-tf="15m">15m</button>
- <button class="btn" data-tf="30m">30m</button>
- <button class="btn" data-tf="1h">1h</button>
- </div>
- <button class="btn btn-export" id="btn-export">&#226;&#172;&#135; Export CSV</button>
- </div>
- <div class="table-wrap">
- <table id="main-table">
- <thead>
- <tr>
- <th class="rank-cell" data-col="rank">#</th>
- <th data-col="sym">Symbol</th>
- <th data-col="best_tf">Best TF</th>
- <th data-col="best_side">Side</th>
- <th data-col="total_trades">Trades</th>
- <th data-col="total_wr">WR %</th>
- <th data-col="best_pf">Best PF</th>
- <th data-col="total_net_inr">Net INR</th>
- <th data-col="max_dd">Max DD %</th>
- <th data-col="mcl">MCL</th>
- <th data-col="avg_pnl">Avg P&L</th>
- </tr>
- </thead>
- <tbody id="main-tbody">
- </tbody>
- </table>
- </div>
- <div style="color:var(--text-vdim); font-size:11px; margin-top:8px;" id="table-count"></div>
- </section>
+  <!-- SECTION 4: MAIN STOCK TABLE -->
+  <section id="s-table">
+    <h2 class="section-header">Stock Performance Table (TEST)</h2>
+    <div class="table-controls">
+      <input type="text" class="search-box" id="stock-search" placeholder="Search symbol...">
+      <div class="filter-group" id="filter-btns">
+        <button class="btn active" data-filter="all">All</button>
+        <button class="btn" data-filter="profitable">Profitable Only</button>
+        <button class="btn" data-filter="bull">Bull Best</button>
+        <button class="btn" data-filter="bear">Bear Best</button>
+      </div>
+      <div class="filter-group" id="tf-filter-btns">
+        <button class="btn active" data-tf="all">All TF</button>
+        <button class="btn" data-tf="1m">1m</button>
+        <button class="btn" data-tf="3m">3m</button>
+        <button class="btn" data-tf="5m">5m</button>
+        <button class="btn" data-tf="15m">15m</button>
+        <button class="btn" data-tf="30m">30m</button>
+        <button class="btn" data-tf="1h">1h</button>
+      </div>
+      <button class="btn btn-export" id="btn-export">&#x2B07; Export CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table id="main-table">
+        <thead>
+          <tr>
+            <th class="rank-cell" data-col="rank">#</th>
+            <th data-col="sym">Symbol</th>
+            <th data-col="best_tf">Best TF</th>
+            <th data-col="best_side">Side</th>
+            <th data-col="total_trades">Trades</th>
+            <th data-col="total_wr">WR %</th>
+            <th data-col="best_pf">Best PF</th>
+            <th data-col="total_net_inr">Net INR</th>
+            <th data-col="max_dd">Max DD %</th>
+            <th data-col="mcl">MCL</th>
+            <th data-col="avg_pnl">Avg P&amp;L</th>
+          </tr>
+        </thead>
+        <tbody id="main-tbody">
+        </tbody>
+      </table>
+    </div>
+    <div class="table-count-text" id="table-count"></div>
+  </section>
 
- <!-- SECTION 5: RANKINGS TABS -->
- <section id="s-rankings">
- <h2>Rankings</h2>
- <div class="tabs-nav" id="rankings-tabs">
- <button class="tab-btn active" data-tab="by_net_inr">Top 50 by Net INR</button>
- <button class="tab-btn" data-tab="by_pf">Top 50 by Profit Factor</button>
- <button class="tab-btn" data-tab="by_wr">Top 50 by Win Rate</button>
- <button class="tab-btn" data-tab="by_trades">Most Active</button>
- </div>
- <div class="tabs-content">
- <div class="tab-pane active" id="tab-by_net_inr"></div>
- <div class="tab-pane" id="tab-by_pf"></div>
- <div class="tab-pane" id="tab-by_wr"></div>
- <div class="tab-pane" id="tab-by_trades"></div>
- </div>
- </section>
+  <!-- SECTION 5: RANKINGS TABS -->
+  <section id="s-rankings">
+    <h2 class="section-header">Rankings</h2>
+    <div class="tabs-nav" id="rankings-tabs">
+      <button class="tab-btn active" data-tab="by_net_inr">Top 50 by Net INR</button>
+      <button class="tab-btn" data-tab="by_pf">Top 50 by Profit Factor</button>
+      <button class="tab-btn" data-tab="by_wr">Top 50 by Win Rate</button>
+      <button class="tab-btn" data-tab="by_trades">Most Active</button>
+    </div>
+    <div class="tabs-content">
+      <div class="tab-pane active" id="tab-by_net_inr"></div>
+      <div class="tab-pane" id="tab-by_pf"></div>
+      <div class="tab-pane" id="tab-by_wr"></div>
+      <div class="tab-pane" id="tab-by_trades"></div>
+    </div>
+  </section>
 
- <!-- SECTION 6: BEST TF LOOKUP -->
- <section id="s-lookup">
- <h2>Best TF Lookup &#226;&#128;&#148; Train vs Test</h2>
- <div id="lookup-stats-box" class="lookup-stats"></div>
- <br>
- <input type="text" class="lookup-search" id="lookup-search" placeholder="Filter symbol...">
- <div class="lookup-table-wrap">
- <table class="lookup-table" id="lookup-table">
- <thead>
- <tr>
- <th>Symbol</th>
- <th>Best TF (TEST)</th>
- <th>Best TF (TRAIN)</th>
- <th>Agreement</th>
- </tr>
- </thead>
- <tbody id="lookup-tbody"></tbody>
- </table>
- </div>
- </section>
+  <!-- SECTION 6: BEST TF LOOKUP -->
+  <section id="s-lookup">
+    <h2 class="section-header">Best TF Lookup &mdash; Train vs Test</h2>
+    <div id="lookup-stats-box" class="lookup-stats"></div>
+    <br>
+    <input type="text" class="lookup-search" id="lookup-search" placeholder="Filter symbol...">
+    <div class="lookup-table-wrap">
+      <table class="lookup-table" id="lookup-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Best TF (TEST)</th>
+            <th>Best TF (TRAIN)</th>
+            <th>Agreement</th>
+          </tr>
+        </thead>
+        <tbody id="lookup-tbody"></tbody>
+      </table>
+    </div>
+  </section>
 
 </main>
 

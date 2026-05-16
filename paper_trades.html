@@ -3,721 +3,676 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Paper Trading - F&amp;O Live</title>
+<title>Paper Trades &mdash; Quanta Terminal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/theme.css">
 <style>
-:root {
- --bg: #131722;
- --surface: #1E222D;
- --surface-alt: #1a1e2a;
- --surface-hover: #2A2E39;
- --border: #363A45;
- --text: #D1D4DC;
- --text-dim: #787B86;
- --text-vdim: #545862;
- --blue: #2962FF;
- --green: #26A69A;
- --red: #EF5350;
- --gold: #FFD700;
- --orange: #FF9800;
- --purple: #AB47BC;
- --cyan: #00BCD4;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ============================================================
+   Paper Trades - Page-Specific Styles
+   ============================================================ */
+
 body {
- font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
- background: var(--bg);
- color: var(--text);
- font-size: 13px;
- min-height: 100vh;
+  padding-bottom: 60px;
 }
 
-/* &#226;&#148;&#128;&#226;&#148;&#128; Header &#226;&#148;&#128;&#226;&#148;&#128; */
-/* old .header removed */
-
-
-
-
-
-
-.conn-dot.off { background: var(--red); }
-.conn-dot.warn { background: var(--orange); }
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; Summary Cards &#226;&#148;&#128;&#226;&#148;&#128; */
-.summary-bar {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
- gap: 12px;
- padding: 16px 20px;
+.page-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 20px;
 }
-.summary-card {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- padding: 14px 16px;
- text-align: center;
+
+/* --- Summary Bar --- */
+#summaryBar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
 }
-.summary-card .sc-label {
- font-size: 9px;
- font-weight: 700;
- color: var(--text-vdim);
- text-transform: uppercase;
- letter-spacing: 1px;
- margin-bottom: 6px;
+#summaryBar .q-stat-card {
+  text-align: center;
 }
-.summary-card .sc-val {
- font-size: 22px;
- font-weight: 800;
-}
-.summary-card .sc-sub {
- font-size: 10px;
- color: var(--text-dim);
- margin-top: 2px;
+.sc-val {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  line-height: 1.2;
 }
 .sc-val.positive { color: var(--green); }
 .sc-val.negative { color: var(--red); }
-.sc-val.neutral { color: var(--text-dim); }
+.sc-val.neutral  { color: var(--text-dim); }
 
-/* &#226;&#148;&#128;&#226;&#148;&#128; Tabs &#226;&#148;&#128;&#226;&#148;&#128; */
-.tabs {
- display: flex;
- gap: 2px;
- padding: 0 20px;
- border-bottom: 1px solid var(--border);
-}
-.tab-btn {
- background: none;
- border: none;
- padding: 10px 20px;
- font-size: 12px;
- font-weight: 600;
- color: var(--text-dim);
- cursor: pointer;
- border-bottom: 2px solid transparent;
- transition: all 0.2s;
-}
-.tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
-.tab-count {
- font-size: 10px;
- font-weight: 700;
- background: rgba(255,255,255,0.06);
- padding: 1px 6px;
- border-radius: 10px;
- margin-left: 6px;
-}
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; Trade Cards &#226;&#148;&#128;&#226;&#148;&#128; */
-.trades-container {
- padding: 16px 20px;
-}
-.trades-empty {
- text-align: center;
- padding: 60px 20px;
- color: var(--text-vdim);
-}
-.trades-empty .te-icon { font-size: 40px; margin-bottom: 12px; }
-.trades-empty .te-text { font-size: 14px; margin-bottom: 4px; }
-.trades-empty .te-sub { font-size: 12px; }
-
-.trade-card {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- margin-bottom: 12px;
- overflow: hidden;
- transition: all 0.2s;
-}
-.trade-card:hover { border-color: rgba(255,255,255,0.1); }
-.trade-card.tc-profit { border-left: 4px solid var(--green); }
-.trade-card.tc-loss { border-left: 4px solid var(--red); }
-.trade-card.tc-flat { border-left: 4px solid var(--text-vdim); }
-
-.tc-header {
- display: flex;
- align-items: center;
- gap: 10px;
- padding: 12px 16px;
- border-bottom: 1px solid rgba(54,58,69,0.4);
-}
-.tc-sym {
- font-size: 15px;
- font-weight: 800;
-}
-.tc-badge {
- font-size: 9px;
- font-weight: 700;
- padding: 2px 7px;
- border-radius: 4px;
-}
-.tc-badge.badge-CE { background: rgba(38,166,154,0.2); color: #4DD0C0; }
-.tc-badge.badge-PE { background: rgba(239,83,80,0.2); color: #FF8A80; }
-.tc-badge.badge-open { background: rgba(41,98,255,0.2); color: #5B8DEF; }
-.tc-badge.badge-closed { background: rgba(158,158,158,0.15); color: var(--text-dim); }
-.tc-id {
- font-size: 10px;
- color: var(--text-vdim);
- font-family: monospace;
-}
-.tc-pnl {
- margin-left: auto;
- text-align: right;
-}
-.tc-pnl-val {
- font-size: 18px;
- font-weight: 800;
-}
-.tc-pnl-pct {
- font-size: 10px;
- margin-top: 1px;
-}
-
-.tc-body {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
- gap: 1px;
- background: rgba(54,58,69,0.3);
-}
-.tc-cell {
- background: var(--surface);
- padding: 8px 12px;
- text-align: center;
-}
-.tc-cell .tcc-label {
- font-size: 9px;
- color: var(--text-vdim);
- text-transform: uppercase;
- letter-spacing: 0.5px;
- margin-bottom: 2px;
-}
-.tc-cell .tcc-val {
- font-size: 13px;
- font-weight: 600;
-}
-
-.tc-footer {
- display: flex;
- align-items: center;
- gap: 8px;
- padding: 8px 16px;
- border-top: 1px solid rgba(54,58,69,0.4);
-}
-.tc-time {
- font-size: 10px;
- color: var(--text-vdim);
-}
-.tc-alerts {
- display: flex;
- gap: 6px;
- flex: 1;
-}
-.tc-alert {
- font-size: 9px;
- font-weight: 700;
- padding: 2px 6px;
- border-radius: 3px;
-}
-.tc-alert.alert-sl { background: rgba(239,83,80,0.15); color: var(--red); }
-.tc-alert.alert-t1 { background: rgba(38,166,154,0.15); color: var(--green); }
-.tc-alert.alert-t2 { background: rgba(255,215,0,0.15); color: var(--gold); }
-
-.tc-actions {
- margin-left: auto;
- display: flex;
- gap: 6px;
-}
-.tc-btn {
- font-size: 11px;
- font-weight: 600;
- padding: 5px 12px;
- border-radius: 6px;
- border: 1px solid var(--border);
- background: none;
- cursor: pointer;
- transition: all 0.2s;
-}
-.tc-btn.btn-exit { color: var(--red); border-color: rgba(239,83,80,0.3); }
-.tc-btn.btn-exit:hover { background: rgba(239,83,80,0.1); border-color: var(--red); }
-.tc-btn.btn-t1 { color: var(--green); border-color: rgba(38,166,154,0.3); }
-.tc-btn.btn-t1:hover { background: rgba(38,166,154,0.1); border-color: var(--green); }
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; Progress bar (SL to T2) &#226;&#148;&#128;&#226;&#148;&#128; */
-.tc-progress {
- height: 4px;
- background: rgba(255,255,255,0.03);
- position: relative;
-}
-.tc-progress-fill {
- height: 100%;
- border-radius: 2px;
- transition: width 0.3s;
-}
-.tc-progress-markers {
- display: flex;
- justify-content: space-between;
- padding: 2px 16px;
- font-size: 8px;
- color: var(--text-vdim);
-}
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; Auto-Trade Badge &#226;&#148;&#128;&#226;&#148;&#128; */
-.auto-badge {
- display: inline-flex;
- align-items: center;
- gap: 4px;
- background: rgba(124,77,255,0.15);
- color: #b388ff;
- font-size: 10px;
- font-weight: 700;
- padding: 2px 8px;
- border-radius: 4px;
- letter-spacing: 0.5px;
- text-transform: uppercase;
-}
-.manual-badge {
- display: inline-flex;
- align-items: center;
- gap: 4px;
- background: rgba(255,255,255,0.06);
- color: var(--text-dim);
- font-size: 10px;
- font-weight: 600;
- padding: 2px 8px;
- border-radius: 4px;
- letter-spacing: 0.3px;
-}
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; Reason Block &#226;&#148;&#128;&#226;&#148;&#128; */
-.tc-reason {
- margin-top: 8px;
- padding: 8px 10px;
- background: rgba(124,77,255,0.06);
- border: 1px solid rgba(124,77,255,0.15);
- border-radius: 6px;
- font-size: 11px;
- line-height: 1.6;
- color: var(--text-dim);
- white-space: pre-line;
- cursor: pointer;
- position: relative;
-}
-.tc-reason-label {
- font-size: 9px;
- font-weight: 700;
- color: #b388ff;
- text-transform: uppercase;
- letter-spacing: 0.5px;
- margin-bottom: 4px;
-}
-.tc-reason.collapsed {
- max-height: 42px;
- overflow: hidden;
-}
-.tc-reason.collapsed::after {
- content: "&#226;&#150;&#188; Click to expand";
- position: absolute;
- bottom: 0;
- left: 0;
- right: 0;
- text-align: center;
- font-size: 9px;
- padding: 4px;
- background: linear-gradient(transparent, var(--surface) 60%);
- color: var(--text-vdim);
-}
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; Signal Tags &#226;&#148;&#128;&#226;&#148;&#128; */
-.tc-signals {
- display: flex;
- flex-wrap: wrap;
- gap: 4px;
- margin-top: 6px;
-}
-.tc-sig-tag {
- font-size: 9.5px;
- font-weight: 600;
- padding: 1px 6px;
- border-radius: 4px;
- letter-spacing: 0.2px;
-}
-.sig-bull { background: rgba(38,166,154,0.15); color: var(--green); }
-.sig-bear { background: rgba(239,83,80,0.15); color: var(--red); }
-.sig-oi { background: rgba(0,188,212,0.15); color: var(--cyan); }
-.sig-vol { background: rgba(255,152,0,0.15); color: var(--orange); }
-.sig-wl { background: rgba(255,215,0,0.15); color: var(--gold); }
-.sig-prem { background: rgba(171,71,188,0.15); color: var(--purple); }
-.sig-score { background: rgba(41,98,255,0.15); color: var(--blue); }
-.sig-wf { background: rgba(255,215,0,0.2); color: var(--gold); font-weight: 700; }
-.sig-side-match { background: rgba(38,166,154,0.2); color: var(--green); }
-.sig-side-contra { background: rgba(239,83,80,0.15); color: var(--red); }
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; WF Tier Badge &#226;&#148;&#128;&#226;&#148;&#128; */
-.wf-badge {
- display: inline-flex;
- align-items: center;
- gap: 3px;
- font-size: 9px;
- font-weight: 700;
- padding: 2px 7px;
- border-radius: 4px;
- letter-spacing: 0.3px;
-}
-.wf-t1 { background: rgba(255,215,0,0.2); color: var(--gold); }
-.wf-t2 { background: rgba(0,188,212,0.15); color: var(--cyan); }
-.wf-t3 { background: rgba(255,255,255,0.06); color: var(--text-dim); }
-.wf-side-tag {
- font-size: 9px;
- font-weight: 600;
- padding: 1px 5px;
- border-radius: 3px;
- margin-left: 2px;
-}
-.wf-side-match { background: rgba(38,166,154,0.15); color: var(--green); }
-.wf-side-contra { background: rgba(239,83,80,0.1); color: var(--red); }
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; SL Method Tag &#226;&#148;&#128;&#226;&#148;&#128; */
-.sl-method-tag {
- font-size: 9px;
- color: var(--text-vdim);
- margin-left: 4px;
-}
-
-/* &#226;&#148;&#128;&#226;&#148;&#128; Scanner Panel &#226;&#148;&#128;&#226;&#148;&#128; */
+/* --- Scanner Panel --- */
 .scanner-panel {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 10px;
- margin: 0 20px 12px;
- padding: 14px 16px;
+  margin-bottom: 16px;
 }
 .scanner-header {
- display: flex;
- align-items: center;
- gap: 10px;
- margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 .scanner-header h3 {
- font-size: 13px;
- font-weight: 700;
- flex: 1;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  flex: 1;
 }
 .scanner-status {
- font-size: 11px;
- padding: 3px 10px;
- border-radius: 12px;
- font-weight: 600;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  padding: 3px 10px;
+  border-radius: 12px;
 }
-.scanner-status.active { background: rgba(38,166,154,0.15); color: var(--green); }
-.scanner-status.idle { background: rgba(255,255,255,0.06); color: var(--text-dim); }
-.scanner-status.off { background: rgba(239,83,80,0.1); color: var(--red); }
-.scanner-toggle {
- background: none;
- border: 1px solid var(--border);
- color: var(--text-dim);
- padding: 4px 12px;
- border-radius: 6px;
- font-size: 11px;
- font-weight: 600;
- cursor: pointer;
- transition: all 0.2s;
- font-family: inherit;
-}
-.scanner-toggle:hover { border-color: var(--blue); color: var(--blue); }
-.scanner-info {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
- gap: 8px;
- font-size: 11px;
- color: var(--text-dim);
-}
-.scanner-info .si-label { color: var(--text-vdim); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-.scanner-info .si-val { color: var(--text); font-weight: 600; margin-top: 2px; }
-.scanner-regime {
- display: inline-flex;
- align-items: center;
- gap: 4px;
- font-weight: 700;
-}
-.regime-bull { color: var(--green); }
-.regime-bear { color: var(--red); }
-.regime-neutral { color: var(--text-dim); }
+.scanner-status.active  { background: var(--green-soft); color: var(--green); }
+.scanner-status.idle    { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+.scanner-status.off     { background: var(--red-soft); color: var(--red); }
+
 .scanner-scan-btn {
- background: var(--blue);
- color: #fff;
- border: none;
- padding: 5px 14px;
- border-radius: 6px;
- font-size: 11px;
- font-weight: 600;
- cursor: pointer;
- transition: opacity 0.2s;
- font-family: inherit;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  padding: 5px 14px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-family: inherit;
 }
 .scanner-scan-btn:hover { opacity: 0.85; }
 .scanner-scan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* &#226;&#148;&#128;&#226;&#148;&#128; Toast &#226;&#148;&#128;&#226;&#148;&#128; */
-.toast {
- position: fixed;
- top: 60px;
- right: 16px;
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 8px;
- padding: 10px 16px;
- font-size: 12px;
- color: var(--text);
- z-index: 200;
- opacity: 0;
- transform: translateY(-10px);
- transition: opacity 0.3s, transform 0.3s;
- pointer-events: none;
- max-width: 400px;
+.scanner-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
 }
-.toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.toast.error { border-color: var(--red); }
-.toast.success { border-color: var(--green); }
+.scanner-toggle:hover { border-color: var(--blue); color: var(--blue); }
 
-/* &#226;&#148;&#128;&#226;&#148;&#128; Confirm Modal &#226;&#148;&#128;&#226;&#148;&#128; */
+.scanner-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+.scanner-info > div {
+  padding: 8px 10px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+}
+.scanner-info .si-label {
+  font-size: 10px;
+  color: var(--text-vdim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.scanner-info .si-val {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  margin-top: 2px;
+}
+.scanner-regime {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--fw-bold);
+}
+.regime-bull    { color: var(--green); }
+.regime-bear    { color: var(--red); }
+.regime-neutral { color: var(--text-dim); }
+
+/* --- Tabs --- */
+.tabs-wrap {
+  margin-bottom: 16px;
+}
+.tab-btn {
+  padding: 8px 18px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--blue-soft);
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  margin-left: 6px;
+  color: var(--blue);
+}
+
+/* --- Trade Cards Container --- */
+.trades-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.trades-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-vdim);
+}
+.trades-empty .te-icon { font-size: 40px; margin-bottom: 12px; }
+.trades-empty .te-text { font-size: var(--fs-md); margin-bottom: 4px; color: var(--text-dim); }
+.trades-empty .te-sub  { font-size: var(--fs-sm); line-height: 1.8; }
+
+/* --- Trade Card --- */
+.trade-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.trade-card:hover {
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: var(--shadow-sm);
+}
+.trade-card.tc-profit { border-left: 4px solid var(--green); }
+.trade-card.tc-loss   { border-left: 4px solid var(--red); }
+.trade-card.tc-flat   { border-left: 4px solid var(--text-vdim); }
+
+/* Trade Card Header */
+.tc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(42,46,57,0.5);
+  flex-wrap: wrap;
+}
+.tc-sym {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-bright);
+}
+.tc-badge {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.tc-badge.badge-CE     { background: var(--green-soft); color: var(--green-text); }
+.tc-badge.badge-PE     { background: var(--red-soft); color: var(--red-text); }
+.tc-badge.badge-open   { background: var(--blue-soft); color: var(--blue); }
+.tc-badge.badge-closed { background: rgba(120,123,134,0.1); color: var(--text-dim); }
+.tc-id {
+  font-size: 10px;
+  color: var(--text-vdim);
+  font-family: var(--font-mono);
+}
+.tc-pnl {
+  margin-left: auto;
+  text-align: right;
+  flex-shrink: 0;
+}
+.tc-pnl-val {
+  font-size: 18px;
+  font-weight: 800;
+}
+.tc-pnl-val.positive { color: var(--green); }
+.tc-pnl-val.negative { color: var(--red); }
+.tc-pnl-val.neutral  { color: var(--text-dim); }
+.tc-pnl-pct {
+  font-size: 10px;
+  margin-top: 1px;
+}
+.tc-pnl-pct.positive { color: var(--green); }
+.tc-pnl-pct.negative { color: var(--red); }
+.tc-pnl-pct.neutral  { color: var(--text-dim); }
+
+/* Trade Card Body Grid */
+.tc-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 1px;
+  background: rgba(42,46,57,0.3);
+}
+.tc-cell {
+  background: var(--surface);
+  padding: 10px 12px;
+  text-align: center;
+}
+.tc-cell .tcc-label {
+  font-size: 9px;
+  color: var(--text-vdim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+.tc-cell .tcc-val {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+}
+
+/* Trade Card Footer */
+.tc-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(42,46,57,0.5);
+}
+.tc-time {
+  font-size: 10px;
+  color: var(--text-vdim);
+}
+.tc-alerts {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+.tc-alert {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.tc-alert.alert-sl { background: var(--red-soft); color: var(--red); }
+.tc-alert.alert-t1 { background: var(--green-soft); color: var(--green); }
+.tc-alert.alert-t2 { background: var(--gold-soft); color: var(--gold); }
+.tc-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+.tc-btn {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.tc-btn.btn-exit { color: var(--red); border-color: rgba(239,83,80,0.3); }
+.tc-btn.btn-exit:hover { background: var(--red-soft); border-color: var(--red); }
+.tc-btn.btn-t1 { color: var(--green); border-color: rgba(38,166,154,0.3); }
+.tc-btn.btn-t1:hover { background: var(--green-soft); border-color: var(--green); }
+
+/* --- Progress Bar (SL to T2) --- */
+.tc-progress {
+  height: 4px;
+  background: rgba(255,255,255,0.03);
+  position: relative;
+}
+.tc-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.tc-progress-markers {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 16px;
+  font-size: 8px;
+  color: var(--text-vdim);
+  font-family: var(--font-mono);
+}
+
+/* --- Auto/Manual Badge --- */
+.auto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--purple-soft);
+  color: #b388ff;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.manual-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.3px;
+}
+
+/* --- Signal Tags --- */
+.tc-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 16px;
+}
+.tc-sig-tag {
+  font-size: 9.5px;
+  font-weight: var(--fw-semibold);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.2px;
+}
+.sig-bull       { background: var(--green-soft); color: var(--green); }
+.sig-bear       { background: var(--red-soft); color: var(--red); }
+.sig-oi         { background: var(--cyan-soft); color: var(--cyan); }
+.sig-vol        { background: var(--orange-soft); color: var(--orange); }
+.sig-wl         { background: var(--gold-soft); color: var(--gold); }
+.sig-prem       { background: var(--purple-soft); color: var(--purple); }
+.sig-score      { background: var(--blue-soft); color: var(--blue); }
+.sig-wf         { background: rgba(255,215,0,0.2); color: var(--gold); font-weight: var(--fw-bold); }
+.sig-side-match { background: rgba(38,166,154,0.2); color: var(--green); }
+.sig-side-contra{ background: var(--red-soft); color: var(--red); }
+
+/* --- Reason Block (Expandable) --- */
+.tc-reason {
+  margin: 8px 16px;
+  padding: 8px 10px;
+  background: rgba(124,77,255,0.06);
+  border: 1px solid rgba(124,77,255,0.15);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--text-dim);
+  white-space: pre-line;
+  cursor: pointer;
+  position: relative;
+}
+.tc-reason-label {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  color: #b388ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.tc-reason.collapsed {
+  max-height: 42px;
+  overflow: hidden;
+}
+.tc-reason.collapsed::after {
+  content: "&#9660; Click to expand";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9px;
+  padding: 4px;
+  background: linear-gradient(transparent, var(--surface) 60%);
+  color: var(--text-vdim);
+}
+
+/* --- WF Tier Badge --- */
+.wf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.3px;
+}
+.wf-t1 { background: rgba(255,215,0,0.2); color: var(--gold); }
+.wf-t2 { background: var(--cyan-soft); color: var(--cyan); }
+.wf-t3 { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+.wf-side-tag {
+  font-size: 9px;
+  font-weight: var(--fw-semibold);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 2px;
+}
+.wf-side-match  { background: var(--green-soft); color: var(--green); }
+.wf-side-contra { background: rgba(239,83,80,0.1); color: var(--red); }
+
+/* --- SL Method Tag --- */
+.sl-method-tag {
+  font-size: 9px;
+  color: var(--text-vdim);
+  margin-left: 4px;
+}
+
+/* --- Toast (JS sets className to 'toast show') --- */
+.toast {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+}
+.toast.show    { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.success { border-left: 3px solid var(--green); }
+
+/* --- Exit Modal --- */
 .modal-overlay {
- position: fixed;
- inset: 0;
- background: rgba(0,0,0,0.6);
- z-index: 400;
- display: none;
- align-items: center;
- justify-content: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 .modal-overlay.open { display: flex; }
 .modal {
- background: var(--surface);
- border: 1px solid var(--border);
- border-radius: 12px;
- padding: 24px;
- min-width: 340px;
- max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  min-width: 340px;
+  max-width: 460px;
+  box-shadow: var(--shadow-lg);
 }
 .modal h3 {
- font-size: 16px;
- font-weight: 700;
- margin-bottom: 16px;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  margin-bottom: 16px;
 }
 .modal .modal-body {
- font-size: 13px;
- color: var(--text-dim);
- line-height: 1.6;
- margin-bottom: 20px;
+  font-size: var(--fs-base);
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 .modal .modal-body strong { color: var(--text); }
+.modal .modal-body strong.positive { color: var(--green); }
+.modal .modal-body strong.negative { color: var(--red); }
 .modal .modal-btns {
- display: flex;
- gap: 8px;
- justify-content: flex-end;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 .modal .modal-btn {
- padding: 8px 18px;
- border-radius: 8px;
- font-size: 12px;
- font-weight: 600;
- border: 1px solid var(--border);
- background: none;
- color: var(--text-dim);
- cursor: pointer;
- transition: all 0.2s;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
 }
 .modal .modal-btn:hover { border-color: var(--text-dim); color: var(--text); }
 .modal .modal-btn.btn-confirm {
- background: var(--red);
- border-color: var(--red);
- color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
 }
 .modal .modal-btn.btn-confirm:hover { opacity: 0.9; }
 
-/* &#9472;&#9472; Unified Site Navigation &#9472;&#9472; */
-.site-nav {
- background: var(--surface);
- border-bottom: 1px solid var(--border);
- padding: 0 24px;
- display: flex;
- align-items: center;
- gap: 0;
- height: 52px;
- position: sticky;
- top: 0;
- z-index: 100;
-}
-.site-nav .nav-logo {
- font-size: 15px;
- font-weight: 800;
- color: var(--text);
- text-decoration: none;
- padding-right: 24px;
- border-right: 1px solid var(--border);
- margin-right: 16px;
- white-space: nowrap;
- display: flex;
- align-items: center;
- gap: 8px;
- letter-spacing: 0.5px;
-}
-.site-nav .nav-links { display: flex; gap: 2px; flex: 1; }
-.site-nav .nav-links a {
- color: var(--text-dim);
- text-decoration: none;
- font-size: 13px;
- font-weight: 500;
- padding: 6px 14px;
- border-radius: 6px;
- transition: all 0.15s;
- white-space: nowrap;
-}
-.site-nav .nav-links a:hover { color: var(--text); background: var(--surface-hover); }
-.site-nav .nav-links a.active { color: var(--blue); background: rgba(41,98,255,0.12); }
-.site-nav .nav-status {
- display: flex;
- align-items: center;
- gap: 10px;
- font-size: 11px;
- color: var(--text-dim);
- margin-left: auto;
- white-space: nowrap;
-}
-.site-nav .nav-status .conn-dot {
- width: 8px; height: 8px;
- border-radius: 50%;
- background: #EF5350;
- display: inline-block;
- flex-shrink: 0;
-}
-.site-nav .nav-status .conn-dot.on { background: #26A69A; }
-.site-nav .pulse-dot {
- width: 8px; height: 8px;
- border-radius: 50%;
- background: #26A69A;
- display: inline-block;
- animation: pulse-glow 2s infinite;
- flex-shrink: 0;
-}
-@keyframes pulse-glow {
- 0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
- 50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
-}
+/* --- Connection dot overrides (JS sets 'conn-dot warn') --- */
+.conn-dot.warn { background: var(--orange); }
 
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  #summaryBar { grid-template-columns: repeat(3, 1fr); }
+  .scanner-info { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .page-wrap { padding: 12px 10px; }
+  #summaryBar { grid-template-columns: repeat(2, 1fr); }
+  .tc-header { gap: 6px; }
+  .tc-body { grid-template-columns: repeat(2, 1fr); }
+  .scanner-header { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+<!-- Toast Notification -->
+<div class="q-toast" id="toast"></div>
 
 <!-- Exit Confirm Modal -->
 <div class="modal-overlay" id="exitModal">
- <div class="modal">
- <h3>Exit Paper Trade</h3>
- <div class="modal-body" id="exitModalBody"></div>
- <div class="modal-btns">
- <button class="modal-btn" onclick="closeExitModal()">Cancel</button>
- <button class="modal-btn btn-confirm" id="exitConfirmBtn" onclick="confirmExit()">Exit Trade</button>
- </div>
- </div>
+  <div class="modal">
+    <h3>Exit Paper Trade</h3>
+    <div class="modal-body" id="exitModalBody"></div>
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="closeExitModal()">Cancel</button>
+      <button class="modal-btn btn-confirm" id="exitConfirmBtn" onclick="confirmExit()">Exit Trade</button>
+    </div>
+  </div>
 </div>
 
-<!-- Navigation Bar -->
-<nav class="site-nav">
- <a class="nav-logo" href="/">
- <span class="pulse-dot" id="pulseDot"></span>
- F&amp;O LIVE
- </a>
- <div class="nav-links">
- <a href="/">Dashboard</a>
- <a href="/paper" class="active">Paper Trades</a>
- <a href="/sectors">Sectors</a>
- <a href="/rsi">RSI Scanner</a>
- <a href="/rsi-analysis">Stock Analysis</a>
- <a href="/divergence">Divergence</a>
- <a href="/admin">Admin</a>
- </div>
- <div class="nav-status">
- <span class="conn-dot" id="connDot"></span>
- <span id="connText">Connecting...</span>
- <span id="updateTime">--:--:--</span>
- </div>
+<!-- Navigation -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand"><span class="brand-icon">Q</span>QUANTA</a>
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/paper" class="active">Paper Trades</a>
+    <a href="/sectors">Sectors</a>
+    <a href="/rsi">RSI Scanner</a>
+    <a href="/rsi-analysis">Stock Analysis</a>
+    <a href="/divergence">Divergence</a>
+    <a href="/admin">Admin</a>
+  </div>
+  <div class="q-nav-status">
+    <span class="pulse-dot" id="pulseDot"></span>
+    <span class="conn-dot off" id="connDot"></span>
+    <span id="connText">Connecting</span>
+    <span id="updateTime"></span>
+  </div>
 </nav>
 
+<!-- Page Content -->
+<div class="page-wrap">
 
-<!-- Summary -->
-<div class="summary-bar" id="summaryBar">
- <div class="summary-card">
- <div class="sc-label">Total P&amp;L</div>
- <div class="sc-val neutral" id="totalPnl">&#226;&#130;&#185;0</div>
- <div class="sc-sub" id="totalPnlSub">No trades yet</div>
- </div>
- <div class="summary-card">
- <div class="sc-label">Open P&amp;L</div>
- <div class="sc-val neutral" id="openPnl">&#226;&#130;&#185;0</div>
- <div class="sc-sub" id="openPnlSub">0 open positions</div>
- </div>
- <div class="summary-card">
- <div class="sc-label">Closed P&amp;L</div>
- <div class="sc-val neutral" id="closedPnl">&#226;&#130;&#185;0</div>
- <div class="sc-sub" id="closedPnlSub">0 closed trades</div>
- </div>
- <div class="summary-card">
- <div class="sc-label">Win Rate</div>
- <div class="sc-val neutral" id="winRate">&#226;&#128;&#147;</div>
- <div class="sc-sub" id="winRateSub">W: 0 &#194;&middot; L: 0</div>
- </div>
- <div class="summary-card">
- <div class="sc-label">Open Positions</div>
- <div class="sc-val neutral" id="openCount">0</div>
- <div class="sc-sub" id="openCountSub">Max 2 per day</div>
- </div>
-</div>
+  <!-- Summary Stats -->
+  <div id="summaryBar">
+    <div class="q-stat-card">
+      <div class="q-stat-label">Total P&amp;L</div>
+      <div class="sc-val neutral" id="totalPnl">&#8377;0</div>
+      <div class="q-stat-sub" id="totalPnlSub">No trades yet</div>
+    </div>
+    <div class="q-stat-card">
+      <div class="q-stat-label">Open P&amp;L</div>
+      <div class="sc-val neutral" id="openPnl">&#8377;0</div>
+      <div class="q-stat-sub" id="openPnlSub">0 open positions</div>
+    </div>
+    <div class="q-stat-card">
+      <div class="q-stat-label">Closed P&amp;L</div>
+      <div class="sc-val neutral" id="closedPnl">&#8377;0</div>
+      <div class="q-stat-sub" id="closedPnlSub">0 closed trades</div>
+    </div>
+    <div class="q-stat-card">
+      <div class="q-stat-label">Win Rate</div>
+      <div class="sc-val neutral" id="winRate">&mdash;</div>
+      <div class="q-stat-sub" id="winRateSub">W: 0 &middot; L: 0</div>
+    </div>
+    <div class="q-stat-card">
+      <div class="q-stat-label">Open Positions</div>
+      <div class="sc-val neutral" id="openCount">0</div>
+      <div class="q-stat-sub" id="openCountSub">Max 2 per day</div>
+    </div>
+  </div>
 
-<!-- Auto-Scanner Panel -->
-<div class="scanner-panel" id="scannerPanel">
- <div class="scanner-header">
- <h3>&#240;&#159;&#164;&#150; Auto-Trade Scanner</h3>
- <span class="scanner-status idle" id="scannerStatus">Loading...</span>
- <button class="scanner-scan-btn" id="scanNowBtn" onclick="triggerScan()" disabled>Scan Now</button>
- <button class="scanner-toggle" id="scannerToggle" onclick="toggleAutoTrade()">Disable</button>
- </div>
- <div class="scanner-info" id="scannerInfo">
- <div><div class="si-label">Regime</div><div class="si-val" id="siRegime">&#226;&#128;&#148;</div></div>
- <div><div class="si-label">Breadth</div><div class="si-val" id="siBreadth">&#226;&#128;&#148;</div></div>
- <div><div class="si-label">Scans</div><div class="si-val" id="siScans">0</div></div>
- <div><div class="si-label">Today Trades</div><div class="si-val" id="siTrades">0 / 2</div></div>
- <div><div class="si-label">Candidates</div><div class="si-val" id="siCandidates">&#226;&#128;&#148;</div></div>
- <div><div class="si-label">Last Skip</div><div class="si-val" id="siSkip" style="font-size:10px">&#226;&#128;&#148;</div></div>
- <div><div class="si-label">WF Universe</div><div class="si-val" id="siWfUniverse">&#226;&#128;&#148;</div></div>
- <div><div class="si-label">Risk Model</div><div class="si-val" id="siRiskModel">&#226;&#128;&#148;</div></div>
- </div>
-</div>
+  <!-- Auto-Trade Scanner Panel -->
+  <div class="q-card scanner-panel" id="scannerPanel">
+    <div class="scanner-header">
+      <h3>Auto-Trade Scanner</h3>
+      <span class="scanner-status idle" id="scannerStatus">Loading...</span>
+      <button class="scanner-scan-btn" id="scanNowBtn" onclick="triggerScan()" disabled>Scan Now</button>
+      <button class="scanner-toggle" id="scannerToggle" onclick="toggleAutoTrade()">Disable</button>
+    </div>
+    <div class="scanner-info" id="scannerInfo">
+      <div><div class="si-label">Regime</div><div class="si-val" id="siRegime">&mdash;</div></div>
+      <div><div class="si-label">Breadth</div><div class="si-val" id="siBreadth">&mdash;</div></div>
+      <div><div class="si-label">Scans</div><div class="si-val" id="siScans">0</div></div>
+      <div><div class="si-label">Today Trades</div><div class="si-val" id="siTrades">0 / 2</div></div>
+      <div><div class="si-label">Candidates</div><div class="si-val" id="siCandidates">&mdash;</div></div>
+      <div><div class="si-label">Last Skip</div><div class="si-val" id="siSkip" style="font-size:10px">&mdash;</div></div>
+      <div><div class="si-label">WF Universe</div><div class="si-val" id="siWfUniverse">&mdash;</div></div>
+      <div><div class="si-label">Risk Model</div><div class="si-val" id="siRiskModel">&mdash;</div></div>
+    </div>
+  </div>
 
-<!-- Tabs -->
-<div class="tabs">
- <button class="tab-btn active" id="tabOpen" onclick="switchTab('open')">
- Open Trades<span class="tab-count" id="tabOpenCount">0</span>
- </button>
- <button class="tab-btn" id="tabClosed" onclick="switchTab('closed')">
- Closed Trades<span class="tab-count" id="tabClosedCount">0</span>
- </button>
- <button class="tab-btn" id="tabAll" onclick="switchTab('all')">
- All Trades<span class="tab-count" id="tabAllCount">0</span>
- </button>
-</div>
+  <!-- Tabs -->
+  <div class="q-tabs tabs-wrap">
+    <button class="tab-btn active" id="tabOpen" onclick="switchTab('open')">
+      Open Trades<span class="tab-count" id="tabOpenCount">0</span>
+    </button>
+    <button class="tab-btn" id="tabClosed" onclick="switchTab('closed')">
+      Closed Trades<span class="tab-count" id="tabClosedCount">0</span>
+    </button>
+    <button class="tab-btn" id="tabAll" onclick="switchTab('all')">
+      All Trades<span class="tab-count" id="tabAllCount">0</span>
+    </button>
+  </div>
 
-<!-- Trade Cards -->
-<div class="trades-container" id="tradesContainer">
- <div class="trades-empty">
- <div class="te-icon">&#240;&#159;&#147;&#139;</div>
- <div class="te-text">No paper trades yet</div>
- <div class="te-sub">Auto-trader scans every 5 min (9:30-14:50 IST) using walk-forward validated signals:<br>
- NIFTY regime &#226;&#134;&#146; Sector alignment &#226;&#134;&#146; WF-ranked stocks (41 universe, 3 tiers) &#226;&#134;&#146; ITM option<br>
- SL: 0.5% spot | Target: 5x SL | Max 2 trades/day<br>
- Or go to the <a href="/" style="color:var(--blue)">Dashboard</a>and click a Trade Ready stock for manual entry</div>
- </div>
+  <!-- Trade Cards -->
+  <div class="trades-container" id="tradesContainer">
+    <div class="trades-empty">
+      <div class="te-icon">&#128203;</div>
+      <div class="te-text">No paper trades yet</div>
+      <div class="te-sub">Auto-trader scans every 5 min (9:30&ndash;14:50 IST) using walk-forward validated signals:<br>
+      NIFTY regime &#8594; Sector alignment &#8594; WF-ranked stocks (41 universe, 3 tiers) &#8594; ITM option<br>
+      SL: 0.5% spot | Target: 5x SL | Max 2 trades/day<br>
+      Or go to the <a href="/" style="color:var(--blue)">Dashboard</a> and click a Trade Ready stock for manual entry</div>
+    </div>
+  </div>
+
 </div>
 
 <script>

@@ -3,401 +3,312 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSI Scanner - F&amp;O Live</title>
+<title>RSI Scanner &mdash; Quanta Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/theme.css">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
- --bg: #0a0e17;
- --surface: #111827;
- --surface-hover: #1a2235;
- --border: #1e293b;
- --text: #e2e8f0;
- --text-dim: #64748b;
- --blue: #2962ff;
- --green: #26A69A;
- --red: #EF5350;
- --yellow: #FFB74D;
- --purple: #AB47BC;
-}
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-a { color: inherit; }
-
-/* &#9472;&#9472; Unified Site Navigation &#9472;&#9472; */
-.site-nav {
- background: var(--surface);
- border-bottom: 1px solid var(--border);
- padding: 0 24px;
- display: flex;
- align-items: center;
- gap: 0;
- height: 52px;
- position: sticky;
- top: 0;
- z-index: 100;
-}
-.site-nav .nav-logo {
- font-size: 15px;
- font-weight: 800;
- color: var(--text);
- text-decoration: none;
- padding-right: 24px;
- border-right: 1px solid var(--border);
- margin-right: 16px;
- white-space: nowrap;
- display: flex;
- align-items: center;
- gap: 8px;
- letter-spacing: 0.5px;
-}
-.site-nav .nav-links { display: flex; gap: 2px; flex: 1; }
-.site-nav .nav-links a {
- color: var(--text-dim);
- text-decoration: none;
- font-size: 13px;
- font-weight: 500;
- padding: 6px 14px;
- border-radius: 6px;
- transition: all 0.15s;
- white-space: nowrap;
-}
-.site-nav .nav-links a:hover { color: var(--text); background: var(--surface-hover); }
-.site-nav .nav-links a.active { color: var(--blue); background: rgba(41,98,255,0.12); }
-.site-nav .nav-status {
- display: flex;
- align-items: center;
- gap: 10px;
- font-size: 11px;
- color: var(--text-dim);
- margin-left: auto;
- white-space: nowrap;
-}
-.site-nav .nav-status .conn-dot {
- width: 8px; height: 8px;
- border-radius: 50%;
- background: #EF5350;
- display: inline-block;
- flex-shrink: 0;
-}
-.site-nav .nav-status .conn-dot.on { background: #26A69A; }
-.site-nav .pulse-dot {
- width: 8px; height: 8px;
- border-radius: 50%;
- background: #26A69A;
- display: inline-block;
- animation: pulse-glow 2s infinite;
- flex-shrink: 0;
-}
-@keyframes pulse-glow {
- 0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
- 50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
-}
-
-/* &#9472;&#9472; Controls Bar &#9472;&#9472; */
+/* === Controls Bar === */
 .controls {
- display: flex;
- align-items: center;
- gap: 10px;
- padding: 12px 24px;
- border-bottom: 1px solid var(--border);
- background: var(--surface);
- flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-wrap: wrap;
 }
-.controls .search-box {
- background: var(--bg);
- border: 1px solid var(--border);
- color: var(--text);
- padding: 6px 12px;
- border-radius: 6px;
- font-size: 13px;
- width: 200px;
- outline: none;
-}
-.controls .search-box:focus { border-color: var(--blue); }
 .controls .filter-group {
- display: flex;
- gap: 4px;
+  display: flex;
+  gap: 4px;
 }
 .filter-btn {
- background: var(--bg);
- border: 1px solid var(--border);
- color: var(--text-dim);
- padding: 5px 12px;
- border-radius: 6px;
- font-size: 12px;
- font-weight: 500;
- cursor: pointer;
- transition: all 0.15s;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
 }
 .filter-btn:hover { color: var(--text); border-color: var(--text-dim); }
-.filter-btn.active { color: var(--blue); border-color: var(--blue); background: rgba(41,98,255,0.1); }
+.filter-btn.active { color: var(--blue); border-color: var(--blue); background: var(--blue-soft); }
 .controls .scan-info {
- margin-left: auto;
- font-size: 11px;
- color: var(--text-dim);
- display: flex;
- align-items: center;
- gap: 12px;
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.controls .scan-info .progress-bar {
- width: 120px;
- height: 4px;
- background: var(--border);
- border-radius: 2px;
- overflow: hidden;
-}
-.controls .scan-info .progress-fill {
- height: 100%;
- background: var(--blue);
- border-radius: 2px;
- transition: width 0.3s;
- width: 0%;
-}
-.refresh-btn {
- background: rgba(41,98,255,0.15);
- border: 1px solid rgba(41,98,255,0.3);
- color: var(--blue);
- padding: 5px 14px;
- border-radius: 6px;
- font-size: 12px;
- font-weight: 600;
- cursor: pointer;
- transition: all 0.15s;
-}
-.refresh-btn:hover { background: rgba(41,98,255,0.25); }
-.refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* &#9472;&#9472; Stats Strip &#9472;&#9472; */
+/* === Stats Strip === */
 .stats-strip {
- display: flex;
- gap: 0;
- padding: 0 24px;
- background: var(--surface);
- border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 0;
+  padding: 0 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 .stat-card {
- flex: 1;
- padding: 10px 16px;
- border-right: 1px solid var(--border);
- text-align: center;
+  flex: 1;
+  padding: 10px 16px;
+  border-right: 1px solid var(--border);
+  text-align: center;
 }
 .stat-card:last-child { border-right: none; }
-.stat-card .stat-value { font-size: 20px; font-weight: 700; }
-.stat-card .stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.stat-card .stat-value {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+.stat-card .stat-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
 .stat-card.oversold .stat-value { color: var(--green); }
 .stat-card.overbought .stat-value { color: var(--red); }
 .stat-card.neutral .stat-value { color: var(--text-dim); }
 
-/* &#9472;&#9472; Table &#9472;&#9472; */
+/* === Table === */
 .table-wrap {
- padding: 0;
- overflow-x: auto;
+  padding: 0;
+  overflow-x: auto;
 }
 table {
- width: 100%;
- border-collapse: collapse;
- font-size: 13px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-base);
 }
 thead th {
- background: var(--surface);
- color: var(--text-dim);
- font-size: 10px;
- font-weight: 600;
- text-transform: uppercase;
- letter-spacing: 0.5px;
- padding: 10px 12px;
- text-align: left;
- border-bottom: 1px solid var(--border);
- position: sticky;
- top: 52px;
- z-index: 10;
- cursor: pointer;
- user-select: none;
- white-space: nowrap;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: var(--nav-height);
+  z-index: 10;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
 }
 thead th:hover { color: var(--text); }
 thead th.sorted { color: var(--blue); }
 thead th .sort-arrow { font-size: 9px; margin-left: 3px; }
 tbody tr {
- border-bottom: 1px solid var(--border);
- transition: background 0.1s;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
 }
 tbody tr:hover { background: var(--surface-hover); }
 td {
- padding: 8px 12px;
- white-space: nowrap;
+  padding: 7px 12px;
+  white-space: nowrap;
+  vertical-align: middle;
 }
-td.symbol {
- font-weight: 700;
- font-size: 13px;
-}
-td.symbol a { text-decoration: none; }
+td.symbol { font-weight: var(--fw-bold); font-size: var(--fs-base); }
+td.symbol a { text-decoration: none; color: var(--text); }
 td.symbol a:hover { color: var(--blue); }
 td.ltp { font-variant-numeric: tabular-nums; }
-td.chg { font-variant-numeric: tabular-nums; font-weight: 600; }
+td.chg { font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); }
 td.chg.pos { color: var(--green); }
 td.chg.neg { color: var(--red); }
 
 /* RSI cells */
 td.rsi {
- font-weight: 600;
- font-variant-numeric: tabular-nums;
- text-align: center;
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
-td.rsi.oversold { color: var(--green); background: rgba(38,166,154,0.08); }
-td.rsi.overbought { color: var(--red); background: rgba(239,83,80,0.08); }
+td.rsi.oversold { color: var(--green); background: var(--green-soft); }
+td.rsi.overbought { color: var(--red); background: var(--red-soft); }
 td.rsi.neutral { color: var(--text-dim); }
-td.rsi.loading { color: var(--text-dim); font-weight: 400; font-style: italic; }
+td.rsi.loading { color: var(--text-dim); font-weight: var(--fw-normal); font-style: italic; }
 
 /* Buildup badge */
 .buildup-badge {
- display: inline-block;
- padding: 2px 8px;
- border-radius: 4px;
- font-size: 10px;
- font-weight: 600;
- text-transform: uppercase;
- letter-spacing: 0.3px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 .buildup-badge.LONG_BUILD { background: rgba(38,166,154,0.15); color: var(--green); }
 .buildup-badge.SHORT_BUILD { background: rgba(239,83,80,0.15); color: var(--red); }
-.buildup-badge.LONG_UNWIND { background: rgba(255,183,77,0.15); color: var(--yellow); }
+.buildup-badge.LONG_UNWIND { background: rgba(255,152,0,0.15); color: var(--orange); }
 .buildup-badge.SHORT_COVER { background: rgba(171,71,188,0.15); color: var(--purple); }
-.buildup-badge.NEUTRAL { background: rgba(100,116,139,0.1); color: var(--text-dim); }
+.buildup-badge.NEUTRAL { background: rgba(120,123,134,0.1); color: var(--text-dim); }
 
 /* Score bar */
 .score-bar {
- display: flex;
- align-items: center;
- gap: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .score-track {
- width: 50px;
- height: 4px;
- background: var(--border);
- border-radius: 2px;
- overflow: hidden;
+  width: 50px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
 }
 .score-fill {
- height: 100%;
- border-radius: 2px;
- transition: width 0.3s;
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
 }
-.score-val { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 24px; }
+.score-val {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  min-width: 24px;
+}
 
 /* Empty state */
 .empty-state {
- text-align: center;
- padding: 60px 24px;
- color: var(--text-dim);
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--text-dim);
 }
 .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-.empty-state .msg { font-size: 15px; }
+.empty-state .msg { font-size: var(--fs-md); }
 
 /* Sector pill */
 .sector-pill {
- display: inline-block;
- padding: 1px 6px;
- border-radius: 3px;
- font-size: 10px;
- font-weight: 600;
- color: var(--text-dim);
- background: rgba(100,116,139,0.1);
- border: 1px solid var(--border);
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-dim);
+  background: rgba(120,123,134,0.1);
+  border: 1px solid var(--border);
 }
 
 /* Loading shimmer */
 @keyframes shimmer {
- 0% { background-position: -200px 0; }
- 100% { background-position: 200px 0; }
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
 }
 .shimmer {
- background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
- background-size: 400px 100%;
- animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .controls { padding: 8px 10px; }
+  .stats-strip { flex-wrap: wrap; padding: 0 10px; }
+  .stat-card { min-width: 80px; }
 }
 </style>
 </head>
 <body>
 
 <!-- Navigation Bar -->
-<nav class="site-nav">
- <a class="nav-logo" href="/">
- <span class="pulse-dot" id="pulseDot"></span>
- F&amp;O LIVE
- </a>
- <div class="nav-links">
- <a href="/">Dashboard</a>
- <a href="/paper">Paper Trades</a>
- <a href="/sectors">Sectors</a>
- <a href="/rsi" class="active">RSI Scanner</a>
- <a href="/rsi-analysis">Stock Analysis</a>
- <a href="/divergence">Divergence</a>
- <a href="/admin">Admin</a>
- </div>
- <div class="nav-status">
- <span class="conn-dot" id="connDot"></span>
- <span id="connText">Connecting...</span>
- <span id="updateTime">--:--:--</span>
- </div>
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand"><span class="brand-icon">Q</span>QUANTA</a>
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/paper">Paper Trades</a>
+    <a href="/sectors">Sectors</a>
+    <a href="/rsi" class="active">RSI Scanner</a>
+    <a href="/rsi-analysis">Stock Analysis</a>
+    <a href="/divergence">Divergence</a>
+    <a href="/admin">Admin</a>
+  </div>
+  <div class="q-nav-status">
+    <span class="pulse-dot" id="pulseDot"></span>
+    <span class="conn-dot off" id="connDot"></span>
+    <span id="connText">Connecting</span>
+    <span id="updateTime">--:--:--</span>
+  </div>
 </nav>
 
 <!-- Controls -->
 <div class="controls">
- <input type="text" class="search-box" id="searchBox" placeholder="Search symbol...">
- <div class="filter-group" id="rsiFilter">
- <button class="filter-btn active" data-filter="all">All</button>
- <button class="filter-btn" data-filter="oversold">Oversold &lt;30</button>
- <button class="filter-btn" data-filter="overbought">Overbought &gt;70</button>
- <button class="filter-btn" data-filter="extreme">Extreme (&lt;20 / &gt;80)</button>
- </div>
- <div class="filter-group" id="tfFilter">
- <button class="filter-btn active" data-tf="5">5m</button>
- <button class="filter-btn" data-tf="15">15m</button>
- </div>
- <div class="scan-info">
- <span id="scanStatus">Waiting for data...</span>
- <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
- <button class="refresh-btn" id="refreshBtn" onclick="startScan()">&#10227; Scan RSI</button>
- </div>
+  <input type="text" class="q-input" id="searchBox" placeholder="Search symbol..." style="width:200px">
+  <div class="filter-group" id="rsiFilter">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="oversold">Oversold &lt;30</button>
+    <button class="filter-btn" data-filter="overbought">Overbought &gt;70</button>
+    <button class="filter-btn" data-filter="extreme">Extreme (&lt;20 / &gt;80)</button>
+  </div>
+  <div class="filter-group" id="tfFilter">
+    <button class="filter-btn active" data-tf="5">5m</button>
+    <button class="filter-btn" data-tf="15">15m</button>
+  </div>
+  <div class="scan-info">
+    <span id="scanStatus">Waiting for data...</span>
+    <div class="q-progress" style="width:120px"><div class="q-progress-fill" id="progressFill"></div></div>
+    <button class="q-btn q-btn-primary q-btn-sm" id="refreshBtn" onclick="startScan()">&#10227; Scan RSI</button>
+  </div>
 </div>
 
 <!-- Stats Strip -->
 <div class="stats-strip">
- <div class="stat-card oversold"><div class="stat-value" id="statOversold">&mdash;</div><div class="stat-label">Oversold &lt;30</div></div>
- <div class="stat-card overbought"><div class="stat-value" id="statOverbought">&mdash;</div><div class="stat-label">Overbought &gt;70</div></div>
- <div class="stat-card neutral"><div class="stat-value" id="statNeutral">&mdash;</div><div class="stat-label">Neutral 30&ndash;70</div></div>
- <div class="stat-card"><div class="stat-value" id="statTotal">&mdash;</div><div class="stat-label">Total Scanned</div></div>
- <div class="stat-card"><div class="stat-value" id="statAvgRsi">&mdash;</div><div class="stat-label">Avg RSI</div></div>
+  <div class="stat-card oversold">
+    <div class="stat-value" id="statOversold">&mdash;</div>
+    <div class="stat-label">Oversold &lt;30</div>
+  </div>
+  <div class="stat-card overbought">
+    <div class="stat-value" id="statOverbought">&mdash;</div>
+    <div class="stat-label">Overbought &gt;70</div>
+  </div>
+  <div class="stat-card neutral">
+    <div class="stat-value" id="statNeutral">&mdash;</div>
+    <div class="stat-label">Neutral 30&ndash;70</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="statTotal">&mdash;</div>
+    <div class="stat-label">Total Scanned</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="statAvgRsi">&mdash;</div>
+    <div class="stat-label">Avg RSI</div>
+  </div>
 </div>
 
 <!-- Table -->
 <div class="table-wrap">
- <table>
- <thead>
- <tr>
- <th data-col="symbol">Symbol <span class="sort-arrow"></span></th>
- <th data-col="sector">Sector</th>
- <th data-col="ltp">LTP <span class="sort-arrow"></span></th>
- <th data-col="chg_pct">Chg% <span class="sort-arrow"></span></th>
- <th data-col="rsi_5m" class="sorted">RSI 5m <span class="sort-arrow">&#9650;</span></th>
- <th data-col="rsi_15m">RSI 15m <span class="sort-arrow"></span></th>
- <th data-col="vol_surge">Vol Surge <span class="sort-arrow"></span></th>
- <th data-col="buildup">Buildup</th>
- <th data-col="score">Score <span class="sort-arrow"></span></th>
- <th data-col="atm_iv">ATM IV <span class="sort-arrow"></span></th>
- <th data-col="pcr">PCR <span class="sort-arrow"></span></th>
- </tr>
- </thead>
- <tbody id="tbody"></tbody>
- </table>
- <div class="empty-state" id="emptyState">
- <div class="icon"></div>
- <div class="msg">Connecting to server &mdash; RSI scan will start automatically</div>
- </div>
+  <table>
+    <thead>
+      <tr>
+        <th data-col="symbol">Symbol <span class="sort-arrow"></span></th>
+        <th data-col="sector">Sector</th>
+        <th data-col="ltp">LTP <span class="sort-arrow"></span></th>
+        <th data-col="chg_pct">Chg% <span class="sort-arrow"></span></th>
+        <th data-col="rsi_5m" class="sorted">RSI 5m <span class="sort-arrow">&#9650;</span></th>
+        <th data-col="rsi_15m">RSI 15m <span class="sort-arrow"></span></th>
+        <th data-col="vol_surge">Vol Surge <span class="sort-arrow"></span></th>
+        <th data-col="buildup">Buildup</th>
+        <th data-col="score">Score <span class="sort-arrow"></span></th>
+        <th data-col="atm_iv">ATM IV <span class="sort-arrow"></span></th>
+        <th data-col="pcr">PCR <span class="sort-arrow"></span></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty-state" id="emptyState">
+    <div class="icon"></div>
+    <div class="msg">Connecting to server &mdash; RSI scan will start automatically</div>
+  </div>
 </div>
 
 <script>
-// \u2500\u2500 State \u2500\u2500
+// -- State --
 const stocks = {};
 let rsiData = {}; // { symbol: { rsi_5m: number, rsi_15m: number } }
 let sortCol = 'rsi_5m', sortDir = 'asc';
@@ -409,7 +320,7 @@ let ws = null;
 let reconnectTimer = null;
 let reconnectDelay = 3000;
 
-// \u2500\u2500 DOM refs \u2500\u2500
+// -- DOM refs --
 const tbody = document.getElementById('tbody');
 const emptyState = document.getElementById('emptyState');
 const connDot = document.getElementById('connDot');
@@ -419,7 +330,7 @@ const progressFill = document.getElementById('progressFill');
 const scanStatus = document.getElementById('scanStatus');
 const refreshBtn = document.getElementById('refreshBtn');
 
-// \u2500\u2500 Wilder's RSI (period 14) \u2500\u2500
+// -- Wilder's RSI (period 14) --
 function wilderRSI(closes, period = 14) {
  if (closes.length < period + 1) return null;
  let gains = 0, losses = 0;
@@ -440,7 +351,7 @@ function wilderRSI(closes, period = 14) {
  return 100 - (100 / (1 + rs));
 }
 
-// \u2500\u2500 Fetch candles + compute RSI \u2500\u2500
+// -- Fetch candles + compute RSI --
 async function fetchRSI(symbol, interval) {
  try {
  const res = await fetch(`/api/candles?symbol=${encodeURIComponent(symbol)}&interval=${interval}minute`);
@@ -454,7 +365,7 @@ async function fetchRSI(symbol, interval) {
  }
 }
 
-// \u2500\u2500 Scan all stocks \u2500\u2500
+// -- Scan all stocks --
 async function startScan() {
  if (scanning) return;
  const syms = Object.keys(stocks);
@@ -497,7 +408,7 @@ async function startScan() {
  updateStats();
 }
 
-// \u2500\u2500 Update stats \u2500\u2500
+// -- Update stats --
 function updateStats() {
  let oversold = 0, overbought = 0, neutral = 0, total = 0, rsiSum = 0;
  const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
@@ -514,10 +425,10 @@ function updateStats() {
  document.getElementById('statOverbought').textContent = overbought;
  document.getElementById('statNeutral').textContent = neutral;
  document.getElementById('statTotal').textContent = total;
- document.getElementById('statAvgRsi').textContent = total >0 ? (rsiSum / total).toFixed(1) : '\u2014';
+ document.getElementById('statAvgRsi').textContent = total >0 ? (rsiSum / total).toFixed(1) : '--';
 }
 
-// \u2500\u2500 Render table \u2500\u2500
+// -- Render table --
 function renderTable() {
  const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
  let rows = Object.keys(stocks).map(sym =>{
@@ -575,16 +486,16 @@ function renderTable() {
  const scoreColor = r.score >= 65 ? 'var(--green)' : r.score >= 40 ? 'var(--yellow)' : 'var(--red)';
  return `<tr>
  <td class="symbol"><a href="/rsi-analysis#${r.symbol}" target="_blank">${r.symbol}</a></td>
- <td><span class="sector-pill">${r.sector || '\u2014'}</span></td>
- <td class="ltp">${r.ltp ? r.ltp.toFixed(2) : '\u2014'}</td>
- <td class="chg ${chgCls}">${r.chg_pct ? (r.chg_pct >0 ? '+' : '') + r.chg_pct.toFixed(2) + '%' : '\u2014'}</td>
+ <td><span class="sector-pill">${r.sector || '--'}</span></td>
+ <td class="ltp">${r.ltp ? r.ltp.toFixed(2) : '--'}</td>
+ <td class="chg ${chgCls}">${r.chg_pct ? (r.chg_pct >0 ? '+' : '') + r.chg_pct.toFixed(2) + '%' : '--'}</td>
  <td class="rsi ${rsi5Cls}">${rsi5Val}</td>
  <td class="rsi ${rsi15Cls}">${rsi15Val}</td>
- <td>${r.vol_surge ? r.vol_surge.toFixed(1) + 'x' : '\u2014'}</td>
+ <td>${r.vol_surge ? r.vol_surge.toFixed(1) + 'x' : '--'}</td>
  <td><span class="buildup-badge ${r.buildup}">${formatBuildup(r.buildup)}</span></td>
  <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${r.score}%;background:${scoreColor}"></div></div><span class="score-val" style="color:${scoreColor}">${r.score}</span></div></td>
- <td>${r.atm_iv ? r.atm_iv.toFixed(1) + '%' : '\u2014'}</td>
- <td>${r.pcr ? r.pcr.toFixed(2) : '\u2014'}</td>
+ <td>${r.atm_iv ? r.atm_iv.toFixed(1) + '%' : '--'}</td>
+ <td>${r.pcr ? r.pcr.toFixed(2) : '--'}</td>
  </tr>`;
  }).join('');
 }
@@ -597,11 +508,11 @@ function rsiClass(val) {
 }
 
 function formatBuildup(b) {
- if (!b) return '\u2014';
+ if (!b) return '--';
  return b.replace(/_/g, ' ');
 }
 
-// \u2500\u2500 Sort headers \u2500\u2500
+// -- Sort headers --
 document.querySelectorAll('thead th[data-col]').forEach(th =>{
  th.addEventListener('click', () =>{
  const col = th.dataset.col;
@@ -613,12 +524,12 @@ document.querySelectorAll('thead th[data-col]').forEach(th =>{
  h.querySelector('.sort-arrow') && (h.querySelector('.sort-arrow').textContent = '');
  });
  th.classList.add('sorted');
- th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '\u25B2' : '\u25BC';
+ th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '(up)' : '(dn)';
  renderTable();
  });
 });
 
-// \u2500\u2500 Filter buttons \u2500\u2500
+// -- Filter buttons --
 document.getElementById('rsiFilter').addEventListener('click', e =>{
  if (!e.target.classList.contains('filter-btn')) return;
  document.querySelectorAll('#rsiFilter .filter-btn').forEach(b =>b.classList.remove('active'));
@@ -641,13 +552,13 @@ document.getElementById('tfFilter').addEventListener('click', e =>{
  updateStats();
 });
 
-// \u2500\u2500 Search \u2500\u2500
+// -- Search --
 document.getElementById('searchBox').addEventListener('input', e =>{
  searchQuery = e.target.value.trim();
  renderTable();
 });
 
-// \u2500\u2500 WebSocket \u2500\u2500
+// -- WebSocket --
 function setConnStatus(status) {
  connDot.className = 'conn-dot' + (status === 'on' ? ' on' : '');
  connText.textContent = status === 'on' ? 'Connected' : status === 'off' ? 'Disconnected' : 'Reconnecting...';
@@ -725,7 +636,7 @@ function scheduleReconnect() {
  }, reconnectDelay);
 }
 
-// \u2500\u2500 Init \u2500\u2500
+// -- Init --
 connectWS();
 </script>
 </body>
