@@ -3069,10 +3069,25 @@ function addChatBubble(role, text) {
   msgs.scrollTop = msgs.scrollHeight;
 }
 
-function setTyping(show) {
+function setTyping(show, label) {
   const el = document.getElementById('chatTyping');
-  if (show) el.classList.add('show');
-  else el.classList.remove('show');
+  if (show) {
+    el.classList.add('show');
+    // Show analysis label if provided
+    const lbl = el.querySelector('.typing-label');
+    if (lbl) lbl.textContent = label || '';
+    else if (label) {
+      const sp = document.createElement('span');
+      sp.className = 'typing-label';
+      sp.style.cssText = 'font-size:10px;color:var(--blue);margin-left:6px;letter-spacing:0.3px';
+      sp.textContent = label;
+      el.appendChild(sp);
+    }
+  } else {
+    el.classList.remove('show');
+    const lbl = el.querySelector('.typing-label');
+    if (lbl) lbl.remove();
+  }
   // Keep typing indicator scrolled into view
   if (show) {
     const msgs = document.getElementById('chatMsgs');
@@ -3225,7 +3240,11 @@ async function sendChatMessage() {
   // Disable send
   chatSending = true;
   document.getElementById('chatSendBtn').disabled = true;
-  setTyping(true);
+
+  // Detect if deep analysis likely needed (stock/scan keywords)
+  const lowerText = text.toLowerCase();
+  const needsAnalysis = /\b(analy|setup|chain|oi |best|top|poised|scan|which|recommend|sell|buy|short|long|bull|bear)\b/i.test(lowerText);
+  setTyping(true, needsAnalysis ? 'Fetching live data & analyzing...' : '');
 
   // Snapshot live dashboard data for AI context
   const dashContext = buildDashboardContext();

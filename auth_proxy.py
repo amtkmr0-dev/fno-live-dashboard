@@ -37,6 +37,13 @@ import logging
 
 from aiohttp import web, ClientSession, WSMsgType
 
+try:
+    from chat_analysis import run_analysis, get_upstox_token
+    ANALYSIS_AVAILABLE = True
+except ImportError:
+    ANALYSIS_AVAILABLE = False
+    log = logging.getLogger("auth_proxy")
+
 # ============================================================
 # CONFIG
 # ============================================================
@@ -382,6 +389,24 @@ async def handle_chat_api(request):
     elif focused_stock:
         system_content += f"\n\nThe user is currently viewing {focused_stock} in the analysis panel. Focus your answer on this stock's F&O setup."
 
+    # Deep analysis via Upstox API (chain, technicals, OI)
+    analysis_text = None
+    if ANALYSIS_AVAILABLE:
+        try:
+            upstox_token = get_upstox_token()
+            if upstox_token:
+                analysis_text, query_type = await run_analysis(
+                    user_message,
+                    focused_stock=data.get("focused_stock"),
+                    dashboard_context=dash_context,
+                    token=upstox_token,
+                )
+                if analysis_text:
+                    system_content += f"\n\n--- DEEP ANALYSIS FROM LIVE UPSTOX API ---\n{analysis_text}"
+                    log.info(f"Deep analysis injected ({query_type}), {len(analysis_text)} chars")
+        except Exception as e:
+            log.warning(f"Deep analysis failed (non-fatal): {e}")
+
     messages = [{"role": "system", "content": system_content}]
 
     # Add recent history (last 6 messages for context, skip system)
@@ -400,17 +425,20 @@ async def handle_chat_api(request):
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
+    # More tokens when deep analysis is present
+    max_tok = 2048 if analysis_text else 1024
     payload = {
         "model": model,
         "messages": messages,
-        "max_tokens": 1024,
+        "max_tokens": max_tok,
         "temperature": 0.7,
         "stream": False,
     }
 
     try:
+        req_timeout = 60 if analysis_text else 45
         async with ClientSession() as cs:
-            async with cs.post(api_url, headers=headers, json=payload, timeout=45) as resp:
+            async with cs.post(api_url, headers=headers, json=payload, timeout=req_timeout) as resp:
                 if resp.status == 401:
                     return web.json_response({"reply": f"{provider_name} API key is invalid or expired. Ask admin to update it in Admin > AI Settings."})
                 if resp.status == 429:
