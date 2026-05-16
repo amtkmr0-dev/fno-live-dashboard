@@ -1928,15 +1928,16 @@ function connectWS() {
  setConnStatus('on');
  reconnectDelay = 3000;
  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
- // Fallback: if WS init not received in 5s, fetch /api/state directly
+ // Fallback: if WS init not received in 5s, load from REST API
  setTimeout(function() {
-  var overlay = document.getElementById('loadingOverlay');
-  if (overlay && !overlay.classList.contains('hide')) {
-   fetch('/api/state').then(function(r){ return r.json(); }).then(function(data){
-    data.type = 'init';
-    handleMessage(data);
-   }).catch(function(e){ console.error('Fallback fetch failed:', e); });
-  }
+  var ol = document.getElementById('loadingOverlay');
+  if (!ol || ol.classList.contains('hide')) return;
+  fetch('/api/state').then(function(r){ return r.json(); }).then(function(d){
+   try { stocks = d.stocks || {}; meta = d.meta || {}; buildTable(); } catch(e){}
+   ol.classList.add('hide'); ol.style.display = 'none';
+  }).catch(function(){
+   ol.classList.add('hide'); ol.style.display = 'none';
+  });
  }, 5000);
  };
 
