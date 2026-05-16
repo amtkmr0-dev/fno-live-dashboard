@@ -2747,6 +2747,24 @@ document.querySelector('#headerRow th[data-key="score"]').classList.add('sort-de
 applyColVisibility();
 
 connectWS();
+
+// Standalone fallback: hide overlay after 6s regardless of WS state
+setTimeout(function() {
+ var ol = document.getElementById('loadingOverlay');
+ if (!ol || ol.classList.contains('hide') || ol.style.display === 'none') return;
+ console.log('Fallback: loading from /api/state');
+ fetch('/api/state')
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+   try { stocks = d.stocks || {}; meta = d.meta || {}; buildTable(); } catch(e) { console.error('buildTable:', e); }
+  })
+  .catch(function(e) { console.error('API fetch:', e); });
+ // Hide overlay unconditionally
+ ol.classList.add('hide');
+ ol.style.opacity = '0';
+ ol.style.pointerEvents = 'none';
+ ol.style.display = 'none';
+}, 6000);
 </script>
 <script>
 // \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 TradingView Widget Chart \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
