@@ -637,6 +637,28 @@ a:hover { text-decoration: underline; }
   .q-nav-links a { padding: 5px 9px; font-size: var(--fs-xs); }
   .q-stats-row { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Logout button in nav */
+.q-nav-logout {
+  margin-left: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.q-nav-logout:hover {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(239,68,68,0.08);
+}
 </style>
 <style>
 /* === Admin Layout === */
@@ -883,6 +905,16 @@ a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
+<script>
+// Auth gate: verify session, redirect to login if expired
+(function(){
+  fetch('/api/auth/verify',{credentials:'same-origin'})
+    .then(function(r){if(!r.ok)throw r;return r.json()})
+    .then(function(d){if(!d.ok)window.location.href='/login'})
+    .catch(function(){window.location.href='/login'});
+})();
+</script>
+
 
 <div class="toast" id="toast"></div>
 
@@ -898,6 +930,7 @@ a:hover { text-decoration: underline; }
     <a href="/divergence">Divergence</a>
     <a href="/admin" class="active">Admin</a>
   </div>
+  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
 </nav>
 
 <main class="admin-main">

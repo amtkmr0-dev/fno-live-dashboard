@@ -278,26 +278,18 @@ body {
   var errBox = document.getElementById('loginError');
   var errMsg = document.getElementById('errorMsg');
 
-  // Check if already authenticated
-  var token = localStorage.getItem('q_session');
-  if (token) {
-    // Verify token is still valid
-    fetch('/api/auth/verify', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({token: token})
-    }).then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (d.valid) window.location.href = '/';
-      })
-      .catch(function() {});
-  }
+  // Check if already authenticated (cookie-based)
+  fetch('/api/auth/verify', {credentials: 'same-origin'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) window.location.href = '/';
+    })
+    .catch(function() {});
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     var user = document.getElementById('username').value.trim();
     var pass = document.getElementById('password').value;
-    var remember = document.getElementById('rememberMe').checked;
 
     if (!user || !pass) {
       showError('Please enter username and password');
@@ -311,19 +303,17 @@ body {
     fetch('/api/auth/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username: user, password: pass})
+      body: JSON.stringify({username: user, password: pass}),
+      credentials: 'same-origin'
     })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d.success && d.token) {
-        if (remember) {
-          localStorage.setItem('q_session', d.token);
-        } else {
-          sessionStorage.setItem('q_session', d.token);
-        }
+    .then(function(r) {
+      return r.json().then(function(d) { return {status: r.status, data: d}; });
+    })
+    .then(function(result) {
+      if (result.data.ok) {
         window.location.href = '/';
       } else {
-        showError(d.error || 'Invalid credentials');
+        showError(result.data.error || 'Invalid credentials');
         btn.disabled = false;
         btn.textContent = 'Sign In';
       }
