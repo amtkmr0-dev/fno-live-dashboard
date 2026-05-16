@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quanta Terminal &mdash; F&amp;O Dashboard</title>
+<title>Quantra Terminal &mdash; F&amp;O Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -745,7 +745,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 .btn-paper-trade .bpt-icon { margin-right: 6px; }
 .btn-paper-trade .bpt-sub { font-size: 10px; font-weight: var(--fw-normal); color: var(--text-dim); margin-top: 2px; }
 
-/* --- Ask Quanta Button (analysis panel header) --- */
+/* --- Ask Quantra Button (analysis panel header) --- */
 .ap-ask-quanta {
   background: rgba(41,98,255,0.12);
   border: 1px solid rgba(41,98,255,0.3);
@@ -972,7 +972,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 <!-- Navigation Bar -->
 <nav class="q-nav">
   <a href="/" class="q-nav-brand">
-    <span class="brand-icon">Q</span>QUANTA
+    <span class="brand-icon">Q</span>QUANTRA
   </a>
   <div class="q-nav-links">
     <a href="/" class="active">Dashboard</a>
@@ -1116,7 +1116,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   <div class="ap-header">
     <span class="ap-sym" id="apSym">&mdash;</span>
     <span id="apBadges"></span>
-    <button class="ap-ask-quanta" id="apAskBtn" onclick="askQuantaAbout()" title="Ask Quanta about this stock">&#128172; Ask</button>
+    <button class="ap-ask-quanta" id="apAskBtn" onclick="askQuantaAbout()" title="Ask Quantra about this stock">&#128172; Ask</button>
     <button class="ap-close" onclick="closeAnalysis()">&#10005;</button>
   </div>
   <div class="ap-body" id="apBody">
@@ -1125,7 +1125,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 </div>
 
 <!-- Chat FAB + Panel -->
-<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Chat with Quanta">
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Chat with Quantra">
   <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
 </button>
 
@@ -1133,7 +1133,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   <div class="chat-head">
     <div class="chat-avatar">Q</div>
     <div class="chat-head-info">
-      <div class="chat-name">Quanta</div>
+      <div class="chat-name">Quantra</div>
       <div class="chat-status">Live &middot; reading dashboard</div>
     </div>
     <button class="chat-close-btn" onclick="toggleChat()">&#10005;</button>
@@ -1142,7 +1142,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   <!-- Setup screen (shown if no API key) -->
   <div class="chat-setup" id="chatSetup" style="display:none;">
     <div class="setup-icon">&#128273;</div>
-    <div class="setup-title">Connect Quanta AI</div>
+    <div class="setup-title">Connect Quantra AI</div>
     <div class="setup-desc">Enter your Anthropic API key to enable<br>AI-powered trading chat.</div>
     <input type="password" id="chatKeyInput" placeholder="sk-ant-api03-..." autocomplete="off">
     <button onclick="saveChatKey()">Activate</button>
@@ -1160,7 +1160,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
       <button class="chat-qbtn" onclick="sendQuick('Any sectors showing unusual OI buildup?')">&#128269; OI signals</button>
     </div>
     <div class="chat-msgs" id="chatMsgs">
-      <div class="chat-bubble agent">Hey! I'm Quanta &mdash; your live trading desk companion. I can see everything on your dashboard right now. Ask me about stocks, setups, or market conditions.<span class="bubble-time">now</span></div>
+      <div class="chat-bubble agent">Hey! I'm Quantra &mdash; your live trading desk companion. I can see everything on your dashboard right now. Ask me about stocks, setups, or market conditions.<span class="bubble-time">now</span></div>
     </div>
     <div class="chat-typing" id="chatTyping"><span></span><span></span><span></span></div>
     <div class="chat-input-area">
