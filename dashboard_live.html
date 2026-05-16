@@ -972,7 +972,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 <!-- Navigation Bar -->
 <nav class="q-nav">
   <a href="/" class="q-nav-brand">
-    <span class="brand-icon">Q</span>QUANTRA
+    <span class="brand-icon">Q</span>uantra
   </a>
   <div class="q-nav-links">
     <a href="/" class="active">Dashboard</a>
@@ -1173,14 +1173,14 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 </div>
 
 <script>
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 State \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
-let stocks = {};       // symbol \u00E2\u0086\u0092 data object
+// === State ===
+let stocks = {};       // symbol \u2192 data object
 let meta = {};
 let sortKey = 'score';
 let sortAsc = false;
 let symbolOrder = [];  // sorted symbols for rendering
-let rowElements = {};  // symbol \u00E2\u0086\u0092 <tr> element
-let cellMap = {};      // "SYM:field" \u00E2\u0086\u0092 <td> element
+let rowElements = {};  // symbol \u2192 <tr> element
+let cellMap = {};      // "SYM:field" \u2192 <td> element
 let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false };
 let colGroups = { pricedetail: false, vol: false, oi: false, opt: false };
 let wsConn = null;
@@ -1189,18 +1189,18 @@ let reconnectTimer = null;
 let lastTick = 0, lastOhlc = 0, lastChain = 0;
 let heatmapVisible = false;
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Formatting \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Formatting ===
 function fmtPrice(v) {
-  if (v == null || v === 0) return '\u00E2\u0080\u0093';
+  if (v == null || v === 0) return '\u2013';
   return v.toFixed(2);
 }
 function fmtPct(v) {
-  if (v == null || v === 0) return '\u00E2\u0080\u0093';
+  if (v == null || v === 0) return '\u2013';
   const s = v.toFixed(2);
   return v > 0 ? '+' + s : s;
 }
 function fmtVol(v) {
-  if (v == null || v === 0) return '\u00E2\u0080\u0093';
+  if (v == null || v === 0) return '\u2013';
   const abs = Math.abs(v);
   if (abs >= 1e7) return (v / 1e7).toFixed(1) + 'Cr';
   if (abs >= 1e5) return (v / 1e5).toFixed(1) + 'L';
@@ -1208,23 +1208,23 @@ function fmtVol(v) {
   return String(v);
 }
 function fmtOI(v) {
-  if (v == null || v === 0) return '\u00E2\u0080\u0093';
+  if (v == null || v === 0) return '\u2013';
   return fmtVol(v);
 }
 function fmtIV(v) {
-  if (v == null) return '\u00E2\u0080\u0093';
+  if (v == null) return '\u2013';
   return v.toFixed(1) + '%';
 }
 function fmtSurge(v) {
-  if (v == null || v === 0) return '\u00E2\u0080\u0093';
+  if (v == null || v === 0) return '\u2013';
   return v.toFixed(1) + 'x';
 }
 function fmtMPDist(v) {
-  if (v == null) return '\u00E2\u0080\u0093';
+  if (v == null) return '\u2013';
   return v.toFixed(1) + '%';
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Score Ring SVG \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Score Ring SVG ===
 function scoreHTML(val) {
   val = val || 0;
   const pct = val / 100;
@@ -1245,32 +1245,32 @@ function scoreHTML(val) {
   </div>`;
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Signal/Buildup pills \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Signal/Buildup pills ===
 function sigPill(sig) {
-  if (!sig || sig === '~') return '<span class="sig-pill sig-NEUTRAL">\u00E2\u0080\u0093</span>';
+  if (!sig || sig === '~') return '<span class="sig-pill sig-NEUTRAL">\u2013</span>';
   const label = sig.replace('_', ' ');
   return `<span class="sig-pill sig-${sig}">${label}</span>`;
 }
 function buPill(bu) {
-  if (!bu || bu === '~' || bu === 'NEUTRAL') return '<span class="bu-pill bu-NEUTRAL">\u00E2\u0080\u0093</span>';
+  if (!bu || bu === '~' || bu === 'NEUTRAL') return '<span class="bu-pill bu-NEUTRAL">\u2013</span>';
   const labels = { LONG_BUILD: 'LONG BUILD', SHORT_BUILD: 'SHORT BUILD', LONG_UNWIND: 'LONG UNWIND', SHORT_COVER: 'SHORT COVER' };
   return `<span class="bu-pill bu-${bu}">${labels[bu] || bu}</span>`;
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Sector pill \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Sector pill ===
 function sectorPill(s) {
-  if (!s || s === '-') return '<span class="sector-pill sector-DEFAULT">\u00E2\u0080\u0093</span>';
+  if (!s || s === '-') return '<span class="sector-pill sector-DEFAULT">\u2013</span>';
   const cls = 'sector-' + (s.replace(/[^A-Z_]/g, '') || 'DEFAULT');
   return `<span class="sector-pill ${cls}">${s}</span>`;
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Value class \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Value class ===
 function valClass(v) {
   if (v == null || v === 0) return 'null-val';
   return v > 0 ? 'val-pos' : 'val-neg';
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Build Table \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Build Table ===
 function buildTable() {
   sortSymbols();
   const tbody = document.getElementById('tbody');
@@ -1307,7 +1307,7 @@ function buildTable() {
       { key: 'chg_pct', cls: 'w-pct ' + valClass(d.chg_pct), text: fmtPct(d.chg_pct) },
       { key: 'pcr_sig', cls: 'w-sig', html: sigPill(d.pcr_sig) },
       { key: 'buildup', cls: 'w-sig', html: buPill(d.buildup) },
-      { key: 'prem_ok', cls: 'w-small', html: d.prem_ok ? '<span class="prem-yes">\u00E2\u009C\u0093</span>' : '<span class="prem-no">\u00E2\u009C\u0097</span>' },
+      { key: 'prem_ok', cls: 'w-small', html: d.prem_ok ? '<span class="prem-yes">\u2713</span>' : '<span class="prem-no">\u2717</span>' },
       // Price detail group
       { key: 'gap_pct', cls: 'w-pct g-pricedetail ' + valClass(d.gap_pct), text: fmtPct(d.gap_pct) },
       { key: 'open', cls: 'w-price g-pricedetail', text: fmtPrice(d.open) },
@@ -1318,7 +1318,7 @@ function buildTable() {
       { key: 'vol', cls: 'w-vol g-vol', text: fmtVol(d.vol) },
       { key: 'vol_surge', cls: 'w-small g-vol ' + surgeClass(d.vol_surge), text: fmtSurge(d.vol_surge) },
       // OI group
-      { key: 'pcr', cls: 'w-small g-oi ' + pcrClass(d.pcr), text: d.pcr != null ? d.pcr.toFixed(2) : '\u00E2\u0080\u0093' },
+      { key: 'pcr', cls: 'w-small g-oi ' + pcrClass(d.pcr), text: d.pcr != null ? d.pcr.toFixed(2) : '\u2013' },
       { key: 'ce_oi_chg', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtOI(d.ce_oi_chg) },
       { key: 'pe_oi_chg', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtOI(d.pe_oi_chg) },
       { key: 'net_oi', cls: 'w-oi g-oi ' + valClass(d.net_oi), text: fmtOI(d.net_oi) },
@@ -1328,7 +1328,7 @@ function buildTable() {
       { key: 'mp_dist', cls: 'w-pct g-opt', text: fmtMPDist(d.mp_dist) },
       { key: 'atm_ce', cls: 'w-prem g-opt' + (d.atm_ce != null && d.atm_ce < 15 ? ' prem-low' : ''), text: fmtPrice(d.atm_ce) },
       { key: 'atm_pe', cls: 'w-prem g-opt' + (d.atm_pe != null && d.atm_pe < 15 ? ' prem-low' : ''), text: fmtPrice(d.atm_pe) },
-      { key: 'lot', cls: 'w-small g-opt', text: d.lot || '\u00E2\u0080\u0093' },
+      { key: 'lot', cls: 'w-small g-opt', text: d.lot || '\u2013' },
     ];
 
     for (const f of fields) {
@@ -1364,7 +1364,7 @@ function pcrClass(v) {
   return '';
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Poised / Trade Ready Logic \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Poised / Trade Ready Logic ===
 function isPoised(d) {
   if (!d) return false;
   // Must have composite score >= 50
@@ -1467,7 +1467,7 @@ function renderTopPicks() {
         <span class="pc-score" style="color:${ps >= 70 ? 'var(--green)' : ps >= 50 ? 'var(--gold)' : 'var(--orange)'}">${ps}</span>
       </div>
       <div class="pc-detail">
-        \u00E2\u0082\u00B9<span>${fmtPrice(d.ltp)}</span> \u00C2\u00B7 Prem \u00E2\u0082\u00B9<span>${fmtPrice(prem)}</span> \u00C2\u00B7 IV <span>${d.atm_iv ? d.atm_iv.toFixed(1) + '%' : '\u00E2\u0080\u0093'}</span> \u00C2\u00B7 ${d.buildup ? d.buildup.replace(/_/g, ' ') : '\u00E2\u0080\u0093'}
+        \u20B9<span>${fmtPrice(d.ltp)}</span> \u00B7 Prem \u20B9<span>${fmtPrice(prem)}</span> \u00B7 IV <span>${d.atm_iv ? d.atm_iv.toFixed(1) + '%' : '\u2013'}</span> \u00B7 ${d.buildup ? d.buildup.replace(/_/g, ' ') : '\u2013'}
       </div>`;
     card.onclick = (e) => {
       if (e.target.closest('.pick-paper-btn')) return; // don't open analysis if clicking paper trade btn
@@ -1477,7 +1477,7 @@ function renderTopPicks() {
     const ptBtn = document.createElement('button');
     ptBtn.className = 'pick-paper-btn';
     ptBtn.style.cssText = 'margin-top:4px;padding:2px 8px;font-size:9px;font-weight:700;border:1px solid rgba(171,71,188,0.3);background:rgba(171,71,188,0.08);color:#CE93D8;border-radius:4px;cursor:pointer;transition:all 0.2s;width:100%';
-    ptBtn.textContent = '\u00F0\u009F\u0093\u008B Paper Trade';
+    ptBtn.textContent = '\uD83D\uDCCB Paper Trade';
     ptBtn.onclick = (e) => {
       e.stopPropagation();
       const rec = buildTradeRec(d, dir);
@@ -1488,7 +1488,7 @@ function renderTopPicks() {
   }
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Sorting \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Sorting ===
 function sortSymbols() {
   symbolOrder = Object.keys(stocks);
   symbolOrder.sort((a, b) => {
@@ -1511,7 +1511,7 @@ document.getElementById('headerRow').addEventListener('click', function(e) {
   buildTable();
 });
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Filtering \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Filtering ===
 document.getElementById('searchBox').addEventListener('input', function() {
   filters.search = this.value.toUpperCase();
   applyFilters();
@@ -1568,11 +1568,11 @@ function updateFooterFilter() {
   if (filters.signal) parts.push('Signal: ' + filters.signal);
   if (filters.buildup) parts.push('Buildup: ' + filters.buildup);
   if (filters.n50) parts.push('NIFTY 50 only');
-  if (filters.poised) parts.push('\u00F0\u009F\u008E\u00AF Trade Ready only');
+  if (filters.poised) parts.push('\uD83C\uDFAF Trade Ready only');
   document.getElementById('footerFilter').textContent = parts.length ? parts.join(' | ') : 'Showing all stocks';
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Column Visibility \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Column Visibility ===
 function toggleColGroup(group) {
   colGroups[group] = !colGroups[group];
   const btn = document.querySelector(`.col-toggles [data-group="${group}"]`);
@@ -1590,7 +1590,7 @@ function applyColVisibility() {
   }
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 View Mode Presets \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === View Mode Presets ===
 function setViewMode(mode) {
   if (mode === 'compact') {
     colGroups = { pricedetail: false, vol: false, oi: false, opt: false };
@@ -1604,7 +1604,7 @@ function setViewMode(mode) {
   applyColVisibility();
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Heatmap \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Heatmap ===
 function toggleHeatmap() {
   heatmapVisible = !heatmapVisible;
   document.getElementById('heatmapBar').classList.toggle('collapsed', !heatmapVisible);
@@ -1642,12 +1642,12 @@ function renderHeatmap() {
   }
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Cell Updates \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Cell Updates ===
 function updateCell(sym, field, value, formatter, extraClass) {
   const td = cellMap[sym + ':' + field];
   if (!td) return;
   const oldText = td.textContent;
-  const newText = formatter ? formatter(value) : String(value == null ? '\u00E2\u0080\u0093' : value);
+  const newText = formatter ? formatter(value) : String(value == null ? '\u2013' : value);
   if (oldText === newText) return;
 
   td.textContent = newText;
@@ -1669,7 +1669,7 @@ function updateCellHTML(sym, field, html) {
   td.innerHTML = html;
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 WebSocket \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === WebSocket ===
 function connectWS() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
   const url = proto + '//' + location.host + '/ws';
@@ -1731,7 +1731,7 @@ function handleMessage(msg) {
       buildTable();
       document.getElementById('loadingOverlay').classList.add('hide');
       lastTick = lastOhlc = lastChain = Date.now();
-      showToast('Connected \u00E2\u0080\u0094 ' + Object.keys(stocks).length + ' stocks loaded', 'info');
+      showToast('Connected \u2014 ' + Object.keys(stocks).length + ' stocks loaded', 'info');
       if (heatmapVisible) renderHeatmap();
       break;
 
@@ -1778,7 +1778,7 @@ function handleMessage(msg) {
         for (const [sym, d] of Object.entries(msg.d)) {
           if (!stocks[sym]) continue;
           Object.assign(stocks[sym], d);
-          updateCell(sym, 'pcr', d.pcr, v => v != null ? v.toFixed(2) : '\u00E2\u0080\u0093', pcrClass(d.pcr));
+          updateCell(sym, 'pcr', d.pcr, v => v != null ? v.toFixed(2) : '\u2013', pcrClass(d.pcr));
           updateCellHTML(sym, 'pcr_sig', sigPill(d.pcr_sig));
           updateCellHTML(sym, 'buildup', buPill(d.buildup));
           updateCell(sym, 'ce_oi_chg', d.ce_oi_chg, fmtOI, valClass(d.ce_oi_chg));
@@ -1789,7 +1789,7 @@ function handleMessage(msg) {
           updateCell(sym, 'mp_dist', d.mp_dist, fmtMPDist);
           updateCell(sym, 'atm_ce', d.atm_ce, fmtPrice, d.atm_ce != null && d.atm_ce < 15 ? 'prem-low' : '');
           updateCell(sym, 'atm_pe', d.atm_pe, fmtPrice, d.atm_pe != null && d.atm_pe < 15 ? 'prem-low' : '');
-          updateCellHTML(sym, 'prem_ok', d.prem_ok ? '<span class="prem-yes">\u00E2\u009C\u0093</span>' : '<span class="prem-no">\u00E2\u009C\u0097</span>');
+          updateCellHTML(sym, 'prem_ok', d.prem_ok ? '<span class="prem-yes">\u2713</span>' : '<span class="prem-no">\u2717</span>');
           if (d.score != null) updateCellHTML(sym, 'score', scoreHTML(d.score));
           // Update row data attributes for filtering + poised status
           const tr = rowElements[sym];
@@ -1836,8 +1836,8 @@ function handleMessage(msg) {
       if (msg.trades) {
         for (const t of msg.trades) {
           const _pnl = t.final_pnl || 0;
-          const _reason = t.exit_reason === 'SL_HIT' ? '\u00E2\u009B\u0094 SL Hit' : t.exit_reason === 'T2_HIT' ? '\u00F0\u009F\u008E\u00AF T2 Hit' : t.exit_reason;
-          showToast('AUTO-EXIT: ' + t.symbol + ' ' + t.option_type + ' ' + _reason + ' \u00E2\u0080\u0094 P&L: \u00E2\u0082\u00B9' + Math.round(_pnl).toLocaleString('en-IN'), _pnl >= 0 ? 'info' : 'warn');
+          const _reason = t.exit_reason === 'SL_HIT' ? '\u26D4 SL Hit' : t.exit_reason === 'T2_HIT' ? '\uD83C\uDFAF T2 Hit' : t.exit_reason;
+          showToast('AUTO-EXIT: ' + t.symbol + ' ' + t.option_type + ' ' + _reason + ' \u2014 P&L: \u20B9' + Math.round(_pnl).toLocaleString('en-IN'), _pnl >= 0 ? 'info' : 'warn');
         }
         updatePaperBadge();
       }
@@ -1852,7 +1852,7 @@ function handleMessage(msg) {
   }
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Timestamp Display \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Timestamp Display ===
 function updateTimestamp() {
   const now = new Date();
   document.getElementById('updateTime').textContent = now.toLocaleTimeString('en-IN', { hour12: false });
@@ -1872,7 +1872,7 @@ function updateFreshness() {
 }
 setInterval(updateFreshness, 5000);
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Toast \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Toast ===
 let toastTimer = null;
 function showToast(msg, level) {
   const el = document.getElementById('toast');
@@ -1887,7 +1887,7 @@ document.getElementById('tbody').addEventListener('animationend', function(e) {
   e.target.classList.remove('flash-up', 'flash-down');
 });
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Analysis Panel (Trade Ready stocks only) \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Analysis Panel (Trade Ready stocks only) ===
 let analysisSym = null;
 
 function openAnalysis(sym) {
@@ -1921,8 +1921,8 @@ function renderAnalysisPanel() {
   const dir = getDirection(d);
   const isBull = (dir === 'CE');
 
-  // Header \u00E2\u0080\u0094 symbol links to TradingView
-  document.getElementById('apSym').innerHTML = '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(sym) + '" target="_blank" rel="noopener" class="tv-link" style="font-size:inherit;font-weight:inherit">' + sym + ' \u00E2\u0086\u0097</a>';
+  // Header \u2014 symbol links to TradingView
+  document.getElementById('apSym').innerHTML = '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(sym) + '" target="_blank" rel="noopener" class="tv-link" style="font-size:inherit;font-weight:inherit">' + sym + ' \u2197</a>';
   document.getElementById('apBadges').innerHTML =
     (d.is_n50 ? '<span class="n50-badge">N50</span> ' : '') +
     '<span class="poised-badge">READY</span> ' +
@@ -1940,12 +1940,12 @@ function renderAnalysisPanel() {
     <div class="ap-section">
       <div class="ap-section-title">Stock Snapshot</div>
       <div class="ap-snapshot">
-        <div class="snap-item"><div class="si-label">LTP</div><div class="si-val">\u00E2\u0082\u00B9${fmtPrice(d.ltp)}</div></div>
+        <div class="snap-item"><div class="si-label">LTP</div><div class="si-val">\u20B9${fmtPrice(d.ltp)}</div></div>
         <div class="snap-item"><div class="si-label">Change</div><div class="si-val ${valClass(d.chg_pct)}">${fmtPct(d.chg_pct)}%</div></div>
         <div class="snap-item"><div class="si-label">Score</div><div class="si-val" style="color:${(d.score||0)>=60?'var(--green)':(d.score||0)>=40?'var(--gold)':'var(--orange)'}">${d.score || 0}/100</div></div>
-        <div class="snap-item"><div class="si-label">Sector</div><div class="si-val">${d.sector || '\u00E2\u0080\u0093'}</div></div>
+        <div class="snap-item"><div class="si-label">Sector</div><div class="si-val">${d.sector || '\u2013'}</div></div>
         <div class="snap-item"><div class="si-label">Vol Surge</div><div class="si-val ${surgeClass(d.vol_surge)}">${fmtSurge(d.vol_surge)}</div></div>
-        <div class="snap-item"><div class="si-label">Lot Size</div><div class="si-val">${d.lot || '\u00E2\u0080\u0093'}</div></div>
+        <div class="snap-item"><div class="si-label">Lot Size</div><div class="si-val">${d.lot || '\u2013'}</div></div>
       </div>
     </div>
 
@@ -1958,7 +1958,7 @@ function renderAnalysisPanel() {
         <button class="chart-tf-btn" data-interval="15" onclick="switchChartTf('${sym}','15',this)">15m</button>
         <button class="chart-tf-btn" data-interval="60" onclick="switchChartTf('${sym}','60',this)">1H</button>
         <button class="chart-tf-btn" data-interval="D" onclick="switchChartTf('${sym}','D',this)">1D</button>
-        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u00E2\u0086\u0097</a>
+        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u2197</a>
       </div>
       <div class="tv-chart-wrap" id="tvChartWrap">
         <iframe id="tvChartFrame" src="https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart" allowtransparency="true" allow="autoplay"></iframe>
@@ -1980,47 +1980,47 @@ function renderAnalysisPanel() {
       <div class="ap-section-title">Trade Recommendation</div>
       <div class="trade-rec-card rec-${dir || 'CE'}">
         <div class="rec-header">
-          <span class="rec-dir dir-${dir || 'CE'}">${isBull ? '\u00E2\u0096\u00B2 BUY CE' : '\u00E2\u0096\u00BC BUY PE'} ${rec.strike}</span>
+          <span class="rec-dir dir-${dir || 'CE'}">${isBull ? '\u25B2 BUY CE' : '\u25BC BUY PE'} ${rec.strike}</span>
           <span class="rec-conf">Confluence ${d.score || 0}/100</span>
         </div>
         <div class="rec-grid">
           <div class="rec-item">
             <div class="ri-label">Entry Premium</div>
-            <div class="ri-val">\u00E2\u0082\u00B9${fmtPrice(rec.entry)}</div>
-            <div class="ri-sub">ATM ${isBull ? 'CE' : 'PE'} @ \u00E2\u0082\u00B9${fmtPrice(d.ltp)}</div>
+            <div class="ri-val">\u20B9${fmtPrice(rec.entry)}</div>
+            <div class="ri-sub">ATM ${isBull ? 'CE' : 'PE'} @ \u20B9${fmtPrice(d.ltp)}</div>
           </div>
           <div class="rec-item">
             <div class="ri-label">Stop Loss</div>
-            <div class="ri-val val-red">\u00E2\u0082\u00B9${fmtPrice(rec.sl)}</div>
-            <div class="ri-sub">${rec.slPct}% premium \u00C2\u00B7 Spot ${rec.slSpot}</div>
+            <div class="ri-val val-red">\u20B9${fmtPrice(rec.sl)}</div>
+            <div class="ri-sub">${rec.slPct}% premium \u00B7 Spot ${rec.slSpot}</div>
           </div>
           <div class="rec-item">
             <div class="ri-label">Target 1 (1.5 RR)</div>
-            <div class="ri-val val-green">\u00E2\u0082\u00B9${fmtPrice(rec.t1)}</div>
-            <div class="ri-sub">+\u00E2\u0082\u00B9${fmtPrice(rec.t1 - rec.entry)} profit/lot</div>
+            <div class="ri-val val-green">\u20B9${fmtPrice(rec.t1)}</div>
+            <div class="ri-sub">+\u20B9${fmtPrice(rec.t1 - rec.entry)} profit/lot</div>
           </div>
           <div class="rec-item">
             <div class="ri-label">Target 2 (2.5 RR)</div>
-            <div class="ri-val val-green">\u00E2\u0082\u00B9${fmtPrice(rec.t2)}</div>
-            <div class="ri-sub">+\u00E2\u0082\u00B9${fmtPrice(rec.t2 - rec.entry)} profit/lot</div>
+            <div class="ri-val val-green">\u20B9${fmtPrice(rec.t2)}</div>
+            <div class="ri-sub">+\u20B9${fmtPrice(rec.t2 - rec.entry)} profit/lot</div>
           </div>
         </div>
         <div class="rec-grid">
           <div class="rec-item">
             <div class="ri-label">Risk / Lot</div>
-            <div class="ri-val val-red">\u00E2\u0082\u00B9${fmtNum(rec.riskPerLot)}</div>
-            <div class="ri-sub">(${d.lot || '\u00E2\u0080\u0093'} \u00C3\u0097 \u00E2\u0082\u00B9${fmtPrice(rec.entry - rec.sl)})</div>
+            <div class="ri-val val-red">\u20B9${fmtNum(rec.riskPerLot)}</div>
+            <div class="ri-sub">(${d.lot || '\u2013'}  \u20B9${fmtPrice(rec.entry - rec.sl)})</div>
           </div>
           <div class="rec-item">
             <div class="ri-label">Reward / Lot (T1)</div>
-            <div class="ri-val val-green">\u00E2\u0082\u00B9${fmtNum(rec.rewardPerLot)}</div>
-            <div class="ri-sub">(${d.lot || '\u00E2\u0080\u0093'} \u00C3\u0097 \u00E2\u0082\u00B9${fmtPrice(rec.t1 - rec.entry)})</div>
+            <div class="ri-val val-green">\u20B9${fmtNum(rec.rewardPerLot)}</div>
+            <div class="ri-sub">(${d.lot || '\u2013'}  \u20B9${fmtPrice(rec.t1 - rec.entry)})</div>
           </div>
         </div>
         <div class="rec-rr-bar">
           <span class="rr-label">Risk-Reward</span>
           <span class="rr-val">1 : ${rec.rr}</span>
-          <span style="margin-left:auto;color:var(--text-vdim)">Max Pain: \u00E2\u0082\u00B9${fmtPrice(d.max_pain)} (${fmtMPDist(d.mp_dist)})</span>
+          <span style="margin-left:auto;color:var(--text-vdim)">Max Pain: \u20B9${fmtPrice(d.max_pain)} (${fmtMPDist(d.mp_dist)})</span>
         </div>
       </div>
     </div>
@@ -2028,9 +2028,9 @@ function renderAnalysisPanel() {
     <div class="ap-section">
       <div class="ap-section-title">Option Chain Context</div>
       <div class="ap-snapshot">
-        <div class="snap-item"><div class="si-label">PCR</div><div class="si-val ${pcrClass(d.pcr)}">${d.pcr != null ? d.pcr.toFixed(2) : '\u00E2\u0080\u0093'}</div></div>
+        <div class="snap-item"><div class="si-label">PCR</div><div class="si-val ${pcrClass(d.pcr)}">${d.pcr != null ? d.pcr.toFixed(2) : '\u2013'}</div></div>
         <div class="snap-item"><div class="si-label">ATM IV</div><div class="si-val">${fmtIV(d.atm_iv)}</div></div>
-        <div class="snap-item"><div class="si-label">ATM Strike</div><div class="si-val">${d.atm_strike || '\u00E2\u0080\u0093'}</div></div>
+        <div class="snap-item"><div class="si-label">ATM Strike</div><div class="si-val">${d.atm_strike || '\u2013'}</div></div>
         <div class="snap-item"><div class="si-label">CE OI Chg</div><div class="si-val ${valClass(d.ce_oi_chg)}">${fmtOI(d.ce_oi_chg)}</div></div>
         <div class="snap-item"><div class="si-label">PE OI Chg</div><div class="si-val ${valClass(d.pe_oi_chg)}">${fmtOI(d.pe_oi_chg)}</div></div>
         <div class="snap-item"><div class="si-label">Net OI</div><div class="si-val ${valClass(d.net_oi)}">${fmtOI(d.net_oi)}</div></div>
@@ -2040,15 +2040,15 @@ function renderAnalysisPanel() {
     <div class="ap-section" style="margin-bottom:8px;">
       <div class="ap-section-title">Cost Estimate (per trade)</div>
       <div class="rec-rr-bar" style="flex-direction:column;align-items:stretch;gap:4px;">
-        <div style="display:flex;justify-content:space-between;"><span class="rr-label">Est. Costs (brokerage+STT+slippage)</span><span style="color:var(--red)">~\u00E2\u0082\u00B9350</span></div>
-        <div style="display:flex;justify-content:space-between;"><span class="rr-label">Net Risk after Costs</span><span style="color:var(--red)">\u00E2\u0082\u00B9${fmtNum(rec.riskPerLot + 350)}</span></div>
-        <div style="display:flex;justify-content:space-between;"><span class="rr-label">Capital Required</span><span style="color:var(--text)">\u00E2\u0082\u00B9${fmtNum(rec.entry * (d.lot || 1))}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span class="rr-label">Est. Costs (brokerage+STT+slippage)</span><span style="color:var(--red)">~\u20B9350</span></div>
+        <div style="display:flex;justify-content:space-between;"><span class="rr-label">Net Risk after Costs</span><span style="color:var(--red)">\u20B9${fmtNum(rec.riskPerLot + 350)}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span class="rr-label">Capital Required</span><span style="color:var(--text)">\u20B9${fmtNum(rec.entry * (d.lot || 1))}</span></div>
       </div>
     </div>
 
     <button class="btn-paper-trade" onclick="enterPaperTrade('${sym}','${dir || 'CE'}',${rec.entry},${rec.sl},${rec.t1},${rec.t2})">
-      <span class="bpt-icon">\u00F0\u009F\u0093\u008B</span> Paper Trade ${sym} ${isBull ? 'CE' : 'PE'} ${rec.strike} @ \u00E2\u0082\u00B9${fmtPrice(rec.entry)}
-      <div class="bpt-sub">1 lot \u00C3\u0097 ${d.lot || '\u00E2\u0080\u0093'} = ${d.lot || '\u00E2\u0080\u0093'} qty \u00C2\u00B7 Risk \u00E2\u0082\u00B9${fmtNum(rec.riskPerLot)}</div>
+      <span class="bpt-icon">\uD83D\uDCCB</span> Paper Trade ${sym} ${isBull ? 'CE' : 'PE'} ${rec.strike} @ \u20B9${fmtPrice(rec.entry)}
+      <div class="bpt-sub">1 lot  ${d.lot || '\u2013'} = ${d.lot || '\u2013'} qty \u00B7 Risk \u20B9${fmtNum(rec.riskPerLot)}</div>
     </button>
   `;
 }
@@ -2058,8 +2058,8 @@ function renderChartOnlyPanel() {
   const d = stocks[sym];
   if (!d) return;
 
-  // Header \u00E2\u0080\u0094 symbol links to TradingView
-  document.getElementById('apSym').innerHTML = '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(sym) + '" target="_blank" rel="noopener" class="tv-link" style="font-size:inherit;font-weight:inherit">' + sym + ' \u00E2\u0086\u0097</a>';
+  // Header \u2014 symbol links to TradingView
+  document.getElementById('apSym').innerHTML = '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(sym) + '" target="_blank" rel="noopener" class="tv-link" style="font-size:inherit;font-weight:inherit">' + sym + ' \u2197</a>';
   document.getElementById('apBadges').innerHTML =
     (d.is_n50 ? '<span class="n50-badge">N50</span> ' : '') +
     sectorPill(d.sector);
@@ -2069,12 +2069,12 @@ function renderChartOnlyPanel() {
     <div class="ap-section">
       <div class="ap-section-title">Stock Snapshot</div>
       <div class="ap-snapshot">
-        <div class="snap-item"><div class="si-label">LTP</div><div class="si-val">\u00E2\u0082\u00B9${fmtPrice(d.ltp)}</div></div>
+        <div class="snap-item"><div class="si-label">LTP</div><div class="si-val">\u20B9${fmtPrice(d.ltp)}</div></div>
         <div class="snap-item"><div class="si-label">Change</div><div class="si-val ${valClass(d.chg_pct)}">${fmtPct(d.chg_pct)}%</div></div>
         <div class="snap-item"><div class="si-label">Score</div><div class="si-val" style="color:${(d.score||0)>=60?'var(--green)':(d.score||0)>=40?'var(--gold)':'var(--orange)'}">${d.score || 0}/100</div></div>
-        <div class="snap-item"><div class="si-label">Sector</div><div class="si-val">${d.sector || '\u00E2\u0080\u0093'}</div></div>
+        <div class="snap-item"><div class="si-label">Sector</div><div class="si-val">${d.sector || '\u2013'}</div></div>
         <div class="snap-item"><div class="si-label">Range%</div><div class="si-val">${fmtPct(d.range_pct)}</div></div>
-        <div class="snap-item"><div class="si-label">Lot Size</div><div class="si-val">${d.lot || '\u00E2\u0080\u0093'}</div></div>
+        <div class="snap-item"><div class="si-label">Lot Size</div><div class="si-val">${d.lot || '\u2013'}</div></div>
       </div>
     </div>
 
@@ -2087,7 +2087,7 @@ function renderChartOnlyPanel() {
         <button class="chart-tf-btn" data-interval="15" onclick="switchChartTf('${sym}','15',this)">15m</button>
         <button class="chart-tf-btn" data-interval="60" onclick="switchChartTf('${sym}','60',this)">1H</button>
         <button class="chart-tf-btn" data-interval="D" onclick="switchChartTf('${sym}','D',this)">1D</button>
-        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u00E2\u0086\u0097</a>
+        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u2197</a>
       </div>
       <div class="tv-chart-wrap" id="tvChartWrap">
         <iframe id="tvChartFrame" src="https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart" allowtransparency="true" allow="autoplay"></iframe>
@@ -2098,12 +2098,12 @@ function renderChartOnlyPanel() {
     <div class="ap-section">
       <div class="ap-section-title">Option Chain Data</div>
       <div class="ap-snapshot">
-        <div class="snap-item"><div class="si-label">PCR</div><div class="si-val ${pcrClass(d.pcr)}">${d.pcr != null ? d.pcr.toFixed(2) : '\u00E2\u0080\u0093'}</div></div>
+        <div class="snap-item"><div class="si-label">PCR</div><div class="si-val ${pcrClass(d.pcr)}">${d.pcr != null ? d.pcr.toFixed(2) : '\u2013'}</div></div>
         <div class="snap-item"><div class="si-label">Signal</div><div class="si-val">${sigPill(d.pcr_sig)}</div></div>
         <div class="snap-item"><div class="si-label">Buildup</div><div class="si-val">${buPill(d.buildup)}</div></div>
         <div class="snap-item"><div class="si-label">ATM IV</div><div class="si-val">${fmtIV(d.atm_iv)}</div></div>
-        <div class="snap-item"><div class="si-label">Max Pain</div><div class="si-val">\u00E2\u0082\u00B9${fmtPrice(d.max_pain)}</div></div>
-        <div class="snap-item"><div class="si-label">ATM CE/PE</div><div class="si-val">\u00E2\u0082\u00B9${fmtPrice(d.atm_ce)} / \u00E2\u0082\u00B9${fmtPrice(d.atm_pe)}</div></div>
+        <div class="snap-item"><div class="si-label">Max Pain</div><div class="si-val">\u20B9${fmtPrice(d.max_pain)}</div></div>
+        <div class="snap-item"><div class="si-label">ATM CE/PE</div><div class="si-val">\u20B9${fmtPrice(d.atm_ce)} / \u20B9${fmtPrice(d.atm_pe)}</div></div>
       </div>
     </div>
     ` : ''}
@@ -2120,7 +2120,7 @@ function renderChartOnlyPanel() {
 }
 
 function fmtNum(v) {
-  if (v == null || isNaN(v)) return '\u00E2\u0080\u0093';
+  if (v == null || isNaN(v)) return '\u2013';
   return Math.round(v).toLocaleString('en-IN');
 }
 
@@ -2132,69 +2132,69 @@ function buildReasons(d, dir) {
 
   // 1. Signal direction
   if (sig === 'BULLISH') {
-    reasons.push({ icon: '\u00F0\u009F\u0093\u0088', text: 'Strong <span class="rc-val">BULLISH</span> signal \u00E2\u0080\u0094 put writers dominating, market expects upside' });
+    reasons.push({ icon: '\uD83D\uDCC8', text: 'Strong <span class="rc-val">BULLISH</span> signal \u2014 put writers dominating, market expects upside' });
   } else if (sig === 'MILDLY_BULL') {
-    reasons.push({ icon: '\u00F0\u009F\u0093\u0088', text: 'Mildly <span class="rc-val">BULLISH</span> signal \u00E2\u0080\u0094 put OI building indicates support forming' });
+    reasons.push({ icon: '\uD83D\uDCC8', text: 'Mildly <span class="rc-val">BULLISH</span> signal \u2014 put OI building indicates support forming' });
   } else if (sig === 'BEARISH') {
-    reasons.push({ icon: '\u00F0\u009F\u0093\u0089', text: 'Strong <span class="rc-val">BEARISH</span> signal \u00E2\u0080\u0094 call writers dominating, market expects downside' });
+    reasons.push({ icon: '\uD83D\uDCC9', text: 'Strong <span class="rc-val">BEARISH</span> signal \u2014 call writers dominating, market expects downside' });
   } else if (sig === 'MILDLY_BEAR') {
-    reasons.push({ icon: '\u00F0\u009F\u0093\u0089', text: 'Mildly <span class="rc-val">BEARISH</span> signal \u00E2\u0080\u0094 call OI building indicates resistance forming' });
+    reasons.push({ icon: '\uD83D\uDCC9', text: 'Mildly <span class="rc-val">BEARISH</span> signal \u2014 call OI building indicates resistance forming' });
   }
 
   // 2. Buildup alignment
   const buLabels = { LONG_BUILD: 'Long Buildup', SHORT_BUILD: 'Short Buildup', SHORT_COVER: 'Short Covering', LONG_UNWIND: 'Long Unwinding' };
   const buDesc = {
-    LONG_BUILD: 'price up + OI up = fresh longs entering \u00E2\u0080\u0094 strong bullish conviction',
-    SHORT_BUILD: 'price down + OI up = fresh shorts entering \u00E2\u0080\u0094 strong bearish conviction',
-    SHORT_COVER: 'price up + OI down = shorts exiting \u00E2\u0080\u0094 buying pressure from covering',
-    LONG_UNWIND: 'price down + OI down = longs exiting \u00E2\u0080\u0094 selling pressure from unwinding'
+    LONG_BUILD: 'price up + OI up = fresh longs entering \u2014 strong bullish conviction',
+    SHORT_BUILD: 'price down + OI up = fresh shorts entering \u2014 strong bearish conviction',
+    SHORT_COVER: 'price up + OI down = shorts exiting \u2014 buying pressure from covering',
+    LONG_UNWIND: 'price down + OI down = longs exiting \u2014 selling pressure from unwinding'
   };
   if (bu !== 'NEUTRAL') {
-    reasons.push({ icon: '\u00F0\u009F\u0094\u0084', text: '<span class="rc-val">' + (buLabels[bu] || bu) + '</span> \u00E2\u0080\u0094 ' + (buDesc[bu] || 'OI and price confirm direction') });
+    reasons.push({ icon: '\uD83D\uDD04', text: '<span class="rc-val">' + (buLabels[bu] || bu) + '</span> \u2014 ' + (buDesc[bu] || 'OI and price confirm direction') });
   }
 
   // 3. PCR confirmation
   if (d.pcr != null) {
     if (d.pcr > 1.3 && isBull) {
-      reasons.push({ icon: '\u00E2\u009A\u0096\u00EF\u00B8\u008F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (strongly bullish) \u00E2\u0080\u0094 heavy PE writing supports rally' });
+      reasons.push({ icon: '\u2696\uFE0F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (strongly bullish) \u2014 heavy PE writing supports rally' });
     } else if (d.pcr > 1.0 && isBull) {
-      reasons.push({ icon: '\u00E2\u009A\u0096\u00EF\u00B8\u008F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (mildly bullish) \u00E2\u0080\u0094 more puts than calls written' });
+      reasons.push({ icon: '\u2696\uFE0F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (mildly bullish) \u2014 more puts than calls written' });
     } else if (d.pcr < 0.7 && !isBull) {
-      reasons.push({ icon: '\u00E2\u009A\u0096\u00EF\u00B8\u008F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (strongly bearish) \u00E2\u0080\u0094 heavy CE writing caps upside' });
+      reasons.push({ icon: '\u2696\uFE0F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (strongly bearish) \u2014 heavy CE writing caps upside' });
     } else if (d.pcr < 1.0 && !isBull) {
-      reasons.push({ icon: '\u00E2\u009A\u0096\u00EF\u00B8\u008F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (mildly bearish) \u00E2\u0080\u0094 more calls than puts written' });
+      reasons.push({ icon: '\u2696\uFE0F', text: 'PCR <span class="rc-val">' + d.pcr.toFixed(2) + '</span> (mildly bearish) \u2014 more calls than puts written' });
     }
   }
 
   // 4. Volume surge
   if ((d.vol_surge || 0) >= 2.0) {
-    reasons.push({ icon: '\u00F0\u009F\u0094\u00A5', text: 'Volume surge <span class="rc-val">' + d.vol_surge.toFixed(1) + 'x</span> \u00E2\u0080\u0094 significantly above avg, strong participation' });
+    reasons.push({ icon: '\uD83D\uDD25', text: 'Volume surge <span class="rc-val">' + d.vol_surge.toFixed(1) + 'x</span> \u2014 significantly above avg, strong participation' });
   } else if ((d.vol_surge || 0) >= 1.3) {
-    reasons.push({ icon: '\u00F0\u009F\u0093\u008A', text: 'Volume surge <span class="rc-val">' + d.vol_surge.toFixed(1) + 'x</span> \u00E2\u0080\u0094 above average, decent participation' });
+    reasons.push({ icon: '\uD83D\uDCCA', text: 'Volume surge <span class="rc-val">' + d.vol_surge.toFixed(1) + 'x</span> \u2014 above average, decent participation' });
   }
 
   // 5. Max pain context
   if (d.mp_dist != null && d.max_pain) {
     if (isBull && d.mp_dist < -1) {
-      reasons.push({ icon: '\u00F0\u009F\u00A7\u00B2', text: 'Max pain \u00E2\u0082\u00B9' + fmtPrice(d.max_pain) + ' is <span class="rc-val">' + Math.abs(d.mp_dist).toFixed(1) + '% above</span> \u00E2\u0080\u0094 price likely to gravitate up' });
+      reasons.push({ icon: '\uD83E\uDDF2', text: 'Max pain \u20B9' + fmtPrice(d.max_pain) + ' is <span class="rc-val">' + Math.abs(d.mp_dist).toFixed(1) + '% above</span> \u2014 price likely to gravitate up' });
     } else if (!isBull && d.mp_dist > 1) {
-      reasons.push({ icon: '\u00F0\u009F\u00A7\u00B2', text: 'Max pain \u00E2\u0082\u00B9' + fmtPrice(d.max_pain) + ' is <span class="rc-val">' + Math.abs(d.mp_dist).toFixed(1) + '% below</span> \u00E2\u0080\u0094 price likely to gravitate down' });
+      reasons.push({ icon: '\uD83E\uDDF2', text: 'Max pain \u20B9' + fmtPrice(d.max_pain) + ' is <span class="rc-val">' + Math.abs(d.mp_dist).toFixed(1) + '% below</span> \u2014 price likely to gravitate down' });
     }
   }
 
   // 6. Premium liquidity
   const prem = isBull ? d.atm_ce : d.atm_pe;
   if (prem && prem >= 30) {
-    reasons.push({ icon: '\u00F0\u009F\u0092\u00A7', text: 'ATM premium \u00E2\u0082\u00B9<span class="rc-val">' + fmtPrice(prem) + '</span> \u00E2\u0080\u0094 good liquidity, tight bid-ask spread expected' });
+    reasons.push({ icon: '\uD83D\uDCA7', text: 'ATM premium \u20B9<span class="rc-val">' + fmtPrice(prem) + '</span> \u2014 good liquidity, tight bid-ask spread expected' });
   } else if (prem && prem >= 15) {
-    reasons.push({ icon: '\u00F0\u009F\u0092\u00A7', text: 'ATM premium \u00E2\u0082\u00B9<span class="rc-val">' + fmtPrice(prem) + '</span> \u00E2\u0080\u0094 tradeable but watch spreads' });
+    reasons.push({ icon: '\uD83D\uDCA7', text: 'ATM premium \u20B9<span class="rc-val">' + fmtPrice(prem) + '</span> \u2014 tradeable but watch spreads' });
   }
 
   // 7. Score
   if ((d.score || 0) >= 70) {
-    reasons.push({ icon: '\u00F0\u009F\u008E\u00AF', text: 'Composite tradability score <span class="rc-val">' + d.score + '/100</span> \u00E2\u0080\u0094 high confluence across all metrics' });
+    reasons.push({ icon: '\uD83C\uDFAF', text: 'Composite tradability score <span class="rc-val">' + d.score + '/100</span> \u2014 high confluence across all metrics' });
   } else if ((d.score || 0) >= 50) {
-    reasons.push({ icon: '\u00F0\u009F\u008E\u00AF', text: 'Composite tradability score <span class="rc-val">' + d.score + '/100</span> \u00E2\u0080\u0094 good confluence of signals' });
+    reasons.push({ icon: '\uD83C\uDFAF', text: 'Composite tradability score <span class="rc-val">' + d.score + '/100</span> \u2014 good confluence of signals' });
   }
 
   return reasons;
@@ -2206,7 +2206,7 @@ function buildTradeRec(d, dir) {
   const ltp = d.ltp || 0;
   const lot = d.lot || 1;
 
-  // SL: hybrid \u00E2\u0080\u0094 15% premium stop AND 1% spot stop
+  // SL: hybrid \u2014 15% premium stop AND 1% spot stop
   const premSL = Math.round(entry * 0.85 * 100) / 100; // 15% premium drop
   const spotDelta = ltp * 0.01; // 1% spot move
   const slSpot = isBull ? (ltp - spotDelta) : (ltp + spotDelta);
@@ -2218,14 +2218,14 @@ function buildTradeRec(d, dir) {
   // Targets based on risk-reward
   const t1 = Math.round((entry + risk * 1.5) * 100) / 100;
   const t2 = Math.round((entry + risk * 2.5) * 100) / 100;
-  const rr = risk > 0 ? (1.5).toFixed(1) : '\u00E2\u0080\u0093';
+  const rr = risk > 0 ? (1.5).toFixed(1) : '\u2013';
 
   return {
-    strike: d.atm_strike || '\u00E2\u0080\u0093',
+    strike: d.atm_strike || '\u2013',
     entry: entry,
     sl: sl,
     slPct: '15',
-    slSpot: (isBull ? '< \u00E2\u0082\u00B9' : '> \u00E2\u0082\u00B9') + fmtPrice(slSpot),
+    slSpot: (isBull ? '< \u20B9' : '> \u20B9') + fmtPrice(slSpot),
     t1: t1,
     t2: t2,
     rr: rr,
@@ -2234,7 +2234,7 @@ function buildTradeRec(d, dir) {
   };
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Paper Trading \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Paper Trading ===
 let paperTradeCount = 0;
 
 async function enterPaperTrade(symbol, optionType, entry, sl, t1, t2) {
@@ -2254,7 +2254,7 @@ async function enterPaperTrade(symbol, optionType, entry, sl, t1, t2) {
     });
     const data = await resp.json();
     if (data.ok) {
-      showToast('Paper trade entered: ' + data.trade.id + ' ' + symbol + ' ' + optionType + ' @ \u00E2\u0082\u00B9' + entry.toFixed(2), 'info');
+      showToast('Paper trade entered: ' + data.trade.id + ' ' + symbol + ' ' + optionType + ' @ \u20B9' + entry.toFixed(2), 'info');
       closeAnalysis();
       updatePaperBadge();
     } else {
@@ -2283,7 +2283,7 @@ async function updatePaperBadge() {
 // Check paper trade count on load
 setTimeout(updatePaperBadge, 3000);
 
-// Row click \u00E2\u0086\u0092 open analysis for any stock
+// Row click \u2192 open analysis for any stock
 document.getElementById('tbody').addEventListener('click', function(e) {
   if (e.target.closest('.tv-link')) return; // Don't intercept TradingView links
   const tr = e.target.closest('tr');
@@ -2296,7 +2296,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && analysisSym) closeAnalysis();
 });
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Chat Panel \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Chat Panel ===
 let chatHistory = [];
 let chatOpen = false;
 let chatSending = false;
@@ -2323,7 +2323,7 @@ function toggleChat() {
 }
 
 function checkChatKey() {
-  // We'll try a lightweight test \u00E2\u0080\u0094 just check if the setup screen should show
+  // We'll try a lightweight test \u2014 just check if the setup screen should show
   // The server will tell us if the key is missing when we send a message
   const setup = document.getElementById('chatSetup');
   const area = document.getElementById('chatArea');
@@ -2331,7 +2331,7 @@ function checkChatKey() {
     setup.style.display = 'none';
     area.style.display = 'flex';
   }
-  // On first open, assume key is set \u00E2\u0080\u0094 server will tell us otherwise
+  // On first open, assume key is set \u2014 server will tell us otherwise
   if (!chatKeyOk && chatHistory.length === 0) {
     chatKeyOk = true;
     setup.style.display = 'none';
@@ -2361,7 +2361,7 @@ async function saveChatKey() {
       document.getElementById('chatSetup').style.display = 'none';
       document.getElementById('chatArea').style.display = 'flex';
       input.value = '';
-      addChatBubble('agent', '\u00F0\u009F\u0094\u0091 API key saved! I\'m ready to help. Ask me anything about the market.');
+      addChatBubble('agent', '\uD83D\uDD11 API key saved! I\'m ready to help. Ask me anything about the market.');
       setTimeout(() => document.getElementById('chatInput').focus(), 100);
     } else {
       alert('Failed to save key: ' + (data.error || 'Unknown error'));
@@ -2428,7 +2428,7 @@ function askQuantaAbout() {
   if (!chatOpen) toggleChat();
   // Pre-fill with question about this stock
   const input = document.getElementById('chatInput');
-  input.value = 'Analyze ' + sym + ' for me \u00E2\u0080\u0094 what\'s the setup, should I trade it?';
+  input.value = 'Analyze ' + sym + ' for me \u2014 what\'s the setup, should I trade it?';
   input.focus();
 }
 
@@ -2469,7 +2469,7 @@ async function sendChatMessage() {
       chatHistory.push({ role: 'assistant', content: reply });
     }
   } catch (e) {
-    addChatBubble('agent', '\u00E2\u009D\u008C Connection error: ' + e.message);
+    addChatBubble('agent', '\u274C Connection error: ' + e.message);
   } finally {
     chatSending = false;
     document.getElementById('chatSendBtn').disabled = false;
@@ -2482,7 +2482,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && chatOpen) toggleChat();
 });
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Init \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Init ===
 // Set default sort indicator
 document.querySelector('#headerRow th[data-key="score"]').classList.add('sort-desc');
 
@@ -2510,7 +2510,7 @@ setTimeout(function() {
 }, 6000);
 </script>
 <script>
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 TradingView Widget Chart \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === TradingView Widget Chart ===
 function switchChartTf(sym, interval, btn) {
   // Update active button
   document.querySelectorAll('#chartTfBar .chart-tf-btn').forEach(b => b.classList.remove('active'));

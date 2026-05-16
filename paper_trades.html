@@ -578,7 +578,7 @@ body {
 
 <!-- Navigation -->
 <nav class="q-nav">
-  <a href="/" class="q-nav-brand"><span class="brand-icon">Q</span>QUANTRA</a>
+  <a href="/" class="q-nav-brand"><span class="brand-icon">Q</span>uantra</a>
   <div class="q-nav-links">
     <a href="/">Dashboard</a>
     <a href="/paper" class="active">Paper Trades</a>
@@ -676,7 +676,7 @@ body {
 </div>
 
 <script>
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 State \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === State ===
 let trades = [];
 let summary = {};
 let activeTab = 'open';
@@ -685,29 +685,29 @@ let reconnectDelay = 3000;
 let reconnectTimer = null;
 let exitTradeId = null;
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Formatting \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Formatting ===
 function fmtCurrency(v) {
- if (v == null || isNaN(v)) return '\u00E2\u0082\u00B90';
+ if (v == null || isNaN(v)) return '\u20B90';
  const sign = v >= 0 ? '' : '-';
  const abs = Math.abs(v);
- if (abs >= 10000000) return sign + '\u00E2\u0082\u00B9' + (abs / 10000000).toFixed(2) + 'Cr';
- if (abs >= 100000) return sign + '\u00E2\u0082\u00B9' + (abs / 100000).toFixed(2) + 'L';
- if (abs >= 1000) return sign + '\u00E2\u0082\u00B9' + Math.round(abs).toLocaleString('en-IN');
- return sign + '\u00E2\u0082\u00B9' + abs.toFixed(2);
+ if (abs >= 10000000) return sign + '\u20B9' + (abs / 10000000).toFixed(2) + 'Cr';
+ if (abs >= 100000) return sign + '\u20B9' + (abs / 100000).toFixed(2) + 'L';
+ if (abs >= 1000) return sign + '\u20B9' + Math.round(abs).toLocaleString('en-IN');
+ return sign + '\u20B9' + abs.toFixed(2);
 }
 
 function fmtPct(v) {
- if (v == null || isNaN(v)) return '\u00E2\u0080\u0093';
+ if (v == null || isNaN(v)) return '\u2013';
  return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 }
 
 function fmtPrice(v) {
- if (v == null || v === 0) return '\u00E2\u0080\u0093';
+ if (v == null || v === 0) return '\u2013';
  return v.toFixed(2);
 }
 
 function fmtTime(iso) {
- if (!iso) return '\u00E2\u0080\u0093';
+ if (!iso) return '\u2013';
  const d = new Date(iso);
  return d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, day: '2-digit', month: 'short' });
 }
@@ -717,7 +717,7 @@ function pnlClass(v) {
  return v >0 ? 'positive' : 'negative';
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Summary Update \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Summary Update ===
 function updateSummary() {
  const s = summary;
 
@@ -725,7 +725,7 @@ function updateSummary() {
  totalEl.textContent = fmtCurrency(s.total_pnl || 0);
  totalEl.className = 'sc-val ' + pnlClass(s.total_pnl);
  document.getElementById('totalPnlSub').textContent =
- (s.open_count || 0) + ' open \u00C2\u00B7 ' + (s.closed_count || 0) + ' closed';
+ (s.open_count || 0) + ' open \u00B7 ' + (s.closed_count || 0) + ' closed';
 
  const openEl = document.getElementById('openPnl');
  openEl.textContent = fmtCurrency(s.total_open_pnl || 0);
@@ -739,9 +739,9 @@ function updateSummary() {
 
  const wrEl = document.getElementById('winRate');
  const wr = s.win_rate || 0;
- wrEl.textContent = (s.wins + s.losses) >0 ? wr.toFixed(1) + '%' : '\u00E2\u0080\u0093';
+ wrEl.textContent = (s.wins + s.losses) >0 ? wr.toFixed(1) + '%' : '\u2013';
  wrEl.className = 'sc-val ' + (wr >= 50 ? 'positive' : wr >0 ? 'negative' : 'neutral');
- document.getElementById('winRateSub').textContent = 'W: ' + (s.wins || 0) + ' \u00C2\u00B7 L: ' + (s.losses || 0);
+ document.getElementById('winRateSub').textContent = 'W: ' + (s.wins || 0) + ' \u00B7 L: ' + (s.losses || 0);
 
  const ocEl = document.getElementById('openCount');
  ocEl.textContent = s.open_count || 0;
@@ -755,7 +755,7 @@ function updateSummary() {
  document.getElementById('tabAllCount').textContent = trades.length;
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Tab Switching \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Tab Switching ===
 function switchTab(tab) {
  activeTab = tab;
  document.querySelectorAll('.tab-btn').forEach(b =>b.classList.remove('active'));
@@ -763,7 +763,7 @@ function switchTab(tab) {
  renderTrades();
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Render Trades \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Render Trades ===
 function renderTrades() {
  const container = document.getElementById('tradesContainer');
 
@@ -789,9 +789,9 @@ function renderTrades() {
  const msg = activeTab === 'open' ? 'No open positions' :
  activeTab === 'closed' ? 'No closed trades yet' : 'No paper trades yet';
  const sub = activeTab === 'open'
- ? '\u00F0\u009F\u00A4\u0096 Auto-trader scans every 5 min during market hours (9:30\u00E2\u0080\u009314:50 IST)<br>Logic: NIFTY regime \u00E2\u0086\u0092 Sector alignment \u00E2\u0086\u0092 OI + Volume + Score \u00E2\u0086\u0092 ITM option<br>Or use the <a href="/" style="color:var(--blue)">Dashboard</a>to enter trades manually'
+ ? '\uD83E\uDD16 Auto-trader scans every 5 min during market hours (9:30\u201314:50 IST)<br>Logic: NIFTY regime \u2192 Sector alignment \u2192 OI + Volume + Score \u2192 ITM option<br>Or use the <a href="/" style="color:var(--blue)">Dashboard</a>to enter trades manually'
  : 'Auto trades and manual trades appear here once they close';
- container.innerHTML = `<div class="trades-empty"><div class="te-icon">${activeTab === 'open' ? '\u00F0\u009F\u00A4\u0096' : '\u00F0\u009F\u0093\u008B'}</div><div class="te-text">${msg}</div><div class="te-sub">${sub}</div></div>`;
+ container.innerHTML = `<div class="trades-empty"><div class="te-icon">${activeTab === 'open' ? '\uD83E\uDD16' : '\uD83D\uDCCB'}</div><div class="te-text">${msg}</div><div class="te-sub">${sub}</div></div>`;
  return;
  }
 
@@ -826,13 +826,13 @@ function buildTradeCard(t) {
  // Alerts
  let alerts = '';
  if (isOpen) {
- if (t.sl_hit) alerts += '<span class="tc-alert alert-sl">\u00E2\u009A\u00A0 SL HIT</span>';
- if (t.t2_hit) alerts += '<span class="tc-alert alert-t2">\u00F0\u009F\u008E\u00AF T2 HIT</span>';
- else if (t.t1_hit) alerts += '<span class="tc-alert alert-t1">\u00F0\u009F\u008E\u00AF T1 HIT</span>';
- if (t.sl_premium >= t.entry_premium && t.entry_premium >0) alerts += '<span class="tc-alert alert-t1" style="background:rgba(41,98,255,0.15);color:#5B8DEF">\u00F0\u009F\u0094\u0092 COST-FREE</span>';
+ if (t.sl_hit) alerts += '<span class="tc-alert alert-sl">\u26A0 SL HIT</span>';
+ if (t.t2_hit) alerts += '<span class="tc-alert alert-t2">\uD83C\uDFAF T2 HIT</span>';
+ else if (t.t1_hit) alerts += '<span class="tc-alert alert-t1">\uD83C\uDFAF T1 HIT</span>';
+ if (t.sl_premium >= t.entry_premium && t.entry_premium >0) alerts += '<span class="tc-alert alert-t1" style="background:rgba(41,98,255,0.15);color:#5B8DEF">\uD83D\uDD12 COST-FREE</span>';
  } else {
  if (t.exit_reason) {
- const reasonLabel = { SL_HIT: '\u00E2\u009B\u0094 SL Hit', T1_HIT: '\u00E2\u009C\u0085 T1 Hit', T2_HIT: '\u00F0\u009F\u008E\u00AF T2 Hit', MANUAL: '\u00F0\u009F\u0094\u00A7 Manual', EOD: '\u00F0\u009F\u0095\u0090 EOD' };
+ const reasonLabel = { SL_HIT: '\u26D4 SL Hit', T1_HIT: '\u2705 T1 Hit', T2_HIT: '\uD83C\uDFAF T2 Hit', MANUAL: '\uD83D\uDD27 Manual', EOD: '\uD83D\uDD50 EOD' };
  alerts += `<span class="tc-alert ${pnl >0 ? 'alert-t1' : 'alert-sl'}">${reasonLabel[t.exit_reason] || t.exit_reason}</span>`;
  }
  }
@@ -850,8 +850,8 @@ function buildTradeCard(t) {
 
  // Auto-trade badge
  const typeBadge = t.auto_trade
- ? '<span class="auto-badge">\u00F0\u009F\u00A4\u0096 AUTO</span>'
- : '<span class="manual-badge">\u00E2\u009C\u008B MANUAL</span>';
+ ? '<span class="auto-badge">\uD83E\uDD16 AUTO</span>'
+ : '<span class="manual-badge">\u270B MANUAL</span>';
 
  // WF tier badge
  let wfBadge = '';
@@ -864,7 +864,7 @@ function buildTradeCard(t) {
  if (t.wf_side) {
  const sideOk = t.side_match;
  const sideCls = sideOk ? 'wf-side-match' : 'wf-side-contra';
- const sideIcon = sideOk ? '\u00E2\u009C\u0093' : '\u00E2\u009C\u0097';
+ const sideIcon = sideOk ? '\u2713' : '\u2717';
  wfBadge += `<span class="wf-side-tag ${sideCls}">${sideIcon} ${t.wf_side}</span>`;
  }
  }
@@ -904,8 +904,8 @@ function buildTradeCard(t) {
 
  // Exit reason label
  const exitReasonLabel = {
- SL_HIT: '\u00E2\u009B\u0094 SL Hit', T1_HIT: '\u00E2\u009C\u0085 T1 Hit', T2_HIT: '\u00F0\u009F\u008E\u00AF T2 Hit',
- MANUAL: '\u00F0\u009F\u0094\u00A7 Manual', EOD: '\u00F0\u009F\u0095\u0090 EOD', EOD_EXIT: '\u00F0\u009F\u0095\u0090 EOD Auto'
+ SL_HIT: '\u26D4 SL Hit', T1_HIT: '\u2705 T1 Hit', T2_HIT: '\uD83C\uDFAF T2 Hit',
+ MANUAL: '\uD83D\uDD27 Manual', EOD: '\uD83D\uDD50 EOD', EOD_EXIT: '\uD83D\uDD50 EOD Auto'
  };
 
  card.innerHTML = `
@@ -927,26 +927,26 @@ function buildTradeCard(t) {
  <div class="tc-progress-fill" style="width:${progressPct.toFixed(1)}%;background:${progressColor}"></div>
  </div>
  <div class="tc-progress-markers">
- <span>SL \u00E2\u0082\u00B9${fmtPrice(t.sl_premium)}</span>
- <span>Entry \u00E2\u0082\u00B9${fmtPrice(t.entry_premium)}</span>
- <span>T1 \u00E2\u0082\u00B9${fmtPrice(t.target1)}</span>
- <span>T2 \u00E2\u0082\u00B9${fmtPrice(t.target2)}</span>
+ <span>SL \u20B9${fmtPrice(t.sl_premium)}</span>
+ <span>Entry \u20B9${fmtPrice(t.entry_premium)}</span>
+ <span>T1 \u20B9${fmtPrice(t.target1)}</span>
+ <span>T2 \u20B9${fmtPrice(t.target2)}</span>
  </div>` : ''}
  <div class="tc-body">
- <div class="tc-cell"><div class="tcc-label">Entry</div><div class="tcc-val">\u00E2\u0082\u00B9${fmtPrice(t.entry_premium)}</div></div>
+ <div class="tc-cell"><div class="tcc-label">Entry</div><div class="tcc-val">\u20B9${fmtPrice(t.entry_premium)}</div></div>
  ${isOpen
- ? `<div class="tc-cell"><div class="tcc-label">Current</div><div class="tcc-val ${pnlClass(pnl)}">\u00E2\u0082\u00B9${fmtPrice(t.current_premium)}</div></div>`
- : `<div class="tc-cell"><div class="tcc-label">Exit</div><div class="tcc-val">\u00E2\u0082\u00B9${fmtPrice(t.exit_premium)}</div></div>`}
- <div class="tc-cell"><div class="tcc-label">SL${t.sl_method ? ' <span class="sl-method-tag">(' + t.sl_method + ')</span>' : ''}</div><div class="tcc-val" style="color:var(--red)">\u00E2\u0082\u00B9${fmtPrice(t.sl_premium)}${t.sl_spot_trigger ? ' / Spot \u00E2\u0082\u00B9'+fmtPrice(t.sl_spot_trigger) : ''}</div></div>
- <div class="tc-cell"><div class="tcc-label">T1 / T2${t.tgt_method ? ' <span class="sl-method-tag">(' + t.tgt_method + ')</span>' : ''}</div><div class="tcc-val" style="color:var(--green)">\u00E2\u0082\u00B9${fmtPrice(t.target1)} / \u00E2\u0082\u00B9${fmtPrice(t.target2)}</div></div>
- <div class="tc-cell"><div class="tcc-label">Qty</div><div class="tcc-val">${qty} (${t.lots}\u00C3\u0097${t.lot_size})</div></div>
- <div class="tc-cell"><div class="tcc-label">Spot @ Entry</div><div class="tcc-val">\u00E2\u0082\u00B9${fmtPrice(t.spot_at_entry)}</div></div>
- <div class="tc-cell"><div class="tcc-label">Sector</div><div class="tcc-val">${t.sector || '\u00E2\u0080\u0093'}</div></div>
- <div class="tc-cell"><div class="tcc-label">Rank</div><div class="tcc-val">${t.rank_score ? t.rank_score.toFixed(0) : '\u00E2\u0080\u0093'} ${t.score_at_entry ? '(base ' + t.score_at_entry + ')' : ''}</div></div>
+ ? `<div class="tc-cell"><div class="tcc-label">Current</div><div class="tcc-val ${pnlClass(pnl)}">\u20B9${fmtPrice(t.current_premium)}</div></div>`
+ : `<div class="tc-cell"><div class="tcc-label">Exit</div><div class="tcc-val">\u20B9${fmtPrice(t.exit_premium)}</div></div>`}
+ <div class="tc-cell"><div class="tcc-label">SL${t.sl_method ? ' <span class="sl-method-tag">(' + t.sl_method + ')</span>' : ''}</div><div class="tcc-val" style="color:var(--red)">\u20B9${fmtPrice(t.sl_premium)}${t.sl_spot_trigger ? ' / Spot \u20B9'+fmtPrice(t.sl_spot_trigger) : ''}</div></div>
+ <div class="tc-cell"><div class="tcc-label">T1 / T2${t.tgt_method ? ' <span class="sl-method-tag">(' + t.tgt_method + ')</span>' : ''}</div><div class="tcc-val" style="color:var(--green)">\u20B9${fmtPrice(t.target1)} / \u20B9${fmtPrice(t.target2)}</div></div>
+ <div class="tc-cell"><div class="tcc-label">Qty</div><div class="tcc-val">${qty} (${t.lots}${t.lot_size})</div></div>
+ <div class="tc-cell"><div class="tcc-label">Spot @ Entry</div><div class="tcc-val">\u20B9${fmtPrice(t.spot_at_entry)}</div></div>
+ <div class="tc-cell"><div class="tcc-label">Sector</div><div class="tcc-val">${t.sector || '\u2013'}</div></div>
+ <div class="tc-cell"><div class="tcc-label">Rank</div><div class="tcc-val">${t.rank_score ? t.rank_score.toFixed(0) : '\u2013'} ${t.score_at_entry ? '(base ' + t.score_at_entry + ')' : ''}</div></div>
  </div>
  ${reasonBlock}
  <div class="tc-footer">
- <span class="tc-time">${isOpen ? 'Entered ' + fmtTime(t.entry_time) : fmtTime(t.entry_time) + ' \u00E2\u0086\u0092 ' + fmtTime(t.exit_time)}</span>
+ <span class="tc-time">${isOpen ? 'Entered ' + fmtTime(t.entry_time) : fmtTime(t.entry_time) + ' \u2192 ' + fmtTime(t.exit_time)}</span>
  <div class="tc-alerts">${alerts}</div>
  <div class="tc-actions">${actions}</div>
  </div>
@@ -955,7 +955,7 @@ function buildTradeCard(t) {
  return card;
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Trade Actions \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Trade Actions ===
 async function exitTrade(id, reason, exitPremium) {
  try {
  const resp = await fetch('/api/paper/exit', {
@@ -965,7 +965,7 @@ async function exitTrade(id, reason, exitPremium) {
  });
  const data = await resp.json();
  if (data.ok) {
- showToast('Trade ' + id + ' exited \u00E2\u0080\u0094 P&L: ' + fmtCurrency(data.trade.final_pnl), data.trade.final_pnl >= 0 ? 'success' : 'error');
+ showToast('Trade ' + id + ' exited \u2014 P&L: ' + fmtCurrency(data.trade.final_pnl), data.trade.final_pnl >= 0 ? 'success' : 'error');
  } else {
  showToast('Exit failed: ' + (data.error || 'Unknown error'), 'error');
  }
@@ -983,8 +983,8 @@ function showExitModal(id) {
  document.getElementById('exitModalBody').innerHTML = `
  <p>Exit <strong>${t.symbol} ${t.option_type} ${t.strike}</strong>at current market premium?</p>
  <p style="margin-top:8px">
- Entry: <strong>\u00E2\u0082\u00B9${fmtPrice(t.entry_premium)}</strong>\u00C2\u00B7
- Current: <strong class="${pnlClass(pnl)}">\u00E2\u0082\u00B9${fmtPrice(t.current_premium)}</strong>\u00C2\u00B7
+ Entry: <strong>\u20B9${fmtPrice(t.entry_premium)}</strong>\u00B7
+ Current: <strong class="${pnlClass(pnl)}">\u20B9${fmtPrice(t.current_premium)}</strong>\u00B7
  P&L: <strong class="${pnlClass(pnl)}">${fmtCurrency(pnl)}</strong>
  </p>
  `;
@@ -1003,7 +1003,7 @@ function confirmExit() {
  }
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 WebSocket \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === WebSocket ===
 function connectWS() {
  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
  const url = proto + '//' + location.host + '/ws';
@@ -1041,13 +1041,13 @@ function connectWS() {
  if (msg.type === 'paper_exit' && msg.trades) {
  for (const t of msg.trades) {
  const pnl = t.final_pnl || 0;
- const reason = t.exit_reason === 'SL_HIT' ? '\u00E2\u009B\u0094 SL Hit' : t.exit_reason === 'T2_HIT' ? '\u00F0\u009F\u008E\u00AF T2 Hit' : t.exit_reason === 'EOD_EXIT' ? '\u00F0\u009F\u0095\u0090 EOD' : t.exit_reason;
- showToast('AUTO-EXIT: ' + t.symbol + ' ' + t.option_type + ' ' + reason + ' \u00E2\u0080\u0094 P&L: ' + fmtCurrency(pnl), pnl >= 0 ? 'success' : 'error');
+ const reason = t.exit_reason === 'SL_HIT' ? '\u26D4 SL Hit' : t.exit_reason === 'T2_HIT' ? '\uD83C\uDFAF T2 Hit' : t.exit_reason === 'EOD_EXIT' ? '\uD83D\uDD50 EOD' : t.exit_reason;
+ showToast('AUTO-EXIT: ' + t.symbol + ' ' + t.option_type + ' ' + reason + ' \u2014 P&L: ' + fmtCurrency(pnl), pnl >= 0 ? 'success' : 'error');
  }
  }
  if (msg.type === 'auto_trade' && msg.trade) {
  const at = msg.trade;
- showToast('\u00F0\u009F\u00A4\u0096 AUTO TRADE: ' + at.symbol + ' ' + at.option_type + ' ' + at.strike + ' @ \u00E2\u0082\u00B9' + fmtPrice(at.entry_premium) + ' \u00E2\u0080\u0094 ' + (at.signals || []).join(', '), 'success');
+ showToast('\uD83E\uDD16 AUTO TRADE: ' + at.symbol + ' ' + at.option_type + ' ' + at.strike + ' @ \u20B9' + fmtPrice(at.entry_premium) + ' \u2014 ' + (at.signals || []).join(', '), 'success');
  }
  } catch (err) {
  console.error('WS parse error:', err);
@@ -1091,7 +1091,7 @@ async function fetchTrades() {
  }
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Toast \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Toast ===
 let toastTimer = null;
 function showToast(msg, level) {
  const el = document.getElementById('toast');
@@ -1101,12 +1101,12 @@ function showToast(msg, level) {
  toastTimer = setTimeout(() =>el.classList.remove('show'), 5000);
 }
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Keyboard shortcuts \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Keyboard shortcuts ===
 document.addEventListener('keydown', function(e) {
  if (e.key === 'Escape') closeExitModal();
 });
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Auto-Trade Scanner \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Auto-Trade Scanner ===
 let scannerData = null;
 
 async function fetchScannerStatus() {
@@ -1145,16 +1145,16 @@ function updateScannerPanel() {
 
  // Info
  const last = d.last_scan || {};
- const regime = last.regime || d.regime || '\u00E2\u0080\u0094';
+ const regime = last.regime || d.regime || '\u2014';
  const regimeEl = document.getElementById('siRegime');
- regimeEl.innerHTML = `<span class="scanner-regime ${regime === 'BULLISH' ? 'regime-bull' : regime === 'BEARISH' ? 'regime-bear' : 'regime-neutral'}">${regime === 'BULLISH' ? '\u00E2\u0096\u00B2' : regime === 'BEARISH' ? '\u00E2\u0096\u00BC' : '\u00E2\u0080\u0094'} ${regime}</span>`;
+ regimeEl.innerHTML = `<span class="scanner-regime ${regime === 'BULLISH' ? 'regime-bull' : regime === 'BEARISH' ? 'regime-bear' : 'regime-neutral'}">${regime === 'BULLISH' ? '\u25B2' : regime === 'BEARISH' ? '\u25BC' : '\u2014'} ${regime}</span>`;
 
  const breadth = last.breadth || last.regime_details?.breadth_pct;
- document.getElementById('siBreadth').textContent = breadth != null ? breadth.toFixed(0) + '%' : '\u00E2\u0080\u0094';
+ document.getElementById('siBreadth').textContent = breadth != null ? breadth.toFixed(0) + '%' : '\u2014';
  document.getElementById('siScans').textContent = d.scan_count || 0;
  document.getElementById('siTrades').textContent = (d.today_auto_trades || 0) + ' / ' + (d.max_per_day || 2);
- document.getElementById('siCandidates').textContent = last.candidates_found != null ? last.candidates_found : '\u00E2\u0080\u0094';
- document.getElementById('siSkip').textContent = last.skip_reason || '\u00E2\u0080\u0094';
+ document.getElementById('siCandidates').textContent = last.candidates_found != null ? last.candidates_found : '\u2014';
+ document.getElementById('siSkip').textContent = last.skip_reason || '\u2014';
 
  // WF config info
  const wf = d.wf_config;
@@ -1187,11 +1187,11 @@ async function triggerScan() {
  const resp = await fetch('/api/paper/auto-scan', { method: 'POST' });
  const result = await resp.json();
  if (result.trades_entered && result.trades_entered.length >0) {
- showToast('Scan complete \u00E2\u0080\u0094 ' + result.trades_entered.length + ' trade(s) entered!', 'success');
+ showToast('Scan complete \u2014 ' + result.trades_entered.length + ' trade(s) entered!', 'success');
  } else if (result.skip_reason) {
  showToast('Scan: ' + result.skip_reason, 'error');
  } else {
- showToast('Scan complete \u00E2\u0080\u0094 no trades entered', 'success');
+ showToast('Scan complete \u2014 no trades entered', 'success');
  }
  setTimeout(fetchScannerStatus, 500);
  } catch (e) {
@@ -1205,7 +1205,7 @@ async function triggerScan() {
 // Poll scanner status every 30 seconds
 setInterval(fetchScannerStatus, 30000);
 
-// \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080 Init \u00E2\u0094\u0080\u00E2\u0094\u0080\u00E2\u0094\u0080
+// === Init ===
 connectWS();
 fetchScannerStatus();
 </script>
