@@ -1033,6 +1033,70 @@ thead th.col-sym { z-index: 15; background: #161a25; }
   background: rgba(41,98,255,0.2); border-color: var(--blue);
 }
 
+/* ââ Nav Bar (consistent across pages) ââ */
+.nav-main-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  height: 46px;
+  flex-shrink: 0;
+  z-index: 101;
+  gap: 0;
+}
+.nav-main-bar .nav-logo {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+  padding-right: 20px;
+  border-right: 1px solid var(--border);
+  margin-right: 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+}
+.nav-main-bar .nav-links {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+.nav-main-bar .nav-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-main-bar .nav-links a:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+.nav-main-bar .nav-links a.active {
+  color: var(--blue);
+  background: rgba(41,98,255,0.12);
+}
+.nav-main-bar .nav-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+.nav-main-bar .nav-status .conn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ââ Restyle header-brand to be hidden (moved to nav) ââ */
 
 
 /* ââ Restyle header-controls for cleaner grouping ââ */
@@ -1169,8 +1233,193 @@ thead th.col-sym { z-index: 15; background: #161a25; }
     <span class="conn-dot" id="connDot"></span>
     <span id="connText">Connecting...</span>
     <span id="updateTime">--:--:--</span>
+    <span id="stockCount" style="font-weight:600; color:var(--text);">0 / 0</span>
   </div>
 </nav>
+
+
+
+<!-- Header Row 2: Controls Bar -->
+<div class="header-controls">
+  <div class="filters">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search symbol...">
+    <select class="filter-select" id="sectorFilter">
+      <option value="">All Sectors</option>
+      <option value="IT">IT</option>
+      <option value="BANK">BANK</option>
+      <option value="PSU_BANK">PSU BANK</option>
+      <option value="FIN">FIN</option>
+      <option value="AUTO">AUTO</option>
+      <option value="METAL">METAL</option>
+      <option value="PHARMA">PHARMA</option>
+      <option value="FMCG">FMCG</option>
+      <option value="ENERGY">ENERGY</option>
+      <option value="REALTY">REALTY</option>
+      <option value="INFRA">INFRA</option>
+      <option value="CONSUMER">CONSUMER</option>
+      <option value="HEALTH">HEALTH</option>
+      <option value="MEDIA">MEDIA</option>
+      <option value="INSURANCE">INSURANCE</option>
+    </select>
+    <select class="filter-select" id="signalFilter">
+      <option value="">All Signals</option>
+      <option value="BULLISH">Bullish</option>
+      <option value="MILDLY_BULL">Mildly Bullish</option>
+      <option value="BEARISH">Bearish</option>
+      <option value="MILDLY_BEAR">Mildly Bearish</option>
+      <option value="NEUTRAL">Neutral</option>
+    </select>
+    <select class="filter-select" id="buildupFilter">
+      <option value="">All Buildup</option>
+      <option value="LONG_BUILD">Long Buildup</option>
+      <option value="SHORT_BUILD">Short Buildup</option>
+      <option value="LONG_UNWIND">Long Unwind</option>
+      <option value="SHORT_COVER">Short Cover</option>
+    </select>
+    <button class="btn-toggle btn-n50" id="n50Btn" onclick="toggleN50()">NIFTY 50</button>
+    <button class="btn-toggle btn-poised" id="poisedBtn" onclick="togglePoised()">ð¯ Trade Ready</button>
+    <div class="col-toggles">
+      <button class="btn-toggle" data-group="pricedetail" onclick="toggleColGroup('pricedetail')">Price Detail</button>
+      <button class="btn-toggle" data-group="vol" onclick="toggleColGroup('vol')">Volume</button>
+      <button class="btn-toggle" data-group="oi" onclick="toggleColGroup('oi')">OI</button>
+      <button class="btn-toggle" data-group="opt" onclick="toggleColGroup('opt')">Options</button>
+    </div>
+    <div class="view-presets">
+      <button class="btn-toggle" onclick="setViewMode('compact')" title="Hide all detail columns">Compact</button>
+      <button class="btn-toggle" onclick="setViewMode('full')" title="Show all columns">Full</button>
+    </div>
+    <button class="btn-toggle" id="heatToggle" onclick="toggleHeatmap()">Heatmap</button>
+    <a href="/sectors" class="btn-toggle" style="text-decoration:none;text-align:center;font-size:11px;padding:5px 10px;border-color:#4DD0C0;color:#4DD0C0">ð­ Sectors</a>
+    <a href="/paper" class="btn-toggle" style="text-decoration:none;text-align:center;font-size:11px;padding:5px 10px;border-color:var(--purple);color:var(--purple)" id="paperLink">ð Paper Trades <span id="paperBadge" style="display:none;background:var(--purple);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:3px">0</span></a>
+    <a href="/divergence" class="btn-toggle" style="text-decoration:none;text-align:center;font-size:11px;padding:5px 10px;border-color:#18ffff;color:#18ffff">ð Scanner</a>
+  </div>
+</div>
+
+<!-- Sector Heatmap -->
+<div class="heatmap-bar collapsed" id="heatmapBar"></div>
+
+<!-- Top Picks -->
+<div class="top-picks-bar" id="topPicksBar">
+  <span class="top-picks-label">ð¯ TOP PICKS</span>
+  <span class="top-picks-empty" id="topPicksEmpty">Waiting for chain dataâ¦</span>
+</div>
+
+<!-- Table -->
+<div class="table-wrap" id="tableWrap">
+<table>
+<thead>
+<tr class="col-group-row">
+  <th colspan="8"></th>
+  <th colspan="5" class="g-pricedetail">Price Detail</th>
+  <th colspan="2" class="g-vol">Volume</th>
+  <th colspan="4" class="g-oi">OI Detail</th>
+  <th colspan="6" class="g-opt">Options</th>
+</tr>
+<tr id="headerRow">
+  <!-- Always visible -->
+  <th class="col-score w-score" data-key="score">Score</th>
+  <th class="col-sym w-sym" data-key="symbol">Symbol</th>
+  <th class="col-sector w-sector" data-key="sector">Sector</th>
+  <th class="w-price" data-key="ltp">LTP</th>
+  <th class="w-pct" data-key="chg_pct">Chg%</th>
+  <th class="w-sig" data-key="pcr_sig">Signal</th>
+  <th class="w-sig" data-key="buildup">Buildup</th>
+  <th class="w-small" data-key="prem_ok">Prem</th>
+  <!-- Price Detail group -->
+  <th class="w-pct g-pricedetail" data-key="gap_pct">Gap%</th>
+  <th class="w-price g-pricedetail" data-key="open">Open</th>
+  <th class="w-price g-pricedetail" data-key="high">High</th>
+  <th class="w-price g-pricedetail" data-key="low">Low</th>
+  <th class="w-pct g-pricedetail" data-key="range_pct">Range%</th>
+  <!-- Volume group -->
+  <th class="w-vol g-vol" data-key="vol">Volume</th>
+  <th class="w-small g-vol" data-key="vol_surge">Surge</th>
+  <!-- OI group -->
+  <th class="w-small g-oi" data-key="pcr">PCR</th>
+  <th class="w-oi g-oi" data-key="ce_oi_chg">CE OI Chg</th>
+  <th class="w-oi g-oi" data-key="pe_oi_chg">PE OI Chg</th>
+  <th class="w-oi g-oi" data-key="net_oi">Net OI</th>
+  <!-- Options group -->
+  <th class="w-small g-opt" data-key="atm_iv">IV%</th>
+  <th class="w-price g-opt" data-key="max_pain">MaxPain</th>
+  <th class="w-pct g-opt" data-key="mp_dist">MP Dist%</th>
+  <th class="w-prem g-opt" data-key="atm_ce">CE Prem</th>
+  <th class="w-prem g-opt" data-key="atm_pe">PE Prem</th>
+  <th class="w-small g-opt" data-key="lot">Lot</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <span id="footerFilter">Showing all stocks</span>
+  <span id="footerFresh">LTP: -- | OHLC: -- | Chain: --</span>
+  <span id="footerConn">--</span>
+</div>
+
+<!-- Analysis Panel Overlay + Slide-out -->
+<div class="analysis-overlay" id="analysisOverlay" onclick="closeAnalysis()"></div>
+<div class="analysis-panel" id="analysisPanel">
+  <div class="ap-header">
+    <span class="ap-sym" id="apSym">â</span>
+    <span id="apBadges"></span>
+    <button class="ap-ask-quanta" id="apAskBtn" onclick="askQuantaAbout()" title="Ask Quanta about this stock">ð¬ Ask</button>
+    <button class="ap-close" onclick="closeAnalysis()">â</button>
+  </div>
+  <div class="ap-body" id="apBody">
+    <!-- dynamically rendered -->
+  </div>
+</div>
+
+<!-- Chat FAB + Panel -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Chat with Quanta">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
+</button>
+
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <div class="chat-avatar">Q</div>
+    <div class="chat-head-info">
+      <div class="chat-name">Quanta</div>
+      <div class="chat-status">Live Â· reading dashboard</div>
+    </div>
+    <button class="chat-close-btn" onclick="toggleChat()">â</button>
+  </div>
+
+  <!-- Setup screen (shown if no API key) -->
+  <div class="chat-setup" id="chatSetup" style="display:none;">
+    <div class="setup-icon">ð</div>
+    <div class="setup-title">Connect Quanta AI</div>
+    <div class="setup-desc">Enter your Anthropic API key to enable<br>AI-powered trading chat.</div>
+    <input type="password" id="chatKeyInput" placeholder="sk-ant-api03-..." autocomplete="off">
+    <button onclick="saveChatKey()">Activate</button>
+    <div class="setup-desc" style="font-size:10px;margin-top:4px;">
+      Get key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="color:var(--blue);">console.anthropic.com</a>
+    </div>
+  </div>
+
+  <!-- Chat area (shown when key is set) -->
+  <div id="chatArea" style="display:flex;flex-direction:column;flex:1;min-height:0;">
+    <div class="chat-quick" id="chatQuick">
+      <button class="chat-qbtn" onclick="sendQuick('What are the top trade-ready stocks right now?')">ð¯ Top picks</button>
+      <button class="chat-qbtn" onclick="sendQuick('Give me a quick market overview')">ð Market brief</button>
+      <button class="chat-qbtn" onclick="sendQuick('How are my paper trades doing?')">ð My trades</button>
+      <button class="chat-qbtn" onclick="sendQuick('Any sectors showing unusual OI buildup?')">ð¥ OI signals</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="chat-bubble agent">Hey! I'm Quanta â your live trading desk companion. I can see everything on your dashboard right now. Ask me about stocks, setups, or market conditions.<span class="bubble-time">now</span></div>
+    </div>
+    <div class="chat-typing" id="chatTyping"><span></span><span></span><span></span></div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chatInput" placeholder="Ask about any stock, setup, or strategy..." rows="1" onkeydown="chatKeyDown(event)"></textarea>
+      <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()" title="Send">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
 // âââ State âââ
@@ -2518,31 +2767,26 @@ function switchChartTf(sym, interval, btn) {
   function syncNav() {
     // Sync pulse dot
     var pd1 = document.getElementById('pulseDot');
-    var pd2 = document.getElementById('pulseDot2');
     if (pd1 && pd2) {
       pd2.className = pd1.className;
     }
     // Sync connection dot
     var cd1 = document.getElementById('connDot');
-    var cd2 = document.getElementById('connDot2');
     if (cd1 && cd2) {
       cd2.className = cd1.className;
     }
     // Sync connection text
     var ct1 = document.getElementById('connText');
-    var ct2 = document.getElementById('connText2');
     if (ct1 && ct2) {
       ct2.textContent = ct1.textContent;
     }
     // Sync update time
     var ut1 = document.getElementById('updateTime');
-    var ut2 = document.getElementById('updateTime2');
     if (ut1 && ut2) {
       ut2.textContent = ut1.textContent;
     }
     // Sync stock count
     var sc1 = document.getElementById('stockCount');
-    var sc2 = document.getElementById('stockCount2');
     if (sc1 && sc2) {
       sc2.textContent = sc1.textContent;
     }
