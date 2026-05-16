@@ -7,21 +7,21 @@ on port 8081 (internal). ZERO modifications to ws_server.py required.
 
 Features:
   - Cookie-based session auth (HttpOnly, SameSite=Strict)
+  - Role-based access: "admin" (full) vs "user" (restricted)
+  - Admin-only pages: /admin, /divergence (configurable in auth_config.json)
   - Password hashed with SHA-256 + salt
   - Serves login.html directly for /login
   - Proxies all other routes (HTTP + WebSocket) to backend
   - Sessions expire after configurable timeout (default 24h)
-  - Multiple users supported via auth_config.json
 
 Deploy:
-  1. Change ws_server.py to listen on 8081 (one-line change)
-  2. Start auth_proxy.py on 8080:
-     nohup venv/bin/python3 auth_proxy.py >> auth_proxy.log 2>&1 &
+  1. Change ws_server.py to listen on 8081
+  2. python3 setup_auth.py amit MyPass admin
+  3. python3 setup_auth.py guest ViewPass user
+  4. nohup venv/bin/python3 auth_proxy.py >> auth_proxy.log 2>&1 &
 
 Rollback:
-  1. Kill auth_proxy.py
-  2. Change ws_server.py back to 8080
-  3. Restart ws_server.py
+  pkill -f auth_proxy.py; python3 switch_port.py 8080; pkill -f ws_server; sleep 2; nohup venv/bin/python3 ws_server.py >> server.log 2>&1 &
 """
 
 import asyncio
@@ -45,6 +45,7 @@ BACKEND_PORT = 8081
 CONFIG_FILE = "auth_config.json"
 SESSION_COOKIE = "quantra_session"
 SESSION_MAX_AGE = 86400  # 24 hours
+DEFAULT_ADMIN_PATHS = ["/admin", "/divergence"]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,7 +58,7 @@ log = logging.getLogger("auth_proxy")
 # AUTH STATE
 # ============================================================
 
-_sessions = {}  # token -> {user, created, last_seen}
+_sessions = {}  # token -> {user, role, created, last_seen}
 _config = None
 
 
@@ -69,7 +70,9 @@ def load_config():
         raise SystemExit(1)
     with open(CONFIG_FILE, "r") as f:
         _config = json.load(f)
-    log.info(f"Loaded config: {len(_config.get('users', []))} user(s)")
+    users = _config.get("users", [])
+    admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
+    log.info(f"Loaded config: {len(users)} user(s), admin paths: {admin_paths}")
     return _config
 
 
@@ -78,29 +81,40 @@ def hash_password(password, salt):
     return hashlib.sha256((salt + password).encode()).hexdigest()
 
 
-def verify_password(username, password):
-    """Check password against stored hash."""
+def get_user_record(username):
+    """Find user record by username."""
     for user in _config.get("users", []):
-        if user["username"] == username:
-            hashed = hash_password(password, user["salt"])
-            return hmac.compare_digest(hashed, user["hash"])
-    return False
+        if isinstance(user, dict) and user.get("username") == username:
+            return user
+    return None
 
 
-def create_session(username):
+def verify_password(username, password):
+    """Check password against stored hash. Returns user record or None."""
+    user = get_user_record(username)
+    if not user:
+        return None
+    hashed = hash_password(password, user["salt"])
+    if hmac.compare_digest(hashed, user["hash"]):
+        return user
+    return None
+
+
+def create_session(username, role):
     """Create a new session token."""
     token = secrets.token_hex(32)
     _sessions[token] = {
         "user": username,
+        "role": role,
         "created": time.time(),
         "last_seen": time.time()
     }
-    log.info(f"Session created for {username}")
+    log.info(f"Session created for {username} (role={role})")
     return token
 
 
 def validate_session(token):
-    """Validate session token. Returns username or None."""
+    """Validate session token. Returns session dict or None."""
     if not token or token not in _sessions:
         return None
     session = _sessions[token]
@@ -111,12 +125,18 @@ def validate_session(token):
         log.info(f"Session expired for {session['user']}")
         return None
     session["last_seen"] = time.time()
-    return session["user"]
+    return session
 
 
 def get_session_from_request(request):
     """Extract session token from cookie."""
     return request.cookies.get(SESSION_COOKIE)
+
+
+def is_admin_path(path):
+    """Check if path requires admin role."""
+    admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
+    return path in admin_paths
 
 
 def cleanup_sessions():
@@ -136,9 +156,9 @@ def cleanup_sessions():
 
 async def handle_login_page(request):
     """Serve login.html."""
-    # If already authenticated, redirect to dashboard
     token = get_session_from_request(request)
-    if validate_session(token):
+    session = validate_session(token)
+    if session:
         raise web.HTTPFound("/")
 
     login_file = os.path.join(os.path.dirname(__file__) or ".", "login.html")
@@ -162,14 +182,20 @@ async def handle_login_api(request):
     if not username or not password:
         return web.json_response({"error": "Username and password required"}, status=400)
 
-    if not verify_password(username, password):
+    user_record = verify_password(username, password)
+    if not user_record:
         log.warning(f"Failed login attempt for '{username}' from {request.remote}")
         return web.json_response({"error": "Invalid credentials"}, status=401)
 
-    token = create_session(username)
+    role = user_record.get("role", "admin")
+    token = create_session(username, role)
     max_age = _config.get("session_max_age", SESSION_MAX_AGE)
 
-    resp = web.json_response({"ok": True, "user": username})
+    resp = web.json_response({
+        "ok": True,
+        "user": username,
+        "role": role
+    })
     resp.set_cookie(
         SESSION_COOKIE, token,
         max_age=max_age,
@@ -181,11 +207,17 @@ async def handle_login_api(request):
 
 
 async def handle_verify_api(request):
-    """GET /api/auth/verify - check if current session is valid."""
+    """GET /api/auth/verify - check session + return role."""
     token = get_session_from_request(request)
-    user = validate_session(token)
-    if user:
-        return web.json_response({"ok": True, "user": user})
+    session = validate_session(token)
+    if session:
+        admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
+        return web.json_response({
+            "ok": True,
+            "user": session["user"],
+            "role": session["role"],
+            "admin_paths": admin_paths
+        })
     return web.json_response({"ok": False}, status=401)
 
 
@@ -258,14 +290,31 @@ async def proxy_websocket(request):
 
 
 async def proxy_http(request):
-    """Proxy HTTP requests to backend."""
-    # Auth check — skip for static assets and login routes
+    """Proxy HTTP requests to backend with role-based access control."""
     path = request.path
     public_paths = {"/login", "/api/auth/login", "/api/auth/verify", "/api/auth/logout"}
+
     if path not in public_paths:
         token = get_session_from_request(request)
-        if not validate_session(token):
+        session = validate_session(token)
+
+        # Not logged in at all -> redirect to login
+        if not session:
             raise web.HTTPFound("/login")
+
+        # Logged in but accessing admin-only page as regular user -> 403
+        if is_admin_path(path) and session["role"] != "admin":
+            log.warning(f"Access denied: {session['user']} ({session['role']}) tried {path}")
+            return web.Response(
+                text="<html><body style='background:#09090b;color:#fafafa;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'>"
+                     "<div style='text-align:center'>"
+                     "<h1 style='font-size:48px;margin:0;color:#ef4444'>403</h1>"
+                     "<p style='color:#a1a1aa;margin-top:8px'>Access restricted to administrators</p>"
+                     "<a href='/' style='color:#3b82f6;margin-top:16px;display:inline-block'>Back to Dashboard</a>"
+                     "</div></body></html>",
+                content_type="text/html",
+                status=403
+            )
 
     # Build backend URL
     backend_url = f"http://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
@@ -277,7 +326,6 @@ async def proxy_http(request):
         if key.lower() not in skip_headers:
             headers[key] = val
 
-    # Read request body
     body = await request.read() if request.can_read_body else None
 
     async with ClientSession() as session:
@@ -288,7 +336,6 @@ async def proxy_http(request):
                 data=body,
                 allow_redirects=False
             ) as resp:
-                # Build response
                 response_headers = {}
                 skip_resp_headers = {"content-encoding", "transfer-encoding", "connection"}
                 for key, val in resp.headers.items():
@@ -316,7 +363,7 @@ async def proxy_http(request):
 async def session_cleanup_task(app):
     """Periodic session cleanup."""
     while True:
-        await asyncio.sleep(300)  # Every 5 minutes
+        await asyncio.sleep(300)
         cleanup_sessions()
 
 
