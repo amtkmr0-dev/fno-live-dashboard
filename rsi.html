@@ -7,178 +7,178 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0a0e17;
-  --surface: #111827;
-  --surface-hover: #1a2235;
-  --border: #1e293b;
-  --text: #e2e8f0;
-  --text-dim: #64748b;
-  --blue: #2962ff;
-  --green: #26A69A;
-  --red: #EF5350;
-  --yellow: #FFB74D;
-  --purple: #AB47BC;
+ --bg: #0a0e17;
+ --surface: #111827;
+ --surface-hover: #1a2235;
+ --border: #1e293b;
+ --text: #e2e8f0;
+ --text-dim: #64748b;
+ --blue: #2962ff;
+ --green: #26A69A;
+ --red: #EF5350;
+ --yellow: #FFB74D;
+ --purple: #AB47BC;
 }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 a { color: inherit; }
 
 /* ── Unified Site Navigation ── */
 .site-nav {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  height: 52px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+ background: var(--surface);
+ border-bottom: 1px solid var(--border);
+ padding: 0 24px;
+ display: flex;
+ align-items: center;
+ gap: 0;
+ height: 52px;
+ position: sticky;
+ top: 0;
+ z-index: 100;
 }
 .site-nav .nav-logo {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--text);
-  text-decoration: none;
-  padding-right: 24px;
-  border-right: 1px solid var(--border);
-  margin-right: 16px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: 0.5px;
+ font-size: 15px;
+ font-weight: 800;
+ color: var(--text);
+ text-decoration: none;
+ padding-right: 24px;
+ border-right: 1px solid var(--border);
+ margin-right: 16px;
+ white-space: nowrap;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ letter-spacing: 0.5px;
 }
 .site-nav .nav-links { display: flex; gap: 2px; flex: 1; }
 .site-nav .nav-links a {
-  color: var(--text-dim);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 14px;
-  border-radius: 6px;
-  transition: all 0.15s;
-  white-space: nowrap;
+ color: var(--text-dim);
+ text-decoration: none;
+ font-size: 13px;
+ font-weight: 500;
+ padding: 6px 14px;
+ border-radius: 6px;
+ transition: all 0.15s;
+ white-space: nowrap;
 }
 .site-nav .nav-links a:hover { color: var(--text); background: var(--surface-hover); }
 .site-nav .nav-links a.active { color: var(--blue); background: rgba(41,98,255,0.12); }
 .site-nav .nav-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-left: auto;
-  white-space: nowrap;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ font-size: 11px;
+ color: var(--text-dim);
+ margin-left: auto;
+ white-space: nowrap;
 }
 .site-nav .nav-status .conn-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #EF5350;
-  display: inline-block;
-  flex-shrink: 0;
+ width: 8px; height: 8px;
+ border-radius: 50%;
+ background: #EF5350;
+ display: inline-block;
+ flex-shrink: 0;
 }
 .site-nav .nav-status .conn-dot.on { background: #26A69A; }
 .site-nav .pulse-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #26A69A;
-  display: inline-block;
-  animation: pulse-glow 2s infinite;
-  flex-shrink: 0;
+ width: 8px; height: 8px;
+ border-radius: 50%;
+ background: #26A69A;
+ display: inline-block;
+ animation: pulse-glow 2s infinite;
+ flex-shrink: 0;
 }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
-  50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
+ 0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
+ 50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
 }
 
 /* ── Controls Bar ── */
 .controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  flex-wrap: wrap;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ padding: 12px 24px;
+ border-bottom: 1px solid var(--border);
+ background: var(--surface);
+ flex-wrap: wrap;
 }
 .controls .search-box {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  width: 200px;
-  outline: none;
+ background: var(--bg);
+ border: 1px solid var(--border);
+ color: var(--text);
+ padding: 6px 12px;
+ border-radius: 6px;
+ font-size: 13px;
+ width: 200px;
+ outline: none;
 }
 .controls .search-box:focus { border-color: var(--blue); }
 .controls .filter-group {
-  display: flex;
-  gap: 4px;
+ display: flex;
+ gap: 4px;
 }
 .filter-btn {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
+ background: var(--bg);
+ border: 1px solid var(--border);
+ color: var(--text-dim);
+ padding: 5px 12px;
+ border-radius: 6px;
+ font-size: 12px;
+ font-weight: 500;
+ cursor: pointer;
+ transition: all 0.15s;
 }
 .filter-btn:hover { color: var(--text); border-color: var(--text-dim); }
 .filter-btn.active { color: var(--blue); border-color: var(--blue); background: rgba(41,98,255,0.1); }
 .controls .scan-info {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  gap: 12px;
+ margin-left: auto;
+ font-size: 11px;
+ color: var(--text-dim);
+ display: flex;
+ align-items: center;
+ gap: 12px;
 }
 .controls .scan-info .progress-bar {
-  width: 120px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
+ width: 120px;
+ height: 4px;
+ background: var(--border);
+ border-radius: 2px;
+ overflow: hidden;
 }
 .controls .scan-info .progress-fill {
-  height: 100%;
-  background: var(--blue);
-  border-radius: 2px;
-  transition: width 0.3s;
-  width: 0%;
+ height: 100%;
+ background: var(--blue);
+ border-radius: 2px;
+ transition: width 0.3s;
+ width: 0%;
 }
 .refresh-btn {
-  background: rgba(41,98,255,0.15);
-  border: 1px solid rgba(41,98,255,0.3);
-  color: var(--blue);
-  padding: 5px 14px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
+ background: rgba(41,98,255,0.15);
+ border: 1px solid rgba(41,98,255,0.3);
+ color: var(--blue);
+ padding: 5px 14px;
+ border-radius: 6px;
+ font-size: 12px;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.15s;
 }
 .refresh-btn:hover { background: rgba(41,98,255,0.25); }
 .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Stats Strip ── */
 .stats-strip {
-  display: flex;
-  gap: 0;
-  padding: 0 24px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+ display: flex;
+ gap: 0;
+ padding: 0 24px;
+ background: var(--surface);
+ border-bottom: 1px solid var(--border);
 }
 .stat-card {
-  flex: 1;
-  padding: 10px 16px;
-  border-right: 1px solid var(--border);
-  text-align: center;
+ flex: 1;
+ padding: 10px 16px;
+ border-right: 1px solid var(--border);
+ text-align: center;
 }
 .stat-card:last-child { border-right: none; }
 .stat-card .stat-value { font-size: 20px; font-weight: 700; }
@@ -189,46 +189,46 @@ a { color: inherit; }
 
 /* ── Table ── */
 .table-wrap {
-  padding: 0;
-  overflow-x: auto;
+ padding: 0;
+ overflow-x: auto;
 }
 table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+ width: 100%;
+ border-collapse: collapse;
+ font-size: 13px;
 }
 thead th {
-  background: var(--surface);
-  color: var(--text-dim);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 52px;
-  z-index: 10;
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
+ background: var(--surface);
+ color: var(--text-dim);
+ font-size: 10px;
+ font-weight: 600;
+ text-transform: uppercase;
+ letter-spacing: 0.5px;
+ padding: 10px 12px;
+ text-align: left;
+ border-bottom: 1px solid var(--border);
+ position: sticky;
+ top: 52px;
+ z-index: 10;
+ cursor: pointer;
+ user-select: none;
+ white-space: nowrap;
 }
 thead th:hover { color: var(--text); }
 thead th.sorted { color: var(--blue); }
 thead th .sort-arrow { font-size: 9px; margin-left: 3px; }
 tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
+ border-bottom: 1px solid var(--border);
+ transition: background 0.1s;
 }
 tbody tr:hover { background: var(--surface-hover); }
 td {
-  padding: 8px 12px;
-  white-space: nowrap;
+ padding: 8px 12px;
+ white-space: nowrap;
 }
 td.symbol {
-  font-weight: 700;
-  font-size: 13px;
+ font-weight: 700;
+ font-size: 13px;
 }
 td.symbol a { text-decoration: none; }
 td.symbol a:hover { color: var(--blue); }
@@ -239,9 +239,9 @@ td.chg.neg { color: var(--red); }
 
 /* RSI cells */
 td.rsi {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  text-align: center;
+ font-weight: 600;
+ font-variant-numeric: tabular-nums;
+ text-align: center;
 }
 td.rsi.oversold { color: var(--green); background: rgba(38,166,154,0.08); }
 td.rsi.overbought { color: var(--red); background: rgba(239,83,80,0.08); }
@@ -250,13 +250,13 @@ td.rsi.loading { color: var(--text-dim); font-weight: 400; font-style: italic; }
 
 /* Buildup badge */
 .buildup-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+ display: inline-block;
+ padding: 2px 8px;
+ border-radius: 4px;
+ font-size: 10px;
+ font-weight: 600;
+ text-transform: uppercase;
+ letter-spacing: 0.3px;
 }
 .buildup-badge.LONG_BUILD { background: rgba(38,166,154,0.15); color: var(--green); }
 .buildup-badge.SHORT_BUILD { background: rgba(239,83,80,0.15); color: var(--red); }
@@ -266,54 +266,54 @@ td.rsi.loading { color: var(--text-dim); font-weight: 400; font-style: italic; }
 
 /* Score bar */
 .score-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+ display: flex;
+ align-items: center;
+ gap: 6px;
 }
 .score-track {
-  width: 50px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
+ width: 50px;
+ height: 4px;
+ background: var(--border);
+ border-radius: 2px;
+ overflow: hidden;
 }
 .score-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.3s;
+ height: 100%;
+ border-radius: 2px;
+ transition: width 0.3s;
 }
 .score-val { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 24px; }
 
 /* Empty state */
 .empty-state {
-  text-align: center;
-  padding: 60px 24px;
-  color: var(--text-dim);
+ text-align: center;
+ padding: 60px 24px;
+ color: var(--text-dim);
 }
 .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
 .empty-state .msg { font-size: 15px; }
 
 /* Sector pill */
 .sector-pill {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-dim);
-  background: rgba(100,116,139,0.1);
-  border: 1px solid var(--border);
+ display: inline-block;
+ padding: 1px 6px;
+ border-radius: 3px;
+ font-size: 10px;
+ font-weight: 600;
+ color: var(--text-dim);
+ background: rgba(100,116,139,0.1);
+ border: 1px solid var(--border);
 }
 
 /* Loading shimmer */
 @keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: 200px 0; }
+ 0% { background-position: -200px 0; }
+ 100% { background-position: 200px 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
-  background-size: 400px 100%;
-  animation: shimmer 1.5s infinite;
+ background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+ background-size: 400px 100%;
+ animation: shimmer 1.5s infinite;
 }
 </style>
 </head>
@@ -321,84 +321,85 @@ td.rsi.loading { color: var(--text-dim); font-weight: 400; font-style: italic; }
 
 <!-- Navigation Bar -->
 <nav class="site-nav">
-  <a class="nav-logo" href="/">
-    <span class="pulse-dot" id="pulseDot"></span>
-    F&amp;O LIVE
-  </a>
-  <div class="nav-links">
-    <a href="/">Dashboard</a>
-    <a href="/paper">Paper Trades</a>
-    <a href="/sectors">Sectors</a>
-    <a href="/rsi" class="active">RSI Scanner</a>
-    <a href="/rsi-analysis">Stock Analysis</a>
-    <a href="/admin">Admin</a>
-  </div>
-  <div class="nav-status">
-    <span class="conn-dot" id="connDot"></span>
-    <span id="connText">Connecting...</span>
-    <span id="updateTime">--:--:--</span>
-  </div>
+ <a class="nav-logo" href="/">
+ <span class="pulse-dot" id="pulseDot"></span>
+ F&amp;O LIVE
+ </a>
+ <div class="nav-links">
+ <a href="/">Dashboard</a>
+ <a href="/paper">Paper Trades</a>
+ <a href="/sectors">Sectors</a>
+ <a href="/rsi" class="active">RSI Scanner</a>
+ <a href="/rsi-analysis">Stock Analysis</a>
+ <a href="/divergence">Divergence</a>
+ <a href="/admin">Admin</a>
+ </div>
+ <div class="nav-status">
+ <span class="conn-dot" id="connDot"></span>
+ <span id="connText">Connecting...</span>
+ <span id="updateTime">--:--:--</span>
+ </div>
 </nav>
 
 <!-- Controls -->
 <div class="controls">
-  <input type="text" class="search-box" id="searchBox" placeholder="Search symbol...">
-  <div class="filter-group" id="rsiFilter">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="oversold">Oversold &lt;30</button>
-    <button class="filter-btn" data-filter="overbought">Overbought &gt;70</button>
-    <button class="filter-btn" data-filter="extreme">Extreme (&lt;20 / &gt;80)</button>
-  </div>
-  <div class="filter-group" id="tfFilter">
-    <button class="filter-btn active" data-tf="5">5m</button>
-    <button class="filter-btn" data-tf="15">15m</button>
-  </div>
-  <div class="scan-info">
-    <span id="scanStatus">Waiting for data...</span>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <button class="refresh-btn" id="refreshBtn" onclick="startScan()">⟳ Scan RSI</button>
-  </div>
+ <input type="text" class="search-box" id="searchBox" placeholder="Search symbol...">
+ <div class="filter-group" id="rsiFilter">
+ <button class="filter-btn active" data-filter="all">All</button>
+ <button class="filter-btn" data-filter="oversold">Oversold &lt;30</button>
+ <button class="filter-btn" data-filter="overbought">Overbought &gt;70</button>
+ <button class="filter-btn" data-filter="extreme">Extreme (&lt;20 / &gt;80)</button>
+ </div>
+ <div class="filter-group" id="tfFilter">
+ <button class="filter-btn active" data-tf="5">5m</button>
+ <button class="filter-btn" data-tf="15">15m</button>
+ </div>
+ <div class="scan-info">
+ <span id="scanStatus">Waiting for data...</span>
+ <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+ <button class="refresh-btn" id="refreshBtn" onclick="startScan()">⟳ Scan RSI</button>
+ </div>
 </div>
 
 <!-- Stats Strip -->
 <div class="stats-strip">
-  <div class="stat-card oversold"><div class="stat-value" id="statOversold">—</div><div class="stat-label">Oversold &lt;30</div></div>
-  <div class="stat-card overbought"><div class="stat-value" id="statOverbought">—</div><div class="stat-label">Overbought &gt;70</div></div>
-  <div class="stat-card neutral"><div class="stat-value" id="statNeutral">—</div><div class="stat-label">Neutral 30–70</div></div>
-  <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Scanned</div></div>
-  <div class="stat-card"><div class="stat-value" id="statAvgRsi">—</div><div class="stat-label">Avg RSI</div></div>
+ <div class="stat-card oversold"><div class="stat-value" id="statOversold">—</div><div class="stat-label">Oversold &lt;30</div></div>
+ <div class="stat-card overbought"><div class="stat-value" id="statOverbought">—</div><div class="stat-label">Overbought &gt;70</div></div>
+ <div class="stat-card neutral"><div class="stat-value" id="statNeutral">—</div><div class="stat-label">Neutral 30–70</div></div>
+ <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Scanned</div></div>
+ <div class="stat-card"><div class="stat-value" id="statAvgRsi">—</div><div class="stat-label">Avg RSI</div></div>
 </div>
 
 <!-- Table -->
 <div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th data-col="symbol">Symbol <span class="sort-arrow"></span></th>
-        <th data-col="sector">Sector</th>
-        <th data-col="ltp">LTP <span class="sort-arrow"></span></th>
-        <th data-col="chg_pct">Chg% <span class="sort-arrow"></span></th>
-        <th data-col="rsi_5m" class="sorted">RSI 5m <span class="sort-arrow">▲</span></th>
-        <th data-col="rsi_15m">RSI 15m <span class="sort-arrow"></span></th>
-        <th data-col="vol_surge">Vol Surge <span class="sort-arrow"></span></th>
-        <th data-col="buildup">Buildup</th>
-        <th data-col="score">Score <span class="sort-arrow"></span></th>
-        <th data-col="atm_iv">ATM IV <span class="sort-arrow"></span></th>
-        <th data-col="pcr">PCR <span class="sort-arrow"></span></th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-  <div class="empty-state" id="emptyState">
-    <div class="icon">📡</div>
-    <div class="msg">Connecting to server — RSI scan will start automatically</div>
-  </div>
+ <table>
+ <thead>
+ <tr>
+ <th data-col="symbol">Symbol <span class="sort-arrow"></span></th>
+ <th data-col="sector">Sector</th>
+ <th data-col="ltp">LTP <span class="sort-arrow"></span></th>
+ <th data-col="chg_pct">Chg% <span class="sort-arrow"></span></th>
+ <th data-col="rsi_5m" class="sorted">RSI 5m <span class="sort-arrow">▲</span></th>
+ <th data-col="rsi_15m">RSI 15m <span class="sort-arrow"></span></th>
+ <th data-col="vol_surge">Vol Surge <span class="sort-arrow"></span></th>
+ <th data-col="buildup">Buildup</th>
+ <th data-col="score">Score <span class="sort-arrow"></span></th>
+ <th data-col="atm_iv">ATM IV <span class="sort-arrow"></span></th>
+ <th data-col="pcr">PCR <span class="sort-arrow"></span></th>
+ </tr>
+ </thead>
+ <tbody id="tbody"></tbody>
+ </table>
+ <div class="empty-state" id="emptyState">
+ <div class="icon"></div>
+ <div class="msg">Connecting to server — RSI scan will start automatically</div>
+ </div>
 </div>
 
 <script>
 // ── State ──
 const stocks = {};
-let rsiData = {};  // { symbol: { rsi_5m: number, rsi_15m: number } }
+let rsiData = {}; // { symbol: { rsi_5m: number, rsi_15m: number } }
 let sortCol = 'rsi_5m', sortDir = 'asc';
 let filterMode = 'all';
 let activeTf = '5';
@@ -420,308 +421,308 @@ const refreshBtn = document.getElementById('refreshBtn');
 
 // ── Wilder's RSI (period 14) ──
 function wilderRSI(closes, period = 14) {
-  if (closes.length < period + 1) return null;
-  let gains = 0, losses = 0;
-  for (let i = 1; i <= period; i++) {
-    const diff = closes[i] - closes[i - 1];
-    if (diff > 0) gains += diff;
-    else losses -= diff;
-  }
-  let avgGain = gains / period;
-  let avgLoss = losses / period;
-  for (let i = period + 1; i < closes.length; i++) {
-    const diff = closes[i] - closes[i - 1];
-    avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
-    avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
-  }
-  if (avgLoss === 0) return 100;
-  const rs = avgGain / avgLoss;
-  return 100 - (100 / (1 + rs));
+ if (closes.length < period + 1) return null;
+ let gains = 0, losses = 0;
+ for (let i = 1; i <= period; i++) {
+ const diff = closes[i] - closes[i - 1];
+ if (diff >0) gains += diff;
+ else losses -= diff;
+ }
+ let avgGain = gains / period;
+ let avgLoss = losses / period;
+ for (let i = period + 1; i < closes.length; i++) {
+ const diff = closes[i] - closes[i - 1];
+ avgGain = (avgGain * (period - 1) + (diff >0 ? diff : 0)) / period;
+ avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+ }
+ if (avgLoss === 0) return 100;
+ const rs = avgGain / avgLoss;
+ return 100 - (100 / (1 + rs));
 }
 
 // ── Fetch candles + compute RSI ──
 async function fetchRSI(symbol, interval) {
-  try {
-    const res = await fetch(`/api/candles?symbol=${encodeURIComponent(symbol)}&interval=${interval}minute`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.candles || data.candles.length < 15) return null;
-    const closes = data.candles.map(c => c.close);
-    return wilderRSI(closes);
-  } catch (e) {
-    return null;
-  }
+ try {
+ const res = await fetch(`/api/candles?symbol=${encodeURIComponent(symbol)}&interval=${interval}minute`);
+ if (!res.ok) return null;
+ const data = await res.json();
+ if (!data.candles || data.candles.length < 15) return null;
+ const closes = data.candles.map(c =>c.close);
+ return wilderRSI(closes);
+ } catch (e) {
+ return null;
+ }
 }
 
 // ── Scan all stocks ──
 async function startScan() {
-  if (scanning) return;
-  const syms = Object.keys(stocks);
-  if (syms.length === 0) {
-    scanStatus.textContent = 'No stocks loaded yet';
-    return;
-  }
-  scanning = true;
-  refreshBtn.disabled = true;
-  scanStatus.textContent = `Scanning 0 / ${syms.length}...`;
-  progressFill.style.width = '0%';
+ if (scanning) return;
+ const syms = Object.keys(stocks);
+ if (syms.length === 0) {
+ scanStatus.textContent = 'No stocks loaded yet';
+ return;
+ }
+ scanning = true;
+ refreshBtn.disabled = true;
+ scanStatus.textContent = `Scanning 0 / ${syms.length}...`;
+ progressFill.style.width = '0%';
 
-  // Scan in batches of 5 to avoid hammering the server
-  const batchSize = 5;
-  let done = 0;
+ // Scan in batches of 5 to avoid hammering the server
+ const batchSize = 5;
+ let done = 0;
 
-  for (let i = 0; i < syms.length; i += batchSize) {
-    const batch = syms.slice(i, i + batchSize);
-    const promises = batch.map(async (sym) => {
-      const [r5, r15] = await Promise.all([
-        fetchRSI(sym, 5),
-        fetchRSI(sym, 15)
-      ]);
-      rsiData[sym] = { rsi_5m: r5, rsi_15m: r15 };
-    });
-    await Promise.all(promises);
-    done += batch.length;
-    const pct = Math.round((done / syms.length) * 100);
-    progressFill.style.width = pct + '%';
-    scanStatus.textContent = `Scanning ${done} / ${syms.length}...`;
-    renderTable();
-    updateStats();
-  }
+ for (let i = 0; i < syms.length; i += batchSize) {
+ const batch = syms.slice(i, i + batchSize);
+ const promises = batch.map(async (sym) =>{
+ const [r5, r15] = await Promise.all([
+ fetchRSI(sym, 5),
+ fetchRSI(sym, 15)
+ ]);
+ rsiData[sym] = { rsi_5m: r5, rsi_15m: r15 };
+ });
+ await Promise.all(promises);
+ done += batch.length;
+ const pct = Math.round((done / syms.length) * 100);
+ progressFill.style.width = pct + '%';
+ scanStatus.textContent = `Scanning ${done} / ${syms.length}...`;
+ renderTable();
+ updateStats();
+ }
 
-  scanning = false;
-  refreshBtn.disabled = false;
-  const now = new Date().toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' });
-  scanStatus.textContent = `Scan complete at ${now}`;
-  renderTable();
-  updateStats();
+ scanning = false;
+ refreshBtn.disabled = false;
+ const now = new Date().toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' });
+ scanStatus.textContent = `Scan complete at ${now}`;
+ renderTable();
+ updateStats();
 }
 
 // ── Update stats ──
 function updateStats() {
-  let oversold = 0, overbought = 0, neutral = 0, total = 0, rsiSum = 0;
-  const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
-  for (const sym in rsiData) {
-    const val = rsiData[sym][tf];
-    if (val == null) continue;
-    total++;
-    rsiSum += val;
-    if (val < 30) oversold++;
-    else if (val > 70) overbought++;
-    else neutral++;
-  }
-  document.getElementById('statOversold').textContent = oversold;
-  document.getElementById('statOverbought').textContent = overbought;
-  document.getElementById('statNeutral').textContent = neutral;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statAvgRsi').textContent = total > 0 ? (rsiSum / total).toFixed(1) : '—';
+ let oversold = 0, overbought = 0, neutral = 0, total = 0, rsiSum = 0;
+ const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
+ for (const sym in rsiData) {
+ const val = rsiData[sym][tf];
+ if (val == null) continue;
+ total++;
+ rsiSum += val;
+ if (val < 30) oversold++;
+ else if (val >70) overbought++;
+ else neutral++;
+ }
+ document.getElementById('statOversold').textContent = oversold;
+ document.getElementById('statOverbought').textContent = overbought;
+ document.getElementById('statNeutral').textContent = neutral;
+ document.getElementById('statTotal').textContent = total;
+ document.getElementById('statAvgRsi').textContent = total >0 ? (rsiSum / total).toFixed(1) : '—';
 }
 
 // ── Render table ──
 function renderTable() {
-  const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
-  let rows = Object.keys(stocks).map(sym => {
-    const s = stocks[sym];
-    const r = rsiData[sym] || {};
-    return {
-      symbol: sym,
-      sector: s.sector || '',
-      ltp: s.ltp || 0,
-      chg_pct: s.chg_pct || 0,
-      rsi_5m: r.rsi_5m,
-      rsi_15m: r.rsi_15m,
-      vol_surge: s.vol_surge || 0,
-      buildup: s.buildup || 'NEUTRAL',
-      score: s.score || 0,
-      atm_iv: s.atm_iv || 0,
-      pcr: s.pcr || 0,
-    };
-  });
+ const tf = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
+ let rows = Object.keys(stocks).map(sym =>{
+ const s = stocks[sym];
+ const r = rsiData[sym] || {};
+ return {
+ symbol: sym,
+ sector: s.sector || '',
+ ltp: s.ltp || 0,
+ chg_pct: s.chg_pct || 0,
+ rsi_5m: r.rsi_5m,
+ rsi_15m: r.rsi_15m,
+ vol_surge: s.vol_surge || 0,
+ buildup: s.buildup || 'NEUTRAL',
+ score: s.score || 0,
+ atm_iv: s.atm_iv || 0,
+ pcr: s.pcr || 0,
+ };
+ });
 
-  // Filter by search
-  if (searchQuery) {
-    const q = searchQuery.toUpperCase();
-    rows = rows.filter(r => r.symbol.includes(q));
-  }
+ // Filter by search
+ if (searchQuery) {
+ const q = searchQuery.toUpperCase();
+ rows = rows.filter(r =>r.symbol.includes(q));
+ }
 
-  // Filter by RSI zone
-  if (filterMode === 'oversold') rows = rows.filter(r => r[tf] != null && r[tf] < 30);
-  else if (filterMode === 'overbought') rows = rows.filter(r => r[tf] != null && r[tf] > 70);
-  else if (filterMode === 'extreme') rows = rows.filter(r => r[tf] != null && (r[tf] < 20 || r[tf] > 80));
+ // Filter by RSI zone
+ if (filterMode === 'oversold') rows = rows.filter(r =>r[tf] != null && r[tf] < 30);
+ else if (filterMode === 'overbought') rows = rows.filter(r =>r[tf] != null && r[tf] >70);
+ else if (filterMode === 'extreme') rows = rows.filter(r =>r[tf] != null && (r[tf] < 20 || r[tf] >80));
 
-  // Sort
-  rows.sort((a, b) => {
-    let va = a[sortCol], vb = b[sortCol];
-    if (va == null) va = sortDir === 'asc' ? Infinity : -Infinity;
-    if (vb == null) vb = sortDir === 'asc' ? Infinity : -Infinity;
-    if (typeof va === 'string') return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
-    return sortDir === 'asc' ? va - vb : vb - va;
-  });
+ // Sort
+ rows.sort((a, b) =>{
+ let va = a[sortCol], vb = b[sortCol];
+ if (va == null) va = sortDir === 'asc' ? Infinity : -Infinity;
+ if (vb == null) vb = sortDir === 'asc' ? Infinity : -Infinity;
+ if (typeof va === 'string') return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+ return sortDir === 'asc' ? va - vb : vb - va;
+ });
 
-  if (rows.length === 0) {
-    tbody.innerHTML = '';
-    emptyState.style.display = 'block';
-    emptyState.querySelector('.msg').textContent = searchQuery ? 'No matches' : (Object.keys(rsiData).length === 0 ? 'RSI scan in progress...' : 'No stocks match current filter');
-    return;
-  }
-  emptyState.style.display = 'none';
+ if (rows.length === 0) {
+ tbody.innerHTML = '';
+ emptyState.style.display = 'block';
+ emptyState.querySelector('.msg').textContent = searchQuery ? 'No matches' : (Object.keys(rsiData).length === 0 ? 'RSI scan in progress...' : 'No stocks match current filter');
+ return;
+ }
+ emptyState.style.display = 'none';
 
-  tbody.innerHTML = rows.map(r => {
-    const chgCls = r.chg_pct > 0 ? 'pos' : r.chg_pct < 0 ? 'neg' : '';
-    const rsi5Cls = rsiClass(r.rsi_5m);
-    const rsi15Cls = rsiClass(r.rsi_15m);
-    const rsi5Val = r.rsi_5m != null ? r.rsi_5m.toFixed(1) : '...';
-    const rsi15Val = r.rsi_15m != null ? r.rsi_15m.toFixed(1) : '...';
-    const scoreColor = r.score >= 65 ? 'var(--green)' : r.score >= 40 ? 'var(--yellow)' : 'var(--red)';
-    return `<tr>
-      <td class="symbol"><a href="/rsi-analysis#${r.symbol}" target="_blank">${r.symbol}</a></td>
-      <td><span class="sector-pill">${r.sector || '—'}</span></td>
-      <td class="ltp">${r.ltp ? r.ltp.toFixed(2) : '—'}</td>
-      <td class="chg ${chgCls}">${r.chg_pct ? (r.chg_pct > 0 ? '+' : '') + r.chg_pct.toFixed(2) + '%' : '—'}</td>
-      <td class="rsi ${rsi5Cls}">${rsi5Val}</td>
-      <td class="rsi ${rsi15Cls}">${rsi15Val}</td>
-      <td>${r.vol_surge ? r.vol_surge.toFixed(1) + 'x' : '—'}</td>
-      <td><span class="buildup-badge ${r.buildup}">${formatBuildup(r.buildup)}</span></td>
-      <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${r.score}%;background:${scoreColor}"></div></div><span class="score-val" style="color:${scoreColor}">${r.score}</span></div></td>
-      <td>${r.atm_iv ? r.atm_iv.toFixed(1) + '%' : '—'}</td>
-      <td>${r.pcr ? r.pcr.toFixed(2) : '—'}</td>
-    </tr>`;
-  }).join('');
+ tbody.innerHTML = rows.map(r =>{
+ const chgCls = r.chg_pct >0 ? 'pos' : r.chg_pct < 0 ? 'neg' : '';
+ const rsi5Cls = rsiClass(r.rsi_5m);
+ const rsi15Cls = rsiClass(r.rsi_15m);
+ const rsi5Val = r.rsi_5m != null ? r.rsi_5m.toFixed(1) : '...';
+ const rsi15Val = r.rsi_15m != null ? r.rsi_15m.toFixed(1) : '...';
+ const scoreColor = r.score >= 65 ? 'var(--green)' : r.score >= 40 ? 'var(--yellow)' : 'var(--red)';
+ return `<tr>
+ <td class="symbol"><a href="/rsi-analysis#${r.symbol}" target="_blank">${r.symbol}</a></td>
+ <td><span class="sector-pill">${r.sector || '—'}</span></td>
+ <td class="ltp">${r.ltp ? r.ltp.toFixed(2) : '—'}</td>
+ <td class="chg ${chgCls}">${r.chg_pct ? (r.chg_pct >0 ? '+' : '') + r.chg_pct.toFixed(2) + '%' : '—'}</td>
+ <td class="rsi ${rsi5Cls}">${rsi5Val}</td>
+ <td class="rsi ${rsi15Cls}">${rsi15Val}</td>
+ <td>${r.vol_surge ? r.vol_surge.toFixed(1) + 'x' : '—'}</td>
+ <td><span class="buildup-badge ${r.buildup}">${formatBuildup(r.buildup)}</span></td>
+ <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${r.score}%;background:${scoreColor}"></div></div><span class="score-val" style="color:${scoreColor}">${r.score}</span></div></td>
+ <td>${r.atm_iv ? r.atm_iv.toFixed(1) + '%' : '—'}</td>
+ <td>${r.pcr ? r.pcr.toFixed(2) : '—'}</td>
+ </tr>`;
+ }).join('');
 }
 
 function rsiClass(val) {
-  if (val == null) return 'loading';
-  if (val < 30) return 'oversold';
-  if (val > 70) return 'overbought';
-  return 'neutral';
+ if (val == null) return 'loading';
+ if (val < 30) return 'oversold';
+ if (val >70) return 'overbought';
+ return 'neutral';
 }
 
 function formatBuildup(b) {
-  if (!b) return '—';
-  return b.replace(/_/g, ' ');
+ if (!b) return '—';
+ return b.replace(/_/g, ' ');
 }
 
 // ── Sort headers ──
-document.querySelectorAll('thead th[data-col]').forEach(th => {
-  th.addEventListener('click', () => {
-    const col = th.dataset.col;
-    if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-    else { sortCol = col; sortDir = 'asc'; }
-    // Update arrows
-    document.querySelectorAll('thead th').forEach(h => {
-      h.classList.remove('sorted');
-      h.querySelector('.sort-arrow') && (h.querySelector('.sort-arrow').textContent = '');
-    });
-    th.classList.add('sorted');
-    th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '▲' : '▼';
-    renderTable();
-  });
+document.querySelectorAll('thead th[data-col]').forEach(th =>{
+ th.addEventListener('click', () =>{
+ const col = th.dataset.col;
+ if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+ else { sortCol = col; sortDir = 'asc'; }
+ // Update arrows
+ document.querySelectorAll('thead th').forEach(h =>{
+ h.classList.remove('sorted');
+ h.querySelector('.sort-arrow') && (h.querySelector('.sort-arrow').textContent = '');
+ });
+ th.classList.add('sorted');
+ th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '▲' : '▼';
+ renderTable();
+ });
 });
 
 // ── Filter buttons ──
-document.getElementById('rsiFilter').addEventListener('click', e => {
-  if (!e.target.classList.contains('filter-btn')) return;
-  document.querySelectorAll('#rsiFilter .filter-btn').forEach(b => b.classList.remove('active'));
-  e.target.classList.add('active');
-  filterMode = e.target.dataset.filter;
-  renderTable();
-  updateStats();
+document.getElementById('rsiFilter').addEventListener('click', e =>{
+ if (!e.target.classList.contains('filter-btn')) return;
+ document.querySelectorAll('#rsiFilter .filter-btn').forEach(b =>b.classList.remove('active'));
+ e.target.classList.add('active');
+ filterMode = e.target.dataset.filter;
+ renderTable();
+ updateStats();
 });
 
-document.getElementById('tfFilter').addEventListener('click', e => {
-  if (!e.target.classList.contains('filter-btn')) return;
-  document.querySelectorAll('#tfFilter .filter-btn').forEach(b => b.classList.remove('active'));
-  e.target.classList.add('active');
-  activeTf = e.target.dataset.tf;
-  // Update sort column to match active TF
-  if (sortCol === 'rsi_5m' || sortCol === 'rsi_15m') {
-    sortCol = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
-  }
-  renderTable();
-  updateStats();
+document.getElementById('tfFilter').addEventListener('click', e =>{
+ if (!e.target.classList.contains('filter-btn')) return;
+ document.querySelectorAll('#tfFilter .filter-btn').forEach(b =>b.classList.remove('active'));
+ e.target.classList.add('active');
+ activeTf = e.target.dataset.tf;
+ // Update sort column to match active TF
+ if (sortCol === 'rsi_5m' || sortCol === 'rsi_15m') {
+ sortCol = activeTf === '5' ? 'rsi_5m' : 'rsi_15m';
+ }
+ renderTable();
+ updateStats();
 });
 
 // ── Search ──
-document.getElementById('searchBox').addEventListener('input', e => {
-  searchQuery = e.target.value.trim();
-  renderTable();
+document.getElementById('searchBox').addEventListener('input', e =>{
+ searchQuery = e.target.value.trim();
+ renderTable();
 });
 
 // ── WebSocket ──
 function setConnStatus(status) {
-  connDot.className = 'conn-dot' + (status === 'on' ? ' on' : '');
-  connText.textContent = status === 'on' ? 'Connected' : status === 'off' ? 'Disconnected' : 'Reconnecting...';
-  const pulse = document.getElementById('pulseDot');
-  if (pulse) pulse.className = 'pulse-dot' + (status === 'on' ? '' : status === 'off' ? ' off' : ' warn');
+ connDot.className = 'conn-dot' + (status === 'on' ? ' on' : '');
+ connText.textContent = status === 'on' ? 'Connected' : status === 'off' ? 'Disconnected' : 'Reconnecting...';
+ const pulse = document.getElementById('pulseDot');
+ if (pulse) pulse.className = 'pulse-dot' + (status === 'on' ? '' : status === 'off' ? ' off' : ' warn');
 }
 
 function connectWS() {
-  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(proto + '//' + location.host + '/ws');
+ const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+ ws = new WebSocket(proto + '//' + location.host + '/ws');
 
-  ws.onopen = () => {
-    setConnStatus('on');
-    reconnectDelay = 3000;
-    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-  };
+ ws.onopen = () =>{
+ setConnStatus('on');
+ reconnectDelay = 3000;
+ if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+ };
 
-  ws.onclose = () => {
-    setConnStatus('off');
-    scheduleReconnect();
-  };
+ ws.onclose = () =>{
+ setConnStatus('off');
+ scheduleReconnect();
+ };
 
-  ws.onerror = () => {
-    setConnStatus('off');
-  };
+ ws.onerror = () =>{
+ setConnStatus('off');
+ };
 
-  ws.onmessage = (evt) => {
-    try {
-      const msg = JSON.parse(evt.data);
-      handleMessage(msg);
-    } catch (e) {}
-  };
+ ws.onmessage = (evt) =>{
+ try {
+ const msg = JSON.parse(evt.data);
+ handleMessage(msg);
+ } catch (e) {}
+ };
 }
 
 function handleMessage(msg) {
-  const now = new Date().toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' });
-  updateTime.textContent = now;
+ const now = new Date().toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' });
+ updateTime.textContent = now;
 
-  if (msg.type === 'init') {
-    for (const sym in msg.stocks) {
-      stocks[sym] = msg.stocks[sym];
-    }
-    renderTable();
-    // Auto-start scan after receiving stock list
-    if (!scanning && Object.keys(rsiData).length === 0) {
-      setTimeout(startScan, 500);
-    }
-  } else if (msg.type === 'tick' && msg.d) {
-    for (const sym in msg.d) {
-      if (!stocks[sym]) stocks[sym] = {};
-      Object.assign(stocks[sym], msg.d[sym]);
-    }
-    // Light re-render for LTP updates (skip during heavy scan)
-    if (!scanning) renderTable();
-  } else if (msg.type === 'ohlc' && msg.d) {
-    for (const sym in msg.d) {
-      if (!stocks[sym]) stocks[sym] = {};
-      Object.assign(stocks[sym], msg.d[sym]);
-    }
-    if (!scanning) renderTable();
-  } else if (msg.type === 'chain' && msg.d) {
-    for (const sym in msg.d) {
-      if (!stocks[sym]) stocks[sym] = {};
-      Object.assign(stocks[sym], msg.d[sym]);
-    }
-    if (!scanning) renderTable();
-  }
+ if (msg.type === 'init') {
+ for (const sym in msg.stocks) {
+ stocks[sym] = msg.stocks[sym];
+ }
+ renderTable();
+ // Auto-start scan after receiving stock list
+ if (!scanning && Object.keys(rsiData).length === 0) {
+ setTimeout(startScan, 500);
+ }
+ } else if (msg.type === 'tick' && msg.d) {
+ for (const sym in msg.d) {
+ if (!stocks[sym]) stocks[sym] = {};
+ Object.assign(stocks[sym], msg.d[sym]);
+ }
+ // Light re-render for LTP updates (skip during heavy scan)
+ if (!scanning) renderTable();
+ } else if (msg.type === 'ohlc' && msg.d) {
+ for (const sym in msg.d) {
+ if (!stocks[sym]) stocks[sym] = {};
+ Object.assign(stocks[sym], msg.d[sym]);
+ }
+ if (!scanning) renderTable();
+ } else if (msg.type === 'chain' && msg.d) {
+ for (const sym in msg.d) {
+ if (!stocks[sym]) stocks[sym] = {};
+ Object.assign(stocks[sym], msg.d[sym]);
+ }
+ if (!scanning) renderTable();
+ }
 }
 
 function scheduleReconnect() {
-  reconnectTimer = setTimeout(() => {
-    setConnStatus('reconn');
-    reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
-    connectWS();
-  }, reconnectDelay);
+ reconnectTimer = setTimeout(() =>{
+ setConnStatus('reconn');
+ reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
+ connectWS();
+ }, reconnectDelay);
 }
 
 // ── Init ──

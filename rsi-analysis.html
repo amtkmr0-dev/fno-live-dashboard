@@ -8,19 +8,19 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
 :root {
-  --bg: #131722; --surface: #1E222D; --surface-hover: #2A2E39;
-  --border: #363A45; --text: #D1D4DC; --text-dim: #787B86; --text-vdim: #545862;
-  --blue: #2962FF; --green: #26A69A; --red: #EF5350;
-  --gold: #FFD700; --orange: #FF9800; --purple: #AB47BC; --cyan: #00BCD4;
+ --bg: #131722; --surface: #1E222D; --surface-hover: #2A2E39;
+ --border: #363A45; --text: #D1D4DC; --text-dim: #787B86; --text-vdim: #545862;
+ --blue: #2962FF; --green: #26A69A; --red: #EF5350;
+ --gold: #FFD700; --orange: #FF9800; --purple: #AB47BC; --cyan: #00BCD4;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 14px; }
 body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.5;
+ font-family: 'Inter', sans-serif;
+ background: var(--bg);
+ color: var(--text);
+ min-height: 100vh;
+ line-height: 1.5;
 }
 
 /* NAV — see unified .site-nav below */
@@ -28,50 +28,50 @@ body {
 /* MAIN LAYOUT */
 main { padding: 24px; max-width: 1600px; margin: 0 auto; }
 h2 {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: 1.5px;
+ text-transform: uppercase;
+ color: var(--text-dim);
+ margin-bottom: 14px;
+ display: flex;
+ align-items: center;
+ gap: 8px;
 }
 h2::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+ content: '';
+ flex: 1;
+ height: 1px;
+ background: var(--border);
 }
 section { margin-bottom: 32px; }
 
 /* CARDS */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 18px;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ padding: 16px 18px;
 }
 .card-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-vdim);
-  margin-bottom: 6px;
+ font-size: 10px;
+ font-weight: 700;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+ color: var(--text-vdim);
+ margin-bottom: 6px;
 }
 .card-value {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
-  line-height: 1.2;
+ font-size: 22px;
+ font-weight: 800;
+ color: var(--text);
+ line-height: 1.2;
 }
 .card-sub {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 4px;
+ font-size: 11px;
+ color: var(--text-dim);
+ margin-top: 4px;
 }
 .c-green { color: var(--green) !important; }
 .c-red { color: var(--red) !important; }
@@ -83,45 +83,45 @@ section { margin-bottom: 32px; }
 /* CHARTS */
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .chart-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ padding: 16px;
 }
 .chart-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 12px;
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+ color: var(--text-dim);
+ margin-bottom: 12px;
 }
 .chart-area { height: 240px; }
 
 /* COMPARISON */
 .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .compare-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ padding: 20px;
 }
 .compare-card h3 {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: 1.2px;
+ text-transform: uppercase;
+ color: var(--text-dim);
+ margin-bottom: 16px;
+ padding-bottom: 10px;
+ border-bottom: 1px solid var(--border);
 }
 .compare-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 8px 0;
+ border-bottom: 1px solid var(--border);
 }
 .compare-row:last-child { border-bottom: none; }
 .compare-label { font-size: 12px; color: var(--text-dim); }
@@ -131,113 +131,113 @@ section { margin-bottom: 32px; }
 
 /* TABLE CONTROLS */
 .table-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 14px;
+ display: flex;
+ flex-wrap: wrap;
+ gap: 10px;
+ align-items: center;
+ margin-bottom: 14px;
 }
 .search-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  padding: 7px 12px;
-  outline: none;
-  width: 200px;
-  transition: border-color 0.15s;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 6px;
+ color: var(--text);
+ font-family: 'Inter', sans-serif;
+ font-size: 13px;
+ padding: 7px 12px;
+ outline: none;
+ width: 200px;
+ transition: border-color 0.15s;
 }
 .search-box:focus { border-color: var(--blue); }
 .search-box::placeholder { color: var(--text-vdim); }
 .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
 .btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  color: var(--text-dim);
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 5px 10px;
-  transition: all 0.15s;
-  letter-spacing: 0.3px;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 5px;
+ color: var(--text-dim);
+ cursor: pointer;
+ font-family: 'Inter', sans-serif;
+ font-size: 11px;
+ font-weight: 600;
+ padding: 5px 10px;
+ transition: all 0.15s;
+ letter-spacing: 0.3px;
 }
 .btn:hover { background: var(--surface-hover); color: var(--text); }
 .btn.active {
-  background: rgba(41,98,255,0.15);
-  border-color: var(--blue);
-  color: var(--blue);
+ background: rgba(41,98,255,0.15);
+ border-color: var(--blue);
+ color: var(--blue);
 }
 .btn-export {
-  margin-left: auto;
-  background: rgba(38,166,154,0.12);
-  border-color: rgba(38,166,154,0.4);
-  color: var(--green);
-  font-size: 12px;
-  padding: 6px 14px;
+ margin-left: auto;
+ background: rgba(38,166,154,0.12);
+ border-color: rgba(38,166,154,0.4);
+ color: var(--green);
+ font-size: 12px;
+ padding: 6px 14px;
 }
 .btn-export:hover {
-  background: rgba(38,166,154,0.2);
-  color: var(--green);
+ background: rgba(38,166,154,0.2);
+ color: var(--green);
 }
 
 /* MAIN TABLE */
 .table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ overflow: hidden;
 }
 table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
+ width: 100%;
+ border-collapse: collapse;
+ font-size: 12.5px;
 }
 thead th {
-  background: #171B26;
-  color: var(--text-dim);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
-  position: sticky;
-  top: 52px;
-  z-index: 10;
+ background: #171B26;
+ color: var(--text-dim);
+ font-size: 10px;
+ font-weight: 700;
+ letter-spacing: 0.8px;
+ text-transform: uppercase;
+ padding: 10px 12px;
+ text-align: left;
+ border-bottom: 1px solid var(--border);
+ white-space: nowrap;
+ cursor: pointer;
+ user-select: none;
+ position: sticky;
+ top: 52px;
+ z-index: 10;
 }
 thead th:hover { color: var(--text); background: var(--surface-hover); }
 thead th.sort-asc::after { content: ' â'; color: var(--blue); }
 thead th.sort-desc::after { content: ' â'; color: var(--blue); }
 tbody tr {
-  border-bottom: 1px solid rgba(54,58,69,0.5);
-  transition: background 0.1s;
-  cursor: pointer;
+ border-bottom: 1px solid rgba(54,58,69,0.5);
+ transition: background 0.1s;
+ cursor: pointer;
 }
 tbody tr:hover { background: var(--surface-hover); }
 tbody tr.expanded { background: rgba(41,98,255,0.06); }
 tbody td {
-  padding: 9px 12px;
-  vertical-align: middle;
+ padding: 9px 12px;
+ vertical-align: middle;
 }
 .sym-cell { font-weight: 700; font-size: 13px; color: var(--text); }
 .rank-cell { color: var(--text-vdim); font-size: 11px; width: 36px; }
 
 /* BADGES */
 .badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
+ display: inline-block;
+ font-size: 10px;
+ font-weight: 700;
+ padding: 2px 7px;
+ border-radius: 4px;
+ letter-spacing: 0.5px;
 }
 .badge-1m { background: rgba(0,188,212,0.15); color: var(--cyan); border: 1px solid rgba(0,188,212,0.3); }
 .badge-3m { background: rgba(41,98,255,0.15); color: var(--blue); border: 1px solid rgba(41,98,255,0.3); }
@@ -251,175 +251,175 @@ tbody td {
 /* EXPANDED ROW */
 .detail-row td { padding: 0 !important; }
 .detail-panel {
-  padding: 14px 16px;
-  background: #171B26;
-  border-top: 1px solid var(--border);
+ padding: 14px 16px;
+ background: #171B26;
+ border-top: 1px solid var(--border);
 }
 .detail-panel h4 {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 10px;
+ font-size: 10px;
+ font-weight: 700;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+ color: var(--text-dim);
+ margin-bottom: 10px;
 }
 .detail-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
 .detail-table th {
-  color: var(--text-vdim);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 5px 10px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
+ color: var(--text-vdim);
+ font-size: 9.5px;
+ font-weight: 700;
+ letter-spacing: 0.8px;
+ text-transform: uppercase;
+ padding: 5px 10px;
+ text-align: left;
+ border-bottom: 1px solid var(--border);
 }
 .detail-table td {
-  padding: 5px 10px;
-  border-bottom: 1px solid rgba(54,58,69,0.4);
+ padding: 5px 10px;
+ border-bottom: 1px solid rgba(54,58,69,0.4);
 }
 .detail-table tr.best-combo td {
-  background: rgba(41,98,255,0.08);
-  font-weight: 600;
+ background: rgba(41,98,255,0.08);
+ font-weight: 600;
 }
 .detail-table tr.best-combo td:first-child {
-  border-left: 2px solid var(--blue);
-  padding-left: 8px;
+ border-left: 2px solid var(--blue);
+ padding-left: 8px;
 }
 .no-data { color: var(--text-vdim); font-style: italic; font-size: 11px; }
 
 /* RANKINGS TABS */
 .tabs-nav {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 0;
+ display: flex;
+ gap: 0;
+ border-bottom: 1px solid var(--border);
+ margin-bottom: 0;
 }
 .tab-btn {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-dim);
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 10px 18px;
-  transition: all 0.15s;
-  margin-bottom: -1px;
+ background: none;
+ border: none;
+ border-bottom: 2px solid transparent;
+ color: var(--text-dim);
+ cursor: pointer;
+ font-family: 'Inter', sans-serif;
+ font-size: 12px;
+ font-weight: 600;
+ padding: 10px 18px;
+ transition: all 0.15s;
+ margin-bottom: -1px;
 }
 .tab-btn:hover { color: var(--text); }
 .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
 .tabs-content {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  overflow: hidden;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-top: none;
+ border-radius: 0 0 10px 10px;
+ overflow: hidden;
 }
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 .rank-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .rank-table th {
-  background: #171B26;
-  color: var(--text-vdim);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 9px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
+ background: #171B26;
+ color: var(--text-vdim);
+ font-size: 10px;
+ font-weight: 700;
+ letter-spacing: 0.8px;
+ text-transform: uppercase;
+ padding: 9px 12px;
+ text-align: left;
+ border-bottom: 1px solid var(--border);
 }
 .rank-table td {
-  padding: 7px 12px;
-  border-bottom: 1px solid rgba(54,58,69,0.4);
+ padding: 7px 12px;
+ border-bottom: 1px solid rgba(54,58,69,0.4);
 }
 .rank-table tr:last-child td { border-bottom: none; }
 .rank-num {
-  background: rgba(41,98,255,0.12);
-  color: var(--blue);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  min-width: 24px;
-  text-align: center;
-  display: inline-block;
+ background: rgba(41,98,255,0.12);
+ color: var(--blue);
+ font-size: 10px;
+ font-weight: 700;
+ padding: 2px 6px;
+ border-radius: 4px;
+ min-width: 24px;
+ text-align: center;
+ display: inline-block;
 }
 
 /* BEST TF LOOKUP */
 .lookup-stats {
-  font-size: 13px;
-  color: var(--text-dim);
-  margin-bottom: 12px;
-  padding: 10px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  display: inline-block;
+ font-size: 13px;
+ color: var(--text-dim);
+ margin-bottom: 12px;
+ padding: 10px 14px;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ display: inline-block;
 }
 .lookup-stats strong { color: var(--text); }
 .agree-row td { background: rgba(38,166,154,0.05) !important; }
 .disagree-row td { background: rgba(255,152,0,0.04) !important; }
 .agree-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(38,166,154,0.15);
-  color: var(--green);
-  border: 1px solid rgba(38,166,154,0.3);
+ font-size: 10px;
+ font-weight: 700;
+ padding: 2px 7px;
+ border-radius: 4px;
+ background: rgba(38,166,154,0.15);
+ color: var(--green);
+ border: 1px solid rgba(38,166,154,0.3);
 }
 .disagree-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(255,152,0,0.15);
-  color: var(--orange);
-  border: 1px solid rgba(255,152,0,0.3);
+ font-size: 10px;
+ font-weight: 700;
+ padding: 2px 7px;
+ border-radius: 4px;
+ background: rgba(255,152,0,0.15);
+ color: var(--orange);
+ border: 1px solid rgba(255,152,0,0.3);
 }
 .lookup-search {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  padding: 7px 12px;
-  outline: none;
-  width: 220px;
-  margin-bottom: 12px;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 6px;
+ color: var(--text);
+ font-family: 'Inter', sans-serif;
+ font-size: 13px;
+ padding: 7px 12px;
+ outline: none;
+ width: 220px;
+ margin-bottom: 12px;
 }
 .lookup-search:focus { border-color: var(--blue); }
 .lookup-search::placeholder { color: var(--text-vdim); }
 .lookup-table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  max-height: 400px;
-  overflow-y: auto;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ overflow: hidden;
+ max-height: 400px;
+ overflow-y: auto;
 }
 .lookup-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .lookup-table th {
-  background: #171B26;
-  color: var(--text-vdim);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 9px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 5;
+ background: #171B26;
+ color: var(--text-vdim);
+ font-size: 10px;
+ font-weight: 700;
+ letter-spacing: 0.8px;
+ text-transform: uppercase;
+ padding: 9px 14px;
+ text-align: left;
+ border-bottom: 1px solid var(--border);
+ position: sticky;
+ top: 0;
+ z-index: 5;
 }
 .lookup-table td {
-  padding: 6px 14px;
-  border-bottom: 1px solid rgba(54,58,69,0.4);
+ padding: 6px 14px;
+ border-bottom: 1px solid rgba(54,58,69,0.4);
 }
 .lookup-table tr:last-child td { border-bottom: none; }
 
@@ -431,82 +431,82 @@ tbody td {
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-  .charts-row, .compare-grid { grid-template-columns: 1fr; }
-  .cards { grid-template-columns: repeat(2, 1fr); }
+ .charts-row, .compare-grid { grid-template-columns: 1fr; }
+ .cards { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
-  main { padding: 14px; }
-  .cards { grid-template-columns: 1fr 1fr; }
+ main { padding: 14px; }
+ .cards { grid-template-columns: 1fr 1fr; }
 }
 
 /* ── Unified Site Navigation ── */
 .site-nav {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  height: 52px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+ background: var(--surface);
+ border-bottom: 1px solid var(--border);
+ padding: 0 24px;
+ display: flex;
+ align-items: center;
+ gap: 0;
+ height: 52px;
+ position: sticky;
+ top: 0;
+ z-index: 100;
 }
 .site-nav .nav-logo {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--text);
-  text-decoration: none;
-  padding-right: 24px;
-  border-right: 1px solid var(--border);
-  margin-right: 16px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: 0.5px;
+ font-size: 15px;
+ font-weight: 800;
+ color: var(--text);
+ text-decoration: none;
+ padding-right: 24px;
+ border-right: 1px solid var(--border);
+ margin-right: 16px;
+ white-space: nowrap;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ letter-spacing: 0.5px;
 }
 .site-nav .nav-links { display: flex; gap: 2px; flex: 1; }
 .site-nav .nav-links a {
-  color: var(--text-dim);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 14px;
-  border-radius: 6px;
-  transition: all 0.15s;
-  white-space: nowrap;
+ color: var(--text-dim);
+ text-decoration: none;
+ font-size: 13px;
+ font-weight: 500;
+ padding: 6px 14px;
+ border-radius: 6px;
+ transition: all 0.15s;
+ white-space: nowrap;
 }
 .site-nav .nav-links a:hover { color: var(--text); background: var(--surface-hover); }
 .site-nav .nav-links a.active { color: var(--blue); background: rgba(41,98,255,0.12); }
 .site-nav .nav-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-left: auto;
-  white-space: nowrap;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ font-size: 11px;
+ color: var(--text-dim);
+ margin-left: auto;
+ white-space: nowrap;
 }
 .site-nav .nav-status .conn-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #EF5350;
-  display: inline-block;
-  flex-shrink: 0;
+ width: 8px; height: 8px;
+ border-radius: 50%;
+ background: #EF5350;
+ display: inline-block;
+ flex-shrink: 0;
 }
 .site-nav .nav-status .conn-dot.on { background: #26A69A; }
 .site-nav .pulse-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #26A69A;
-  display: inline-block;
-  animation: pulse-glow 2s infinite;
-  flex-shrink: 0;
+ width: 8px; height: 8px;
+ border-radius: 50%;
+ background: #26A69A;
+ display: inline-block;
+ animation: pulse-glow 2s infinite;
+ flex-shrink: 0;
 }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
-  50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
+ 0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
+ 50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
 }
 
 </style>
@@ -514,136 +514,137 @@ tbody td {
 <body>
 
 <nav class="site-nav">
-  <a class="nav-logo" href="/">
-    <span class="pulse-dot" id="pulseDot"></span>
-    F&amp;O LIVE
-  </a>
-  <div class="nav-links">
-    <a href="/">Dashboard</a>
-    <a href="/paper">Paper Trades</a>
-    <a href="/sectors">Sectors</a>
-    <a href="/rsi">RSI Scanner</a>
-    <a href="/rsi-analysis" class="active">Stock Analysis</a>
-    <a href="/admin">Admin</a>
-  </div>
+ <a class="nav-logo" href="/">
+ <span class="pulse-dot" id="pulseDot"></span>
+ F&amp;O LIVE
+ </a>
+ <div class="nav-links">
+ <a href="/">Dashboard</a>
+ <a href="/paper">Paper Trades</a>
+ <a href="/sectors">Sectors</a>
+ <a href="/rsi">RSI Scanner</a>
+ <a href="/rsi-analysis" class="active">Stock Analysis</a>
+ <a href="/divergence">Divergence</a>
+ <a href="/admin">Admin</a>
+ </div>
 </nav>
 
 <main>
 
-  <!-- SECTION 1: SUMMARY CARDS -->
-  <section id="s-summary">
-    <h2>Summary â TEST Period</h2>
-    <div class="cards" id="summary-cards">
-      <!-- Populated by JS -->
-    </div>
-  </section>
+ <!-- SECTION 1: SUMMARY CARDS -->
+ <section id="s-summary">
+ <h2>Summary â TEST Period</h2>
+ <div class="cards" id="summary-cards">
+ <!-- Populated by JS -->
+ </div>
+ </section>
 
-  <!-- SECTION 2: DISTRIBUTION CHARTS -->
-  <section id="s-charts">
-    <h2>Distribution</h2>
-    <div class="charts-row">
-      <div class="chart-box">
-        <div class="chart-title">Best TF Distribution (TEST)</div>
-        <div class="chart-area" id="chart-tf-pie"></div>
-      </div>
-      <div class="chart-box">
-        <div class="chart-title">Bull vs Bear by TF (TEST)</div>
-        <div class="chart-area" id="chart-bullbear"></div>
-      </div>
-    </div>
-  </section>
+ <!-- SECTION 2: DISTRIBUTION CHARTS -->
+ <section id="s-charts">
+ <h2>Distribution</h2>
+ <div class="charts-row">
+ <div class="chart-box">
+ <div class="chart-title">Best TF Distribution (TEST)</div>
+ <div class="chart-area" id="chart-tf-pie"></div>
+ </div>
+ <div class="chart-box">
+ <div class="chart-title">Bull vs Bear by TF (TEST)</div>
+ <div class="chart-area" id="chart-bullbear"></div>
+ </div>
+ </div>
+ </section>
 
-  <!-- SECTION 3: TRAIN vs TEST COMPARISON -->
-  <section id="s-compare">
-    <h2>Train vs Test Comparison</h2>
-    <div class="compare-grid" id="compare-grid">
-      <!-- Populated by JS -->
-    </div>
-  </section>
+ <!-- SECTION 3: TRAIN vs TEST COMPARISON -->
+ <section id="s-compare">
+ <h2>Train vs Test Comparison</h2>
+ <div class="compare-grid" id="compare-grid">
+ <!-- Populated by JS -->
+ </div>
+ </section>
 
-  <!-- SECTION 4: MAIN STOCK TABLE -->
-  <section id="s-table">
-    <h2>Stock Performance Table (TEST)</h2>
-    <div class="table-controls">
-      <input type="text" class="search-box" id="stock-search" placeholder="Search symbol...">
-      <div class="filter-group" id="filter-btns">
-        <button class="btn active" data-filter="all">All</button>
-        <button class="btn" data-filter="profitable">Profitable Only</button>
-        <button class="btn" data-filter="bull">Bull Best</button>
-        <button class="btn" data-filter="bear">Bear Best</button>
-      </div>
-      <div class="filter-group" id="tf-filter-btns">
-        <button class="btn active" data-tf="all">All TF</button>
-        <button class="btn" data-tf="1m">1m</button>
-        <button class="btn" data-tf="3m">3m</button>
-        <button class="btn" data-tf="5m">5m</button>
-        <button class="btn" data-tf="15m">15m</button>
-        <button class="btn" data-tf="30m">30m</button>
-        <button class="btn" data-tf="1h">1h</button>
-      </div>
-      <button class="btn btn-export" id="btn-export">â¬ Export CSV</button>
-    </div>
-    <div class="table-wrap">
-      <table id="main-table">
-        <thead>
-          <tr>
-            <th class="rank-cell" data-col="rank">#</th>
-            <th data-col="sym">Symbol</th>
-            <th data-col="best_tf">Best TF</th>
-            <th data-col="best_side">Side</th>
-            <th data-col="total_trades">Trades</th>
-            <th data-col="total_wr">WR %</th>
-            <th data-col="best_pf">Best PF</th>
-            <th data-col="total_net_inr">Net INR</th>
-            <th data-col="max_dd">Max DD %</th>
-            <th data-col="mcl">MCL</th>
-            <th data-col="avg_pnl">Avg P&L</th>
-          </tr>
-        </thead>
-        <tbody id="main-tbody">
-        </tbody>
-      </table>
-    </div>
-    <div style="color:var(--text-vdim); font-size:11px; margin-top:8px;" id="table-count"></div>
-  </section>
+ <!-- SECTION 4: MAIN STOCK TABLE -->
+ <section id="s-table">
+ <h2>Stock Performance Table (TEST)</h2>
+ <div class="table-controls">
+ <input type="text" class="search-box" id="stock-search" placeholder="Search symbol...">
+ <div class="filter-group" id="filter-btns">
+ <button class="btn active" data-filter="all">All</button>
+ <button class="btn" data-filter="profitable">Profitable Only</button>
+ <button class="btn" data-filter="bull">Bull Best</button>
+ <button class="btn" data-filter="bear">Bear Best</button>
+ </div>
+ <div class="filter-group" id="tf-filter-btns">
+ <button class="btn active" data-tf="all">All TF</button>
+ <button class="btn" data-tf="1m">1m</button>
+ <button class="btn" data-tf="3m">3m</button>
+ <button class="btn" data-tf="5m">5m</button>
+ <button class="btn" data-tf="15m">15m</button>
+ <button class="btn" data-tf="30m">30m</button>
+ <button class="btn" data-tf="1h">1h</button>
+ </div>
+ <button class="btn btn-export" id="btn-export">â¬ Export CSV</button>
+ </div>
+ <div class="table-wrap">
+ <table id="main-table">
+ <thead>
+ <tr>
+ <th class="rank-cell" data-col="rank">#</th>
+ <th data-col="sym">Symbol</th>
+ <th data-col="best_tf">Best TF</th>
+ <th data-col="best_side">Side</th>
+ <th data-col="total_trades">Trades</th>
+ <th data-col="total_wr">WR %</th>
+ <th data-col="best_pf">Best PF</th>
+ <th data-col="total_net_inr">Net INR</th>
+ <th data-col="max_dd">Max DD %</th>
+ <th data-col="mcl">MCL</th>
+ <th data-col="avg_pnl">Avg P&L</th>
+ </tr>
+ </thead>
+ <tbody id="main-tbody">
+ </tbody>
+ </table>
+ </div>
+ <div style="color:var(--text-vdim); font-size:11px; margin-top:8px;" id="table-count"></div>
+ </section>
 
-  <!-- SECTION 5: RANKINGS TABS -->
-  <section id="s-rankings">
-    <h2>Rankings</h2>
-    <div class="tabs-nav" id="rankings-tabs">
-      <button class="tab-btn active" data-tab="by_net_inr">Top 50 by Net INR</button>
-      <button class="tab-btn" data-tab="by_pf">Top 50 by Profit Factor</button>
-      <button class="tab-btn" data-tab="by_wr">Top 50 by Win Rate</button>
-      <button class="tab-btn" data-tab="by_trades">Most Active</button>
-    </div>
-    <div class="tabs-content">
-      <div class="tab-pane active" id="tab-by_net_inr"></div>
-      <div class="tab-pane" id="tab-by_pf"></div>
-      <div class="tab-pane" id="tab-by_wr"></div>
-      <div class="tab-pane" id="tab-by_trades"></div>
-    </div>
-  </section>
+ <!-- SECTION 5: RANKINGS TABS -->
+ <section id="s-rankings">
+ <h2>Rankings</h2>
+ <div class="tabs-nav" id="rankings-tabs">
+ <button class="tab-btn active" data-tab="by_net_inr">Top 50 by Net INR</button>
+ <button class="tab-btn" data-tab="by_pf">Top 50 by Profit Factor</button>
+ <button class="tab-btn" data-tab="by_wr">Top 50 by Win Rate</button>
+ <button class="tab-btn" data-tab="by_trades">Most Active</button>
+ </div>
+ <div class="tabs-content">
+ <div class="tab-pane active" id="tab-by_net_inr"></div>
+ <div class="tab-pane" id="tab-by_pf"></div>
+ <div class="tab-pane" id="tab-by_wr"></div>
+ <div class="tab-pane" id="tab-by_trades"></div>
+ </div>
+ </section>
 
-  <!-- SECTION 6: BEST TF LOOKUP -->
-  <section id="s-lookup">
-    <h2>Best TF Lookup â Train vs Test</h2>
-    <div id="lookup-stats-box" class="lookup-stats"></div>
-    <br>
-    <input type="text" class="lookup-search" id="lookup-search" placeholder="Filter symbol...">
-    <div class="lookup-table-wrap">
-      <table class="lookup-table" id="lookup-table">
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Best TF (TEST)</th>
-            <th>Best TF (TRAIN)</th>
-            <th>Agreement</th>
-          </tr>
-        </thead>
-        <tbody id="lookup-tbody"></tbody>
-      </table>
-    </div>
-  </section>
+ <!-- SECTION 6: BEST TF LOOKUP -->
+ <section id="s-lookup">
+ <h2>Best TF Lookup â Train vs Test</h2>
+ <div id="lookup-stats-box" class="lookup-stats"></div>
+ <br>
+ <input type="text" class="lookup-search" id="lookup-search" placeholder="Filter symbol...">
+ <div class="lookup-table-wrap">
+ <table class="lookup-table" id="lookup-table">
+ <thead>
+ <tr>
+ <th>Symbol</th>
+ <th>Best TF (TEST)</th>
+ <th>Best TF (TRAIN)</th>
+ <th>Agreement</th>
+ </tr>
+ </thead>
+ <tbody id="lookup-tbody"></tbody>
+ </table>
+ </div>
+ </section>
 
 </main>
 
@@ -653,129 +654,129 @@ const DATA = {"test":{"summary":{"profitable_stocks":208,"unprofitable_stocks":1
 // ââ Utility ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function fmtINR(v) {
-  if (v == null) return 'â¹0';
-  v = +v;
-  const neg = v < 0;
-  const abs = Math.abs(v);
-  const intPart = Math.floor(abs);
-  const dec = abs - intPart;
-  let s = String(intPart);
-  let formatted;
-  if (s.length <= 3) {
-    formatted = s;
-  } else {
-    const last3 = s.slice(-3);
-    let rest = s.slice(0, -3);
-    const parts = [];
-    while (rest.length > 0) {
-      parts.unshift(rest.slice(-2));
-      rest = rest.slice(0, -2);
-    }
-    formatted = parts.join(',') + ',' + last3;
-  }
-  if (dec > 0.005) {
-    formatted += '.' + String(Math.round(dec * 100)).padStart(2, '0');
-  }
-  return (neg ? '-' : '') + 'â¹' + formatted;
+ if (v == null) return 'â¹0';
+ v = +v;
+ const neg = v < 0;
+ const abs = Math.abs(v);
+ const intPart = Math.floor(abs);
+ const dec = abs - intPart;
+ let s = String(intPart);
+ let formatted;
+ if (s.length <= 3) {
+ formatted = s;
+ } else {
+ const last3 = s.slice(-3);
+ let rest = s.slice(0, -3);
+ const parts = [];
+ while (rest.length >0) {
+ parts.unshift(rest.slice(-2));
+ rest = rest.slice(0, -2);
+ }
+ formatted = parts.join(',') + ',' + last3;
+ }
+ if (dec >0.005) {
+ formatted += '.' + String(Math.round(dec * 100)).padStart(2, '0');
+ }
+ return (neg ? '-' : '') + 'â¹' + formatted;
 }
 
 function fmtPct(v, decimals=1) {
-  if (v == null) return 'â';
-  return (+v).toFixed(decimals) + '%';
+ if (v == null) return 'â';
+ return (+v).toFixed(decimals) + '%';
 }
 
 function fmtNum(v, decimals=2) {
-  if (v == null) return 'â';
-  return (+v).toFixed(decimals);
+ if (v == null) return 'â';
+ return (+v).toFixed(decimals);
 }
 
 function tfBadge(key) {
-  if (!key) return 'â';
-  const tf = key.includes('_') ? key.split('_')[1] : key;
-  const cls = `badge badge-${tf}`;
-  return `<span class="${cls}">${tf.toUpperCase()}</span>`;
+ if (!key) return 'â';
+ const tf = key.includes('_') ? key.split('_')[1] : key;
+ const cls = `badge badge-${tf}`;
+ return `<span class="${cls}">${tf.toUpperCase()}</span>`;
 }
 
 function sideBadge(key) {
-  if (!key) return 'â';
-  const side = key.includes('_') ? key.split('_')[0] : key;
-  const cls = `badge badge-${side}`;
-  return `<span class="${cls}">${side.toUpperCase()}</span>`;
+ if (!key) return 'â';
+ const side = key.includes('_') ? key.split('_')[0] : key;
+ const cls = `badge badge-${side}`;
+ return `<span class="${cls}">${side.toUpperCase()}</span>`;
 }
 
 function colorINR(v) {
-  v = +v;
-  const cls = v >= 0 ? 'c-green' : 'c-red';
-  return `<span class="${cls}">${fmtINR(v)}</span>`;
+ v = +v;
+ const cls = v >= 0 ? 'c-green' : 'c-red';
+ return `<span class="${cls}">${fmtINR(v)}</span>`;
 }
 
 function colorWR(v) {
-  v = +v;
-  let cls = 'c-red';
-  if (v >= 18) cls = 'c-green';
-  else if (v >= 14) cls = 'c-orange';
-  return `<span class="${cls}">${v.toFixed(1)}%</span>`;
+ v = +v;
+ let cls = 'c-red';
+ if (v >= 18) cls = 'c-green';
+ else if (v >= 14) cls = 'c-orange';
+ return `<span class="${cls}">${v.toFixed(1)}%</span>`;
 }
 
 function colorPF(v) {
-  v = +v;
-  let cls = 'c-red';
-  if (v >= 2) cls = 'c-green';
-  else if (v >= 1.5) cls = 'c-orange';
-  return `<span class="${cls}">${v.toFixed(2)}</span>`;
+ v = +v;
+ let cls = 'c-red';
+ if (v >= 2) cls = 'c-green';
+ else if (v >= 1.5) cls = 'c-orange';
+ return `<span class="${cls}">${v.toFixed(2)}</span>`;
 }
 
 function colorAvgPnl(v) {
-  v = +v;
-  const cls = v >= 0 ? 'c-green' : 'c-red';
-  return `<span class="${cls}">${fmtINR(v)}</span>`;
+ v = +v;
+ const cls = v >= 0 ? 'c-green' : 'c-red';
+ return `<span class="${cls}">${fmtINR(v)}</span>`;
 }
 
 // ââ Build stock rows array ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function buildStockRows() {
-  const stocks = DATA.test && DATA.test.stocks ? DATA.test.stocks : {};
-  const rows = [];
-  for (const [sym, s] of Object.entries(stocks)) {
-    const best = s.best_overall || '';
-    const bestTf = best.includes('_') ? best.split('_')[1] : best;
-    const bestSide = best.includes('_') ? best.split('_')[0] : best;
+ const stocks = DATA.test && DATA.test.stocks ? DATA.test.stocks : {};
+ const rows = [];
+ for (const [sym, s] of Object.entries(stocks)) {
+ const best = s.best_overall || '';
+ const bestTf = best.includes('_') ? best.split('_')[1] : best;
+ const bestSide = best.includes('_') ? best.split('_')[0] : best;
 
-    // Find best PF combo
-    let bestPf = 0;
-    let worstDd = 0;
-    let worstMcl = 0;
-    let totalAvgPnl = 0;
-    let comboCount = 0;
-    for (const [ck, cv] of Object.entries(s.combos || {})) {
-      if (cv.pf > bestPf) bestPf = cv.pf;
-      if (Math.abs(cv.max_dd_pct) > worstDd) worstDd = Math.abs(cv.max_dd_pct);
-      if (cv.mcl > worstMcl) worstMcl = cv.mcl;
-      totalAvgPnl += cv.avg_pnl || 0;
-      comboCount++;
-    }
-    const avgPnl = comboCount > 0 ? totalAvgPnl / comboCount : 0;
+ // Find best PF combo
+ let bestPf = 0;
+ let worstDd = 0;
+ let worstMcl = 0;
+ let totalAvgPnl = 0;
+ let comboCount = 0;
+ for (const [ck, cv] of Object.entries(s.combos || {})) {
+ if (cv.pf >bestPf) bestPf = cv.pf;
+ if (Math.abs(cv.max_dd_pct) >worstDd) worstDd = Math.abs(cv.max_dd_pct);
+ if (cv.mcl >worstMcl) worstMcl = cv.mcl;
+ totalAvgPnl += cv.avg_pnl || 0;
+ comboCount++;
+ }
+ const avgPnl = comboCount >0 ? totalAvgPnl / comboCount : 0;
 
-    rows.push({
-      sym,
-      best_overall: best,
-      best_tf: bestTf,
-      best_side: bestSide,
-      total_trades: s.total_trades || 0,
-      total_net_inr: s.total_net_inr || 0,
-      total_wins: s.total_wins || 0,
-      total_wr: s.total_wr || 0,
-      best_pf: bestPf,
-      max_dd: worstDd,
-      mcl: worstMcl,
-      avg_pnl: avgPnl,
-      combos: s.combos || {},
-    });
-  }
-  // Default sort by net INR desc
-  rows.sort((a, b) => b.total_net_inr - a.total_net_inr);
-  rows.forEach((r, i) => r.rank = i + 1);
-  return rows;
+ rows.push({
+ sym,
+ best_overall: best,
+ best_tf: bestTf,
+ best_side: bestSide,
+ total_trades: s.total_trades || 0,
+ total_net_inr: s.total_net_inr || 0,
+ total_wins: s.total_wins || 0,
+ total_wr: s.total_wr || 0,
+ best_pf: bestPf,
+ max_dd: worstDd,
+ mcl: worstMcl,
+ avg_pnl: avgPnl,
+ combos: s.combos || {},
+ });
+ }
+ // Default sort by net INR desc
+ rows.sort((a, b) =>b.total_net_inr - a.total_net_inr);
+ rows.forEach((r, i) =>r.rank = i + 1);
+ return rows;
 }
 
 const ALL_ROWS = buildStockRows();
@@ -786,487 +787,487 @@ let expandedSym = null;
 // ââ Section 1: Summary Cards ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function renderSummaryCards() {
-  const test = DATA.test ? DATA.test.summary : {};
-  const tf = DATA.test ? DATA.test.tf_distribution : {};
-  const side = DATA.test ? DATA.test.side_distribution : {};
-  const totalStocks = (test.profitable_stocks || 0) + (test.unprofitable_stocks || 0);
-  const profPct = totalStocks ? ((test.profitable_stocks / totalStocks) * 100).toFixed(1) : 0;
+ const test = DATA.test ? DATA.test.summary : {};
+ const tf = DATA.test ? DATA.test.tf_distribution : {};
+ const side = DATA.test ? DATA.test.side_distribution : {};
+ const totalStocks = (test.profitable_stocks || 0) + (test.unprofitable_stocks || 0);
+ const profPct = totalStocks ? ((test.profitable_stocks / totalStocks) * 100).toFixed(1) : 0;
 
-  // Best TF = highest count
-  let bestTf = '', bestTfCount = 0;
-  for (const [tf2, cnt] of Object.entries(tf)) {
-    if (cnt > bestTfCount) { bestTfCount = cnt; bestTf = tf2; }
-  }
+ // Best TF = highest count
+ let bestTf = '', bestTfCount = 0;
+ for (const [tf2, cnt] of Object.entries(tf)) {
+ if (cnt >bestTfCount) { bestTfCount = cnt; bestTf = tf2; }
+ }
 
-  const bull = side.bull || 0;
-  const bear = side.bear || 0;
+ const bull = side.bull || 0;
+ const bear = side.bear || 0;
 
-  const cards = [
-    {
-      label: 'Total Stocks',
-      value: totalStocks,
-      sub: 'in analysis',
-      cls: '',
-    },
-    {
-      label: 'Profitable (TEST)',
-      value: `${test.profitable_stocks || 0}/${totalStocks}`,
-      sub: `${profPct}% of stocks`,
-      cls: 'c-green',
-    },
-    {
-      label: 'Total Net INR (TEST)',
-      value: fmtINR(test.total_net_inr),
-      sub: 'across all stocks',
-      cls: (test.total_net_inr || 0) >= 0 ? 'c-green' : 'c-red',
-    },
-    {
-      label: 'Avg Net / Stock',
-      value: fmtINR(test.avg_net_per_stock),
-      sub: 'average per symbol',
-      cls: (test.avg_net_per_stock || 0) >= 0 ? 'c-green' : 'c-red',
-    },
-    {
-      label: 'Best TF (Most Common)',
-      value: bestTf.toUpperCase(),
-      sub: `${bestTfCount} stocks`,
-      cls: 'c-cyan',
-    },
-    {
-      label: 'Bull / Bear Split',
-      value: `${bull} / ${bear}`,
-      sub: `${bull + bear} total`,
-      cls: '',
-    },
-  ];
+ const cards = [
+ {
+ label: 'Total Stocks',
+ value: totalStocks,
+ sub: 'in analysis',
+ cls: '',
+ },
+ {
+ label: 'Profitable (TEST)',
+ value: `${test.profitable_stocks || 0}/${totalStocks}`,
+ sub: `${profPct}% of stocks`,
+ cls: 'c-green',
+ },
+ {
+ label: 'Total Net INR (TEST)',
+ value: fmtINR(test.total_net_inr),
+ sub: 'across all stocks',
+ cls: (test.total_net_inr || 0) >= 0 ? 'c-green' : 'c-red',
+ },
+ {
+ label: 'Avg Net / Stock',
+ value: fmtINR(test.avg_net_per_stock),
+ sub: 'average per symbol',
+ cls: (test.avg_net_per_stock || 0) >= 0 ? 'c-green' : 'c-red',
+ },
+ {
+ label: 'Best TF (Most Common)',
+ value: bestTf.toUpperCase(),
+ sub: `${bestTfCount} stocks`,
+ cls: 'c-cyan',
+ },
+ {
+ label: 'Bull / Bear Split',
+ value: `${bull} / ${bear}`,
+ sub: `${bull + bear} total`,
+ cls: '',
+ },
+ ];
 
-  const el = document.getElementById('summary-cards');
-  el.innerHTML = cards.map(c => `
-    <div class="card">
-      <div class="card-label">${c.label}</div>
-      <div class="card-value ${c.cls}">${c.value}</div>
-      <div class="card-sub">${c.sub}</div>
-    </div>
-  `).join('');
+ const el = document.getElementById('summary-cards');
+ el.innerHTML = cards.map(c =>`
+ <div class="card">
+ <div class="card-label">${c.label}</div>
+ <div class="card-value ${c.cls}">${c.value}</div>
+ <div class="card-sub">${c.sub}</div>
+ </div>
+ `).join('');
 }
 
 // ââ Section 2: Charts âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const TF_COLORS = {
-  '1m': '#00BCD4', '3m': '#2962FF', '5m': '#AB47BC',
-  '15m': '#FF9800', '30m': '#FFD700', '1h': '#EF5350',
+ '1m': '#00BCD4', '3m': '#2962FF', '5m': '#AB47BC',
+ '15m': '#FF9800', '30m': '#FFD700', '1h': '#EF5350',
 };
 
 function renderCharts() {
-  const tfDist = DATA.test ? DATA.test.tf_distribution : {};
-  const sideDist = DATA.test ? DATA.test.side_distribution : {};
+ const tfDist = DATA.test ? DATA.test.tf_distribution : {};
+ const sideDist = DATA.test ? DATA.test.side_distribution : {};
 
-  // --- Pie chart: TF distribution ---
-  const pieChart = echarts.init(document.getElementById('chart-tf-pie'), 'dark');
-  const tfOrder = ['1m', '3m', '5m', '15m', '30m', '1h'];
-  const pieData = tfOrder
-    .filter(tf => tfDist[tf] != null)
-    .map(tf => ({
-      name: tf.toUpperCase(),
-      value: tfDist[tf],
-      itemStyle: { color: TF_COLORS[tf] || '#888' },
-    }));
+ // --- Pie chart: TF distribution ---
+ const pieChart = echarts.init(document.getElementById('chart-tf-pie'), 'dark');
+ const tfOrder = ['1m', '3m', '5m', '15m', '30m', '1h'];
+ const pieData = tfOrder
+ .filter(tf =>tfDist[tf] != null)
+ .map(tf =>({
+ name: tf.toUpperCase(),
+ value: tfDist[tf],
+ itemStyle: { color: TF_COLORS[tf] || '#888' },
+ }));
 
-  pieChart.setOption({
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} stocks ({d}%)',
-      backgroundColor: '#1E222D',
-      borderColor: '#363A45',
-      textStyle: { color: '#D1D4DC', fontSize: 12 },
-    },
-    legend: {
-      orient: 'vertical',
-      right: 10,
-      top: 'center',
-      textStyle: { color: '#787B86', fontSize: 11 },
-      icon: 'circle',
-    },
-    series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
-      center: ['40%', '50%'],
-      data: pieData,
-      label: {
-        show: true,
-        formatter: '{b}\n{c}',
-        fontSize: 11,
-        color: '#D1D4DC',
-      },
-      labelLine: { lineStyle: { color: '#363A45' } },
-    }],
-  });
+ pieChart.setOption({
+ backgroundColor: 'transparent',
+ tooltip: {
+ trigger: 'item',
+ formatter: '{b}: {c} stocks ({d}%)',
+ backgroundColor: '#1E222D',
+ borderColor: '#363A45',
+ textStyle: { color: '#D1D4DC', fontSize: 12 },
+ },
+ legend: {
+ orient: 'vertical',
+ right: 10,
+ top: 'center',
+ textStyle: { color: '#787B86', fontSize: 11 },
+ icon: 'circle',
+ },
+ series: [{
+ type: 'pie',
+ radius: ['40%', '70%'],
+ center: ['40%', '50%'],
+ data: pieData,
+ label: {
+ show: true,
+ formatter: '{b}\n{c}',
+ fontSize: 11,
+ color: '#D1D4DC',
+ },
+ labelLine: { lineStyle: { color: '#363A45' } },
+ }],
+ });
 
-  // --- Bar chart: Bull vs Bear per TF ---
-  // Count bull and bear per TF from stock data
-  const bullByTf = {}, bearByTf = {};
-  tfOrder.forEach(tf => { bullByTf[tf] = 0; bearByTf[tf] = 0; });
-  for (const s of Object.values(DATA.test ? DATA.test.stocks : {})) {
-    const best = s.best_overall || '';
-    if (!best) continue;
-    const parts = best.split('_');
-    if (parts.length < 2) continue;
-    const side = parts[0], tf = parts[1];
-    if (side === 'bull' && bullByTf[tf] !== undefined) bullByTf[tf]++;
-    else if (side === 'bear' && bearByTf[tf] !== undefined) bearByTf[tf]++;
-  }
+ // --- Bar chart: Bull vs Bear per TF ---
+ // Count bull and bear per TF from stock data
+ const bullByTf = {}, bearByTf = {};
+ tfOrder.forEach(tf =>{ bullByTf[tf] = 0; bearByTf[tf] = 0; });
+ for (const s of Object.values(DATA.test ? DATA.test.stocks : {})) {
+ const best = s.best_overall || '';
+ if (!best) continue;
+ const parts = best.split('_');
+ if (parts.length < 2) continue;
+ const side = parts[0], tf = parts[1];
+ if (side === 'bull' && bullByTf[tf] !== undefined) bullByTf[tf]++;
+ else if (side === 'bear' && bearByTf[tf] !== undefined) bearByTf[tf]++;
+ }
 
-  const barChart = echarts.init(document.getElementById('chart-bullbear'), 'dark');
-  barChart.setOption({
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      backgroundColor: '#1E222D',
-      borderColor: '#363A45',
-      textStyle: { color: '#D1D4DC', fontSize: 12 },
-    },
-    legend: {
-      data: ['Bull', 'Bear'],
-      top: 4,
-      textStyle: { color: '#787B86', fontSize: 11 },
-    },
-    grid: { left: 40, right: 20, top: 36, bottom: 28 },
-    xAxis: {
-      type: 'category',
-      data: tfOrder.map(t => t.toUpperCase()),
-      axisLabel: { color: '#787B86', fontSize: 11 },
-      axisLine: { lineStyle: { color: '#363A45' } },
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: { color: '#787B86', fontSize: 10 },
-      splitLine: { lineStyle: { color: '#2A2E39' } },
-    },
-    series: [
-      {
-        name: 'Bull',
-        type: 'bar',
-        stack: 'total',
-        data: tfOrder.map(t => bullByTf[t] || 0),
-        itemStyle: { color: '#26A69A' },
-      },
-      {
-        name: 'Bear',
-        type: 'bar',
-        stack: 'total',
-        data: tfOrder.map(t => bearByTf[t] || 0),
-        itemStyle: { color: '#EF5350' },
-      },
-    ],
-  });
+ const barChart = echarts.init(document.getElementById('chart-bullbear'), 'dark');
+ barChart.setOption({
+ backgroundColor: 'transparent',
+ tooltip: {
+ trigger: 'axis',
+ axisPointer: { type: 'shadow' },
+ backgroundColor: '#1E222D',
+ borderColor: '#363A45',
+ textStyle: { color: '#D1D4DC', fontSize: 12 },
+ },
+ legend: {
+ data: ['Bull', 'Bear'],
+ top: 4,
+ textStyle: { color: '#787B86', fontSize: 11 },
+ },
+ grid: { left: 40, right: 20, top: 36, bottom: 28 },
+ xAxis: {
+ type: 'category',
+ data: tfOrder.map(t =>t.toUpperCase()),
+ axisLabel: { color: '#787B86', fontSize: 11 },
+ axisLine: { lineStyle: { color: '#363A45' } },
+ },
+ yAxis: {
+ type: 'value',
+ axisLabel: { color: '#787B86', fontSize: 10 },
+ splitLine: { lineStyle: { color: '#2A2E39' } },
+ },
+ series: [
+ {
+ name: 'Bull',
+ type: 'bar',
+ stack: 'total',
+ data: tfOrder.map(t =>bullByTf[t] || 0),
+ itemStyle: { color: '#26A69A' },
+ },
+ {
+ name: 'Bear',
+ type: 'bar',
+ stack: 'total',
+ data: tfOrder.map(t =>bearByTf[t] || 0),
+ itemStyle: { color: '#EF5350' },
+ },
+ ],
+ });
 
-  window.addEventListener('resize', () => {
-    pieChart.resize();
-    barChart.resize();
-  });
+ window.addEventListener('resize', () =>{
+ pieChart.resize();
+ barChart.resize();
+ });
 }
 
 // ââ Section 3: Train vs Test Comparison ââââââââââââââââââââââââââââââââââââââ
 
 function renderComparison() {
-  const train = DATA.train ? DATA.train.summary : null;
-  const test = DATA.test ? DATA.test.summary : null;
-  if (!train || !test) return;
+ const train = DATA.train ? DATA.train.summary : null;
+ const test = DATA.test ? DATA.test.summary : null;
+ if (!train || !test) return;
 
-  const totalStocksTest = (test.profitable_stocks || 0) + (test.unprofitable_stocks || 0);
-  const totalStocksTrain = (train.profitable_stocks || 0) + (train.unprofitable_stocks || 0);
+ const totalStocksTest = (test.profitable_stocks || 0) + (test.unprofitable_stocks || 0);
+ const totalStocksTrain = (train.profitable_stocks || 0) + (train.unprofitable_stocks || 0);
 
-  function arrow(testVal, trainVal, higherIsBetter=true) {
-    const improved = higherIsBetter ? testVal > trainVal : testVal < trainVal;
-    if (testVal === trainVal) return '';
-    return improved
-      ? '<span class="arrow-up">â</span>'
-      : '<span class="arrow-down">â</span>';
-  }
+ function arrow(testVal, trainVal, higherIsBetter=true) {
+ const improved = higherIsBetter ? testVal >trainVal : testVal < trainVal;
+ if (testVal === trainVal) return '';
+ return improved
+ ? '<span class="arrow-up">â</span>'
+ : '<span class="arrow-down">â</span>';
+ }
 
-  const grid = document.getElementById('compare-grid');
-  grid.innerHTML = `
-    <div class="compare-card">
-      <h3>Train Period</h3>
-      <div class="compare-row">
-        <span class="compare-label">Profitable Stocks</span>
-        <span class="compare-val">${train.profitable_stocks || 0} / ${totalStocksTrain}</span>
-      </div>
-      <div class="compare-row">
-        <span class="compare-label">Total Net INR</span>
-        <span class="compare-val">${fmtINR(train.total_net_inr)}</span>
-      </div>
-      <div class="compare-row">
-        <span class="compare-label">Avg Net / Stock</span>
-        <span class="compare-val">${fmtINR(train.avg_net_per_stock)}</span>
-      </div>
-      <div class="compare-row">
-        <span class="compare-label">Unprofitable</span>
-        <span class="compare-val c-red">${train.unprofitable_stocks || 0}</span>
-      </div>
-    </div>
-    <div class="compare-card">
-      <h3>Test Period</h3>
-      <div class="compare-row">
-        <span class="compare-label">Profitable Stocks</span>
-        <span class="compare-val c-green">${test.profitable_stocks || 0} / ${totalStocksTest}
-          ${arrow(test.profitable_stocks, train.profitable_stocks)}</span>
-      </div>
-      <div class="compare-row">
-        <span class="compare-label">Total Net INR</span>
-        <span class="compare-val ${(test.total_net_inr||0) >= 0 ? 'c-green' : 'c-red'}">
-          ${fmtINR(test.total_net_inr)}
-          ${arrow(test.total_net_inr, train.total_net_inr)}
-        </span>
-      </div>
-      <div class="compare-row">
-        <span class="compare-label">Avg Net / Stock</span>
-        <span class="compare-val ${(test.avg_net_per_stock||0) >= 0 ? 'c-green' : 'c-red'}">
-          ${fmtINR(test.avg_net_per_stock)}
-          ${arrow(test.avg_net_per_stock, train.avg_net_per_stock)}
-        </span>
-      </div>
-      <div class="compare-row">
-        <span class="compare-label">Unprofitable</span>
-        <span class="compare-val ${(test.unprofitable_stocks||0) === 0 ? 'c-green' : 'c-red'}">
-          ${test.unprofitable_stocks || 0}
-          ${arrow(test.unprofitable_stocks, train.unprofitable_stocks, false)}
-        </span>
-      </div>
-    </div>
-  `;
+ const grid = document.getElementById('compare-grid');
+ grid.innerHTML = `
+ <div class="compare-card">
+ <h3>Train Period</h3>
+ <div class="compare-row">
+ <span class="compare-label">Profitable Stocks</span>
+ <span class="compare-val">${train.profitable_stocks || 0} / ${totalStocksTrain}</span>
+ </div>
+ <div class="compare-row">
+ <span class="compare-label">Total Net INR</span>
+ <span class="compare-val">${fmtINR(train.total_net_inr)}</span>
+ </div>
+ <div class="compare-row">
+ <span class="compare-label">Avg Net / Stock</span>
+ <span class="compare-val">${fmtINR(train.avg_net_per_stock)}</span>
+ </div>
+ <div class="compare-row">
+ <span class="compare-label">Unprofitable</span>
+ <span class="compare-val c-red">${train.unprofitable_stocks || 0}</span>
+ </div>
+ </div>
+ <div class="compare-card">
+ <h3>Test Period</h3>
+ <div class="compare-row">
+ <span class="compare-label">Profitable Stocks</span>
+ <span class="compare-val c-green">${test.profitable_stocks || 0} / ${totalStocksTest}
+ ${arrow(test.profitable_stocks, train.profitable_stocks)}</span>
+ </div>
+ <div class="compare-row">
+ <span class="compare-label">Total Net INR</span>
+ <span class="compare-val ${(test.total_net_inr||0) >= 0 ? 'c-green' : 'c-red'}">
+ ${fmtINR(test.total_net_inr)}
+ ${arrow(test.total_net_inr, train.total_net_inr)}
+ </span>
+ </div>
+ <div class="compare-row">
+ <span class="compare-label">Avg Net / Stock</span>
+ <span class="compare-val ${(test.avg_net_per_stock||0) >= 0 ? 'c-green' : 'c-red'}">
+ ${fmtINR(test.avg_net_per_stock)}
+ ${arrow(test.avg_net_per_stock, train.avg_net_per_stock)}
+ </span>
+ </div>
+ <div class="compare-row">
+ <span class="compare-label">Unprofitable</span>
+ <span class="compare-val ${(test.unprofitable_stocks||0) === 0 ? 'c-green' : 'c-red'}">
+ ${test.unprofitable_stocks || 0}
+ ${arrow(test.unprofitable_stocks, train.unprofitable_stocks, false)}
+ </span>
+ </div>
+ </div>
+ `;
 }
 
 // ââ Section 4: Main Table âââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function renderTableRow(r) {
-  return `<tr data-sym="${r.sym}" data-rank="${r.rank}">
-    <td class="rank-cell">${r.rank}</td>
-    <td class="sym-cell">${r.sym}</td>
-    <td>${tfBadge(r.best_overall)}</td>
-    <td>${sideBadge(r.best_overall)}</td>
-    <td>${r.total_trades}</td>
-    <td>${colorWR(r.total_wr)}</td>
-    <td>${colorPF(r.best_pf)}</td>
-    <td>${colorINR(r.total_net_inr)}</td>
-    <td><span class="${r.max_dd > 20 ? 'c-red' : r.max_dd > 10 ? 'c-orange' : 'c-green'}">${r.max_dd.toFixed(1)}%</span></td>
-    <td><span class="${r.mcl > 5 ? 'c-red' : r.mcl > 3 ? 'c-orange' : ''}">${r.mcl}</span></td>
-    <td>${colorAvgPnl(r.avg_pnl)}</td>
-  </tr>`;
+ return `<tr data-sym="${r.sym}" data-rank="${r.rank}">
+ <td class="rank-cell">${r.rank}</td>
+ <td class="sym-cell">${r.sym}</td>
+ <td>${tfBadge(r.best_overall)}</td>
+ <td>${sideBadge(r.best_overall)}</td>
+ <td>${r.total_trades}</td>
+ <td>${colorWR(r.total_wr)}</td>
+ <td>${colorPF(r.best_pf)}</td>
+ <td>${colorINR(r.total_net_inr)}</td>
+ <td><span class="${r.max_dd >20 ? 'c-red' : r.max_dd >10 ? 'c-orange' : 'c-green'}">${r.max_dd.toFixed(1)}%</span></td>
+ <td><span class="${r.mcl >5 ? 'c-red' : r.mcl >3 ? 'c-orange' : ''}">${r.mcl}</span></td>
+ <td>${colorAvgPnl(r.avg_pnl)}</td>
+ </tr>`;
 }
 
 function renderDetailRow(r) {
-  const combos = r.combos;
-  const keys = Object.keys(combos).sort();
-  if (keys.length === 0) {
-    return `<tr class="detail-row" data-for="${r.sym}"><td colspan="11">
-      <div class="detail-panel"><span class="no-data">No combo data</span></div>
-    </td></tr>`;
-  }
-  const rows = keys.map(ck => {
-    const cv = combos[ck];
-    const isBest = ck === r.best_overall;
-    const parts = ck.split('_');
-    const side = parts[0] || '';
-    const tf = parts[1] || '';
-    return `<tr class="${isBest ? 'best-combo' : ''}">
-      <td>${tfBadge(ck)}</td>
-      <td>${sideBadge(ck)}</td>
-      <td>${cv.trades}</td>
-      <td>${colorWR(cv.wr)}</td>
-      <td>${colorPF(cv.pf)}</td>
-      <td>${colorINR(cv.net_inr)}</td>
-      <td><span class="${Math.abs(cv.max_dd_pct) > 20 ? 'c-red' : Math.abs(cv.max_dd_pct) > 10 ? 'c-orange' : 'c-green'}">${Math.abs(cv.max_dd_pct).toFixed(1)}%</span></td>
-      <td>${cv.mcl}</td>
-      <td>${colorAvgPnl(cv.avg_pnl)}</td>
-      ${isBest ? '<td><span class="badge" style="background:rgba(41,98,255,.15);color:#2962FF;border:1px solid rgba(41,98,255,.3)">BEST</span></td>' : '<td></td>'}
-    </tr>`;
-  }).join('');
+ const combos = r.combos;
+ const keys = Object.keys(combos).sort();
+ if (keys.length === 0) {
+ return `<tr class="detail-row" data-for="${r.sym}"><td colspan="11">
+ <div class="detail-panel"><span class="no-data">No combo data</span></div>
+ </td></tr>`;
+ }
+ const rows = keys.map(ck =>{
+ const cv = combos[ck];
+ const isBest = ck === r.best_overall;
+ const parts = ck.split('_');
+ const side = parts[0] || '';
+ const tf = parts[1] || '';
+ return `<tr class="${isBest ? 'best-combo' : ''}">
+ <td>${tfBadge(ck)}</td>
+ <td>${sideBadge(ck)}</td>
+ <td>${cv.trades}</td>
+ <td>${colorWR(cv.wr)}</td>
+ <td>${colorPF(cv.pf)}</td>
+ <td>${colorINR(cv.net_inr)}</td>
+ <td><span class="${Math.abs(cv.max_dd_pct) >20 ? 'c-red' : Math.abs(cv.max_dd_pct) >10 ? 'c-orange' : 'c-green'}">${Math.abs(cv.max_dd_pct).toFixed(1)}%</span></td>
+ <td>${cv.mcl}</td>
+ <td>${colorAvgPnl(cv.avg_pnl)}</td>
+ ${isBest ? '<td><span class="badge" style="background:rgba(41,98,255,.15);color:#2962FF;border:1px solid rgba(41,98,255,.3)">BEST</span></td>' : '<td></td>'}
+ </tr>`;
+ }).join('');
 
-  return `<tr class="detail-row" data-for="${r.sym}"><td colspan="11">
-    <div class="detail-panel">
-      <h4>All Combos â ${r.sym} &nbsp;<span style="color:var(--text-vdim);font-weight:400">Best: ${r.best_overall}</span></h4>
-      <table class="detail-table">
-        <thead><tr>
-          <th>TF</th><th>Side</th><th>Trades</th><th>WR%</th>
-          <th>PF</th><th>Net INR</th><th>Max DD</th><th>MCL</th><th>Avg P&L</th><th></th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </td></tr>`;
+ return `<tr class="detail-row" data-for="${r.sym}"><td colspan="11">
+ <div class="detail-panel">
+ <h4>All Combos â ${r.sym} &nbsp;<span style="color:var(--text-vdim);font-weight:400">Best: ${r.best_overall}</span></h4>
+ <table class="detail-table">
+ <thead><tr>
+ <th>TF</th><th>Side</th><th>Trades</th><th>WR%</th>
+ <th>PF</th><th>Net INR</th><th>Max DD</th><th>MCL</th><th>Avg P&L</th><th></th>
+ </tr></thead>
+ <tbody>${rows}</tbody>
+ </table>
+ </div>
+ </td></tr>`;
 }
 
 function applyFilters() {
-  const search = document.getElementById('stock-search').value.trim().toUpperCase();
-  const activeFilter = document.querySelector('#filter-btns .btn.active')?.dataset.filter || 'all';
-  const activeTf = document.querySelector('#tf-filter-btns .btn.active')?.dataset.tf || 'all';
+ const search = document.getElementById('stock-search').value.trim().toUpperCase();
+ const activeFilter = document.querySelector('#filter-btns .btn.active')?.dataset.filter || 'all';
+ const activeTf = document.querySelector('#tf-filter-btns .btn.active')?.dataset.tf || 'all';
 
-  filteredRows = ALL_ROWS.filter(r => {
-    if (search && !r.sym.includes(search)) return false;
-    if (activeFilter === 'profitable' && r.total_net_inr < 0) return false;
-    if (activeFilter === 'bull' && r.best_side !== 'bull') return false;
-    if (activeFilter === 'bear' && r.best_side !== 'bear') return false;
-    if (activeTf !== 'all' && r.best_tf !== activeTf) return false;
-    return true;
-  });
+ filteredRows = ALL_ROWS.filter(r =>{
+ if (search && !r.sym.includes(search)) return false;
+ if (activeFilter === 'profitable' && r.total_net_inr < 0) return false;
+ if (activeFilter === 'bull' && r.best_side !== 'bull') return false;
+ if (activeFilter === 'bear' && r.best_side !== 'bear') return false;
+ if (activeTf !== 'all' && r.best_tf !== activeTf) return false;
+ return true;
+ });
 
-  sortRows();
-  renderTable();
+ sortRows();
+ renderTable();
 }
 
 function sortRows() {
-  const col = currentSort.col;
-  const dir = currentSort.dir;
-  filteredRows.sort((a, b) => {
-    let va = a[col], vb = b[col];
-    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
-    if (va < vb) return dir === 'asc' ? -1 : 1;
-    if (va > vb) return dir === 'asc' ? 1 : -1;
-    return 0;
-  });
+ const col = currentSort.col;
+ const dir = currentSort.dir;
+ filteredRows.sort((a, b) =>{
+ let va = a[col], vb = b[col];
+ if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+ if (va < vb) return dir === 'asc' ? -1 : 1;
+ if (va >vb) return dir === 'asc' ? 1 : -1;
+ return 0;
+ });
 }
 
 function renderTable() {
-  const tbody = document.getElementById('main-tbody');
-  const html = [];
-  for (let i = 0; i < filteredRows.length; i++) {
-    const r = filteredRows[i];
-    html.push(renderTableRow(r));
-    if (r.sym === expandedSym) {
-      html.push(renderDetailRow(r));
-    }
-  }
-  tbody.innerHTML = html.join('');
-  document.getElementById('table-count').textContent =
-    `Showing ${filteredRows.length} of ${ALL_ROWS.length} stocks`;
+ const tbody = document.getElementById('main-tbody');
+ const html = [];
+ for (let i = 0; i < filteredRows.length; i++) {
+ const r = filteredRows[i];
+ html.push(renderTableRow(r));
+ if (r.sym === expandedSym) {
+ html.push(renderDetailRow(r));
+ }
+ }
+ tbody.innerHTML = html.join('');
+ document.getElementById('table-count').textContent =
+ `Showing ${filteredRows.length} of ${ALL_ROWS.length} stocks`;
 
-  // Re-attach row click handlers
-  tbody.querySelectorAll('tr[data-sym]').forEach(tr => {
-    tr.addEventListener('click', () => {
-      const sym = tr.dataset.sym;
-      if (expandedSym === sym) {
-        expandedSym = null;
-        tr.classList.remove('expanded');
-      } else {
-        expandedSym = sym;
-      }
-      renderTable();
-    });
-  });
+ // Re-attach row click handlers
+ tbody.querySelectorAll('tr[data-sym]').forEach(tr =>{
+ tr.addEventListener('click', () =>{
+ const sym = tr.dataset.sym;
+ if (expandedSym === sym) {
+ expandedSym = null;
+ tr.classList.remove('expanded');
+ } else {
+ expandedSym = sym;
+ }
+ renderTable();
+ });
+ });
 }
 
 function initTable() {
-  // Sort header clicks
-  document.querySelectorAll('#main-table thead th[data-col]').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.col;
-      if (currentSort.col === col) {
-        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
-      } else {
-        currentSort.col = col;
-        currentSort.dir = 'desc';
-      }
-      document.querySelectorAll('#main-table thead th').forEach(h => {
-        h.classList.remove('sort-asc', 'sort-desc');
-      });
-      th.classList.add(currentSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
-      applyFilters();
-    });
-  });
+ // Sort header clicks
+ document.querySelectorAll('#main-table thead th[data-col]').forEach(th =>{
+ th.addEventListener('click', () =>{
+ const col = th.dataset.col;
+ if (currentSort.col === col) {
+ currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+ } else {
+ currentSort.col = col;
+ currentSort.dir = 'desc';
+ }
+ document.querySelectorAll('#main-table thead th').forEach(h =>{
+ h.classList.remove('sort-asc', 'sort-desc');
+ });
+ th.classList.add(currentSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+ applyFilters();
+ });
+ });
 
-  // Mark default sort
-  document.querySelector('#main-table thead th[data-col="total_net_inr"]')
-    ?.classList.add('sort-desc');
+ // Mark default sort
+ document.querySelector('#main-table thead th[data-col="total_net_inr"]')
+ ?.classList.add('sort-desc');
 
-  // Search
-  document.getElementById('stock-search').addEventListener('input', applyFilters);
+ // Search
+ document.getElementById('stock-search').addEventListener('input', applyFilters);
 
-  // Filter buttons
-  document.getElementById('filter-btns').addEventListener('click', e => {
-    const btn = e.target.closest('.btn');
-    if (!btn) return;
-    document.querySelectorAll('#filter-btns .btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    applyFilters();
-  });
+ // Filter buttons
+ document.getElementById('filter-btns').addEventListener('click', e =>{
+ const btn = e.target.closest('.btn');
+ if (!btn) return;
+ document.querySelectorAll('#filter-btns .btn').forEach(b =>b.classList.remove('active'));
+ btn.classList.add('active');
+ applyFilters();
+ });
 
-  // TF filter buttons
-  document.getElementById('tf-filter-btns').addEventListener('click', e => {
-    const btn = e.target.closest('.btn');
-    if (!btn) return;
-    document.querySelectorAll('#tf-filter-btns .btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    applyFilters();
-  });
+ // TF filter buttons
+ document.getElementById('tf-filter-btns').addEventListener('click', e =>{
+ const btn = e.target.closest('.btn');
+ if (!btn) return;
+ document.querySelectorAll('#tf-filter-btns .btn').forEach(b =>b.classList.remove('active'));
+ btn.classList.add('active');
+ applyFilters();
+ });
 
-  // Export CSV
-  document.getElementById('btn-export').addEventListener('click', () => {
-    const headers = ['Rank','Symbol','BestTF','BestSide','Trades','WR%','BestPF','NetINR','MaxDD%','MCL','AvgPnL'];
-    const rows = filteredRows.map(r => [
-      r.rank, r.sym, r.best_tf, r.best_side,
-      r.total_trades, r.total_wr.toFixed(2), r.best_pf.toFixed(3),
-      r.total_net_inr.toFixed(2), r.max_dd.toFixed(2), r.mcl,
-      r.avg_pnl.toFixed(2),
-    ]);
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = 'rsi_stock_analysis.csv';
-    a.click();
-  });
+ // Export CSV
+ document.getElementById('btn-export').addEventListener('click', () =>{
+ const headers = ['Rank','Symbol','BestTF','BestSide','Trades','WR%','BestPF','NetINR','MaxDD%','MCL','AvgPnL'];
+ const rows = filteredRows.map(r =>[
+ r.rank, r.sym, r.best_tf, r.best_side,
+ r.total_trades, r.total_wr.toFixed(2), r.best_pf.toFixed(3),
+ r.total_net_inr.toFixed(2), r.max_dd.toFixed(2), r.mcl,
+ r.avg_pnl.toFixed(2),
+ ]);
+ const csv = [headers, ...rows].map(r =>r.join(',')).join('\n');
+ const a = document.createElement('a');
+ a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+ a.download = 'rsi_stock_analysis.csv';
+ a.click();
+ });
 
-  applyFilters();
+ applyFilters();
 }
 
 // ââ Section 5: Rankings Tabs ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function renderRankingTable(items, containerId) {
-  if (!items || !items.length) {
-    document.getElementById(containerId).innerHTML = '<div style="padding:20px;color:var(--text-vdim)">No data</div>';
-    return;
-  }
-  const rows = items.slice(0, 50).map((item, i) => `
-    <tr>
-      <td><span class="rank-num">${i + 1}</span></td>
-      <td style="font-weight:700">${item.sym}</td>
-      <td>${tfBadge(item.key)} ${sideBadge(item.key)}</td>
-      <td>${item.trades}</td>
-      <td>${colorWR(item.wr)}</td>
-      <td>${colorPF(item.pf)}</td>
-      <td>${colorINR(item.net_inr)}</td>
-    </tr>
-  `).join('');
+ if (!items || !items.length) {
+ document.getElementById(containerId).innerHTML = '<div style="padding:20px;color:var(--text-vdim)">No data</div>';
+ return;
+ }
+ const rows = items.slice(0, 50).map((item, i) =>`
+ <tr>
+ <td><span class="rank-num">${i + 1}</span></td>
+ <td style="font-weight:700">${item.sym}</td>
+ <td>${tfBadge(item.key)} ${sideBadge(item.key)}</td>
+ <td>${item.trades}</td>
+ <td>${colorWR(item.wr)}</td>
+ <td>${colorPF(item.pf)}</td>
+ <td>${colorINR(item.net_inr)}</td>
+ </tr>
+ `).join('');
 
-  document.getElementById(containerId).innerHTML = `
-    <table class="rank-table">
-      <thead><tr>
-        <th>#</th><th>Symbol</th><th>TF / Side</th>
-        <th>Trades</th><th>WR%</th><th>PF</th><th>Net INR</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+ document.getElementById(containerId).innerHTML = `
+ <table class="rank-table">
+ <thead><tr>
+ <th>#</th><th>Symbol</th><th>TF / Side</th>
+ <th>Trades</th><th>WR%</th><th>PF</th><th>Net INR</th>
+ </tr></thead>
+ <tbody>${rows}</tbody>
+ </table>
+ `;
 }
 
 function initRankings() {
-  const rankings = DATA.test ? DATA.test.rankings : {};
-  renderRankingTable(rankings.by_net_inr, 'tab-by_net_inr');
-  renderRankingTable(rankings.by_pf, 'tab-by_pf');
-  renderRankingTable(rankings.by_wr, 'tab-by_wr');
-  renderRankingTable(rankings.by_trades, 'tab-by_trades');
+ const rankings = DATA.test ? DATA.test.rankings : {};
+ renderRankingTable(rankings.by_net_inr, 'tab-by_net_inr');
+ renderRankingTable(rankings.by_pf, 'tab-by_pf');
+ renderRankingTable(rankings.by_wr, 'tab-by_wr');
+ renderRankingTable(rankings.by_trades, 'tab-by_trades');
 
-  document.getElementById('rankings-tabs').addEventListener('click', e => {
-    const btn = e.target.closest('.tab-btn');
-    if (!btn) return;
-    const tab = btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + tab).classList.add('active');
-  });
+ document.getElementById('rankings-tabs').addEventListener('click', e =>{
+ const btn = e.target.closest('.tab-btn');
+ if (!btn) return;
+ const tab = btn.dataset.tab;
+ document.querySelectorAll('.tab-btn').forEach(b =>b.classList.remove('active'));
+ document.querySelectorAll('.tab-pane').forEach(p =>p.classList.remove('active'));
+ btn.classList.add('active');
+ document.getElementById('tab-' + tab).classList.add('active');
+ });
 }
 
 // ââ Section 6: Best TF Lookup âââââââââââââââââââââââââââââââââââââââââââââââââ
@@ -1274,44 +1275,44 @@ function initRankings() {
 let lookupData = [];
 
 function initLookup() {
-  const testLookup = DATA.test ? DATA.test.best_tf_lookup : {};
-  const trainLookup = DATA.train ? DATA.train.best_tf_lookup : {};
+ const testLookup = DATA.test ? DATA.test.best_tf_lookup : {};
+ const trainLookup = DATA.train ? DATA.train.best_tf_lookup : {};
 
-  const syms = Object.keys(testLookup).sort();
-  let agreeCnt = 0;
+ const syms = Object.keys(testLookup).sort();
+ let agreeCnt = 0;
 
-  lookupData = syms.map(sym => {
-    const testTf = testLookup[sym] || 'â';
-    const trainTf = trainLookup[sym] || 'â';
-    const agree = testTf !== 'â' && testTf === trainTf;
-    if (agree) agreeCnt++;
-    return { sym, testTf, trainTf, agree };
-  });
+ lookupData = syms.map(sym =>{
+ const testTf = testLookup[sym] || 'â';
+ const trainTf = trainLookup[sym] || 'â';
+ const agree = testTf !== 'â' && testTf === trainTf;
+ if (agree) agreeCnt++;
+ return { sym, testTf, trainTf, agree };
+ });
 
-  document.getElementById('lookup-stats-box').innerHTML =
-    `<strong>${agreeCnt} / ${syms.length}</strong> stocks have the same best TF in both TRAIN and TEST periods`;
+ document.getElementById('lookup-stats-box').innerHTML =
+ `<strong>${agreeCnt} / ${syms.length}</strong>stocks have the same best TF in both TRAIN and TEST periods`;
 
-  renderLookupTable(lookupData);
+ renderLookupTable(lookupData);
 
-  document.getElementById('lookup-search').addEventListener('input', e => {
-    const q = e.target.value.trim().toUpperCase();
-    const filtered = q ? lookupData.filter(d => d.sym.includes(q)) : lookupData;
-    renderLookupTable(filtered);
-  });
+ document.getElementById('lookup-search').addEventListener('input', e =>{
+ const q = e.target.value.trim().toUpperCase();
+ const filtered = q ? lookupData.filter(d =>d.sym.includes(q)) : lookupData;
+ renderLookupTable(filtered);
+ });
 }
 
 function renderLookupTable(items) {
-  const tbody = document.getElementById('lookup-tbody');
-  tbody.innerHTML = items.map(d => `
-    <tr class="${d.agree ? 'agree-row' : 'disagree-row'}">
-      <td style="font-weight:700">${d.sym}</td>
-      <td>${tfBadge(d.testTf)}</td>
-      <td>${tfBadge(d.trainTf)}</td>
-      <td>${d.agree
-        ? '<span class="agree-badge">AGREE</span>'
-        : '<span class="disagree-badge">DIFFER</span>'}</td>
-    </tr>
-  `).join('');
+ const tbody = document.getElementById('lookup-tbody');
+ tbody.innerHTML = items.map(d =>`
+ <tr class="${d.agree ? 'agree-row' : 'disagree-row'}">
+ <td style="font-weight:700">${d.sym}</td>
+ <td>${tfBadge(d.testTf)}</td>
+ <td>${tfBadge(d.trainTf)}</td>
+ <td>${d.agree
+ ? '<span class="agree-badge">AGREE</span>'
+ : '<span class="disagree-badge">DIFFER</span>'}</td>
+ </tr>
+ `).join('');
 }
 
 // ââ Init all ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ

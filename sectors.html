@@ -8,42 +8,42 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f1117;
-  --bg-card: #1a1d28;
-  --bg-sidebar: #141620;
-  --bg-hover: #1e2233;
-  --bg-active: #252940;
-  --border: #2a2d3a;
-  --border-light: #333650;
-  --text: #e1e4ed;
-  --text-dim: #8b8fa3;
-  --text-muted: #5d6177;
-  --green: #26a69a;
-  --green-bg: rgba(38,166,154,0.12);
-  --green-soft: rgba(38,166,154,0.25);
-  --red: #ef5350;
-  --red-bg: rgba(239,83,80,0.12);
-  --red-soft: rgba(239,83,80,0.25);
-  --yellow: #ffca28;
-  --yellow-bg: rgba(255,202,40,0.10);
-  --blue: #42a5f5;
-  --blue-bg: rgba(66,165,245,0.12);
-  --accent: #7c4dff;
-  --orange: #FF9800;
-  --cyan: #00BCD4;
-  --gold: #FFD700;
+ --bg: #0f1117;
+ --bg-card: #1a1d28;
+ --bg-sidebar: #141620;
+ --bg-hover: #1e2233;
+ --bg-active: #252940;
+ --border: #2a2d3a;
+ --border-light: #333650;
+ --text: #e1e4ed;
+ --text-dim: #8b8fa3;
+ --text-muted: #5d6177;
+ --green: #26a69a;
+ --green-bg: rgba(38,166,154,0.12);
+ --green-soft: rgba(38,166,154,0.25);
+ --red: #ef5350;
+ --red-bg: rgba(239,83,80,0.12);
+ --red-soft: rgba(239,83,80,0.25);
+ --yellow: #ffca28;
+ --yellow-bg: rgba(255,202,40,0.10);
+ --blue: #42a5f5;
+ --blue-bg: rgba(66,165,245,0.12);
+ --accent: #7c4dff;
+ --orange: #FF9800;
+ --cyan: #00BCD4;
+ --gold: #FFD700;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 13px;
-  line-height: 1.5;
-  display: flex;
-  flex-direction: column;
+ font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+ background: var(--bg);
+ color: var(--text);
+ font-size: 13px;
+ line-height: 1.5;
+ display: flex;
+ flex-direction: column;
 }
 
 /* Scrollbar */
@@ -56,28 +56,28 @@ body {
 
 
 .pulse-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: pulse 2s infinite;
-  flex-shrink: 0;
+ width: 9px; height: 9px;
+ border-radius: 50%;
+ background: var(--green);
+ animation: pulse 2s infinite;
+ flex-shrink: 0;
 }
 .pulse-dot.off { background: var(--red); animation: none; }
 .pulse-dot.warn { background: var(--orange); animation: pulse-warn 1s infinite; }
 @keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(38,166,154,0.5); }
-  50%      { opacity: 0.8; box-shadow: 0 0 0 5px rgba(38,166,154,0); }
+ 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(38,166,154,0.5); }
+ 50% { opacity: 0.8; box-shadow: 0 0 0 5px rgba(38,166,154,0); }
 }
 @keyframes pulse-warn {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,152,0,0.5); }
-  50%      { opacity: 0.6; box-shadow: 0 0 0 5px rgba(255,152,0,0); }
+ 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,152,0,0.5); }
+ 50% { opacity: 0.6; box-shadow: 0 0 0 5px rgba(255,152,0,0); }
 }
 
 
 .conn-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
+ width: 7px; height: 7px;
+ border-radius: 50%;
+ flex-shrink: 0;
 }
 .conn-dot.on { background: var(--green); }
 .conn-dot.off { background: var(--red); }
@@ -86,106 +86,106 @@ body {
 
 /* ââ MAIN LAYOUT ââ */
 .main-layout {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
+ display: flex;
+ flex: 1;
+ overflow: hidden;
 }
 
 /* ââ SIDEBAR ââ */
 .sidebar {
-  width: 230px;
-  min-width: 230px;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+ width: 230px;
+ min-width: 230px;
+ background: var(--bg-sidebar);
+ border-right: 1px solid var(--border);
+ display: flex;
+ flex-direction: column;
+ overflow: hidden;
 }
 .sidebar-header {
-  padding: 12px 14px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  border-bottom: 1px solid var(--border);
+ padding: 12px 14px 8px;
+ font-size: 11px;
+ font-weight: 600;
+ color: var(--text-muted);
+ text-transform: uppercase;
+ letter-spacing: 0.8px;
+ border-bottom: 1px solid var(--border);
 }
 .sidebar-search {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
+ padding: 8px 10px;
+ border-bottom: 1px solid var(--border);
 }
 .sidebar-search input {
-  width: 100%;
-  background: var(--bg-hover);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 10px;
-  color: var(--text);
-  font-size: 12px;
-  font-family: inherit;
-  outline: none;
+ width: 100%;
+ background: var(--bg-hover);
+ border: 1px solid var(--border);
+ border-radius: 6px;
+ padding: 6px 10px;
+ color: var(--text);
+ font-size: 12px;
+ font-family: inherit;
+ outline: none;
 }
 .sidebar-search input:focus { border-color: var(--accent); }
 .sidebar-search input::placeholder { color: var(--text-muted); }
 
 .sector-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 4px 0;
+ flex: 1;
+ overflow-y: auto;
+ padding: 4px 0;
 }
 .sector-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: all 0.12s;
-  border-left: 3px solid transparent;
-  gap: 8px;
+ display: flex;
+ align-items: center;
+ padding: 10px 14px;
+ cursor: pointer;
+ transition: all 0.12s;
+ border-left: 3px solid transparent;
+ gap: 8px;
 }
 .sector-item:hover { background: var(--bg-hover); }
 .sector-item.active {
-  background: var(--bg-active);
-  border-left-color: var(--accent);
+ background: var(--bg-active);
+ border-left-color: var(--accent);
 }
 .sector-item .s-emoji {
-  font-size: 13px;
-  flex-shrink: 0;
-  width: 18px;
-  text-align: center;
+ font-size: 13px;
+ flex-shrink: 0;
+ width: 18px;
+ text-align: center;
 }
 .sector-item .s-name {
-  flex: 1;
-  font-size: 12.5px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+ flex: 1;
+ font-size: 12.5px;
+ font-weight: 500;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
 }
 .sector-item .s-bar {
-  width: 36px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-  flex-shrink: 0;
+ width: 36px;
+ height: 4px;
+ background: var(--border);
+ border-radius: 2px;
+ overflow: hidden;
+ flex-shrink: 0;
 }
 .sector-item .s-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.3s;
+ height: 100%;
+ border-radius: 2px;
+ transition: width 0.3s;
 }
 .sector-item .s-chg {
-  font-size: 12px;
-  font-weight: 600;
-  min-width: 52px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+ font-size: 12px;
+ font-weight: 600;
+ min-width: 52px;
+ text-align: right;
+ font-variant-numeric: tabular-nums;
 }
 .sector-item .s-count {
-  font-size: 11px;
-  color: var(--text-muted);
-  min-width: 18px;
-  text-align: right;
+ font-size: 11px;
+ color: var(--text-muted);
+ min-width: 18px;
+ text-align: right;
 }
 .chg-up { color: var(--green); }
 .chg-dn { color: var(--red); }
@@ -193,62 +193,62 @@ body {
 
 /* ââ CONTENT AREA ââ */
 .content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
+ flex: 1;
+ display: flex;
+ flex-direction: column;
+ overflow: hidden;
+ min-width: 0;
 }
 
 /* ââ SECTOR HEADER ââ */
 .sector-header {
-  padding: 14px 20px 12px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
-  background: var(--bg-card);
-  flex-wrap: wrap;
+ padding: 14px 20px 12px;
+ border-bottom: 1px solid var(--border);
+ display: flex;
+ align-items: center;
+ gap: 14px;
+ flex-shrink: 0;
+ background: var(--bg-card);
+ flex-wrap: wrap;
 }
 .sector-header .sh-emoji { font-size: 20px; }
 .sector-header h2 {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
+ font-size: 18px;
+ font-weight: 700;
+ letter-spacing: -0.3px;
 }
 .sector-header .sh-chg {
-  font-size: 16px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+ font-size: 16px;
+ font-weight: 700;
+ font-variant-numeric: tabular-nums;
 }
 .sector-header .sh-stats {
-  display: flex;
-  gap: 18px;
-  margin-left: 16px;
-  font-size: 12px;
-  color: var(--text-dim);
+ display: flex;
+ gap: 18px;
+ margin-left: 16px;
+ font-size: 12px;
+ color: var(--text-dim);
 }
 .sector-header .sh-stats .sh-val { color: var(--text); font-weight: 500; }
 .sector-header .sh-progress {
-  width: 80px;
-  height: 5px;
-  background: var(--red-bg);
-  border-radius: 3px;
-  overflow: hidden;
+ width: 80px;
+ height: 5px;
+ background: var(--red-bg);
+ border-radius: 3px;
+ overflow: hidden;
 }
 .sector-header .sh-progress-fill {
-  height: 100%;
-  background: var(--green);
-  border-radius: 3px;
-  transition: width 0.5s;
+ height: 100%;
+ background: var(--green);
+ border-radius: 3px;
+ transition: width 0.5s;
 }
 .sector-header .sh-signal {
-  margin-left: auto;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+ margin-left: auto;
+ padding: 4px 12px;
+ border-radius: 20px;
+ font-size: 12px;
+ font-weight: 600;
 }
 .sig-badge-bull { background: var(--green-bg); color: var(--green); }
 .sig-badge-bear { background: var(--red-bg); color: var(--red); }
@@ -256,138 +256,138 @@ body {
 
 /* ââ BAR CHART ââ */
 .barchart-area {
-  padding: 10px 20px 6px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  background: var(--bg-card);
+ padding: 10px 20px 6px;
+ border-bottom: 1px solid var(--border);
+ flex-shrink: 0;
+ background: var(--bg-card);
 }
 .barchart-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+ font-size: 11px;
+ font-weight: 600;
+ color: var(--text-muted);
+ text-transform: uppercase;
+ letter-spacing: 0.6px;
+ margin-bottom: 8px;
+ display: flex;
+ align-items: center;
+ gap: 8px;
 }
 .barchart-title .nifty-pill {
-  background: rgba(124,77,255,0.15);
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
-  letter-spacing: 0.3px;
-  margin-left: auto;
-  text-transform: none;
+ background: rgba(124,77,255,0.15);
+ color: var(--accent);
+ font-size: 11px;
+ font-weight: 700;
+ padding: 2px 8px;
+ border-radius: 10px;
+ letter-spacing: 0.3px;
+ margin-left: auto;
+ text-transform: none;
 }
 .barchart-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+ display: flex;
+ flex-direction: column;
+ gap: 4px;
 }
 .bar-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: background 0.1s;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ cursor: pointer;
+ padding: 2px 4px;
+ border-radius: 4px;
+ transition: background 0.1s;
 }
 .bar-row:hover { background: var(--bg-hover); }
 .bar-row.active { background: var(--bg-active); }
 .bar-label {
-  width: 72px;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
+ width: 72px;
+ font-size: 11px;
+ font-weight: 600;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ flex-shrink: 0;
 }
 .bar-track {
-  flex: 1;
-  height: 14px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 3px;
-  position: relative;
-  overflow: hidden;
+ flex: 1;
+ height: 14px;
+ background: rgba(255,255,255,0.03);
+ border-radius: 3px;
+ position: relative;
+ overflow: hidden;
 }
 .bar-fill {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.4s ease, left 0.4s ease;
-  min-width: 2px;
+ position: absolute;
+ top: 0;
+ height: 100%;
+ border-radius: 3px;
+ transition: width 0.4s ease, left 0.4s ease;
+ min-width: 2px;
 }
 .bar-fill.pos { background: var(--green); right: auto; left: 50%; }
 .bar-fill.neg { background: var(--red); right: 50%; left: auto; }
 .bar-center {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--border-light);
+ position: absolute;
+ left: 50%;
+ top: 0;
+ bottom: 0;
+ width: 1px;
+ background: var(--border-light);
 }
 .bar-val {
-  width: 56px;
-  text-align: right;
-  font-size: 11px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
+ width: 56px;
+ text-align: right;
+ font-size: 11px;
+ font-weight: 600;
+ font-variant-numeric: tabular-nums;
+ flex-shrink: 0;
 }
 
 /* ââ KANBAN AREA ââ */
 .kanban-area {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-  padding: 12px 14px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  min-height: 0;
+ flex: 1;
+ display: flex;
+ gap: 8px;
+ padding: 12px 14px;
+ overflow-x: auto;
+ overflow-y: hidden;
+ min-height: 0;
 }
 .kanban-col {
-  flex: 1;
-  min-width: 155px;
-  max-width: 280px;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-card);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  overflow: hidden;
+ flex: 1;
+ min-width: 155px;
+ max-width: 280px;
+ display: flex;
+ flex-direction: column;
+ background: var(--bg-card);
+ border-radius: 10px;
+ border: 1px solid var(--border);
+ overflow: hidden;
 }
 .kanban-col-header {
-  padding: 10px 12px;
-  font-size: 11.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+ padding: 10px 12px;
+ font-size: 11.5px;
+ font-weight: 600;
+ text-transform: uppercase;
+ letter-spacing: 0.5px;
+ border-bottom: 1px solid var(--border);
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ flex-shrink: 0;
 }
 .kanban-col-header .kh-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+ width: 8px; height: 8px;
+ border-radius: 50%;
+ flex-shrink: 0;
 }
 .kanban-col-header .kh-count {
-  margin-left: auto;
-  background: var(--bg-hover);
-  padding: 1px 7px;
-  border-radius: 10px;
-  font-size: 11px;
-  color: var(--text-dim);
+ margin-left: auto;
+ background: var(--bg-hover);
+ padding: 1px 7px;
+ border-radius: 10px;
+ font-size: 11px;
+ color: var(--text-dim);
 }
 .col-bull .kanban-col-header { color: var(--green); border-bottom-color: var(--green-soft); }
 .col-bull .kh-dot { background: var(--green); }
@@ -401,99 +401,99 @@ body {
 .col-bear .kh-dot { background: var(--red); }
 
 .kanban-col-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+ flex: 1;
+ overflow-y: auto;
+ padding: 6px;
+ display: flex;
+ flex-direction: column;
+ gap: 5px;
 }
 .kanban-empty {
-  text-align: center;
-  padding: 24px 10px;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-style: italic;
+ text-align: center;
+ padding: 24px 10px;
+ color: var(--text-muted);
+ font-size: 12px;
+ font-style: italic;
 }
 
 /* ââ STOCK CARDS ââ */
 .stock-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 11px;
-  cursor: pointer;
-  transition: all 0.12s;
+ background: var(--bg);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 10px 11px;
+ cursor: pointer;
+ transition: all 0.12s;
 }
 .stock-card:hover {
-  border-color: var(--border-light);
-  background: var(--bg-hover);
-  transform: translateY(-1px);
+ border-color: var(--border-light);
+ background: var(--bg-hover);
+ transform: translateY(-1px);
 }
 .stock-card .sc-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 6px;
 }
 .stock-card .sc-sym-wrap {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
+ display: flex;
+ align-items: center;
+ gap: 4px;
+ min-width: 0;
 }
 .stock-card .sc-star {
-  font-size: 11px;
-  flex-shrink: 0;
-  width: 14px;
-  text-align: center;
+ font-size: 11px;
+ flex-shrink: 0;
+ width: 14px;
+ text-align: center;
 }
 .sc-star.wl { color: var(--gold); }
 .sc-star.bl { color: var(--red); opacity: 0.7; }
 .sc-star.normal { color: var(--text-muted); }
 .stock-card .sc-sym {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
-  color: var(--text);
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+ font-size: 13px;
+ font-weight: 600;
+ letter-spacing: -0.2px;
+ color: var(--text);
+ text-decoration: none;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
 }
 .stock-card .sc-sym:hover { color: var(--blue); text-decoration: underline; }
 .stock-card .sc-chg {
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-  padding: 1px 5px;
-  border-radius: 4px;
+ font-size: 12px;
+ font-weight: 600;
+ font-variant-numeric: tabular-nums;
+ flex-shrink: 0;
+ padding: 1px 5px;
+ border-radius: 4px;
 }
 .sc-chg.pos { background: var(--green-bg); color: var(--green); }
 .sc-chg.neg { background: var(--red-bg); color: var(--red); }
 .sc-chg.zero { background: rgba(255,255,255,0.05); color: var(--text-dim); }
 
 .stock-card .sc-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11.5px;
-  color: var(--text-dim);
-  margin-top: 3px;
+ display: flex;
+ justify-content: space-between;
+ font-size: 11.5px;
+ color: var(--text-dim);
+ margin-top: 3px;
 }
 .stock-card .sc-row .sc-val { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
 .stock-card .sc-tags {
-  display: flex;
-  gap: 4px;
-  margin-top: 6px;
-  flex-wrap: wrap;
+ display: flex;
+ gap: 4px;
+ margin-top: 6px;
+ flex-wrap: wrap;
 }
 .stock-card .sc-tag {
-  font-size: 9.5px;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+ font-size: 9.5px;
+ padding: 1px 5px;
+ border-radius: 4px;
+ font-weight: 600;
+ letter-spacing: 0.3px;
 }
 .tag-wl { background: var(--green-bg); color: var(--green); }
 .tag-bl { background: var(--red-bg); color: var(--red); }
@@ -506,8 +506,8 @@ body {
 
 /* Score badge */
 .sc-score {
-  font-weight: 700;
-  font-size: 11px;
+ font-weight: 700;
+ font-size: 11px;
 }
 .score-high { color: var(--green); }
 .score-med { color: var(--gold); }
@@ -516,57 +516,57 @@ body {
 
 /* Flash animations */
 @keyframes flash-green {
-  0% { background: rgba(38,166,154,0.25); }
-  100% { background: transparent; }
+ 0% { background: rgba(38,166,154,0.25); }
+ 100% { background: transparent; }
 }
 @keyframes flash-red {
-  0% { background: rgba(239,83,80,0.25); }
-  100% { background: transparent; }
+ 0% { background: rgba(239,83,80,0.25); }
+ 100% { background: transparent; }
 }
 .flash-up { animation: flash-green 0.6s ease-out; }
 .flash-down { animation: flash-red 0.6s ease-out; }
 
 /* ââ BOTTOM BAR ââ */
 .bottom-bar {
-  height: 36px;
-  background: var(--bg-sidebar);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 24px;
-  font-size: 11.5px;
-  color: var(--text-dim);
-  flex-shrink: 0;
+ height: 36px;
+ background: var(--bg-sidebar);
+ border-top: 1px solid var(--border);
+ display: flex;
+ align-items: center;
+ padding: 0 16px;
+ gap: 24px;
+ font-size: 11.5px;
+ color: var(--text-dim);
+ flex-shrink: 0;
 }
 .bottom-bar .bb-val { color: var(--text); font-weight: 500; }
 .bottom-bar .bb-up { color: var(--green); font-weight: 600; }
 .bottom-bar .bb-dn { color: var(--red); font-weight: 600; }
 .bb-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--green);
-  display: inline-block;
-  margin-right: 4px;
+ width: 5px; height: 5px;
+ border-radius: 50%;
+ background: var(--green);
+ display: inline-block;
+ margin-right: 4px;
 }
 .bb-dot.off { background: var(--red); }
 
 /* ââ LOADING STATE ââ */
 .loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  color: var(--text-dim);
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ flex: 1;
+ color: var(--text-dim);
 }
 .loading-spinner {
-  width: 36px; height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 14px;
+ width: 36px; height: 36px;
+ border: 3px solid var(--border);
+ border-top-color: var(--accent);
+ border-radius: 50%;
+ animation: spin 0.8s linear infinite;
+ margin-bottom: 14px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 14px; font-weight: 500; }
@@ -574,86 +574,86 @@ body {
 
 /* ââ RESPONSIVE ââ */
 @media (max-width: 900px) {
-  .sidebar { width: 180px; min-width: 180px; }
-  .sector-item .s-bar { display: none; }
-  .kanban-col { min-width: 130px; }
+ .sidebar { width: 180px; min-width: 180px; }
+ .sector-item .s-bar { display: none; }
+ .kanban-col { min-width: 130px; }
 }
 @media (max-width: 650px) {
-  .sidebar { width: 50px; min-width: 50px; }
-  .sidebar-header, .sidebar-search, .sector-item .s-name,
-  .sector-item .s-bar, .sector-item .s-chg { display: none; }
-  .sector-item .s-emoji { font-size: 16px; width: auto; }
-  .sector-item { justify-content: center; padding: 10px 6px; }
+ .sidebar { width: 50px; min-width: 50px; }
+ .sidebar-header, .sidebar-search, .sector-item .s-name,
+ .sector-item .s-bar, .sector-item .s-chg { display: none; }
+ .sector-item .s-emoji { font-size: 16px; width: auto; }
+ .sector-item { justify-content: center; padding: 10px 6px; }
 }
 
 /* ── Unified Site Navigation ── */
 .site-nav {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  height: 52px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+ background: var(--surface);
+ border-bottom: 1px solid var(--border);
+ padding: 0 24px;
+ display: flex;
+ align-items: center;
+ gap: 0;
+ height: 52px;
+ position: sticky;
+ top: 0;
+ z-index: 100;
 }
 .site-nav .nav-logo {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--text);
-  text-decoration: none;
-  padding-right: 24px;
-  border-right: 1px solid var(--border);
-  margin-right: 16px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: 0.5px;
+ font-size: 15px;
+ font-weight: 800;
+ color: var(--text);
+ text-decoration: none;
+ padding-right: 24px;
+ border-right: 1px solid var(--border);
+ margin-right: 16px;
+ white-space: nowrap;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ letter-spacing: 0.5px;
 }
 .site-nav .nav-links { display: flex; gap: 2px; flex: 1; }
 .site-nav .nav-links a {
-  color: var(--text-dim);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 14px;
-  border-radius: 6px;
-  transition: all 0.15s;
-  white-space: nowrap;
+ color: var(--text-dim);
+ text-decoration: none;
+ font-size: 13px;
+ font-weight: 500;
+ padding: 6px 14px;
+ border-radius: 6px;
+ transition: all 0.15s;
+ white-space: nowrap;
 }
 .site-nav .nav-links a:hover { color: var(--text); background: var(--surface-hover); }
 .site-nav .nav-links a.active { color: var(--blue); background: rgba(41,98,255,0.12); }
 .site-nav .nav-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-left: auto;
-  white-space: nowrap;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ font-size: 11px;
+ color: var(--text-dim);
+ margin-left: auto;
+ white-space: nowrap;
 }
 .site-nav .nav-status .conn-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #EF5350;
-  display: inline-block;
-  flex-shrink: 0;
+ width: 8px; height: 8px;
+ border-radius: 50%;
+ background: #EF5350;
+ display: inline-block;
+ flex-shrink: 0;
 }
 .site-nav .nav-status .conn-dot.on { background: #26A69A; }
 .site-nav .pulse-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #26A69A;
-  display: inline-block;
-  animation: pulse-glow 2s infinite;
-  flex-shrink: 0;
+ width: 8px; height: 8px;
+ border-radius: 50%;
+ background: #26A69A;
+ display: inline-block;
+ animation: pulse-glow 2s infinite;
+ flex-shrink: 0;
 }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
-  50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
+ 0%, 100% { box-shadow: 0 0 4px rgba(38,166,154,0.4); }
+ 50% { box-shadow: 0 0 12px rgba(38,166,154,0.8); }
 }
 
 </style>
@@ -662,107 +662,108 @@ body {
 
 <!-- Navigation Bar -->
 <nav class="site-nav">
-  <a class="nav-logo" href="/">
-    <span class="pulse-dot" id="pulseDot"></span>
-    F&amp;O LIVE
-  </a>
-  <div class="nav-links">
-    <a href="/">Dashboard</a>
-    <a href="/paper">Paper Trades</a>
-    <a href="/sectors" class="active">Sectors</a>
-    <a href="/rsi">RSI Scanner</a>
-    <a href="/rsi-analysis">Stock Analysis</a>
-    <a href="/admin">Admin</a>
-  </div>
-  <div class="nav-status">
-    <span class="conn-dot" id="connDot"></span>
-    <span id="connText">Connecting...</span>
-    <span id="updateTime">--:--:--</span>
-  </div>
+ <a class="nav-logo" href="/">
+ <span class="pulse-dot" id="pulseDot"></span>
+ F&amp;O LIVE
+ </a>
+ <div class="nav-links">
+ <a href="/">Dashboard</a>
+ <a href="/paper">Paper Trades</a>
+ <a href="/sectors" class="active">Sectors</a>
+ <a href="/rsi">RSI Scanner</a>
+ <a href="/rsi-analysis">Stock Analysis</a>
+ <a href="/divergence">Divergence</a>
+ <a href="/admin">Admin</a>
+ </div>
+ <div class="nav-status">
+ <span class="conn-dot" id="connDot"></span>
+ <span id="connText">Connecting...</span>
+ <span id="updateTime">--:--:--</span>
+ </div>
 </nav>
 
 
 <!-- Main Layout -->
 <div class="main-layout">
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header" id="sidebarHeader">Sectors</div>
-    <div class="sidebar-search">
-      <input type="text" placeholder="Filter sectors..." id="sectorSearch" autocomplete="off" spellcheck="false">
-    </div>
-    <div class="sector-list" id="sectorList"></div>
-  </aside>
+ <!-- Sidebar -->
+ <aside class="sidebar">
+ <div class="sidebar-header" id="sidebarHeader">Sectors</div>
+ <div class="sidebar-search">
+ <input type="text" placeholder="Filter sectors..." id="sectorSearch" autocomplete="off" spellcheck="false">
+ </div>
+ <div class="sector-list" id="sectorList"></div>
+ </aside>
 
-  <!-- Content -->
-  <main class="content" id="contentArea">
+ <!-- Content -->
+ <main class="content" id="contentArea">
 
-    <!-- Sector Header -->
-    <div class="sector-header" id="sectorHeader" style="display:none;">
-      <span class="sh-emoji" id="shEmoji"></span>
-      <h2 id="shName"></h2>
-      <div class="sh-chg" id="shChg"></div>
-      <div class="sh-stats">
-        <div>Stocks: <span class="sh-val" id="shCount"></span></div>
-        <div>
-          <span class="sh-val" style="color:var(--green)" id="shUp"></span> â²
-          <span class="sh-val" style="color:var(--red)" id="shDown"></span> â¼
-        </div>
-        <div class="sh-progress"><div class="sh-progress-fill" id="shProgressFill"></div></div>
-      </div>
-      <div class="sh-signal" id="shSignal"></div>
-    </div>
+ <!-- Sector Header -->
+ <div class="sector-header" id="sectorHeader" style="display:none;">
+ <span class="sh-emoji" id="shEmoji"></span>
+ <h2 id="shName"></h2>
+ <div class="sh-chg" id="shChg"></div>
+ <div class="sh-stats">
+ <div>Stocks: <span class="sh-val" id="shCount"></span></div>
+ <div>
+ <span class="sh-val" style="color:var(--green)" id="shUp"></span>â²
+ <span class="sh-val" style="color:var(--red)" id="shDown"></span>â¼
+ </div>
+ <div class="sh-progress"><div class="sh-progress-fill" id="shProgressFill"></div></div>
+ </div>
+ <div class="sh-signal" id="shSignal"></div>
+ </div>
 
-    <!-- Bar Chart -->
-    <div class="barchart-area" id="barChartArea" style="display:none;">
-      <div class="barchart-title">
-        <span>Sector Performance</span>
-        <span class="nifty-pill" id="niftyPill">NIFTY --</span>
-      </div>
-      <div class="barchart-grid" id="barChartGrid"></div>
-    </div>
+ <!-- Bar Chart -->
+ <div class="barchart-area" id="barChartArea" style="display:none;">
+ <div class="barchart-title">
+ <span>Sector Performance</span>
+ <span class="nifty-pill" id="niftyPill">NIFTY --</span>
+ </div>
+ <div class="barchart-grid" id="barChartGrid"></div>
+ </div>
 
-    <!-- Kanban Area -->
-    <div class="kanban-area" id="kanbanArea" style="display:none;">
-      <div class="kanban-col col-bull">
-        <div class="kanban-col-header"><span class="kh-dot"></span>BULL<span class="kh-count" id="cntBull">0</span></div>
-        <div class="kanban-col-body" id="bodyBull"></div>
-      </div>
-      <div class="kanban-col col-mbull">
-        <div class="kanban-col-header"><span class="kh-dot"></span>MILD â²<span class="kh-count" id="cntMbull">0</span></div>
-        <div class="kanban-col-body" id="bodyMbull"></div>
-      </div>
-      <div class="kanban-col col-flat">
-        <div class="kanban-col-header"><span class="kh-dot"></span>FLAT<span class="kh-count" id="cntFlat">0</span></div>
-        <div class="kanban-col-body" id="bodyFlat"></div>
-      </div>
-      <div class="kanban-col col-mbear">
-        <div class="kanban-col-header"><span class="kh-dot"></span>MILD â¼<span class="kh-count" id="cntMbear">0</span></div>
-        <div class="kanban-col-body" id="bodyMbear"></div>
-      </div>
-      <div class="kanban-col col-bear">
-        <div class="kanban-col-header"><span class="kh-dot"></span>BEAR<span class="kh-count" id="cntBear">0</span></div>
-        <div class="kanban-col-body" id="bodyBear"></div>
-      </div>
-    </div>
+ <!-- Kanban Area -->
+ <div class="kanban-area" id="kanbanArea" style="display:none;">
+ <div class="kanban-col col-bull">
+ <div class="kanban-col-header"><span class="kh-dot"></span>BULL<span class="kh-count" id="cntBull">0</span></div>
+ <div class="kanban-col-body" id="bodyBull"></div>
+ </div>
+ <div class="kanban-col col-mbull">
+ <div class="kanban-col-header"><span class="kh-dot"></span>MILD â²<span class="kh-count" id="cntMbull">0</span></div>
+ <div class="kanban-col-body" id="bodyMbull"></div>
+ </div>
+ <div class="kanban-col col-flat">
+ <div class="kanban-col-header"><span class="kh-dot"></span>FLAT<span class="kh-count" id="cntFlat">0</span></div>
+ <div class="kanban-col-body" id="bodyFlat"></div>
+ </div>
+ <div class="kanban-col col-mbear">
+ <div class="kanban-col-header"><span class="kh-dot"></span>MILD â¼<span class="kh-count" id="cntMbear">0</span></div>
+ <div class="kanban-col-body" id="bodyMbear"></div>
+ </div>
+ <div class="kanban-col col-bear">
+ <div class="kanban-col-header"><span class="kh-dot"></span>BEAR<span class="kh-count" id="cntBear">0</span></div>
+ <div class="kanban-col-body" id="bodyBear"></div>
+ </div>
+ </div>
 
-    <!-- Loading State -->
-    <div class="loading-state" id="loadingState">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Connecting to live feed...</div>
-      <div class="loading-sub">Waiting for market data via WebSocket</div>
-    </div>
+ <!-- Loading State -->
+ <div class="loading-state" id="loadingState">
+ <div class="loading-spinner"></div>
+ <div class="loading-text">Connecting to live feed...</div>
+ <div class="loading-sub">Waiting for market data via WebSocket</div>
+ </div>
 
-  </main>
+ </main>
 </div>
 
 <!-- Bottom Bar -->
 <footer class="bottom-bar">
-  <div><span class="bb-dot" id="footerDot"></span><span id="footerStatus">Connecting</span></div>
-  <div>Stocks: <span class="bb-val" id="bbStocks">--</span></div>
-  <div>Breadth: <span class="bb-up" id="bbUp">--</span> â² / <span class="bb-dn" id="bbDown">--</span> â¼</div>
-  <div>Updated: <span class="bb-val" id="bbTime">--</span></div>
-  <div style="margin-left:auto;color:var(--text-muted);">Click stock â TradingView</div>
+ <div><span class="bb-dot" id="footerDot"></span><span id="footerStatus">Connecting</span></div>
+ <div>Stocks: <span class="bb-val" id="bbStocks">--</span></div>
+ <div>Breadth: <span class="bb-up" id="bbUp">--</span>â² / <span class="bb-dn" id="bbDown">--</span>â¼</div>
+ <div>Updated: <span class="bb-val" id="bbTime">--</span></div>
+ <div style="margin-left:auto;color:var(--text-muted);">Click stock â TradingView</div>
 </footer>
 
 <script>
@@ -770,36 +771,36 @@ body {
 // CONSTANTS
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 const WHITELIST_SET = new Set([
-  "HDFCBANK","ICICIBANK","AXISBANK","KOTAKBANK","SBIN","BAJFINANCE","RELIANCE","INFY","TCS",
-  "TATAMOTORS","TATASTEEL","HINDALCO","JSWSTEEL","SUNPHARMA","CIPLA","DRREDDY","DIVISLAB",
-  "BHARTIARTL","LT","MARUTI","M&M","BAJAJ-AUTO","HEROMOTOCO","EICHERMOT","HINDUNILVR","ITC",
-  "NESTLEIND","BRITANNIA","TITAN","HCLTECH","WIPRO","TECHM","LTIM","ADANIPORTS","DLF",
-  "GODREJPROP","OBEROIRLTY","NTPC","POWERGRID","TATAPOWER","ONGC","BPCL","COALINDIA",
-  "APOLLOHOSP","MAXHEALTH","PERSISTENT","MPHASIS","ABB"
+ "HDFCBANK","ICICIBANK","AXISBANK","KOTAKBANK","SBIN","BAJFINANCE","RELIANCE","INFY","TCS",
+ "TATAMOTORS","TATASTEEL","HINDALCO","JSWSTEEL","SUNPHARMA","CIPLA","DRREDDY","DIVISLAB",
+ "BHARTIARTL","LT","MARUTI","M&M","BAJAJ-AUTO","HEROMOTOCO","EICHERMOT","HINDUNILVR","ITC",
+ "NESTLEIND","BRITANNIA","TITAN","HCLTECH","WIPRO","TECHM","LTIM","ADANIPORTS","DLF",
+ "GODREJPROP","OBEROIRLTY","NTPC","POWERGRID","TATAPOWER","ONGC","BPCL","COALINDIA",
+ "APOLLOHOSP","MAXHEALTH","PERSISTENT","MPHASIS","ABB"
 ]);
 
 const BLACKLIST_SET = new Set([
-  "IDEA","YESBANK","IDFCFIRSTB","SUZLON","PNB",
-  "GMRAIRPORT","CANBK","NMDC","NBCC","NHPC",
-  "MOTHERSON","BANKINDIA","ASHOKLEY"
+ "IDEA","YESBANK","IDFCFIRSTB","SUZLON","PNB",
+ "GMRAIRPORT","CANBK","NMDC","NBCC","NHPC",
+ "MOTHERSON","BANKINDIA","ASHOKLEY"
 ]);
 
 const SECTOR_META = {
-  IT:        { text: "#5B8DEF",  emoji: "ð»" },
-  BANK:      { text: "#00BCD4",  emoji: "ð¦" },
-  PSU_BANK:  { text: "#26A69A",  emoji: "ðï¸" },
-  FIN:       { text: "#CE93D8",  emoji: "ð°" },
-  AUTO:      { text: "#FFB74D",  emoji: "ð" },
-  METAL:     { text: "#BDBDBD",  emoji: "âï¸" },
-  PHARMA:    { text: "#81C784",  emoji: "ð" },
-  FMCG:      { text: "#FFF176",  emoji: "ð" },
-  ENERGY:    { text: "#EF9A9A",  emoji: "â¡" },
-  REALTY:    { text: "#BCAAA4",  emoji: "ðï¸" },
-  INFRA:     { text: "#90A4AE",  emoji: "ð­" },
-  CONSUMER:  { text: "#F48FB1",  emoji: "ð " },
-  HEALTH:    { text: "#80CBC4",  emoji: "ð¥" },
-  MEDIA:     { text: "#B39DDB",  emoji: "ðº" },
-  INSURANCE: { text: "#FFE082",  emoji: "ð¡ï¸" },
+ IT: { text: "#5B8DEF", emoji: "ð»" },
+ BANK: { text: "#00BCD4", emoji: "ð¦" },
+ PSU_BANK: { text: "#26A69A", emoji: "ðï¸" },
+ FIN: { text: "#CE93D8", emoji: "ð°" },
+ AUTO: { text: "#FFB74D", emoji: "ð" },
+ METAL: { text: "#BDBDBD", emoji: "âï¸" },
+ PHARMA: { text: "#81C784", emoji: "ð" },
+ FMCG: { text: "#FFF176", emoji: "ð" },
+ ENERGY: { text: "#EF9A9A", emoji: "â¡" },
+ REALTY: { text: "#BCAAA4", emoji: "ðï¸" },
+ INFRA: { text: "#90A4AE", emoji: "ð­" },
+ CONSUMER: { text: "#F48FB1", emoji: "ð " },
+ HEALTH: { text: "#80CBC4", emoji: "ð¥" },
+ MEDIA: { text: "#B39DDB", emoji: "ðº" },
+ INSURANCE: { text: "#FFE082", emoji: "ð¡ï¸" },
 };
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
@@ -813,630 +814,630 @@ let reconnectDelay = 3000;
 let reconnectTimer = null;
 
 // DOM caches
-const sidebarCache = {};   // sector -> { el, chgEl, barFillEl, countEl }
-const kanbanCards = {};     // symbol -> { cardEl, ltpEl, chgEl, scoreEl, tagsEl, currentBucket }
-const columnBodies = {};    // bucket -> DOM element (populated on DOMReady)
+const sidebarCache = {}; // sector ->{ el, chgEl, barFillEl, countEl }
+const kanbanCards = {}; // symbol ->{ cardEl, ltpEl, chgEl, scoreEl, tagsEl, currentBucket }
+const columnBodies = {}; // bucket ->DOM element (populated on DOMReady)
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // HELPERS
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function fmtPrice(v) {
-  if (v == null || isNaN(v)) return "--";
-  return "â¹" + Number(v).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ if (v == null || isNaN(v)) return "--";
+ return "â¹" + Number(v).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function fmtChg(v) {
-  if (v == null || isNaN(v)) return "--";
-  return (v > 0 ? "+" : "") + v.toFixed(2) + "%";
+ if (v == null || isNaN(v)) return "--";
+ return (v >0 ? "+" : "") + v.toFixed(2) + "%";
 }
 function chgClass(v) {
-  if (v > 0.005) return "pos";
-  if (v < -0.005) return "neg";
-  return "zero";
+ if (v >0.005) return "pos";
+ if (v < -0.005) return "neg";
+ return "zero";
 }
 function scoreColor(s) {
-  if (s == null) return "score-vlow";
-  if (s >= 60) return "score-high";
-  if (s >= 40) return "score-med";
-  if (s >= 20) return "score-low";
-  return "score-vlow";
+ if (s == null) return "score-vlow";
+ if (s >= 60) return "score-high";
+ if (s >= 40) return "score-med";
+ if (s >= 20) return "score-low";
+ return "score-vlow";
 }
 function signalBucket(chg_pct) {
-  if (chg_pct == null) return "flat";
-  if (chg_pct > 1) return "bull";
-  if (chg_pct > 0.1) return "mbull";
-  if (chg_pct < -1) return "bear";
-  if (chg_pct < -0.1) return "mbear";
-  return "flat";
+ if (chg_pct == null) return "flat";
+ if (chg_pct >1) return "bull";
+ if (chg_pct >0.1) return "mbull";
+ if (chg_pct < -1) return "bear";
+ if (chg_pct < -0.1) return "mbear";
+ return "flat";
 }
 function sectorSignal(avgChg) {
-  if (avgChg > 0.5) return { text: "â² BULLISH", cls: "sig-badge-bull" };
-  if (avgChg < -0.5) return { text: "â¼ BEARISH", cls: "sig-badge-bear" };
-  return { text: "â NEUTRAL", cls: "sig-badge-flat" };
+ if (avgChg >0.5) return { text: "â² BULLISH", cls: "sig-badge-bull" };
+ if (avgChg < -0.5) return { text: "â¼ BEARISH", cls: "sig-badge-bear" };
+ return { text: "â NEUTRAL", cls: "sig-badge-flat" };
 }
 function starHtml(sym) {
-  if (WHITELIST_SET.has(sym)) return '<span class="sc-star wl">â</span>';
-  if (BLACKLIST_SET.has(sym)) return '<span class="sc-star bl">â</span>';
-  return '<span class="sc-star normal">â</span>';
+ if (WHITELIST_SET.has(sym)) return '<span class="sc-star wl">â</span>';
+ if (BLACKLIST_SET.has(sym)) return '<span class="sc-star bl">â</span>';
+ return '<span class="sc-star normal">â</span>';
 }
 function timeStr() {
-  return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+ return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 }
 function getMeta(sec) {
-  return SECTOR_META[sec] || { text: "var(--text)", emoji: "ð" };
+ return SECTOR_META[sec] || { text: "var(--text)", emoji: "ð" };
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // SECTOR AGGREGATION
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function buildSectors() {
-  sectors = {};
-  for (const sym of Object.keys(stocks)) {
-    const sec = stocks[sym].sector || "OTHER";
-    if (!sectors[sec]) sectors[sec] = { symbols: [], avgChg: 0 };
-    sectors[sec].symbols.push(sym);
-  }
-  recalcAverages();
+ sectors = {};
+ for (const sym of Object.keys(stocks)) {
+ const sec = stocks[sym].sector || "OTHER";
+ if (!sectors[sec]) sectors[sec] = { symbols: [], avgChg: 0 };
+ sectors[sec].symbols.push(sym);
+ }
+ recalcAverages();
 }
 
 function recalcAverages() {
-  for (const sec of Object.keys(sectors)) {
-    const syms = sectors[sec].symbols;
-    if (syms.length === 0) { sectors[sec].avgChg = 0; continue; }
-    let sum = 0;
-    for (const sym of syms) {
-      sum += (stocks[sym] && stocks[sym].chg_pct != null) ? stocks[sym].chg_pct : 0;
-    }
-    sectors[sec].avgChg = sum / syms.length;
-  }
+ for (const sec of Object.keys(sectors)) {
+ const syms = sectors[sec].symbols;
+ if (syms.length === 0) { sectors[sec].avgChg = 0; continue; }
+ let sum = 0;
+ for (const sym of syms) {
+ sum += (stocks[sym] && stocks[sym].chg_pct != null) ? stocks[sym].chg_pct : 0;
+ }
+ sectors[sec].avgChg = sum / syms.length;
+ }
 }
 
 function sortedSectorKeys() {
-  return Object.keys(sectors).sort((a, b) => sectors[b].avgChg - sectors[a].avgChg);
+ return Object.keys(sectors).sort((a, b) =>sectors[b].avgChg - sectors[a].avgChg);
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // SIDEBAR
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function renderSidebar() {
-  const list = document.getElementById("sectorList");
-  list.innerHTML = "";
-  // Clear cache
-  for (const k of Object.keys(sidebarCache)) delete sidebarCache[k];
+ const list = document.getElementById("sectorList");
+ list.innerHTML = "";
+ // Clear cache
+ for (const k of Object.keys(sidebarCache)) delete sidebarCache[k];
 
-  const sorted = sortedSectorKeys();
-  document.getElementById("sidebarHeader").textContent = "Sectors (" + sorted.length + ")";
+ const sorted = sortedSectorKeys();
+ document.getElementById("sidebarHeader").textContent = "Sectors (" + sorted.length + ")";
 
-  for (const sec of sorted) {
-    const meta = getMeta(sec);
-    const avg = sectors[sec].avgChg;
-    const syms = sectors[sec].symbols;
-    const upCount = syms.filter(s => stocks[s] && stocks[s].chg_pct > 0.005).length;
-    const bullRatio = syms.length > 0 ? (upCount / syms.length * 100) : 50;
-    const isUp = avg > 0.005;
-    const isDn = avg < -0.005;
+ for (const sec of sorted) {
+ const meta = getMeta(sec);
+ const avg = sectors[sec].avgChg;
+ const syms = sectors[sec].symbols;
+ const upCount = syms.filter(s =>stocks[s] && stocks[s].chg_pct >0.005).length;
+ const bullRatio = syms.length >0 ? (upCount / syms.length * 100) : 50;
+ const isUp = avg >0.005;
+ const isDn = avg < -0.005;
 
-    const item = document.createElement("div");
-    item.className = "sector-item" + (sec === activeSector ? " active" : "");
-    item.dataset.sector = sec;
-    item.innerHTML =
-      '<span class="s-emoji">' + meta.emoji + '</span>' +
-      '<span class="s-name" style="color:' + meta.text + '">' + sec.replace("_", " ") + '</span>' +
-      '<span class="s-bar"><span class="s-bar-fill" style="width:' + bullRatio + '%;background:' +
-        (bullRatio > 55 ? 'var(--green)' : bullRatio < 45 ? 'var(--red)' : 'var(--yellow)') + '"></span></span>' +
-      '<span class="s-chg ' + (isUp ? 'chg-up' : isDn ? 'chg-dn' : 'chg-flat') + '">' + fmtChg(avg) + '</span>' +
-      '<span class="s-count">' + syms.length + '</span>';
+ const item = document.createElement("div");
+ item.className = "sector-item" + (sec === activeSector ? " active" : "");
+ item.dataset.sector = sec;
+ item.innerHTML =
+ '<span class="s-emoji">' + meta.emoji + '</span>' +
+ '<span class="s-name" style="color:' + meta.text + '">' + sec.replace("_", " ") + '</span>' +
+ '<span class="s-bar"><span class="s-bar-fill" style="width:' + bullRatio + '%;background:' +
+ (bullRatio >55 ? 'var(--green)' : bullRatio < 45 ? 'var(--red)' : 'var(--yellow)') + '"></span></span>' +
+ '<span class="s-chg ' + (isUp ? 'chg-up' : isDn ? 'chg-dn' : 'chg-flat') + '">' + fmtChg(avg) + '</span>' +
+ '<span class="s-count">' + syms.length + '</span>';
 
-    item.onclick = function() { selectSector(sec); };
-    list.appendChild(item);
+ item.onclick = function() { selectSector(sec); };
+ list.appendChild(item);
 
-    sidebarCache[sec] = {
-      el: item,
-      chgEl: item.querySelector(".s-chg"),
-      barFillEl: item.querySelector(".s-bar-fill"),
-      countEl: item.querySelector(".s-count")
-    };
-  }
+ sidebarCache[sec] = {
+ el: item,
+ chgEl: item.querySelector(".s-chg"),
+ barFillEl: item.querySelector(".s-bar-fill"),
+ countEl: item.querySelector(".s-count")
+ };
+ }
 }
 
 function updateSidebarItem(sec) {
-  const sc = sidebarCache[sec];
-  if (!sc) return;
-  const avg = sectors[sec].avgChg;
-  const syms = sectors[sec].symbols;
-  const upCount = syms.filter(s => stocks[s] && stocks[s].chg_pct > 0.005).length;
-  const bullRatio = syms.length > 0 ? (upCount / syms.length * 100) : 50;
-  const isUp = avg > 0.005;
-  const isDn = avg < -0.005;
+ const sc = sidebarCache[sec];
+ if (!sc) return;
+ const avg = sectors[sec].avgChg;
+ const syms = sectors[sec].symbols;
+ const upCount = syms.filter(s =>stocks[s] && stocks[s].chg_pct >0.005).length;
+ const bullRatio = syms.length >0 ? (upCount / syms.length * 100) : 50;
+ const isUp = avg >0.005;
+ const isDn = avg < -0.005;
 
-  sc.chgEl.textContent = fmtChg(avg);
-  sc.chgEl.className = "s-chg " + (isUp ? "chg-up" : isDn ? "chg-dn" : "chg-flat");
-  sc.barFillEl.style.width = bullRatio + "%";
-  sc.barFillEl.style.background = bullRatio > 55 ? "var(--green)" : bullRatio < 45 ? "var(--red)" : "var(--yellow)";
+ sc.chgEl.textContent = fmtChg(avg);
+ sc.chgEl.className = "s-chg " + (isUp ? "chg-up" : isDn ? "chg-dn" : "chg-flat");
+ sc.barFillEl.style.width = bullRatio + "%";
+ sc.barFillEl.style.background = bullRatio >55 ? "var(--green)" : bullRatio < 45 ? "var(--red)" : "var(--yellow)";
 }
 
 function resortSidebar() {
-  const list = document.getElementById("sectorList");
-  const sorted = sortedSectorKeys();
-  for (const sec of sorted) {
-    const sc = sidebarCache[sec];
-    if (sc && sc.el) list.appendChild(sc.el);
-  }
+ const list = document.getElementById("sectorList");
+ const sorted = sortedSectorKeys();
+ for (const sec of sorted) {
+ const sc = sidebarCache[sec];
+ if (sc && sc.el) list.appendChild(sc.el);
+ }
 }
 
 // Sidebar search filter
 document.getElementById("sectorSearch").addEventListener("input", function() {
-  const q = this.value.trim().toLowerCase();
-  for (const sec of Object.keys(sidebarCache)) {
-    const sc = sidebarCache[sec];
-    if (!q || sec.toLowerCase().includes(q) || sec.replace("_", " ").toLowerCase().includes(q)) {
-      sc.el.style.display = "";
-    } else {
-      sc.el.style.display = "none";
-    }
-  }
+ const q = this.value.trim().toLowerCase();
+ for (const sec of Object.keys(sidebarCache)) {
+ const sc = sidebarCache[sec];
+ if (!q || sec.toLowerCase().includes(q) || sec.replace("_", " ").toLowerCase().includes(q)) {
+ sc.el.style.display = "";
+ } else {
+ sc.el.style.display = "none";
+ }
+ }
 });
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // SELECT SECTOR
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function selectSector(sec) {
-  if (activeSector === sec) return;
-  activeSector = sec;
+ if (activeSector === sec) return;
+ activeSector = sec;
 
-  // Update sidebar active state
-  for (const s of Object.keys(sidebarCache)) {
-    sidebarCache[s].el.classList.toggle("active", s === sec);
-  }
+ // Update sidebar active state
+ for (const s of Object.keys(sidebarCache)) {
+ sidebarCache[s].el.classList.toggle("active", s === sec);
+ }
 
-  // Update bar chart active state
-  for (const s of Object.keys(barRowCache)) {
-    barRowCache[s].rowEl.classList.toggle("active", s === sec);
-  }
+ // Update bar chart active state
+ for (const s of Object.keys(barRowCache)) {
+ barRowCache[s].rowEl.classList.toggle("active", s === sec);
+ }
 
-  renderSectorHeader();
-  renderKanban();
+ renderSectorHeader();
+ renderKanban();
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // SECTOR HEADER
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function renderSectorHeader() {
-  if (!activeSector || !sectors[activeSector]) return;
-  const sec = activeSector;
-  const data = sectors[sec];
-  const meta = getMeta(sec);
-  const avg = data.avgChg;
-  const syms = data.symbols;
-  const upCount = syms.filter(s => stocks[s] && stocks[s].chg_pct > 0.005).length;
-  const downCount = syms.length - upCount;
-  const upPct = syms.length > 0 ? (upCount / syms.length * 100) : 50;
-  const sig = sectorSignal(avg);
+ if (!activeSector || !sectors[activeSector]) return;
+ const sec = activeSector;
+ const data = sectors[sec];
+ const meta = getMeta(sec);
+ const avg = data.avgChg;
+ const syms = data.symbols;
+ const upCount = syms.filter(s =>stocks[s] && stocks[s].chg_pct >0.005).length;
+ const downCount = syms.length - upCount;
+ const upPct = syms.length >0 ? (upCount / syms.length * 100) : 50;
+ const sig = sectorSignal(avg);
 
-  document.getElementById("sectorHeader").style.display = "";
-  document.getElementById("shEmoji").textContent = meta.emoji;
-  const nameEl = document.getElementById("shName");
-  nameEl.textContent = sec.replace("_", " ");
-  nameEl.style.color = meta.text;
+ document.getElementById("sectorHeader").style.display = "";
+ document.getElementById("shEmoji").textContent = meta.emoji;
+ const nameEl = document.getElementById("shName");
+ nameEl.textContent = sec.replace("_", " ");
+ nameEl.style.color = meta.text;
 
-  const chgEl = document.getElementById("shChg");
-  chgEl.textContent = fmtChg(avg);
-  chgEl.className = "sh-chg " + (avg > 0.005 ? "chg-up" : avg < -0.005 ? "chg-dn" : "chg-flat");
+ const chgEl = document.getElementById("shChg");
+ chgEl.textContent = fmtChg(avg);
+ chgEl.className = "sh-chg " + (avg >0.005 ? "chg-up" : avg < -0.005 ? "chg-dn" : "chg-flat");
 
-  document.getElementById("shCount").textContent = syms.length;
-  document.getElementById("shUp").textContent = upCount;
-  document.getElementById("shDown").textContent = downCount;
-  document.getElementById("shProgressFill").style.width = upPct + "%";
+ document.getElementById("shCount").textContent = syms.length;
+ document.getElementById("shUp").textContent = upCount;
+ document.getElementById("shDown").textContent = downCount;
+ document.getElementById("shProgressFill").style.width = upPct + "%";
 
-  const sigEl = document.getElementById("shSignal");
-  sigEl.textContent = sig.text;
-  sigEl.className = "sh-signal " + sig.cls;
+ const sigEl = document.getElementById("shSignal");
+ sigEl.textContent = sig.text;
+ sigEl.className = "sh-signal " + sig.cls;
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // KANBAN
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function renderKanban() {
-  if (!activeSector || !sectors[activeSector]) return;
+ if (!activeSector || !sectors[activeSector]) return;
 
-  document.getElementById("kanbanArea").style.display = "";
+ document.getElementById("kanbanArea").style.display = "";
 
-  // Clear kanban card cache
-  for (const k of Object.keys(kanbanCards)) delete kanbanCards[k];
+ // Clear kanban card cache
+ for (const k of Object.keys(kanbanCards)) delete kanbanCards[k];
 
-  // Clear column bodies
-  const bucketKeys = ["bull", "mbull", "flat", "mbear", "bear"];
-  const bodyIds = { bull: "bodyBull", mbull: "bodyMbull", flat: "bodyFlat", mbear: "bodyMbear", bear: "bodyBear" };
-  const cntIds = { bull: "cntBull", mbull: "cntMbull", flat: "cntFlat", mbear: "cntMbear", bear: "cntBear" };
+ // Clear column bodies
+ const bucketKeys = ["bull", "mbull", "flat", "mbear", "bear"];
+ const bodyIds = { bull: "bodyBull", mbull: "bodyMbull", flat: "bodyFlat", mbear: "bodyMbear", bear: "bodyBear" };
+ const cntIds = { bull: "cntBull", mbull: "cntMbull", flat: "cntFlat", mbear: "cntMbear", bear: "cntBear" };
 
-  for (const bk of bucketKeys) {
-    columnBodies[bk] = document.getElementById(bodyIds[bk]);
-    columnBodies[bk].innerHTML = "";
-  }
+ for (const bk of bucketKeys) {
+ columnBodies[bk] = document.getElementById(bodyIds[bk]);
+ columnBodies[bk].innerHTML = "";
+ }
 
-  // Bucket stocks
-  const buckets = { bull: [], mbull: [], flat: [], mbear: [], bear: [] };
-  const syms = sectors[activeSector].symbols;
-  for (const sym of syms) {
-    const s = stocks[sym];
-    const bk = signalBucket(s ? s.chg_pct : null);
-    buckets[bk].push(sym);
-  }
+ // Bucket stocks
+ const buckets = { bull: [], mbull: [], flat: [], mbear: [], bear: [] };
+ const syms = sectors[activeSector].symbols;
+ for (const sym of syms) {
+ const s = stocks[sym];
+ const bk = signalBucket(s ? s.chg_pct : null);
+ buckets[bk].push(sym);
+ }
 
-  // Sort each bucket by abs(chg_pct) descending
-  for (const bk of bucketKeys) {
-    buckets[bk].sort((a, b) => Math.abs((stocks[b] || {}).chg_pct || 0) - Math.abs((stocks[a] || {}).chg_pct || 0));
-  }
+ // Sort each bucket by abs(chg_pct) descending
+ for (const bk of bucketKeys) {
+ buckets[bk].sort((a, b) =>Math.abs((stocks[b] || {}).chg_pct || 0) - Math.abs((stocks[a] || {}).chg_pct || 0));
+ }
 
-  // Render cards into columns
-  for (const bk of bucketKeys) {
-    const body = columnBodies[bk];
-    document.getElementById(cntIds[bk]).textContent = buckets[bk].length;
+ // Render cards into columns
+ for (const bk of bucketKeys) {
+ const body = columnBodies[bk];
+ document.getElementById(cntIds[bk]).textContent = buckets[bk].length;
 
-    if (buckets[bk].length === 0) {
-      body.innerHTML = '<div class="kanban-empty">No stocks</div>';
-      continue;
-    }
+ if (buckets[bk].length === 0) {
+ body.innerHTML = '<div class="kanban-empty">No stocks</div>';
+ continue;
+ }
 
-    for (const sym of buckets[bk]) {
-      const card = buildStockCard(sym, bk);
-      body.appendChild(card);
-    }
-  }
+ for (const sym of buckets[bk]) {
+ const card = buildStockCard(sym, bk);
+ body.appendChild(card);
+ }
+ }
 }
 
 function buildStockCard(sym, bucket) {
-  const s = stocks[sym] || {};
-  const chg = s.chg_pct || 0;
-  const cc = chgClass(chg);
-  const tvUrl = "https://www.tradingview.com/chart/?symbol=NSE:" + encodeURIComponent(sym);
+ const s = stocks[sym] || {};
+ const chg = s.chg_pct || 0;
+ const cc = chgClass(chg);
+ const tvUrl = "https://www.tradingview.com/chart/?symbol=NSE:" + encodeURIComponent(sym);
 
-  const card = document.createElement("div");
-  card.className = "stock-card";
-  card.dataset.symbol = sym;
+ const card = document.createElement("div");
+ card.className = "stock-card";
+ card.dataset.symbol = sym;
 
-  // Top row: symbol + chg
-  const top = document.createElement("div");
-  top.className = "sc-top";
-  top.innerHTML =
-    '<div class="sc-sym-wrap">' + starHtml(sym) +
-    '<a class="sc-sym" href="' + tvUrl + '" target="_blank" rel="noopener noreferrer">' + sym + '</a></div>' +
-    '<span class="sc-chg ' + cc + '">' + fmtChg(chg) + '</span>';
+ // Top row: symbol + chg
+ const top = document.createElement("div");
+ top.className = "sc-top";
+ top.innerHTML =
+ '<div class="sc-sym-wrap">' + starHtml(sym) +
+ '<a class="sc-sym" href="' + tvUrl + '" target="_blank" rel="noopener noreferrer">' + sym + '</a></div>' +
+ '<span class="sc-chg ' + cc + '">' + fmtChg(chg) + '</span>';
 
-  // Data rows
-  const r1 = document.createElement("div");
-  r1.className = "sc-row";
-  r1.innerHTML = '<span>LTP</span><span class="sc-val">' + fmtPrice(s.ltp) + '</span>';
+ // Data rows
+ const r1 = document.createElement("div");
+ r1.className = "sc-row";
+ r1.innerHTML = '<span>LTP</span><span class="sc-val">' + fmtPrice(s.ltp) + '</span>';
 
-  const r2 = document.createElement("div");
-  r2.className = "sc-row";
-  r2.innerHTML = '<span>PCR</span><span class="sc-val">' + (s.pcr != null ? s.pcr.toFixed(2) : '--') + '</span>';
+ const r2 = document.createElement("div");
+ r2.className = "sc-row";
+ r2.innerHTML = '<span>PCR</span><span class="sc-val">' + (s.pcr != null ? s.pcr.toFixed(2) : '--') + '</span>';
 
-  const r3 = document.createElement("div");
-  r3.className = "sc-row";
-  r3.innerHTML = '<span>Score</span><span class="sc-val sc-score ' + scoreColor(s.score) + '">' + (s.score != null ? s.score : '--') + '</span>';
+ const r3 = document.createElement("div");
+ r3.className = "sc-row";
+ r3.innerHTML = '<span>Score</span><span class="sc-val sc-score ' + scoreColor(s.score) + '">' + (s.score != null ? s.score : '--') + '</span>';
 
-  // Tags
-  const tags = document.createElement("div");
-  tags.className = "sc-tags";
-  let tagHtml = "";
-  if (WHITELIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-wl">WL</span>';
-  if (BLACKLIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-bl">BL</span>';
-  if (s.vol_surge && s.vol_surge >= 2.0) tagHtml += '<span class="sc-tag tag-hv">HV</span>';
-  if (s.buildup === "LONG_BUILD") tagHtml += '<span class="sc-tag tag-lb">LB</span>';
-  else if (s.buildup === "SHORT_BUILD") tagHtml += '<span class="sc-tag tag-sb">SB</span>';
-  else if (s.buildup === "SHORT_COVER") tagHtml += '<span class="sc-tag tag-sc">SC</span>';
-  else if (s.buildup === "LONG_UNWIND") tagHtml += '<span class="sc-tag tag-lu">LU</span>';
-  if (s.prem_ok) tagHtml += '<span class="sc-tag tag-prem">P15+</span>';
-  tags.innerHTML = tagHtml;
+ // Tags
+ const tags = document.createElement("div");
+ tags.className = "sc-tags";
+ let tagHtml = "";
+ if (WHITELIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-wl">WL</span>';
+ if (BLACKLIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-bl">BL</span>';
+ if (s.vol_surge && s.vol_surge >= 2.0) tagHtml += '<span class="sc-tag tag-hv">HV</span>';
+ if (s.buildup === "LONG_BUILD") tagHtml += '<span class="sc-tag tag-lb">LB</span>';
+ else if (s.buildup === "SHORT_BUILD") tagHtml += '<span class="sc-tag tag-sb">SB</span>';
+ else if (s.buildup === "SHORT_COVER") tagHtml += '<span class="sc-tag tag-sc">SC</span>';
+ else if (s.buildup === "LONG_UNWIND") tagHtml += '<span class="sc-tag tag-lu">LU</span>';
+ if (s.prem_ok) tagHtml += '<span class="sc-tag tag-prem">P15+</span>';
+ tags.innerHTML = tagHtml;
 
-  card.appendChild(top);
-  card.appendChild(r1);
-  card.appendChild(r2);
-  card.appendChild(r3);
-  if (tagHtml) card.appendChild(tags);
+ card.appendChild(top);
+ card.appendChild(r1);
+ card.appendChild(r2);
+ card.appendChild(r3);
+ if (tagHtml) card.appendChild(tags);
 
-  // Cache refs for live updates
-  kanbanCards[sym] = {
-    cardEl: card,
-    chgEl: top.querySelector(".sc-chg"),
-    ltpEl: r1.querySelector(".sc-val"),
-    pcrEl: r2.querySelector(".sc-val"),
-    scoreEl: r3.querySelector(".sc-score"),
-    tagsEl: tags,
-    currentBucket: bucket
-  };
+ // Cache refs for live updates
+ kanbanCards[sym] = {
+ cardEl: card,
+ chgEl: top.querySelector(".sc-chg"),
+ ltpEl: r1.querySelector(".sc-val"),
+ pcrEl: r2.querySelector(".sc-val"),
+ scoreEl: r3.querySelector(".sc-score"),
+ tagsEl: tags,
+ currentBucket: bucket
+ };
 
-  return card;
+ return card;
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // LIVE UPDATE HELPERS
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function updateKanbanCard(sym) {
-  const kc = kanbanCards[sym];
-  if (!kc) return;
-  const s = stocks[sym];
-  if (!s) return;
+ const kc = kanbanCards[sym];
+ if (!kc) return;
+ const s = stocks[sym];
+ if (!s) return;
 
-  const chg = s.chg_pct || 0;
-  const cc = chgClass(chg);
+ const chg = s.chg_pct || 0;
+ const cc = chgClass(chg);
 
-  // LTP
-  const newLtp = fmtPrice(s.ltp);
-  if (kc.ltpEl.textContent !== newLtp) {
-    kc.ltpEl.textContent = newLtp;
-    flashCard(kc.cardEl, chg);
-  }
+ // LTP
+ const newLtp = fmtPrice(s.ltp);
+ if (kc.ltpEl.textContent !== newLtp) {
+ kc.ltpEl.textContent = newLtp;
+ flashCard(kc.cardEl, chg);
+ }
 
-  // Chg
-  kc.chgEl.textContent = fmtChg(chg);
-  kc.chgEl.className = "sc-chg " + cc;
+ // Chg
+ kc.chgEl.textContent = fmtChg(chg);
+ kc.chgEl.className = "sc-chg " + cc;
 }
 
 function updateKanbanChainData(sym) {
-  const kc = kanbanCards[sym];
-  if (!kc) return;
-  const s = stocks[sym];
-  if (!s) return;
+ const kc = kanbanCards[sym];
+ if (!kc) return;
+ const s = stocks[sym];
+ if (!s) return;
 
-  // PCR
-  kc.pcrEl.textContent = s.pcr != null ? s.pcr.toFixed(2) : "--";
+ // PCR
+ kc.pcrEl.textContent = s.pcr != null ? s.pcr.toFixed(2) : "--";
 
-  // Score
-  kc.scoreEl.className = "sc-val sc-score " + scoreColor(s.score);
-  kc.scoreEl.textContent = s.score != null ? s.score : "--";
+ // Score
+ kc.scoreEl.className = "sc-val sc-score " + scoreColor(s.score);
+ kc.scoreEl.textContent = s.score != null ? s.score : "--";
 
-  // Tags
-  let tagHtml = "";
-  if (WHITELIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-wl">WL</span>';
-  if (BLACKLIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-bl">BL</span>';
-  if (s.vol_surge && s.vol_surge >= 2.0) tagHtml += '<span class="sc-tag tag-hv">HV</span>';
-  if (s.buildup === "LONG_BUILD") tagHtml += '<span class="sc-tag tag-lb">LB</span>';
-  else if (s.buildup === "SHORT_BUILD") tagHtml += '<span class="sc-tag tag-sb">SB</span>';
-  else if (s.buildup === "SHORT_COVER") tagHtml += '<span class="sc-tag tag-sc">SC</span>';
-  else if (s.buildup === "LONG_UNWIND") tagHtml += '<span class="sc-tag tag-lu">LU</span>';
-  if (s.prem_ok) tagHtml += '<span class="sc-tag tag-prem">P15+</span>';
-  kc.tagsEl.innerHTML = tagHtml;
+ // Tags
+ let tagHtml = "";
+ if (WHITELIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-wl">WL</span>';
+ if (BLACKLIST_SET.has(sym)) tagHtml += '<span class="sc-tag tag-bl">BL</span>';
+ if (s.vol_surge && s.vol_surge >= 2.0) tagHtml += '<span class="sc-tag tag-hv">HV</span>';
+ if (s.buildup === "LONG_BUILD") tagHtml += '<span class="sc-tag tag-lb">LB</span>';
+ else if (s.buildup === "SHORT_BUILD") tagHtml += '<span class="sc-tag tag-sb">SB</span>';
+ else if (s.buildup === "SHORT_COVER") tagHtml += '<span class="sc-tag tag-sc">SC</span>';
+ else if (s.buildup === "LONG_UNWIND") tagHtml += '<span class="sc-tag tag-lu">LU</span>';
+ if (s.prem_ok) tagHtml += '<span class="sc-tag tag-prem">P15+</span>';
+ kc.tagsEl.innerHTML = tagHtml;
 }
 
 function flashCard(cardEl, chg) {
-  cardEl.classList.remove("flash-up", "flash-down");
-  void cardEl.offsetWidth;
-  cardEl.classList.add(chg >= 0 ? "flash-up" : "flash-down");
+ cardEl.classList.remove("flash-up", "flash-down");
+ void cardEl.offsetWidth;
+ cardEl.classList.add(chg >= 0 ? "flash-up" : "flash-down");
 }
 
 function rebucketKanban() {
-  // Check if any stock in active sector needs to move columns
-  if (!activeSector || !sectors[activeSector]) return;
+ // Check if any stock in active sector needs to move columns
+ if (!activeSector || !sectors[activeSector]) return;
 
-  const cntIds = { bull: "cntBull", mbull: "cntMbull", flat: "cntFlat", mbear: "cntMbear", bear: "cntBear" };
-  const counts = { bull: 0, mbull: 0, flat: 0, mbear: 0, bear: 0 };
-  let moved = false;
+ const cntIds = { bull: "cntBull", mbull: "cntMbull", flat: "cntFlat", mbear: "cntMbear", bear: "cntBear" };
+ const counts = { bull: 0, mbull: 0, flat: 0, mbear: 0, bear: 0 };
+ let moved = false;
 
-  for (const sym of sectors[activeSector].symbols) {
-    const kc = kanbanCards[sym];
-    if (!kc) continue;
-    const s = stocks[sym];
-    const newBucket = signalBucket(s ? s.chg_pct : null);
-    counts[newBucket]++;
+ for (const sym of sectors[activeSector].symbols) {
+ const kc = kanbanCards[sym];
+ if (!kc) continue;
+ const s = stocks[sym];
+ const newBucket = signalBucket(s ? s.chg_pct : null);
+ counts[newBucket]++;
 
-    if (kc.currentBucket !== newBucket) {
-      // Move card to new column
-      if (columnBodies[newBucket]) {
-        columnBodies[newBucket].appendChild(kc.cardEl);
-      }
-      kc.currentBucket = newBucket;
-      moved = true;
-    }
-  }
+ if (kc.currentBucket !== newBucket) {
+ // Move card to new column
+ if (columnBodies[newBucket]) {
+ columnBodies[newBucket].appendChild(kc.cardEl);
+ }
+ kc.currentBucket = newBucket;
+ moved = true;
+ }
+ }
 
-  // Update counts
-  for (const bk of Object.keys(cntIds)) {
-    document.getElementById(cntIds[bk]).textContent = counts[bk];
-  }
+ // Update counts
+ for (const bk of Object.keys(cntIds)) {
+ document.getElementById(cntIds[bk]).textContent = counts[bk];
+ }
 
-  // Clear empty placeholders and add them where needed
-  if (moved) {
-    for (const bk of Object.keys(columnBodies)) {
-      const body = columnBodies[bk];
-      const empty = body.querySelector(".kanban-empty");
-      if (counts[bk] === 0 && !empty) {
-        body.innerHTML = '<div class="kanban-empty">No stocks</div>';
-      } else if (counts[bk] > 0 && empty) {
-        empty.remove();
-      }
-    }
-  }
+ // Clear empty placeholders and add them where needed
+ if (moved) {
+ for (const bk of Object.keys(columnBodies)) {
+ const body = columnBodies[bk];
+ const empty = body.querySelector(".kanban-empty");
+ if (counts[bk] === 0 && !empty) {
+ body.innerHTML = '<div class="kanban-empty">No stocks</div>';
+ } else if (counts[bk] >0 && empty) {
+ empty.remove();
+ }
+ }
+ }
 
-  // Re-sort within columns by abs(chg_pct) desc
-  for (const bk of Object.keys(columnBodies)) {
-    if (counts[bk] <= 1) continue;
-    const body = columnBodies[bk];
-    const cards = Array.from(body.querySelectorAll(".stock-card"));
-    cards.sort((a, b) => {
-      const sa = stocks[a.dataset.symbol];
-      const sb = stocks[b.dataset.symbol];
-      return Math.abs((sb ? sb.chg_pct : 0) || 0) - Math.abs((sa ? sa.chg_pct : 0) || 0);
-    });
-    for (const c of cards) body.appendChild(c);
-  }
+ // Re-sort within columns by abs(chg_pct) desc
+ for (const bk of Object.keys(columnBodies)) {
+ if (counts[bk] <= 1) continue;
+ const body = columnBodies[bk];
+ const cards = Array.from(body.querySelectorAll(".stock-card"));
+ cards.sort((a, b) =>{
+ const sa = stocks[a.dataset.symbol];
+ const sb = stocks[b.dataset.symbol];
+ return Math.abs((sb ? sb.chg_pct : 0) || 0) - Math.abs((sa ? sa.chg_pct : 0) || 0);
+ });
+ for (const c of cards) body.appendChild(c);
+ }
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // BOTTOM BAR + FOOTER
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function updateBottomBar() {
-  const stCount = Object.keys(stocks).length;
-  let totalUp = 0, totalDn = 0;
-  for (const sym of Object.keys(stocks)) {
-    if (stocks[sym].chg_pct > 0.005) totalUp++;
-    else if (stocks[sym].chg_pct < -0.005) totalDn++;
-  }
-  document.getElementById("bbStocks").textContent = stCount;
-  document.getElementById("bbUp").textContent = totalUp;
-  document.getElementById("bbDown").textContent = totalDn;
-  document.getElementById("bbTime").textContent = timeStr();
-  document.getElementById("stockCountPill").textContent = stCount + " stocks";
+ const stCount = Object.keys(stocks).length;
+ let totalUp = 0, totalDn = 0;
+ for (const sym of Object.keys(stocks)) {
+ if (stocks[sym].chg_pct >0.005) totalUp++;
+ else if (stocks[sym].chg_pct < -0.005) totalDn++;
+ }
+ document.getElementById("bbStocks").textContent = stCount;
+ document.getElementById("bbUp").textContent = totalUp;
+ document.getElementById("bbDown").textContent = totalDn;
+ document.getElementById("bbTime").textContent = timeStr();
+ document.getElementById("stockCountPill").textContent = stCount + " stocks";
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // CONNECTION STATUS
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function setConnStatus(state) {
-  const dot = document.getElementById("connDot");
-  const text = document.getElementById("connText");
-  const pulse = document.getElementById("logoPulse");
-  const fDot = document.getElementById("footerDot");
-  const fStatus = document.getElementById("footerStatus");
+ const dot = document.getElementById("connDot");
+ const text = document.getElementById("connText");
+ const pulse = document.getElementById("logoPulse");
+ const fDot = document.getElementById("footerDot");
+ const fStatus = document.getElementById("footerStatus");
 
-  if (state === "connected") {
-    dot.className = "conn-dot on";
-    text.textContent = "Connected";
-    pulse.className = "pulse-dot";
-    fDot.className = "bb-dot";
-    fStatus.textContent = "Connected";
-  } else if (state === "reconnecting") {
-    dot.className = "conn-dot warn";
-    text.textContent = "Reconnecting...";
-    pulse.className = "pulse-dot warn";
-    fDot.className = "bb-dot off";
-    fStatus.textContent = "Reconnecting...";
-  } else {
-    dot.className = "conn-dot off";
-    text.textContent = "Disconnected";
-    pulse.className = "pulse-dot off";
-    fDot.className = "bb-dot off";
-    fStatus.textContent = "Disconnected";
-  }
+ if (state === "connected") {
+ dot.className = "conn-dot on";
+ text.textContent = "Connected";
+ pulse.className = "pulse-dot";
+ fDot.className = "bb-dot";
+ fStatus.textContent = "Connected";
+ } else if (state === "reconnecting") {
+ dot.className = "conn-dot warn";
+ text.textContent = "Reconnecting...";
+ pulse.className = "pulse-dot warn";
+ fDot.className = "bb-dot off";
+ fStatus.textContent = "Reconnecting...";
+ } else {
+ dot.className = "conn-dot off";
+ text.textContent = "Disconnected";
+ pulse.className = "pulse-dot off";
+ fDot.className = "bb-dot off";
+ fStatus.textContent = "Disconnected";
+ }
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // BAR CHART
 // âââââââââââââââââââââââââââââââââââââââââââââââ
-const barRowCache = {}; // sector -> { rowEl, fillEl, valEl, labelEl }
+const barRowCache = {}; // sector ->{ rowEl, fillEl, valEl, labelEl }
 
 function renderBarChart() {
-  const grid = document.getElementById("barChartGrid");
-  const area = document.getElementById("barChartArea");
-  if (!grid) return;
+ const grid = document.getElementById("barChartGrid");
+ const area = document.getElementById("barChartArea");
+ if (!grid) return;
 
-  const sorted = sortedSectorKeys();
-  if (sorted.length === 0) { area.style.display = "none"; return; }
-  area.style.display = "";
+ const sorted = sortedSectorKeys();
+ if (sorted.length === 0) { area.style.display = "none"; return; }
+ area.style.display = "";
 
-  // Find max absolute chg for scaling
-  let maxAbs = 0.5; // minimum scale = 0.5%
-  for (const sec of sorted) {
-    const a = Math.abs(sectors[sec].avgChg);
-    if (a > maxAbs) maxAbs = a;
-  }
+ // Find max absolute chg for scaling
+ let maxAbs = 0.5; // minimum scale = 0.5%
+ for (const sec of sorted) {
+ const a = Math.abs(sectors[sec].avgChg);
+ if (a >maxAbs) maxAbs = a;
+ }
 
-  // Only rebuild DOM if sector count changed
-  const needRebuild = Object.keys(barRowCache).length !== sorted.length;
+ // Only rebuild DOM if sector count changed
+ const needRebuild = Object.keys(barRowCache).length !== sorted.length;
 
-  if (needRebuild) {
-    grid.innerHTML = "";
-    for (const k of Object.keys(barRowCache)) delete barRowCache[k];
+ if (needRebuild) {
+ grid.innerHTML = "";
+ for (const k of Object.keys(barRowCache)) delete barRowCache[k];
 
-    for (const sec of sorted) {
-      const meta = getMeta(sec);
-      const avg = sectors[sec].avgChg;
-      const isPos = avg >= 0;
-      const widthPct = Math.min((Math.abs(avg) / maxAbs) * 50, 50);
+ for (const sec of sorted) {
+ const meta = getMeta(sec);
+ const avg = sectors[sec].avgChg;
+ const isPos = avg >= 0;
+ const widthPct = Math.min((Math.abs(avg) / maxAbs) * 50, 50);
 
-      const row = document.createElement("div");
-      row.className = "bar-row" + (sec === activeSector ? " active" : "");
-      row.dataset.sector = sec;
-      row.onclick = function() { selectSector(sec); };
+ const row = document.createElement("div");
+ row.className = "bar-row" + (sec === activeSector ? " active" : "");
+ row.dataset.sector = sec;
+ row.onclick = function() { selectSector(sec); };
 
-      row.innerHTML =
-        '<span class="bar-label" style="color:' + meta.text + '">' + meta.emoji + ' ' + sec.replace("_"," ") + '</span>' +
-        '<div class="bar-track">' +
-          '<div class="bar-center"></div>' +
-          '<div class="bar-fill ' + (isPos ? "pos" : "neg") + '" style="width:' + widthPct + '%"></div>' +
-        '</div>' +
-        '<span class="bar-val ' + (avg > 0.005 ? "chg-up" : avg < -0.005 ? "chg-dn" : "chg-flat") + '">' + fmtChg(avg) + '</span>';
+ row.innerHTML =
+ '<span class="bar-label" style="color:' + meta.text + '">' + meta.emoji + ' ' + sec.replace("_"," ") + '</span>' +
+ '<div class="bar-track">' +
+ '<div class="bar-center"></div>' +
+ '<div class="bar-fill ' + (isPos ? "pos" : "neg") + '" style="width:' + widthPct + '%"></div>' +
+ '</div>' +
+ '<span class="bar-val ' + (avg >0.005 ? "chg-up" : avg < -0.005 ? "chg-dn" : "chg-flat") + '">' + fmtChg(avg) + '</span>';
 
-      grid.appendChild(row);
+ grid.appendChild(row);
 
-      barRowCache[sec] = {
-        rowEl: row,
-        fillEl: row.querySelector(".bar-fill"),
-        valEl: row.querySelector(".bar-val"),
-        labelEl: row.querySelector(".bar-label")
-      };
-    }
-  } else {
-    // Update existing bars in place
-    for (const sec of sorted) {
-      const bc = barRowCache[sec];
-      if (!bc) continue;
-      const avg = sectors[sec].avgChg;
-      const isPos = avg >= 0;
-      const widthPct = Math.min((Math.abs(avg) / maxAbs) * 50, 50);
+ barRowCache[sec] = {
+ rowEl: row,
+ fillEl: row.querySelector(".bar-fill"),
+ valEl: row.querySelector(".bar-val"),
+ labelEl: row.querySelector(".bar-label")
+ };
+ }
+ } else {
+ // Update existing bars in place
+ for (const sec of sorted) {
+ const bc = barRowCache[sec];
+ if (!bc) continue;
+ const avg = sectors[sec].avgChg;
+ const isPos = avg >= 0;
+ const widthPct = Math.min((Math.abs(avg) / maxAbs) * 50, 50);
 
-      bc.fillEl.style.width = widthPct + "%";
-      bc.fillEl.className = "bar-fill " + (isPos ? "pos" : "neg");
-      bc.valEl.textContent = fmtChg(avg);
-      bc.valEl.className = "bar-val " + (avg > 0.005 ? "chg-up" : avg < -0.005 ? "chg-dn" : "chg-flat");
-      bc.rowEl.classList.toggle("active", sec === activeSector);
-    }
+ bc.fillEl.style.width = widthPct + "%";
+ bc.fillEl.className = "bar-fill " + (isPos ? "pos" : "neg");
+ bc.valEl.textContent = fmtChg(avg);
+ bc.valEl.className = "bar-val " + (avg >0.005 ? "chg-up" : avg < -0.005 ? "chg-dn" : "chg-flat");
+ bc.rowEl.classList.toggle("active", sec === activeSector);
+ }
 
-    // Re-sort rows in DOM
-    for (const sec of sorted) {
-      const bc = barRowCache[sec];
-      if (bc) grid.appendChild(bc.rowEl);
-    }
-  }
+ // Re-sort rows in DOM
+ for (const sec of sorted) {
+ const bc = barRowCache[sec];
+ if (bc) grid.appendChild(bc.rowEl);
+ }
+ }
 
-  // Update NIFTY pill if we have NIFTY 50 index data
-  updateNiftyPill();
+ // Update NIFTY pill if we have NIFTY 50 index data
+ updateNiftyPill();
 }
 
 function updateNiftyPill() {
-  const pill = document.getElementById("niftyPill");
-  if (!pill) return;
-  // Look for NIFTY 50 in stocks data (sometimes sent as index)
-  const nifty = stocks["NIFTY 50"] || stocks["NIFTY"] || stocks["NIFTY50"];
-  if (nifty && nifty.ltp) {
-    const chg = nifty.chg_pct || 0;
-    pill.textContent = "NIFTY " + Number(nifty.ltp).toLocaleString("en-IN", { maximumFractionDigits: 0 }) + " " + fmtChg(chg);
-    pill.style.color = chg > 0.005 ? "var(--green)" : chg < -0.005 ? "var(--red)" : "var(--text-dim)";
-    pill.style.background = chg > 0.005 ? "var(--green-bg)" : chg < -0.005 ? "var(--red-bg)" : "rgba(255,255,255,0.05)";
-  } else {
-    // Compute synthetic NIFTY proxy from all stocks
-    const allSyms = Object.keys(stocks);
-    if (allSyms.length > 0) {
-      let sum = 0;
-      for (const sym of allSyms) sum += (stocks[sym].chg_pct || 0);
-      const avgAll = sum / allSyms.length;
-      pill.textContent = "Market Avg " + fmtChg(avgAll);
-      pill.style.color = avgAll > 0.005 ? "var(--green)" : avgAll < -0.005 ? "var(--red)" : "var(--text-dim)";
-      pill.style.background = avgAll > 0.005 ? "var(--green-bg)" : avgAll < -0.005 ? "var(--red-bg)" : "rgba(255,255,255,0.05)";
-    }
-  }
+ const pill = document.getElementById("niftyPill");
+ if (!pill) return;
+ // Look for NIFTY 50 in stocks data (sometimes sent as index)
+ const nifty = stocks["NIFTY 50"] || stocks["NIFTY"] || stocks["NIFTY50"];
+ if (nifty && nifty.ltp) {
+ const chg = nifty.chg_pct || 0;
+ pill.textContent = "NIFTY " + Number(nifty.ltp).toLocaleString("en-IN", { maximumFractionDigits: 0 }) + " " + fmtChg(chg);
+ pill.style.color = chg >0.005 ? "var(--green)" : chg < -0.005 ? "var(--red)" : "var(--text-dim)";
+ pill.style.background = chg >0.005 ? "var(--green-bg)" : chg < -0.005 ? "var(--red-bg)" : "rgba(255,255,255,0.05)";
+ } else {
+ // Compute synthetic NIFTY proxy from all stocks
+ const allSyms = Object.keys(stocks);
+ if (allSyms.length >0) {
+ let sum = 0;
+ for (const sym of allSyms) sum += (stocks[sym].chg_pct || 0);
+ const avgAll = sum / allSyms.length;
+ pill.textContent = "Market Avg " + fmtChg(avgAll);
+ pill.style.color = avgAll >0.005 ? "var(--green)" : avgAll < -0.005 ? "var(--red)" : "var(--text-dim)";
+ pill.style.background = avgAll >0.005 ? "var(--green-bg)" : avgAll < -0.005 ? "var(--red-bg)" : "rgba(255,255,255,0.05)";
+ }
+ }
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // FULL RENDER (on init)
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function fullRender() {
-  const loading = document.getElementById("loadingState");
-  if (loading) loading.style.display = "none";
+ const loading = document.getElementById("loadingState");
+ if (loading) loading.style.display = "none";
 
-  buildSectors();
-  const sorted = sortedSectorKeys();
+ buildSectors();
+ const sorted = sortedSectorKeys();
 
-  // Default to first (best-performing) sector
-  if (!activeSector || !sectors[activeSector]) {
-    activeSector = sorted.length > 0 ? sorted[0] : null;
-  }
+ // Default to first (best-performing) sector
+ if (!activeSector || !sectors[activeSector]) {
+ activeSector = sorted.length >0 ? sorted[0] : null;
+ }
 
-  renderSidebar();
-  renderBarChart();
-  renderSectorHeader();
-  renderKanban();
-  updateBottomBar();
+ renderSidebar();
+ renderBarChart();
+ renderSectorHeader();
+ renderKanban();
+ updateBottomBar();
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
@@ -1446,148 +1447,148 @@ let tickBatchTimer = null;
 const dirtySectors = new Set();
 
 function scheduleTickUpdate() {
-  if (tickBatchTimer) return;
-  tickBatchTimer = requestAnimationFrame(function() {
-    tickBatchTimer = null;
-    recalcAverages();
+ if (tickBatchTimer) return;
+ tickBatchTimer = requestAnimationFrame(function() {
+ tickBatchTimer = null;
+ recalcAverages();
 
-    for (const sec of dirtySectors) {
-      updateSidebarItem(sec);
-    }
+ for (const sec of dirtySectors) {
+ updateSidebarItem(sec);
+ }
 
-    if (dirtySectors.has(activeSector)) {
-      renderSectorHeader();
-      rebucketKanban();
-    }
+ if (dirtySectors.has(activeSector)) {
+ renderSectorHeader();
+ rebucketKanban();
+ }
 
-    renderBarChart();
-    resortSidebar();
-    updateBottomBar();
-    dirtySectors.clear();
-  });
+ renderBarChart();
+ resortSidebar();
+ updateBottomBar();
+ dirtySectors.clear();
+ });
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 // WEBSOCKET
 // âââââââââââââââââââââââââââââââââââââââââââââââ
 function connectWS() {
-  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+ if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
 
-  const proto = window.location.protocol === "https:" ? "wss" : "ws";
-  const url = proto + "://" + window.location.host + "/ws";
-  setConnStatus("reconnecting");
+ const proto = window.location.protocol === "https:" ? "wss" : "ws";
+ const url = proto + "://" + window.location.host + "/ws";
+ setConnStatus("reconnecting");
 
-  try {
-    ws = new WebSocket(url);
-  } catch (e) {
-    console.error("WS create error:", e);
-    scheduleReconnect();
-    return;
-  }
+ try {
+ ws = new WebSocket(url);
+ } catch (e) {
+ console.error("WS create error:", e);
+ scheduleReconnect();
+ return;
+ }
 
-  ws.onopen = function() {
-    setConnStatus("connected");
-    reconnectDelay = 3000;
-    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-  };
+ ws.onopen = function() {
+ setConnStatus("connected");
+ reconnectDelay = 3000;
+ if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+ };
 
-  ws.onmessage = function(evt) {
-    let msg;
-    try { msg = JSON.parse(evt.data); } catch (e) { return; }
-    handleMessage(msg);
-  };
+ ws.onmessage = function(evt) {
+ let msg;
+ try { msg = JSON.parse(evt.data); } catch (e) { return; }
+ handleMessage(msg);
+ };
 
-  ws.onclose = function() {
-    setConnStatus("disconnected");
-    scheduleReconnect();
-  };
+ ws.onclose = function() {
+ setConnStatus("disconnected");
+ scheduleReconnect();
+ };
 
-  ws.onerror = function() {};
+ ws.onerror = function() {};
 }
 
 function scheduleReconnect() {
-  if (reconnectTimer) return;
-  setConnStatus("reconnecting");
-  reconnectTimer = setTimeout(function() {
-    reconnectTimer = null;
-    connectWS();
-  }, reconnectDelay);
-  reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+ if (reconnectTimer) return;
+ setConnStatus("reconnecting");
+ reconnectTimer = setTimeout(function() {
+ reconnectTimer = null;
+ connectWS();
+ }, reconnectDelay);
+ reconnectDelay = Math.min(reconnectDelay * 2, 30000);
 }
 
 function handleMessage(msg) {
-  switch (msg.type) {
-    case "init":  handleInit(msg); break;
-    case "tick":  handleTick(msg); break;
-    case "ohlc":  handleOhlc(msg); break;
-    case "chain": handleChain(msg); break;
-  }
+ switch (msg.type) {
+ case "init": handleInit(msg); break;
+ case "tick": handleTick(msg); break;
+ case "ohlc": handleOhlc(msg); break;
+ case "chain": handleChain(msg); break;
+ }
 }
 
 function handleInit(msg) {
-  const d = msg.stocks || msg.d || {};
-  stocks = {};
-  // Reset caches
-  for (const k of Object.keys(kanbanCards)) delete kanbanCards[k];
-  for (const k of Object.keys(sidebarCache)) delete sidebarCache[k];
+ const d = msg.stocks || msg.d || {};
+ stocks = {};
+ // Reset caches
+ for (const k of Object.keys(kanbanCards)) delete kanbanCards[k];
+ for (const k of Object.keys(sidebarCache)) delete sidebarCache[k];
 
-  for (const sym of Object.keys(d)) {
-    stocks[sym] = { ...d[sym] };
-  }
-  fullRender();
+ for (const sym of Object.keys(d)) {
+ stocks[sym] = { ...d[sym] };
+ }
+ fullRender();
 }
 
 function handleTick(msg) {
-  const d = msg.d || {};
-  for (const sym of Object.keys(d)) {
-    if (!stocks[sym]) continue;
-    if (d[sym].ltp != null) stocks[sym].ltp = d[sym].ltp;
-    if (d[sym].chg_pct != null) stocks[sym].chg_pct = d[sym].chg_pct;
+ const d = msg.d || {};
+ for (const sym of Object.keys(d)) {
+ if (!stocks[sym]) continue;
+ if (d[sym].ltp != null) stocks[sym].ltp = d[sym].ltp;
+ if (d[sym].chg_pct != null) stocks[sym].chg_pct = d[sym].chg_pct;
 
-    // Update kanban card if in active sector
-    if (stocks[sym].sector === activeSector) {
-      updateKanbanCard(sym);
-    }
+ // Update kanban card if in active sector
+ if (stocks[sym].sector === activeSector) {
+ updateKanbanCard(sym);
+ }
 
-    // Mark sector dirty
-    if (stocks[sym].sector) dirtySectors.add(stocks[sym].sector);
-  }
-  scheduleTickUpdate();
+ // Mark sector dirty
+ if (stocks[sym].sector) dirtySectors.add(stocks[sym].sector);
+ }
+ scheduleTickUpdate();
 }
 
 function handleOhlc(msg) {
-  const d = msg.d || {};
-  for (const sym of Object.keys(d)) {
-    if (!stocks[sym]) continue;
-    const upd = d[sym];
-    if (upd.open != null) stocks[sym].open = upd.open;
-    if (upd.high != null) stocks[sym].high = upd.high;
-    if (upd.low != null) stocks[sym].low = upd.low;
-    if (upd.vol != null) stocks[sym].vol = upd.vol;
-    if (upd.vol_surge != null) stocks[sym].vol_surge = upd.vol_surge;
-  }
+ const d = msg.d || {};
+ for (const sym of Object.keys(d)) {
+ if (!stocks[sym]) continue;
+ const upd = d[sym];
+ if (upd.open != null) stocks[sym].open = upd.open;
+ if (upd.high != null) stocks[sym].high = upd.high;
+ if (upd.low != null) stocks[sym].low = upd.low;
+ if (upd.vol != null) stocks[sym].vol = upd.vol;
+ if (upd.vol_surge != null) stocks[sym].vol_surge = upd.vol_surge;
+ }
 }
 
 function handleChain(msg) {
-  const d = msg.d || {};
-  for (const sym of Object.keys(d)) {
-    if (!stocks[sym]) continue;
-    const upd = d[sym];
-    if (upd.pcr != null) stocks[sym].pcr = upd.pcr;
-    if (upd.pcr_sig != null) stocks[sym].pcr_sig = upd.pcr_sig;
-    if (upd.buildup != null) stocks[sym].buildup = upd.buildup;
-    if (upd.score != null) stocks[sym].score = upd.score;
-    if (upd.atm_iv != null) stocks[sym].atm_iv = upd.atm_iv;
-    if (upd.max_pain != null) stocks[sym].max_pain = upd.max_pain;
-    if (upd.atm_ce != null) stocks[sym].atm_ce = upd.atm_ce;
-    if (upd.atm_pe != null) stocks[sym].atm_pe = upd.atm_pe;
-    if (upd.prem_ok != null) stocks[sym].prem_ok = upd.prem_ok;
+ const d = msg.d || {};
+ for (const sym of Object.keys(d)) {
+ if (!stocks[sym]) continue;
+ const upd = d[sym];
+ if (upd.pcr != null) stocks[sym].pcr = upd.pcr;
+ if (upd.pcr_sig != null) stocks[sym].pcr_sig = upd.pcr_sig;
+ if (upd.buildup != null) stocks[sym].buildup = upd.buildup;
+ if (upd.score != null) stocks[sym].score = upd.score;
+ if (upd.atm_iv != null) stocks[sym].atm_iv = upd.atm_iv;
+ if (upd.max_pain != null) stocks[sym].max_pain = upd.max_pain;
+ if (upd.atm_ce != null) stocks[sym].atm_ce = upd.atm_ce;
+ if (upd.atm_pe != null) stocks[sym].atm_pe = upd.atm_pe;
+ if (upd.prem_ok != null) stocks[sym].prem_ok = upd.prem_ok;
 
-    // Update kanban card chain data if in active sector
-    if (stocks[sym].sector === activeSector) {
-      updateKanbanChainData(sym);
-    }
-  }
+ // Update kanban card chain data if in active sector
+ if (stocks[sym].sector === activeSector) {
+ updateKanbanChainData(sym);
+ }
+ }
 }
 
 // âââââââââââââââââââââââââââââââââââââââââââââââ
