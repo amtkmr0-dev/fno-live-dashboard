@@ -13,6 +13,8 @@ Features:
   - Serves login.html directly for /login
   - Proxies all other routes (HTTP + WebSocket) to backend
   - Sessions expire after configurable timeout (default 24h)
+  - AI chat via Perplexity API (sonar model, web search enabled)
+  - Chat context includes live dashboard data for smarter answers
 
 Deploy:
   1. Change ws_server.py to listen on 8081
@@ -235,6 +237,144 @@ async def handle_logout_api(request):
 
 
 # ============================================================
+# AI CHAT (Perplexity API)
+# ============================================================
+
+PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
+PERPLEXITY_MODEL = "sonar"  # fast, web-search enabled
+
+CHAT_SYSTEM_PROMPT = """You are Quantra AI, the built-in assistant for the Quantra Terminal - an F&O (Futures & Options) analytics platform for the Indian stock market (NSE).
+
+Your expertise:
+- NIFTY and stock options (CE/PE), option chains, OI analysis, PCR, IV
+- Technical analysis: RSI, MACD, EMA, support/resistance, volume
+- OI buildup patterns: Long Build, Short Build, Long Unwind, Short Cover
+- F&O trading strategies: intraday, positional, hedging
+- Indian market terminology and conventions (lot sizes, expiry, etc.)
+
+Guidelines:
+- Be direct and actionable - like a trading desk colleague
+- Use Indian market terminology (CE/PE, ATM, lot size, expiry)
+- Cite specific numbers when available
+- If asked about a specific stock, focus on its F&O data and setup
+- Keep responses concise (2-4 paragraphs max unless asked for detail)
+- Never give guaranteed predictions - always frame as probability/setup
+- Mention risk management (SL levels, position sizing) when relevant
+- NIFTY lot size is 65 (not 75)
+- For stock-specific questions, note that premium >= Rs 15 is the minimum for tradeable options"""
+
+
+def get_perplexity_key():
+    """Get Perplexity API key from config."""
+    return _config.get("perplexity_api_key", "")
+
+
+async def handle_chat_api(request):
+    """POST /api/chat - AI chat via Perplexity."""
+    # Auth check
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    api_key = get_perplexity_key()
+    if not api_key:
+        return web.json_response({
+            "reply": "Chat not configured. Admin needs to set the Perplexity API key.\n\nGo to the chat setup or ask your admin to run:\npython3 setup_auth.py --set-chat-key <your-perplexity-api-key>"
+        })
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    user_message = data.get("message", "").strip()
+    if not user_message:
+        return web.json_response({"error": "Empty message"}, status=400)
+
+    history = data.get("history", [])
+    focused_stock = data.get("focused_stock")
+
+    # Build messages array for Perplexity
+    system_content = CHAT_SYSTEM_PROMPT
+    if focused_stock:
+        system_content += f"\n\nThe user is currently viewing {focused_stock} in the analysis panel. Focus your answer on this stock's F&O setup."
+
+    messages = [{"role": "system", "content": system_content}]
+
+    # Add recent history (last 6 messages for context, skip system)
+    for msg in history[-6:]:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        if role in ("user", "assistant") and content:
+            messages.append({"role": role, "content": content})
+
+    # Ensure the last message is the current user message
+    if not messages or messages[-1].get("content") != user_message:
+        messages.append({"role": "user", "content": user_message})
+
+    # Call Perplexity API
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": _config.get("chat_model", PERPLEXITY_MODEL),
+        "messages": messages,
+        "max_tokens": 1024,
+        "temperature": 0.7,
+        "stream": False
+    }
+
+    try:
+        async with ClientSession() as cs:
+            async with cs.post(PERPLEXITY_URL, headers=headers, json=payload, timeout=30) as resp:
+                if resp.status == 401:
+                    return web.json_response({"reply": "Perplexity API key is invalid. Ask admin to update it."})
+                if resp.status == 429:
+                    return web.json_response({"reply": "Rate limited by Perplexity. Try again in a few seconds."})
+                if resp.status != 200:
+                    body = await resp.text()
+                    log.error(f"Perplexity API error {resp.status}: {body[:200]}")
+                    return web.json_response({"reply": f"AI service error ({resp.status}). Try again."})
+
+                result = await resp.json()
+                reply = result.get("choices", [{}])[0].get("message", {}).get("content", "No response.")
+                return web.json_response({"reply": reply})
+
+    except asyncio.TimeoutError:
+        return web.json_response({"reply": "AI response timed out. Try a shorter question."})
+    except Exception as e:
+        log.error(f"Chat error: {e}")
+        return web.json_response({"reply": f"Connection error: {str(e)}"})
+
+
+async def handle_chat_key_api(request):
+    """POST /api/admin/chat-key - Save Perplexity API key (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    key = data.get("key", "").strip()
+    if not key:
+        return web.json_response({"error": "API key required"}, status=400)
+
+    # Save to config
+    _config["perplexity_api_key"] = key
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(_config, f, indent=2)
+
+    log.info(f"Perplexity API key updated by {session['user']}")
+    return web.json_response({"ok": True})
+
+
+# ============================================================
 # REVERSE PROXY
 # ============================================================
 
@@ -387,6 +527,10 @@ def create_app():
     app.router.add_post("/api/auth/login", handle_login_api)
     app.router.add_get("/api/auth/verify", handle_verify_api)
     app.router.add_get("/api/auth/logout", handle_logout_api)
+
+    # AI Chat routes (handled directly, not proxied)
+    app.router.add_post("/api/chat", handle_chat_api)
+    app.router.add_post("/api/admin/chat-key", handle_chat_key_api)
 
     # WebSocket proxy
     app.router.add_get("/ws", proxy_websocket)

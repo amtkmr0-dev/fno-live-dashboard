@@ -4,12 +4,14 @@ setup_auth.py - Create auth_config.json with hashed credentials.
 
 Usage:
   python3 setup_auth.py <username> <password> [role]
+  python3 setup_auth.py --set-chat-key <perplexity-api-key>
 
   role: "admin" (default) or "user"
 
 Examples:
-  python3 setup_auth.py amit MyPass123 admin    # admin account
-  python3 setup_auth.py guest ViewOnly1 user    # restricted user
+  python3 setup_auth.py amit MyPass123 admin          # admin account
+  python3 setup_auth.py guest ViewOnly1 user          # restricted user
+  python3 setup_auth.py --set-chat-key pplx-xxxxxx    # set Perplexity API key
 
 Run before starting auth_proxy.py. Can be run multiple times to add users.
 """
@@ -66,6 +68,22 @@ def main():
     config = load_config(config_file)
 
     print("\n=== Quantra Terminal - Auth Setup ===\n")
+
+    # Handle --set-chat-key flag
+    if len(sys.argv) >= 3 and sys.argv[1] == "--set-chat-key":
+        api_key = sys.argv[2].strip()
+        if not api_key:
+            print("API key cannot be empty")
+            sys.exit(1)
+        config["perplexity_api_key"] = api_key
+        if "session_secret" not in config:
+            config["session_secret"] = secrets.token_hex(32)
+        with open(config_file, "w") as f:
+            json.dump(config, f, indent=2)
+        masked = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
+        print(f"Perplexity API key set: {masked}")
+        print(f"Restart auth_proxy.py to pick up the change.")
+        return
 
     if len(sys.argv) >= 3:
         # Non-interactive: python3 setup_auth.py <username> <password> [role]
