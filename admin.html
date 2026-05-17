@@ -1150,7 +1150,170 @@ a:hover { text-decoration: underline; }
     </div>
   </div>
 
+  <!-- ========== PLATFORM STATS ========== -->
+  <div class="card" id="statsCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128202;</span>
+      <h2>Platform Stats</h2>
+      <button class="q-btn q-btn-ghost q-btn-sm" style="margin-left:auto" onclick="loadPlatformData()">Refresh</button>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px" id="statsGrid">
+        <div class="stat-box"><div class="stat-val" id="statUsers">-</div><div class="stat-lbl">Users</div></div>
+        <div class="stat-box"><div class="stat-val" id="statSessions">-</div><div class="stat-lbl">Active Sessions</div></div>
+        <div class="stat-box"><div class="stat-val" id="statTradesToday">-</div><div class="stat-lbl">Trades Today</div></div>
+        <div class="stat-box"><div class="stat-val" id="statTotalTrades">-</div><div class="stat-lbl">Total Trades</div></div>
+        <div class="stat-box"><div class="stat-val" id="statAutoTrades">-</div><div class="stat-lbl">Auto Trades</div></div>
+        <div class="stat-box"><div class="stat-val" id="statLocked" style="color:var(--red)">-</div><div class="stat-lbl">Locked Accounts</div></div>
+        <div class="stat-box"><div class="stat-val" id="statFailed24h" style="color:var(--orange,#f59e0b)">-</div><div class="stat-lbl">Failed Logins 24h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== USER MANAGEMENT ========== -->
+  <div class="card" id="usersCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128101;</span>
+      <h2>User Management</h2>
+    </div>
+    <div class="card-body" style="overflow-x:auto">
+      <table class="q-table" id="usersTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th>
+            <th>Created</th><th>Last Login</th><th>Failed Attempts</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody">
+          <tr><td colspan="9" style="text-align:center;color:var(--text-vdim)">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== AUDIT LOG ========== -->
+  <div class="card" id="auditCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128274;</span>
+      <h2>Security Audit Log</h2>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <select id="auditFilter" class="q-select-sm" onchange="loadAuditLog()" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px">
+          <option value="">All Events</option>
+          <option value="LOGIN_SUCCESS">Login Success</option>
+          <option value="LOGIN_FAILED">Login Failed</option>
+          <option value="LOGIN_LOCKED">Login Locked</option>
+          <option value="REGISTRATION">Registration</option>
+          <option value="PASSWORD_CHANGE">Password Change</option>
+          <option value="ADMIN_ACTION">Admin Action</option>
+          <option value="RATE_LIMITED">Rate Limited</option>
+          <option value="CSRF_VIOLATION">CSRF Violation</option>
+        </select>
+        <button class="q-btn q-btn-ghost q-btn-sm" onclick="loadAuditLog()">Refresh</button>
+      </div>
+    </div>
+    <div class="card-body" style="overflow-x:auto">
+      <table class="q-table" id="auditTable">
+        <thead>
+          <tr><th>Time</th><th>Event</th><th>IP</th><th>User</th><th>Details</th></tr>
+        </thead>
+        <tbody id="auditBody">
+          <tr><td colspan="5" style="text-align:center;color:var(--text-vdim)">Loading...</td></tr>
+        </tbody>
+      </table>
+      <div style="text-align:center;margin-top:8px">
+        <button class="q-btn q-btn-ghost q-btn-sm" id="auditLoadMore" onclick="loadAuditLog(true)" style="display:none">Load More</button>
+      </div>
+    </div>
+  </div>
+
 </main>
+
+<style>
+/* Platform stats boxes */
+.stat-box {
+  background: var(--surface-2, #1e1e22);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.stat-val {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-bright, #fafafa);
+  font-variant-numeric: tabular-nums;
+}
+.stat-lbl {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+/* Data tables */
+.q-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.q-table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.q-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text);
+  white-space: nowrap;
+}
+.q-table tr:hover td {
+  background: rgba(59,130,246,0.04);
+}
+.badge-role {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-admin { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-user { background: rgba(16,185,129,0.15); color: #34d399; }
+.badge-active { background: rgba(16,185,129,0.15); color: #34d399; }
+.badge-inactive { background: rgba(239,68,68,0.15); color: #f87171; }
+.badge-locked { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.badge-event {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+}
+.badge-event-success { background: rgba(16,185,129,0.12); color: #34d399; }
+.badge-event-fail { background: rgba(239,68,68,0.12); color: #f87171; }
+.badge-event-warn { background: rgba(245,158,11,0.12); color: #fbbf24; }
+.badge-event-info { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.action-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface-2, #1e1e22);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.action-btn:hover { border-color: var(--blue); color: var(--blue); }
+.action-btn-danger:hover { border-color: var(--red); color: var(--red); }
+</style>
 
 <script>
 function getCsrfToken() {
@@ -1504,13 +1667,172 @@ async function testProvider(pid) {
 }
 const AI_NAMES = { perplexity: 'Perplexity', nvidia: 'NVIDIA NIM' };
 
+// ----- Platform Data (Users, Stats, Audit) -----
+
+var _auditOffset = 0;
+var _auditEvents = [];
+
+async function loadPlatformData() {
+  try {
+    var r = await fetch('/api/admin/users', { credentials: 'same-origin' });
+    if (!r.ok) return;
+    var d = await r.json();
+    renderStats(d.stats || {});
+    renderUsers(d.users || []);
+  } catch(e) { console.warn('loadPlatformData:', e); }
+}
+
+function renderStats(s) {
+  document.getElementById('statUsers').textContent = s.total_users ?? '-';
+  document.getElementById('statSessions').textContent = s.active_sessions ?? '-';
+  document.getElementById('statTradesToday').textContent = s.trades_today ?? '-';
+  document.getElementById('statTotalTrades').textContent = s.total_trades ?? '-';
+  document.getElementById('statAutoTrades').textContent = s.auto_trades ?? '-';
+  document.getElementById('statLocked').textContent = s.locked_accounts ?? '0';
+  document.getElementById('statFailed24h').textContent = s.failed_logins_24h ?? '0';
+  // Color locked/failed counts
+  var lockedEl = document.getElementById('statLocked');
+  lockedEl.style.color = (s.locked_accounts > 0) ? 'var(--red)' : 'var(--green)';
+  var failEl = document.getElementById('statFailed24h');
+  failEl.style.color = (s.failed_logins_24h > 5) ? 'var(--red)' : (s.failed_logins_24h > 0) ? '#f59e0b' : 'var(--green)';
+}
+
+function renderUsers(users) {
+  var tbody = document.getElementById('usersBody');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-vdim)">No users found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(function(u) {
+    var roleBadge = u.role === 'admin'
+      ? '<span class="badge-role badge-admin">ADMIN</span>'
+      : '<span class="badge-role badge-user">USER</span>';
+
+    var statusBadge;
+    if (!u.is_active) {
+      statusBadge = '<span class="badge-role badge-inactive">INACTIVE</span>';
+    } else if (u.locked_until && u.locked_until > new Date().toISOString()) {
+      statusBadge = '<span class="badge-role badge-locked">LOCKED</span>';
+    } else {
+      statusBadge = '<span class="badge-role badge-active">ACTIVE</span>';
+    }
+
+    var failCount = u.failed_login_attempts || 0;
+    var failColor = failCount >= 5 ? 'var(--red)' : failCount > 0 ? '#f59e0b' : 'var(--text-dim)';
+
+    var actions = '';
+    if (u.locked_until) {
+      actions += '<button class="action-btn" onclick="unlockUser(' + u.id + ')">Unlock</button> ';
+    }
+    if (u.is_active && u.role !== 'admin') {
+      actions += '<button class="action-btn action-btn-danger" onclick="deactivateUser(' + u.id + ',\'' + u.username + '\')">Deactivate</button>';
+    }
+
+    var created = u.created_at ? u.created_at.replace('T',' ').slice(0,16) : '-';
+    var lastLogin = u.last_login ? u.last_login.replace('T',' ').slice(0,16) : 'Never';
+
+    return '<tr>'
+      + '<td>' + u.id + '</td>'
+      + '<td><strong>' + u.username + '</strong></td>'
+      + '<td>' + (u.email || '<span style="color:var(--text-vdim)">-</span>') + '</td>'
+      + '<td>' + roleBadge + '</td>'
+      + '<td>' + statusBadge + '</td>'
+      + '<td>' + created + '</td>'
+      + '<td>' + lastLogin + '</td>'
+      + '<td style="color:' + failColor + '">' + failCount + '</td>'
+      + '<td>' + (actions || '<span style="color:var(--text-vdim)">-</span>') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+async function unlockUser(uid) {
+  if (!confirm('Unlock this user account?')) return;
+  try {
+    var r = await fetch('/api/admin/unlock-user', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+      body: JSON.stringify({ user_id: uid })
+    });
+    if (r.ok) { showToast('User unlocked', 'ok'); loadPlatformData(); }
+    else { var d = await r.json(); showToast(d.error || 'Failed', 'err'); }
+  } catch(e) { showToast('Error: ' + e, 'err'); }
+}
+
+async function deactivateUser(uid, name) {
+  if (!confirm('Deactivate user "' + name + '"? They will be unable to log in.')) return;
+  try {
+    var r = await fetch('/api/admin/deactivate-user', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+      body: JSON.stringify({ user_id: uid })
+    });
+    if (r.ok) { showToast('User deactivated', 'ok'); loadPlatformData(); }
+    else { var d = await r.json(); showToast(d.error || 'Failed', 'err'); }
+  } catch(e) { showToast('Error: ' + e, 'err'); }
+}
+
+// ----- Audit Log -----
+
+async function loadAuditLog(loadMore) {
+  if (!loadMore) { _auditOffset = 0; _auditEvents = []; }
+  var filter = document.getElementById('auditFilter').value;
+  var url = '/api/admin/audit?limit=30&offset=' + _auditOffset;
+  if (filter) url += '&type=' + encodeURIComponent(filter);
+
+  try {
+    var r = await fetch(url, { credentials: 'same-origin' });
+    if (!r.ok) {
+      document.getElementById('auditBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--red)">Failed to load (' + r.status + ')</td></tr>';
+      return;
+    }
+    var d = await r.json();
+    var events = d.events || [];
+    _auditEvents = _auditEvents.concat(events);
+    _auditOffset += events.length;
+
+    renderAuditLog(_auditEvents);
+    document.getElementById('auditLoadMore').style.display = (events.length >= 30) ? '' : 'none';
+  } catch(e) {
+    document.getElementById('auditBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-vdim)">Error loading audit log</td></tr>';
+  }
+}
+
+function renderAuditLog(events) {
+  var tbody = document.getElementById('auditBody');
+  if (!events.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-vdim)">No audit events found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = events.map(function(e) {
+    var evClass = 'badge-event-info';
+    var type = e.event_type || '';
+    if (type.indexOf('SUCCESS') >= 0 || type === 'REGISTRATION') evClass = 'badge-event-success';
+    else if (type.indexOf('FAILED') >= 0 || type.indexOf('VIOLATION') >= 0) evClass = 'badge-event-fail';
+    else if (type.indexOf('LOCKED') >= 0 || type.indexOf('LIMITED') >= 0) evClass = 'badge-event-warn';
+
+    var time = e.created_at ? e.created_at.replace('T',' ').slice(0,19) : '-';
+
+    return '<tr>'
+      + '<td style="font-variant-numeric:tabular-nums">' + time + '</td>'
+      + '<td><span class="badge-event ' + evClass + '">' + type + '</span></td>'
+      + '<td style="font-family:monospace;font-size:12px">' + (e.ip_address || '-') + '</td>'
+      + '<td>' + (e.username || '-') + '</td>'
+      + '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--text-dim)">' + (e.details || '-') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
 // ----- Init -----
 loadStatus();
 loadSettings();
 loadAiSettings();
 loadLogs();
-// Auto-refresh status every 15s
+loadPlatformData();
+loadAuditLog();
+// Auto-refresh status + platform data every 15s
 setInterval(loadStatus, 15000);
+setInterval(loadPlatformData, 30000);
 </script>
 </body>
 </html>
