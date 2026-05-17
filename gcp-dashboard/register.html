@@ -1227,15 +1227,31 @@ input:-webkit-autofill:focus {
 
   passwordEl.addEventListener('input', function () {
     if (passwordEl.classList.contains('field-error')) { validatePassword(false); }
-    /* Live-update confirm mismatch error */
-    if (confirmPwEl.value && confirmPwEl.classList.contains('field-error')) {
-      validateConfirmPassword(false);
+    /* If confirm already matched but password changed, only clear confirm's valid state.
+       Don't re-show mismatch error while user is editing password field. */
+    if (confirmPwEl.value) {
+      if (confirmPwEl.value === passwordEl.value) {
+        clearFieldError(confirmPwEl, confirmPwErr);
+        setFieldValid(confirmPwEl);
+      } else if (confirmPwEl.classList.contains('field-valid')) {
+        /* Was valid but now mismatches — remove green but don't show red yet */
+        confirmPwEl.classList.remove('field-valid');
+      }
     }
     if (errorBanner.classList.contains('visible')) { hideError(); }
   });
 
   confirmPwEl.addEventListener('input', function () {
-    if (confirmPwEl.classList.contains('field-error')) { validateConfirmPassword(false); }
+    /* Only CLEAR the error while typing — don't re-show mismatch mid-keystroke */
+    if (confirmPwEl.classList.contains('field-error')) {
+      if (confirmPwEl.value === passwordEl.value) {
+        clearFieldError(confirmPwEl, confirmPwErr);
+        setFieldValid(confirmPwEl);
+      } else if (!confirmPwEl.value) {
+        clearFieldError(confirmPwEl, confirmPwErr);
+      }
+      /* Don't re-show "Passwords do not match" while user is still typing */
+    }
   });
 
   /* ── Banner helpers ─────────────────────────────────────────────────────── */
