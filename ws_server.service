@@ -1,0 +1,21 @@
+[Unit]
+Description=Quantra Terminal WebSocket Server
+After=network.target
+Wants=auth_proxy.service
+
+[Service]
+Type=simple
+User=amitkumar
+Group=amitkumar
+WorkingDirectory=/home/amitkumar/deploy
+ExecStart=/home/amitkumar/deploy/venv/bin/python3 /home/amitkumar/deploy/ws_server.py
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=5
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
