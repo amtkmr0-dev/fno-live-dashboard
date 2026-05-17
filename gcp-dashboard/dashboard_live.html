@@ -1122,6 +1122,24 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   color: var(--text-dim);
   flex-shrink: 0;
 }
+.compliance-bar {
+  background: var(--bg);
+  border-top: 1px solid rgba(255,255,255,0.03);
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.6;
+  color: #3f3f46;
+  flex-shrink: 0;
+}
+.compliance-bar a {
+  color: #52525b;
+  text-decoration: none;
+}
+.compliance-bar a:hover {
+  color: #71717a;
+  text-decoration: underline;
+}
 
 /* --- Toast (page-specific class for JS compat) --- */
 .toast {
@@ -1827,6 +1845,10 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   <span id="footerFilter">Showing all stocks</span>
   <span id="footerFresh">LTP: -- | OHLC: -- | Chain: --</span>
   <span id="footerConn">--</span>
+</div>
+<div class="compliance-bar">
+  Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
+  &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a>
 </div>
 
 <!-- Analysis Panel Overlay + Slide-out -->

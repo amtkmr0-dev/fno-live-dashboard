@@ -565,6 +565,33 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Compliance disclaimer footer */
+.compliance-footer {
+  margin-top: 24px;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  text-align: center;
+}
+.compliance-footer p {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #52525b;
+  margin-bottom: 6px;
+}
+.compliance-footer p:last-child { margin-bottom: 0; }
+.compliance-footer .compliance-links {
+  margin-top: 8px;
+  font-size: 10px;
+}
+.compliance-footer .compliance-links a {
+  color: #71717a;
+  text-decoration: none;
+}
+.compliance-footer .compliance-links a:hover {
+  color: #a1a1aa;
+  text-decoration: underline;
+}
+
 /* ── LOGO COMPONENT ──────────────────────────────────────────────────────── */
 .logo-block {
   display: flex;
@@ -1035,6 +1062,15 @@ input:-webkit-autofill:focus {
       </footer>
 
     </div><!-- /card -->
+
+    <!-- SEBI Compliance Disclaimer -->
+    <div class="compliance-footer">
+      <p>Investment in securities market are subject to market risks. Read all the related documents carefully before investing.</p>
+      <p>The securities quoted/displayed are for illustration only and are not recommendatory. Past performance does not guarantee future returns.</p>
+      <p>Trading in derivatives is extremely risky and can result in loss of your entire capital. QUANTRA Terminal provides analytics tools for informational and educational purposes only. It does not constitute investment advice, solicitation, or recommendation to buy or sell any security.</p>
+      <p class="compliance-links"><a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a></p>
+    </div>
+
   </main><!-- /right-panel -->
 
 </div><!-- /app -->
