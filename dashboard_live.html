@@ -1060,30 +1060,70 @@ body {
 .view-presets .btn-toggle { font-size: 10px; padding: 4px 8px; }
 
 /* --- Sector Heatmap --- */
+/* ===== Sector Heatmap Bar — treemap style ===== */
 .heatmap-bar {
-  background: var(--bg);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  padding: 6px 16px;
+  background: rgba(9,9,11,0.85);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 8px 16px;
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  gap: 3px;
+  flex-wrap: nowrap;
   flex-shrink: 0;
+  overflow-x: auto;
+  min-height: 56px;
+  align-items: stretch;
 }
+.heatmap-bar::-webkit-scrollbar { height: 3px; }
+.heatmap-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .heatmap-bar.collapsed { display: none; }
 .heat-cell {
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   font-size: 10px;
-  font-weight: var(--fw-semibold);
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: all 0.18s;
   text-align: center;
-  min-width: 60px;
+  min-width: 56px;
   line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+  flex-shrink: 0;
 }
-.heat-cell:hover { transform: scale(1.05); }
-.heat-cell .h-name { display: block; }
-.heat-cell .h-val { display: block; font-weight: var(--fw-normal); font-size: 9px; opacity: 0.8; }
+.heat-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.1);
+  z-index: 1;
+}
+.heat-cell .h-name {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.heat-cell .h-count {
+  display: block;
+  font-size: 8px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+  margin-top: 1px;
+}
+.heat-cell .h-val {
+  display: block;
+  font-weight: 700;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  margin-top: 2px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
 
 /* --- Top Picks Bar --- */
 /* --- Top Picks / Recommended Picks --- */
@@ -1218,16 +1258,45 @@ thead th.sort-desc::after { content: " \25BC"; font-size: 8px; color: var(--blue
 thead th.col-sym, thead th.col-sector { text-align: left; }
 thead th.col-score { text-align: center; }
 
-/* Column group header row */
+/* Column group left-border separators — first column of each group */
+th[data-key="gap_pct"] { border-left: 2px solid rgba(59,130,246,0.18) !important; }
+th[data-key="vol"] { border-left: 2px solid rgba(168,85,247,0.18) !important; }
+th[data-key="pcr"] { border-left: 2px solid rgba(245,158,11,0.18) !important; }
+th[data-key="atm_iv"] { border-left: 2px solid rgba(16,185,129,0.18) !important; }
+/* Body cells: 9th col (gap%) = pricedetail, 14th (vol) = volume, 16th (pcr) = OI, 20th (iv) = options */
+td:nth-child(9) { border-left: 2px solid rgba(59,130,246,0.08) !important; }
+td:nth-child(14) { border-left: 2px solid rgba(168,85,247,0.08) !important; }
+td:nth-child(16) { border-left: 2px solid rgba(245,158,11,0.08) !important; }
+td:nth-child(20) { border-left: 2px solid rgba(16,185,129,0.08) !important; }
+
+/* Column group header row — colored accent underlines per group */
 .col-group-row th {
-  background: var(--bg);
-  padding: 3px 6px;
+  background: rgba(9,9,11,0.98);
+  padding: 5px 8px 6px;
   font-size: 9px;
-  color: rgba(255,255,255,0.25);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
   text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 2px solid rgba(255,255,255,0.06);
   cursor: default;
-  font-weight: var(--fw-semibold);
+}
+.col-group-row th.g-pricedetail {
+  color: rgba(59,130,246,0.7);
+  border-bottom-color: rgba(59,130,246,0.35);
+}
+.col-group-row th.g-vol {
+  color: rgba(168,85,247,0.7);
+  border-bottom-color: rgba(168,85,247,0.35);
+}
+.col-group-row th.g-oi {
+  color: rgba(245,158,11,0.7);
+  border-bottom-color: rgba(245,158,11,0.35);
+}
+.col-group-row th.g-opt {
+  color: rgba(16,185,129,0.7);
+  border-bottom-color: rgba(16,185,129,0.35);
 }
 .col-group-header { /* JS references this class */ }
 
@@ -2466,11 +2535,13 @@ thead th.sort-desc::after {
   transition: color 0.2s;
 }
 
-/* Column group header */
+/* Column group header — premium polish (preserve group accent colors) */
 .col-group-row th {
   background: linear-gradient(180deg, rgba(14,14,17,0.99), rgba(12,12,15,0.99)) !important;
+}
+.col-group-row th:not(.g-pricedetail):not(.g-vol):not(.g-oi):not(.g-opt) {
   color: rgba(255,255,255,0.2) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  border-bottom: 2px solid rgba(255,255,255,0.05) !important;
 }
 
 /* Row hover — left border accent + smooth transition */
@@ -3572,24 +3643,39 @@ function toggleHeatmap() {
 function renderHeatmap() {
   const bar = document.getElementById('heatmapBar');
   const sectorData = {};
+  let totalStocks = 0;
   for (const sym of Object.keys(stocks)) {
     const d = stocks[sym];
     const sec = d.sector || '-';
     if (!sectorData[sec]) sectorData[sec] = { count: 0, chgSum: 0, chgCount: 0 };
     sectorData[sec].count++;
+    totalStocks++;
     if (d.chg_pct) { sectorData[sec].chgSum += d.chg_pct; sectorData[sec].chgCount++; }
   }
-  const sorted = Object.entries(sectorData).sort((a, b) => b[1].count - a[1].count);
+  const sorted = Object.entries(sectorData)
+    .filter(([sec]) => sec !== '-')
+    .sort((a, b) => b[1].count - a[1].count);
   bar.innerHTML = '';
   for (const [sec, data] of sorted) {
-    if (sec === '-') continue;
     const avg = data.chgCount > 0 ? data.chgSum / data.chgCount : 0;
     const cell = document.createElement('div');
     cell.className = 'heat-cell';
-    const intensity = Math.min(Math.abs(avg) * 15, 40);
-    const hue = avg >= 0 ? '160' : '0';
-    cell.style.background = `hsla(${hue}, 60%, 50%, ${(intensity / 100).toFixed(2)})`;
-    cell.innerHTML = `<span class="h-name">${sec} (${data.count})</span><span class="h-val">${avg >= 0 ? '+' : ''}${avg.toFixed(1)}%</span>`;
+    // Proportional width based on stock count (min 56px, scale with count)
+    const widthPct = Math.max(56, (data.count / totalStocks) * 800);
+    cell.style.minWidth = widthPct + 'px';
+    // Color: green for positive, red for negative, intensity by magnitude
+    const absAvg = Math.abs(avg);
+    const alpha = Math.min(0.12 + absAvg * 0.12, 0.55);
+    if (avg >= 0.05) {
+      cell.style.background = 'rgba(16,185,129,' + alpha.toFixed(2) + ')';
+    } else if (avg <= -0.05) {
+      cell.style.background = 'rgba(239,68,68,' + alpha.toFixed(2) + ')';
+    } else {
+      cell.style.background = 'rgba(255,255,255,0.04)';
+    }
+    const sign = avg >= 0 ? '+' : '';
+    const valColor = avg >= 0.05 ? '#34d399' : avg <= -0.05 ? '#f87171' : 'var(--text-dim)';
+    cell.innerHTML = '<span class="h-name">' + sec + '</span><span class="h-count">' + data.count + ' stocks</span><span class="h-val" style="color:' + valColor + '">' + sign + avg.toFixed(2) + '%</span>';
     cell.onclick = () => {
       document.getElementById('sectorFilter').value = sec;
       filters.sector = sec;
