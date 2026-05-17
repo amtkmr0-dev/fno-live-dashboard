@@ -655,19 +655,19 @@ a:hover { text-decoration: underline; }
   .q-stats-row { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* User dropdown */
+/* User dropdown — CSS-driven, no JS needed */
 .user-dropdown {
   position: relative;
   margin-left: 12px;
   flex-shrink: 0;
 }
 .user-avatar-btn {
-  height: 30px;
+  height: 32px;
   border-radius: 6px;
   background: rgba(255,255,255,0.06);
   border: 1px solid var(--border);
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   font-family: var(--font-sans);
   cursor: pointer;
@@ -675,14 +675,14 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 0 12px;
+  padding: 0 14px;
   transition: all 0.15s;
   line-height: 1;
   white-space: nowrap;
 }
 .user-avatar-btn::after {
   content: '\25BE';
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
   margin-left: 2px;
 }
@@ -691,7 +691,12 @@ a:hover { text-decoration: underline; }
   border-color: var(--border-light);
   color: var(--text-bright);
 }
-.user-avatar-btn.open {
+/* CSS-only dropdown: show on focus-within OR .show class */
+.user-dropdown:focus-within .user-menu,
+.user-menu.show {
+  display: block;
+}
+.user-dropdown:focus-within .user-avatar-btn {
   background: rgba(59,130,246,0.1);
   border-color: var(--blue);
   color: var(--text-bright);
@@ -702,18 +707,12 @@ a:hover { text-decoration: underline; }
   top: calc(100% + 8px);
   right: 0;
   min-width: 200px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #1a1a1f;
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 10px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
-  z-index: 200;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+  z-index: 9999;
   padding: 6px 0;
-  animation: menuSlide 0.15s ease;
-}
-.user-menu.show { display: block; }
-@keyframes menuSlide {
-  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .user-menu a {
   display: flex;
@@ -742,7 +741,7 @@ a:hover { text-decoration: underline; }
 }
 .user-menu .menu-divider {
   height: 1px;
-  background: var(--border);
+  background: rgba(255,255,255,0.08);
   margin: 6px 0;
 }
 .user-menu .menu-logout:hover {
@@ -896,14 +895,15 @@ body {
 /* --- Top Picks Bar --- */
 /* --- Top Picks / Recommended Picks --- */
 .top-picks-bar {
-  background: var(--bg);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  padding: 8px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
   display: flex;
   gap: 10px;
-  align-items: stretch;
+  align-items: center;
   flex-shrink: 0;
   overflow-x: auto;
+  min-height: 48px;
 }
 .top-picks-bar::-webkit-scrollbar { height: 4px; }
 .top-picks-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
