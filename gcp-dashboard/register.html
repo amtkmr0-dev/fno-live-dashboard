@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTRA Terminal — Create Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & tokens ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+:root {
+  --bg:           #09090b;
+  --surface:      #18181b;
+  --border:       #27272a;
+  --border-focus: #3b82f6;
+  --text:         #fafafa;
+  --text-dim:     #a1a1aa;
+  --blue:         #3b82f6;
+  --blue-hover:   #2563eb;
+  --green:        #10b981;
+  --red:          #ef4444;
+  --font:         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Background layer ────────────────────────────────────────────────────── */
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Subtle grid */
+.bg-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Radial glow — behind right panel */
+.bg-layer::after {
+  content: '';
+  position: absolute;
+  right: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* Floating CSS-only particles */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--blue);
+  border-radius: 50%;
+  opacity: 0;
+  animation: float-up linear infinite;
+}
+.particle:nth-child(1)  { left:  8%; animation-duration: 18s; animation-delay:  0s; }
+.particle:nth-child(2)  { left: 17%; animation-duration: 22s; animation-delay:  3s; }
+.particle:nth-child(3)  { left: 26%; animation-duration: 16s; animation-delay:  7s; }
+.particle:nth-child(4)  { left: 38%; animation-duration: 24s; animation-delay:  1s; }
+.particle:nth-child(5)  { left: 51%; animation-duration: 20s; animation-delay:  5s; }
+.particle:nth-child(6)  { left: 63%; animation-duration: 17s; animation-delay:  9s; }
+.particle:nth-child(7)  { left: 74%; animation-duration: 23s; animation-delay:  2s; }
+.particle:nth-child(8)  { left: 85%; animation-duration: 19s; animation-delay: 11s; }
+.particle:nth-child(9)  { left: 92%; animation-duration: 21s; animation-delay:  6s; }
+.particle:nth-child(10) { left: 45%; animation-duration: 25s; animation-delay: 14s; }
+
+@keyframes float-up {
+  0%   { bottom: -5%; opacity: 0; transform: translateX(0); }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.3; }
+  100% { bottom: 105%; opacity: 0; transform: translateX(20px); }
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.app {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ── LEFT PANEL ──────────────────────────────────────────────────────────── */
+.left-panel {
+  display: none;
+  width: 45%;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, rgba(24,24,27,0.95) 0%, rgba(9,9,11,0.98) 100%);
+  border-right: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 60px 56px;
+}
+
+/* Animated left-edge glow line */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  width: 2px;
+  height: 70%;
+  background: linear-gradient(180deg, transparent, var(--blue), #06b6d4, var(--blue), transparent);
+  animation: pulse-line 4s ease-in-out infinite;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 12px rgba(59,130,246,0.5);
+}
+
+@keyframes pulse-line {
+  0%, 100% { opacity: 0.3; box-shadow: 0 0 8px rgba(59,130,246,0.3); }
+  50%       { opacity: 0.9; box-shadow: 0 0 20px rgba(59,130,246,0.7); }
+}
+
+/* Top-right decorative circuit lines */
+.left-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background:
+    linear-gradient(rgba(59,130,246,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at top right, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at top right, black 30%, transparent 80%);
+}
+
+.left-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 48px;
+  max-width: 340px;
+}
+
+.tagline {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: -32px;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.feature-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--blue);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.feature-text h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.feature-text p {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.left-decoration {
+  position: absolute;
+  bottom: 40px;
+  left: 56px;
+  right: 56px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* Decorative mini chart in the background of left panel */
+.bg-chart {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+/* ── RIGHT PANEL ─────────────────────────────────────────────────────────── */
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+}
+
+/* ── FORM CARD ───────────────────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 460px;
+  background: rgba(24, 24, 27, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 40px 36px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.03),
+    0 20px 60px rgba(0,0,0,0.5),
+    0 0 80px rgba(59,130,246,0.04);
+  animation: card-in 0.4s ease-out both;
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile logo (inside card, only on small screens) */
+.mobile-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.card-header {
+  margin-bottom: 24px;
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* ── Error banner ────────────────────────────────────────────────────────── */
+.banner {
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.45;
+}
+.banner.visible { display: flex; }
+
+.banner-error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #f87171;
+}
+
+.banner svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%  { transform: translateX(-6px); }
+  30%  { transform: translateX(6px); }
+  45%  { transform: translateX(-4px); }
+  60%  { transform: translateX(4px); }
+  75%  { transform: translateX(-2px); }
+  90%  { transform: translateX(2px); }
+}
+.shake { animation: shake 0.5s ease-out; }
+
+/* ── Form fields ─────────────────────────────────────────────────────────── */
+.form { display: flex; flex-direction: column; gap: 14px; }
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.label-optional {
+  font-size: 10px;
+  font-weight: 500;
+  color: #52525b;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--text-dim);
+}
+
+.input-prefix svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.input-field {
+  width: 100%;
+  height: 46px;
+  background: rgba(9,9,11,0.6);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 400;
+  padding: 0 14px 0 40px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input-field::placeholder { color: #52525b; }
+
+.input-field:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+
+/* Field error state */
+.input-field.field-error {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+
+/* Field valid state */
+.input-field.field-valid {
+  border-color: rgba(16,185,129,0.5);
+}
+
+/* Password suffix (eye toggle) */
+.input-suffix {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  transition: color 0.15s;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+}
+.input-suffix:hover { color: var(--text); }
+.input-suffix svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Password field needs right padding for the eye icon */
+.input-field.has-suffix { padding-right: 46px; }
+
+/* ── Field hint / inline error ───────────────────────────────────────────── */
+.field-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+  padding-left: 2px;
+}
+
+.field-inline-error {
+  display: none;
+  font-size: 11px;
+  color: #f87171;
+  line-height: 1.4;
+  padding-left: 2px;
+  font-weight: 500;
+}
+.field-inline-error.visible { display: block; }
+
+/* ── Submit button ───────────────────────────────────────────────────────── */
+.btn-submit {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-hover) 100%);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(59,130,246,0.4);
+}
+
+.btn-submit:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.2);
+}
+
+.btn-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+.spinner.visible { display: block; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Card footer ─────────────────────────────────────────────────────────── */
+.card-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 20px;
+}
+
+.card-footer a {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.card-footer a:hover { color: #60a5fa; }
+
+.version-tag {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #3f3f46;
+  letter-spacing: 0.5px;
+}
+
+/* ── LOGO COMPONENT ──────────────────────────────────────────────────────── */
+.logo-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  gap: 2px;
+}
+
+.logo-name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.logo-sub {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(59,130,246,0.3)); }
+  50%       { filter: drop-shadow(0 0 12px rgba(59,130,246,0.6)) drop-shadow(0 0 20px rgba(6,182,212,0.3)); }
+}
+
+.logo-mark {
+  animation: logo-glow 4s ease-in-out infinite;
+}
+
+/* ── Desktop layout ──────────────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  .left-panel {
+    display: flex;
+  }
+
+  .mobile-logo {
+    display: none;
+  }
+
+  .right-panel {
+    padding: 48px 64px;
+    overflow-y: auto;
+    align-items: flex-start;
+  }
+
+  .right-panel > .card {
+    margin: auto;
+  }
+}
+
+/* ── Mobile tweaks ───────────────────────────────────────────────────────── */
+@media (max-width: 899px) {
+  body { overflow-y: auto; }
+
+  .right-panel {
+    padding: 32px 16px 48px;
+    align-items: flex-start;
+    padding-top: 48px;
+  }
+
+  .card {
+    padding: 32px 24px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 440px) {
+  .card {
+    padding: 28px 18px;
+  }
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+/* Input autofill override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px #0d0d10 inset;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: var(--text);
+}
+</style>
+</head>
+<body>
+
+<!-- Background effects -->
+<div class="bg-layer" aria-hidden="true"></div>
+<div class="particles" aria-hidden="true">
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+</div>
+
+<div class="app">
+
+  <!-- ── LEFT PANEL ──────────────────────────────────────────────────────── -->
+  <aside class="left-panel" aria-label="Product features">
+
+    <svg class="bg-chart" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <polyline points="0,120 40,95 80,110 120,60 160,80 200,40 240,55 280,20 320,45 360,30 400,50"
+        fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+      <polyline points="0,140 40,130 80,145 120,110 160,125 200,90 240,105 280,70 320,88 360,72 400,85"
+        fill="none" stroke="#06b6d4" stroke-width="1" stroke-dasharray="4 3"/>
+    </svg>
+
+    <div class="left-content">
+
+      <!-- Logo (desktop left panel) -->
+      <div class="logo-block">
+        <svg class="logo-mark" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="QUANTRA mark">
+          <defs>
+            <linearGradient id="mark-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+            <linearGradient id="mark-grad2" x1="64" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.2"/>
+            </linearGradient>
+          </defs>
+          <!-- Outer Q circle arc (open at bottom-right) -->
+          <path d="M32 8 C18.7 8 8 18.7 8 32 C8 45.3 18.7 56 32 56 C38.8 56 45 53.3 49.5 48.8"
+            stroke="url(#mark-grad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- Q tail -->
+          <line x1="44" y1="44" x2="56" y2="57" stroke="url(#mark-grad)" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- Candlestick body 1 -->
+          <rect x="20" y="26" width="5" height="12" rx="1" fill="url(#mark-grad)" opacity="0.9"/>
+          <line x1="22.5" y1="22" x2="22.5" y2="26" stroke="url(#mark-grad)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="22.5" y1="38" x2="22.5" y2="42" stroke="url(#mark-grad)" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Candlestick body 2 -->
+          <rect x="29" y="20" width="5" height="16" rx="1" fill="url(#mark-grad)" opacity="0.75"/>
+          <line x1="31.5" y1="16" x2="31.5" y2="20" stroke="url(#mark-grad)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="31.5" y1="36" x2="31.5" y2="40" stroke="url(#mark-grad)" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Candlestick body 3 -->
+          <rect x="38" y="28" width="5" height="10" rx="1" fill="url(#mark-grad2)" opacity="0.8"/>
+          <line x1="40.5" y1="24" x2="40.5" y2="28" stroke="url(#mark-grad)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="40.5" y1="38" x2="40.5" y2="42" stroke="url(#mark-grad)" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Trend line -->
+          <polyline points="22.5,22 31.5,16 40.5,24" fill="none" stroke="#06b6d4" stroke-width="1.2"
+            stroke-dasharray="2 2" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+
+        <div class="logo-wordmark">
+          <span class="logo-name">QUANTRA</span>
+          <span class="logo-sub">Terminal</span>
+        </div>
+      </div>
+
+      <p class="tagline">Institutional-Grade F&amp;O Analytics</p>
+
+      <!-- Feature bullets -->
+      <div class="features">
+
+        <div class="feature-item">
+          <div class="feature-icon" aria-hidden="true">
+            <!-- Chart / options flow icon -->
+            <svg viewBox="0 0 24 24">
+              <polyline points="2,18 8,12 13,16 22,6"/>
+              <polyline points="16,6 22,6 22,12"/>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <h3>Real-time Options Flow</h3>
+            <p>Live NSE/BSE order book with multi-strike OI tracking</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon" aria-hidden="true">
+            <!-- AI / spark icon -->
+            <svg viewBox="0 0 24 24">
+              <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <h3>AI-Powered Trade Signals</h3>
+            <p>ML-driven signal engine across Nifty, BankNifty &amp; stocks</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon" aria-hidden="true">
+            <!-- Clock / timeframe icon -->
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <h3>Multi-Timeframe Analysis</h3>
+            <p>Seamless 1m–W timeframe sync with custom alerts</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /left-content -->
+
+    <div class="left-decoration" aria-hidden="true"></div>
+  </aside><!-- /left-panel -->
+
+  <!-- ── RIGHT PANEL ─────────────────────────────────────────────────────── -->
+  <main class="right-panel">
+    <div class="card" role="main">
+
+      <!-- Mobile-only logo -->
+      <div class="mobile-logo" aria-label="QUANTRA Terminal">
+        <svg class="logo-mark" width="52" height="52" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mark-grad-m" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+            <linearGradient id="mark-grad2-m" x1="64" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.2"/>
+            </linearGradient>
+          </defs>
+          <path d="M32 8 C18.7 8 8 18.7 8 32 C8 45.3 18.7 56 32 56 C38.8 56 45 53.3 49.5 48.8"
+            stroke="url(#mark-grad-m)" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <line x1="44" y1="44" x2="56" y2="57" stroke="url(#mark-grad-m)" stroke-width="3.5" stroke-linecap="round"/>
+          <rect x="20" y="26" width="5" height="12" rx="1" fill="url(#mark-grad-m)" opacity="0.9"/>
+          <line x1="22.5" y1="22" x2="22.5" y2="26" stroke="url(#mark-grad-m)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="22.5" y1="38" x2="22.5" y2="42" stroke="url(#mark-grad-m)" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="29" y="20" width="5" height="16" rx="1" fill="url(#mark-grad-m)" opacity="0.75"/>
+          <line x1="31.5" y1="16" x2="31.5" y2="20" stroke="url(#mark-grad-m)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="31.5" y1="36" x2="31.5" y2="40" stroke="url(#mark-grad-m)" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="38" y="28" width="5" height="10" rx="1" fill="url(#mark-grad2-m)" opacity="0.8"/>
+          <line x1="40.5" y1="24" x2="40.5" y2="28" stroke="url(#mark-grad-m)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="40.5" y1="38" x2="40.5" y2="42" stroke="url(#mark-grad-m)" stroke-width="1.5" stroke-linecap="round"/>
+          <polyline points="22.5,22 31.5,16 40.5,24" fill="none" stroke="#06b6d4" stroke-width="1.2"
+            stroke-dasharray="2 2" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+        <div class="logo-wordmark" style="margin-top:8px;">
+          <span class="logo-name">QUANTRA</span>
+          <span class="logo-sub">Terminal</span>
+        </div>
+      </div>
+
+      <!-- Card header -->
+      <div class="card-header">
+        <h1 class="card-title">Create Account</h1>
+        <p class="card-subtitle">Join QUANTRA Terminal</p>
+      </div>
+
+      <!-- Error banner -->
+      <div id="error-banner" class="banner banner-error" role="alert" aria-live="assertive">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="error-text">An error occurred. Please try again.</span>
+      </div>
+
+      <!-- Registration form -->
+      <form class="form" id="register-form" novalidate>
+
+        <!-- Display Name -->
+        <div class="field-group">
+          <label class="field-label" for="display-name">Display Name</label>
+          <div class="input-wrap">
+            <span class="input-prefix" aria-hidden="true">
+              <!-- User icon -->
+              <svg viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <input
+              class="input-field"
+              type="text"
+              id="display-name"
+              name="display_name"
+              placeholder="Your full name"
+              autocomplete="name"
+              spellcheck="false"
+              required
+              aria-required="true"
+              aria-describedby="display-name-error"
+            >
+          </div>
+          <span class="field-inline-error" id="display-name-error" role="alert"></span>
+        </div>
+
+        <!-- Username -->
+        <div class="field-group">
+          <label class="field-label" for="username">Username</label>
+          <div class="input-wrap">
+            <span class="input-prefix" aria-hidden="true">
+              <!-- At-sign icon -->
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>
+              </svg>
+            </span>
+            <input
+              class="input-field"
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Choose a username"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+              required
+              aria-required="true"
+              aria-describedby="username-hint username-error"
+            >
+          </div>
+          <span class="field-hint" id="username-hint">3–30 characters, letters, numbers, underscore</span>
+          <span class="field-inline-error" id="username-error" role="alert"></span>
+        </div>
+
+        <!-- Email (optional) -->
+        <div class="field-group">
+          <label class="field-label" for="email">
+            Email
+            <span class="label-optional">(optional)</span>
+          </label>
+          <div class="input-wrap">
+            <span class="input-prefix" aria-hidden="true">
+              <!-- Mail icon -->
+              <svg viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+            <input
+              class="input-field"
+              type="email"
+              id="email"
+              name="email"
+              placeholder="your@email.com"
+              autocomplete="email"
+              spellcheck="false"
+              aria-describedby="email-error"
+            >
+          </div>
+          <span class="field-inline-error" id="email-error" role="alert"></span>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <label class="field-label" for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-prefix" aria-hidden="true">
+              <!-- Lock icon -->
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input
+              class="input-field has-suffix"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+              aria-required="true"
+              aria-describedby="password-hint password-error"
+            >
+            <button
+              type="button"
+              class="input-suffix"
+              id="pw-toggle"
+              aria-label="Show password"
+              title="Toggle password visibility"
+            >
+              <svg id="pw-eye-open" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg id="pw-eye-closed" viewBox="0 0 24 24" style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <span class="field-hint" id="password-hint">Minimum 8 characters with uppercase, lowercase, and number</span>
+          <span class="field-inline-error" id="password-error" role="alert"></span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="field-group">
+          <label class="field-label" for="confirm-password">Confirm Password</label>
+          <div class="input-wrap">
+            <span class="input-prefix" aria-hidden="true">
+              <!-- Lock icon -->
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input
+              class="input-field has-suffix"
+              type="password"
+              id="confirm-password"
+              name="confirm_password"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+              required
+              aria-required="true"
+              aria-describedby="confirm-password-error"
+            >
+            <button
+              type="button"
+              class="input-suffix"
+              id="cpw-toggle"
+              aria-label="Show confirm password"
+              title="Toggle password visibility"
+            >
+              <svg id="cpw-eye-open" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg id="cpw-eye-closed" viewBox="0 0 24 24" style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <span class="field-inline-error" id="confirm-password-error" role="alert"></span>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" id="submit-btn">
+          <div class="spinner" id="spinner" aria-hidden="true"></div>
+          <span id="btn-label">Create Account</span>
+        </button>
+
+      </form><!-- /form -->
+
+      <!-- Footer -->
+      <footer class="card-footer">
+        <span>Already have an account? <a href="/login">Sign in</a></span>
+        <span class="version-tag">QUANTRA Terminal &nbsp;v2.0</span>
+      </footer>
+
+    </div><!-- /card -->
+  </main><!-- /right-panel -->
+
+</div><!-- /app -->
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Elements ──────────────────────────────────────────────────────────── */
+  var form            = document.getElementById('register-form');
+  var displayNameEl   = document.getElementById('display-name');
+  var usernameEl      = document.getElementById('username');
+  var emailEl         = document.getElementById('email');
+  var passwordEl      = document.getElementById('password');
+  var confirmPwEl     = document.getElementById('confirm-password');
+  var submitBtn       = document.getElementById('submit-btn');
+  var btnLabel        = document.getElementById('btn-label');
+  var spinner         = document.getElementById('spinner');
+  var errorBanner     = document.getElementById('error-banner');
+  var errorText       = document.getElementById('error-text');
+
+  /* Password toggle elements */
+  var pwToggle        = document.getElementById('pw-toggle');
+  var pwEyeOpen       = document.getElementById('pw-eye-open');
+  var pwEyeClosed     = document.getElementById('pw-eye-closed');
+  var cpwToggle       = document.getElementById('cpw-toggle');
+  var cpwEyeOpen      = document.getElementById('cpw-eye-open');
+  var cpwEyeClosed    = document.getElementById('cpw-eye-closed');
+
+  /* Inline error elements */
+  var displayNameErr  = document.getElementById('display-name-error');
+  var usernameErr     = document.getElementById('username-error');
+  var emailErr        = document.getElementById('email-error');
+  var passwordErr     = document.getElementById('password-error');
+  var confirmPwErr    = document.getElementById('confirm-password-error');
+
+  /* ── Password toggles ──────────────────────────────────────────────────── */
+  function makeToggle(btn, inputEl, eyeOpen, eyeClosed) {
+    btn.addEventListener('click', function () {
+      var isPassword = inputEl.type === 'password';
+      inputEl.type = isPassword ? 'text' : 'password';
+      eyeOpen.style.display   = isPassword ? 'none' : '';
+      eyeClosed.style.display = isPassword ? '' : 'none';
+      btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      inputEl.focus();
+    });
+  }
+  makeToggle(pwToggle,  passwordEl,  pwEyeOpen,  pwEyeClosed);
+  makeToggle(cpwToggle, confirmPwEl, cpwEyeOpen, cpwEyeClosed);
+
+  /* ── Validation helpers ────────────────────────────────────────────────── */
+  var USERNAME_RE = /^[a-zA-Z0-9_]{3,30}$/;
+  var PW_UPPER_RE = /[A-Z]/;
+  var PW_LOWER_RE = /[a-z]/;
+  var PW_NUM_RE   = /[0-9]/;
+
+  function setFieldError(inputEl, errEl, message) {
+    inputEl.classList.add('field-error');
+    inputEl.classList.remove('field-valid');
+    errEl.textContent = message;
+    errEl.classList.add('visible');
+    return false;
+  }
+
+  function clearFieldError(inputEl, errEl) {
+    inputEl.classList.remove('field-error');
+    errEl.textContent = '';
+    errEl.classList.remove('visible');
+  }
+
+  function setFieldValid(inputEl) {
+    inputEl.classList.remove('field-error');
+    inputEl.classList.add('field-valid');
+  }
+
+  /* ── Individual validators ─────────────────────────────────────────────── */
+  function validateDisplayName(markValid) {
+    var val = displayNameEl.value.trim();
+    if (!val) {
+      return setFieldError(displayNameEl, displayNameErr, 'Display name is required.');
+    }
+    clearFieldError(displayNameEl, displayNameErr);
+    if (markValid) setFieldValid(displayNameEl);
+    return true;
+  }
+
+  function validateUsername(markValid) {
+    var val = usernameEl.value.trim();
+    if (!val) {
+      return setFieldError(usernameEl, usernameErr, 'Username is required.');
+    }
+    if (val.length < 3) {
+      return setFieldError(usernameEl, usernameErr, 'Username must be at least 3 characters.');
+    }
+    if (val.length > 30) {
+      return setFieldError(usernameEl, usernameErr, 'Username must be 30 characters or fewer.');
+    }
+    if (!USERNAME_RE.test(val)) {
+      return setFieldError(usernameEl, usernameErr, 'Only letters, numbers, and underscores allowed.');
+    }
+    clearFieldError(usernameEl, usernameErr);
+    if (markValid) setFieldValid(usernameEl);
+    return true;
+  }
+
+  function validateEmail(markValid) {
+    var val = emailEl.value.trim();
+    if (!val) {
+      /* Optional field — always passes when empty */
+      clearFieldError(emailEl, emailErr);
+      return true;
+    }
+    /* Loose RFC check: must have @ with chars on both sides and a dot after @ */
+    if (val.indexOf('@') < 1 || val.lastIndexOf('.') <= val.indexOf('@') + 1) {
+      return setFieldError(emailEl, emailErr, 'Please enter a valid email address.');
+    }
+    clearFieldError(emailEl, emailErr);
+    if (markValid) setFieldValid(emailEl);
+    return true;
+  }
+
+  function validatePassword(markValid) {
+    var val = passwordEl.value;
+    if (!val) {
+      return setFieldError(passwordEl, passwordErr, 'Password is required.');
+    }
+    if (val.length < 8) {
+      return setFieldError(passwordEl, passwordErr, 'Password must be at least 8 characters.');
+    }
+    if (!PW_UPPER_RE.test(val)) {
+      return setFieldError(passwordEl, passwordErr, 'Password must include at least one uppercase letter.');
+    }
+    if (!PW_LOWER_RE.test(val)) {
+      return setFieldError(passwordEl, passwordErr, 'Password must include at least one lowercase letter.');
+    }
+    if (!PW_NUM_RE.test(val)) {
+      return setFieldError(passwordEl, passwordErr, 'Password must include at least one number.');
+    }
+    clearFieldError(passwordEl, passwordErr);
+    if (markValid) setFieldValid(passwordEl);
+    return true;
+  }
+
+  function validateConfirmPassword(markValid) {
+    var val = confirmPwEl.value;
+    if (!val) {
+      return setFieldError(confirmPwEl, confirmPwErr, 'Please confirm your password.');
+    }
+    if (val !== passwordEl.value) {
+      return setFieldError(confirmPwEl, confirmPwErr, 'Passwords do not match.');
+    }
+    clearFieldError(confirmPwEl, confirmPwErr);
+    if (markValid) setFieldValid(confirmPwEl);
+    return true;
+  }
+
+  /* ── Real-time validation on blur ──────────────────────────────────────── */
+  displayNameEl.addEventListener('blur',  function () { validateDisplayName(true); });
+  usernameEl.addEventListener('blur',     function () { validateUsername(true); });
+  emailEl.addEventListener('blur',        function () { validateEmail(true); });
+  passwordEl.addEventListener('blur',     function () {
+    validatePassword(true);
+    /* Re-validate confirm if already touched */
+    if (confirmPwEl.value) { validateConfirmPassword(true); }
+  });
+  confirmPwEl.addEventListener('blur',    function () { validateConfirmPassword(true); });
+
+  /* Real-time clearing as user corrects each field */
+  displayNameEl.addEventListener('input', function () {
+    if (displayNameEl.classList.contains('field-error') && displayNameEl.value.trim()) {
+      clearFieldError(displayNameEl, displayNameErr);
+    }
+  });
+
+  usernameEl.addEventListener('input', function () {
+    if (usernameEl.classList.contains('field-error')) {
+      if (USERNAME_RE.test(usernameEl.value.trim())) {
+        clearFieldError(usernameEl, usernameErr);
+        setFieldValid(usernameEl);
+      }
+    }
+    if (errorBanner.classList.contains('visible')) { hideError(); }
+  });
+
+  emailEl.addEventListener('input', function () {
+    if (emailEl.classList.contains('field-error') && !emailEl.value.trim()) {
+      clearFieldError(emailEl, emailErr);
+    }
+  });
+
+  passwordEl.addEventListener('input', function () {
+    if (passwordEl.classList.contains('field-error')) { validatePassword(false); }
+    /* Live-update confirm mismatch error */
+    if (confirmPwEl.value && confirmPwEl.classList.contains('field-error')) {
+      validateConfirmPassword(false);
+    }
+    if (errorBanner.classList.contains('visible')) { hideError(); }
+  });
+
+  confirmPwEl.addEventListener('input', function () {
+    if (confirmPwEl.classList.contains('field-error')) { validateConfirmPassword(false); }
+  });
+
+  /* ── Banner helpers ─────────────────────────────────────────────────────── */
+  function showError(msg) {
+    errorText.textContent = msg || 'An unexpected error occurred. Please try again.';
+    errorBanner.classList.remove('shake');
+    void errorBanner.offsetWidth; /* Force reflow so shake restarts cleanly */
+    errorBanner.classList.add('visible', 'shake');
+  }
+
+  function hideError() {
+    errorBanner.classList.remove('visible', 'shake');
+  }
+
+  /* ── Loading state ──────────────────────────────────────────────────────── */
+  function setLoading(loading) {
+    submitBtn.disabled = loading;
+    spinner.classList.toggle('visible', loading);
+    btnLabel.textContent = loading ? 'Creating account…' : 'Create Account';
+  }
+
+  /* ── Form submit ────────────────────────────────────────────────────────── */
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    hideError();
+
+    /* Validate all fields — collect first failing element for focus */
+    var ok       = true;
+    var firstBad = null;
+
+    if (!validateDisplayName(true))     { ok = false; firstBad = firstBad || displayNameEl; }
+    if (!validateUsername(true))        { ok = false; firstBad = firstBad || usernameEl; }
+    if (!validateEmail(true))           { ok = false; firstBad = firstBad || emailEl; }
+    if (!validatePassword(true))        { ok = false; firstBad = firstBad || passwordEl; }
+    if (!validateConfirmPassword(true)) { ok = false; firstBad = firstBad || confirmPwEl; }
+
+    if (!ok) {
+      if (firstBad) { firstBad.focus(); }
+      return;
+    }
+
+    /* Build payload — omit email key entirely if empty */
+    var payload = {
+      username:     usernameEl.value.trim(),
+      password:     passwordEl.value,
+      display_name: displayNameEl.value.trim()
+    };
+    var emailVal = emailEl.value.trim();
+    if (emailVal) { payload.email = emailVal; }
+
+    setLoading(true);
+
+    fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(payload)
+    })
+    .then(function (res) {
+      return res.json().then(function (data) {
+        return { status: res.status, data: data };
+      });
+    })
+    .then(function (result) {
+      setLoading(false);
+      if (result.data && result.data.ok === true) {
+        window.location.href = '/login?registered=1';
+      } else {
+        var msg = (result.data && result.data.message)
+          ? result.data.message
+          : (result.data && result.data.error)
+            ? result.data.error
+            : 'Registration failed. Please try again.';
+        showError(msg);
+      }
+    })
+    .catch(function () {
+      setLoading(false);
+      showError('Connection error. Please check your network and try again.');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
