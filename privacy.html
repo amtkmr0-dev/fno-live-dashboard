@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy &mdash; QUANTRA Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUANTRA Terminal — Obsidian Premium Theme
+   Privacy Policy Page
+   ============================================================ */
+
+:root {
+  --bg:            #09090b;
+  --surface:       #18181b;
+  --surface-alt:   #1c1c20;
+  --surface-hover: #27272a;
+  --surface-active:#2e2e33;
+  --bg-elevated:   #27272a;
+  --border:        #2e2e35;
+  --border-light:  #3f3f46;
+  --border-focus:  #3b82f6;
+  --text:          #e4e4e7;
+  --text-dim:      #71717a;
+  --text-vdim:     #52525b;
+  --text-bright:   #fafafa;
+  --blue:          #3b82f6;
+  --blue-soft:     rgba(59,130,246,0.12);
+  --blue-hover:    #2563eb;
+  --green:         #10b981;
+  --red:           #ef4444;
+  --cyan:          #06b6d4;
+  --yellow:        #eab308;
+  --amber-bg:      rgba(234,179,8,0.08);
+  --amber-border:  rgba(234,179,8,0.4);
+  --green-soft:    rgba(16,185,129,0.1);
+  --green-border:  rgba(16,185,129,0.4);
+  --nav-height:    48px;
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.6);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.8);
+  --font-sans:     'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  --fs-xs:         11px;
+  --fs-sm:         12px;
+  --fs-base:       13px;
+  --fs-md:         14px;
+  --fs-lg:         16px;
+  --fs-xl:         20px;
+  --fw-normal:     400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
+
+/* ---- Navigation ---- */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(59,130,246,0.08);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-brand:hover { text-decoration: none; }
+.q-nav-brand .brand-name {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-size: 15px;
+}
+.q-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+.q-nav-links a {
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-links a:hover { color: var(--text); background: var(--surface-hover); text-decoration: none; }
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--blue-soft);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
+}
+
+/* ---- Main Content ---- */
+.legal-main {
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+
+/* ---- Page Header ---- */
+.legal-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 0 36px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.legal-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.legal-logo .brand-name {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 22px;
+}
+.legal-page-title {
+  font-size: 28px;
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.legal-meta {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.legal-meta span {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin-bottom: 28px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.back-link:hover { color: var(--text); border-color: var(--border-light); text-decoration: none; }
+
+/* ---- Legal Sections ---- */
+.legal-section {
+  margin-bottom: 32px;
+}
+.legal-section h2 {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  padding-left: 14px;
+  border-left: 4px solid var(--blue);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+.legal-section p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.legal-section p:last-child { margin-bottom: 0; }
+.legal-section ul, .legal-section ol {
+  margin: 8px 0 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.legal-section li {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.6;
+}
+.legal-section strong { color: var(--text-bright); font-weight: var(--fw-semibold); }
+.legal-section a { color: var(--blue); }
+
+/* Warning box (amber) */
+.notice-box {
+  background: var(--amber-bg);
+  border-left: 4px solid var(--amber-border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.notice-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Info box (blue) */
+.info-box {
+  background: var(--blue-soft);
+  border-left: 4px solid rgba(59,130,246,0.5);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.info-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Positive / green box */
+.positive-box {
+  background: var(--green-soft);
+  border-left: 4px solid var(--green-border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.positive-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Data table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-md);
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.data-table th {
+  background: var(--surface-alt);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 9px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 9px 14px;
+  color: var(--text);
+  border-bottom: 1px solid rgba(46,46,53,0.6);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(39,39,42,0.4); }
+
+/* ---- Divider ---- */
+.legal-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 36px 0;
+}
+
+/* ---- Footer ---- */
+.q-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.q-footer a { color: var(--text-dim); }
+.q-footer a:hover { color: var(--blue); }
+.footer-links { display: flex; gap: 16px; }
+
+@media (max-width: 640px) {
+  .q-nav { padding: 0 10px; gap: 8px; }
+  .q-nav-links a { padding: 5px 8px; font-size: var(--fs-xs); }
+  .legal-main { padding: 24px 16px 48px; }
+  .legal-page-title { font-size: 22px; }
+  .q-footer { flex-direction: column; align-items: flex-start; }
+  .data-table { font-size: var(--fs-sm); }
+  .data-table th, .data-table td { padding: 7px 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="qg1" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#3b82f6"/>
+          <stop offset="100%" stop-color="#06b6d4"/>
+        </linearGradient>
+      </defs>
+      <circle cx="12" cy="12" r="9.5" stroke="url(#qg1)" stroke-width="2.2" fill="none"/>
+      <line x1="18.5" y1="18.5" x2="23" y2="23" stroke="url(#qg1)" stroke-width="2.2" stroke-linecap="round"/>
+      <rect x="5.5" y="9" width="2" height="6" rx="0.5" fill="#3b82f6" opacity="0.85"/>
+      <rect x="5" y="7.5" width="3" height="1" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+      <rect x="5" y="16" width="3" height="1" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+      <rect x="9" y="8" width="2" height="8" rx="0.5" fill="#06b6d4" opacity="0.85"/>
+      <rect x="8.5" y="6.5" width="3" height="1" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+      <rect x="8.5" y="17" width="3" height="1" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+    </svg>
+    <span class="brand-name">QUANTRA</span>
+  </a>
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy" class="active">Privacy</a>
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="legal-main">
+
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to Dashboard
+  </a>
+
+  <!-- Page Header -->
+  <div class="legal-hero">
+    <div class="legal-logo">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="qg-hero" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="100%" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <circle cx="18" cy="18" r="14" stroke="url(#qg-hero)" stroke-width="2.5" fill="none"/>
+        <line x1="28" y1="28" x2="36" y2="36" stroke="url(#qg-hero)" stroke-width="2.5" stroke-linecap="round"/>
+        <rect x="8" y="13" width="3" height="10" rx="0.8" fill="#3b82f6" opacity="0.9"/>
+        <rect x="7" y="11" width="5" height="1.5" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+        <rect x="7" y="24.5" width="5" height="1.5" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+        <rect x="14" y="11" width="3" height="14" rx="0.8" fill="#06b6d4" opacity="0.9"/>
+        <rect x="13" y="9" width="5" height="1.5" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+        <rect x="13" y="26" width="5" height="1.5" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+      </svg>
+      <span class="brand-name">QUANTRA</span>
+    </div>
+    <h1 class="legal-page-title">Privacy Policy</h1>
+    <p class="legal-meta">Last Updated: <span>May 2026</span></p>
+  </div>
+
+  <!-- 1. Information We Collect -->
+  <section class="legal-section">
+    <h2>1. Information We Collect</h2>
+    <p>When you use QUANTRA Terminal, we collect the following categories of information:</p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data Type</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Account Data</strong></td>
+          <td>Username, display name, hashed password. Email address is optional.</td>
+        </tr>
+        <tr>
+          <td><strong>Usage Data</strong></td>
+          <td>Pages visited, features used, session duration, browser type, and IP address for security purposes.</td>
+        </tr>
+        <tr>
+          <td><strong>Paper Trade Records</strong></td>
+          <td>Simulated trade entries, exits, and strategy notes you record within the platform.</td>
+        </tr>
+        <tr>
+          <td><strong>Preferences</strong></td>
+          <td>UI settings, watchlist configurations, and display preferences you save.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 2. Data We Do NOT Collect -->
+  <section class="legal-section">
+    <h2>2. Data We Do Not Collect</h2>
+    <div class="positive-box">
+      <p><strong>QUANTRA Terminal does not collect:</strong> real trading account data, bank account details, Demat account information, PAN numbers, Aadhaar numbers, financial statements, or any other sensitive financial or identity documents. We do not store your broker credentials on our servers.</p>
+    </div>
+  </section>
+
+  <!-- 3. How We Use Information -->
+  <section class="legal-section">
+    <h2>3. How We Use Your Information</h2>
+    <p>We use the information we collect for the following purposes:</p>
+    <ul>
+      <li><strong>Provide and operate</strong> the QUANTRA Terminal service</li>
+      <li><strong>Authenticate</strong> your identity and maintain session security</li>
+      <li><strong>Improve platform features</strong> based on aggregate usage patterns</li>
+      <li><strong>Detect and prevent</strong> fraudulent or abusive activity</li>
+      <li><strong>Communicate</strong> important updates or security notices (if email provided)</li>
+    </ul>
+    <p>We do not use your data for advertising, profiling, or sale to third parties.</p>
+  </section>
+
+  <!-- 4. Data Storage -->
+  <section class="legal-section">
+    <h2>4. Data Storage &amp; Infrastructure</h2>
+    <p>Your data is stored in a <strong>SQLite database on secured cloud infrastructure</strong> hosted on <strong>Google Cloud Platform (GCP) in the India region</strong>. We implement industry-standard security measures including:</p>
+    <ul>
+      <li>Encrypted storage volumes and secure access controls</li>
+      <li>Regular security audits and access logging</li>
+      <li>Restricted access to production infrastructure</li>
+    </ul>
+    <p>Data is processed and stored within India in compliance with applicable data localisation requirements.</p>
+  </section>
+
+  <!-- 5. Cookies & Sessions -->
+  <section class="legal-section">
+    <h2>5. Cookies &amp; Sessions</h2>
+    <p>QUANTRA Terminal uses <strong>session cookies for authentication only</strong>. These are strictly necessary cookies that:</p>
+    <ul>
+      <li>Maintain your login state during an active session</li>
+      <li>Include <strong>CSRF protection tokens</strong> to prevent cross-site request forgery</li>
+      <li>Expire when you log out or after an inactivity timeout</li>
+    </ul>
+    <div class="info-box">
+      <p>We do <strong>not</strong> use third-party tracking cookies, advertising cookies, analytics services (e.g. Google Analytics), or any cross-site tracking technologies.</p>
+    </div>
+  </section>
+
+  <!-- 6. Market Data -->
+  <section class="legal-section">
+    <h2>6. Market Data &amp; Broker Credentials</h2>
+    <p>When you connect a broker account (e.g. Upstox) to QUANTRA Terminal, market data is <strong>fetched live using your own API credentials</strong> and is <strong>not stored permanently</strong> on our servers. Specifically:</p>
+    <ul>
+      <li>Real-time price feeds are streamed directly and not persisted in our database</li>
+      <li>Broker API tokens are stored temporarily in your session and cleared on logout</li>
+      <li>We do not transmit your broker credentials to any third party</li>
+    </ul>
+  </section>
+
+  <!-- 7. Data Sharing -->
+  <section class="legal-section">
+    <h2>7. Data Sharing</h2>
+    <div class="positive-box">
+      <p><strong>We do not sell, rent, or share your personal data with any third party</strong> for commercial purposes. We may disclose information only when legally required (e.g., in response to a valid court order or government request under applicable law).</p>
+    </div>
+  </section>
+
+  <!-- 8. Security Measures -->
+  <section class="legal-section">
+    <h2>8. Security Measures</h2>
+    <p>We take reasonable technical and organisational measures to protect your data, including:</p>
+    <ul>
+      <li><strong>bcrypt password hashing</strong> — passwords are never stored in plain text</li>
+      <li><strong>CSRF token protection</strong> on all state-changing requests</li>
+      <li><strong>Rate limiting</strong> on authentication and API endpoints to prevent brute-force attacks</li>
+      <li><strong>HTTPS enforcement</strong> for all communications</li>
+      <li>Server-side input validation and sanitisation</li>
+    </ul>
+    <p>While we implement robust security measures, no system can guarantee absolute security. You should use a strong, unique password for your QUANTRA account.</p>
+  </section>
+
+  <!-- 9. Data Retention -->
+  <section class="legal-section">
+    <h2>9. Data Retention</h2>
+    <p>Account data and associated records are retained for as long as your account remains active. If you request account deletion:</p>
+    <ul>
+      <li>Your account and all personal data will be permanently deleted within <strong>30 days</strong></li>
+      <li>Paper trade records associated with your account will be removed</li>
+      <li>Anonymised, aggregate usage statistics may be retained for platform improvement</li>
+    </ul>
+  </section>
+
+  <!-- 10. Your Rights -->
+  <section class="legal-section">
+    <h2>10. Your Rights</h2>
+    <p>You have the following rights with respect to your personal data:</p>
+    <ul>
+      <li><strong>Access:</strong> Request a copy of the personal data we hold about you</li>
+      <li><strong>Correction:</strong> Request correction of inaccurate or incomplete data</li>
+      <li><strong>Deletion:</strong> Request permanent deletion of your account and associated data</li>
+      <li><strong>Portability:</strong> Request your paper trade records in a machine-readable format</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at <a href="mailto:support@quantraterminal.com">support@quantraterminal.com</a>.</p>
+  </section>
+
+  <!-- 11. Children's Privacy -->
+  <section class="legal-section">
+    <h2>11. Children's Privacy</h2>
+    <div class="notice-box">
+      <p>QUANTRA Terminal is <strong>not directed at persons under 18 years of age</strong>. We do not knowingly collect personal information from minors. If you believe a person under 18 has provided us with personal information, please contact us immediately so we can delete it.</p>
+    </div>
+  </section>
+
+  <!-- 12. Changes -->
+  <section class="legal-section">
+    <h2>12. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we make material changes, we will update the "Last Updated" date at the top and notify registered users where possible. Your continued use of the platform after changes constitutes acceptance of the updated policy.</p>
+  </section>
+
+  <hr class="legal-divider">
+
+  <!-- Contact -->
+  <section class="legal-section">
+    <h2>13. Contact</h2>
+    <p>For privacy-related questions, data access requests, or to report a concern, please contact us at:</p>
+    <p><a href="mailto:support@quantraterminal.com">support@quantraterminal.com</a></p>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="q-footer">
+  <span>&copy; 2026 QUANTRA Terminal &mdash; For educational purposes only. Not SEBI registered.</span>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+</footer>
+
+</body>
+</html>

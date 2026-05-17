@@ -407,6 +407,31 @@ async def handle_register_page(request):
     return web.Response(text=html, content_type="text/html")
 
 
+async def _serve_static_page(filename: str):
+    """Serve a static HTML page by filename."""
+    fpath = os.path.join(os.path.dirname(__file__) or ".", filename)
+    if not os.path.exists(fpath):
+        return web.Response(text=f"Page not found: {filename}", status=404)
+    with open(fpath, "r") as f:
+        html = f.read()
+    return web.Response(text=html, content_type="text/html")
+
+
+async def handle_terms_page(request):
+    """Serve terms.html."""
+    return await _serve_static_page("terms.html")
+
+
+async def handle_privacy_page(request):
+    """Serve privacy.html."""
+    return await _serve_static_page("privacy.html")
+
+
+async def handle_disclaimer_page(request):
+    """Serve disclaimer.html."""
+    return await _serve_static_page("disclaimer.html")
+
+
 async def handle_register_api(request):
     """POST /api/auth/register - create new user account with full validation."""
     if not _db:
@@ -1335,6 +1360,89 @@ async def handle_admin_audit_log(request):
 
 
 # ============================================================
+# TELEGRAM ALERTS
+# ============================================================
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = "1713719957"  # Amit's chat with @amitfno_bot
+
+
+async def send_telegram_alert(text: str):
+    """Send a plain-text Telegram message. Fire-and-forget; never crashes the caller."""
+    bot_token = TELEGRAM_BOT_TOKEN
+    # Also check auth_config.json
+    if not bot_token and _config:
+        bot_token = _config.get("telegram_bot_token", "")
+    if not bot_token:
+        log.warning("Telegram alert skipped — no bot token configured")
+        return False
+
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": text[:4096],  # Telegram limit
+        "disable_notification": False,
+    }
+
+    try:
+        async with ClientSession() as cs:
+            async with cs.post(url, json=payload, timeout=15) as resp:
+                if resp.status == 200:
+                    log.info("Telegram alert sent (%d chars)", len(text))
+                    return True
+                else:
+                    body = await resp.text()
+                    log.error("Telegram alert failed: HTTP %d — %s", resp.status, body[:200])
+                    return False
+    except Exception as exc:
+        log.error("Telegram alert error: %s", exc)
+        return False
+
+
+def _format_trade_alert(trades: list, nifty_direction: str, nifty_score: float, username: str) -> str:
+    """Format trade entries as a Telegram alert message."""
+    from datetime import datetime
+    now_ist = datetime.now().strftime("%H:%M IST")
+
+    lines = [
+        f"AUTO-TRADE ALERT  {now_ist}",
+        f"NIFTY: {nifty_direction} ({nifty_score:.0f}/100)",
+        f"User: {username}",
+        "",
+    ]
+
+    for i, t in enumerate(trades, 1):
+        sym = t.get("symbol", "?")
+        direction = t.get("direction", "?")
+        strike = t.get("strike", "?")
+        expiry = t.get("expiry", "?")
+        entry = t.get("entry_premium", 0)
+        sl = t.get("sl_premium", 0)
+        t1 = t.get("t1_premium", 0)
+        t2 = t.get("t2_premium", 0)
+        lots = t.get("lots", 1)
+        lot_size = t.get("lot_size", 1)
+        capital = t.get("capital", 0)
+        score = t.get("composite_score", 0)
+
+        risk_per_lot = abs(entry - sl) * lot_size if sl else 0
+        total_risk = risk_per_lot * lots
+
+        lines.append(f"--- Trade {i} ---")
+        lines.append(f"{sym} {strike} {direction} @ Rs {entry:.2f}")
+        lines.append(f"Expiry: {expiry}")
+        lines.append(f"SL: Rs {sl:.2f} | T1: Rs {t1:.2f} | T2: Rs {t2:.2f}")
+        lines.append(f"Lots: {lots} x {lot_size} = {lots * lot_size} qty")
+        lines.append(f"Capital: Rs {capital:,.0f} | Risk: Rs {total_risk:,.0f}")
+        lines.append(f"Composite V3 Score: {score}")
+        lines.append("")
+
+    lines.append(f"Total trades: {len(trades)}")
+    lines.append("Paper-trade mode — track for live validation")
+    return "\n".join(lines)
+
+
+# ============================================================
 # AUTO-TRADE ENGINE
 # ============================================================
 
@@ -1400,10 +1508,49 @@ async def handle_auto_trade_run(request):
                 f"entered={len(result.get('trades_entered', []))}"
             )
 
+        # Telegram alert for manual scans too
+        entered = result.get("trades_entered", [])
+        if entered:
+            try:
+                msg = _format_trade_alert(
+                    entered,
+                    result.get("nifty_direction", "NEUTRAL"),
+                    result.get("nifty_score", 50),
+                    session["username"],
+                )
+                await send_telegram_alert(msg)
+            except Exception as tg_exc:
+                log.error("Manual scan Telegram alert failed: %s", tg_exc)
+
         return web.json_response({"ok": True, **result})
     except Exception as e:
         log.error(f"Auto-trade scan error: {e}", exc_info=True)
         return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_telegram_test(request):
+    """POST /api/admin/telegram/test - send a test Telegram message (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    from datetime import datetime
+    now_ist = datetime.now().strftime("%H:%M IST · %a %d %b")
+    test_msg = (
+        f"QUANTRA Test Alert  {now_ist}\n\n"
+        f"Telegram wiring confirmed.\n"
+        f"Auto-trade alerts will appear here when trades are entered.\n"
+        f"Triggered by: {session['username']}"
+    )
+    ok = await send_telegram_alert(test_msg)
+    if ok:
+        return web.json_response({"ok": True, "message": "Test alert sent to Telegram"})
+    else:
+        return web.json_response(
+            {"ok": False, "error": "Telegram send failed — check bot token configuration"},
+            status=500,
+        )
 
 
 async def handle_auto_trade_status(request):
@@ -1657,12 +1804,21 @@ async def auto_scan_timer(app):
                         nifty_direction=nifty_direction,
                         nifty_score=nifty_score,
                     )
-                    trades_ct = len(result.get("trades_entered", []))
+                    entered = result.get("trades_entered", [])
+                    trades_ct = len(entered)
                     if trades_ct > 0:
                         log.info(
                             "Auto-scan: user %s — %d trade(s) entered",
                             uname, trades_ct,
                         )
+                        # --- Telegram alert ---
+                        try:
+                            msg = _format_trade_alert(
+                                entered, nifty_direction, nifty_score, uname,
+                            )
+                            await send_telegram_alert(msg)
+                        except Exception as tg_exc:
+                            log.error("Auto-scan Telegram alert failed: %s", tg_exc)
                     else:
                         log.debug(
                             "Auto-scan: user %s — skip: %s",
@@ -1689,6 +1845,11 @@ async def on_startup(app):
     else:
         log.warning("Security: DEGRADED — security.py not found")
     log.info("Auto-scan timer: ACTIVE (every 5 min during market hours)")
+    tg_token = TELEGRAM_BOT_TOKEN or (_config or {}).get("telegram_bot_token", "")
+    if tg_token:
+        log.info("Telegram alerts: ACTIVE (chat_id=%s)", TELEGRAM_CHAT_ID)
+    else:
+        log.warning("Telegram alerts: DISABLED — set telegram_bot_token in auth_config.json or TELEGRAM_BOT_TOKEN env var")
 
 
 async def on_shutdown(app):
@@ -1718,6 +1879,11 @@ def create_app():
     app.router.add_get("/register", handle_register_page)
     app.router.add_post("/api/auth/register", handle_register_api)
 
+    # Legal / compliance pages
+    app.router.add_get("/terms", handle_terms_page)
+    app.router.add_get("/privacy", handle_privacy_page)
+    app.router.add_get("/disclaimer", handle_disclaimer_page)
+
     # User profile & settings
     app.router.add_get("/profile", handle_profile_page)
     app.router.add_get("/api/user/profile", handle_user_profile_get)
@@ -1746,6 +1912,7 @@ def create_app():
     app.router.add_get("/api/admin/audit", handle_admin_audit_log)
     app.router.add_post("/api/admin/auto-trade/run", handle_auto_trade_run)
     app.router.add_get("/api/admin/auto-trade/status", handle_auto_trade_status)
+    app.router.add_post("/api/admin/telegram/test", handle_telegram_test)
 
     # WebSocket proxy
     app.router.add_get("/ws", proxy_websocket)

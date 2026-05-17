@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disclaimer &mdash; QUANTRA Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUANTRA Terminal — Obsidian Premium Theme
+   Disclaimer / SEBI Compliance Page
+   ============================================================ */
+
+:root {
+  --bg:            #09090b;
+  --surface:       #18181b;
+  --surface-alt:   #1c1c20;
+  --surface-hover: #27272a;
+  --surface-active:#2e2e33;
+  --bg-elevated:   #27272a;
+  --border:        #2e2e35;
+  --border-light:  #3f3f46;
+  --border-focus:  #3b82f6;
+  --text:          #e4e4e7;
+  --text-dim:      #71717a;
+  --text-vdim:     #52525b;
+  --text-bright:   #fafafa;
+  --blue:          #3b82f6;
+  --blue-soft:     rgba(59,130,246,0.12);
+  --blue-hover:    #2563eb;
+  --green:         #10b981;
+  --red:           #ef4444;
+  --red-soft:      rgba(239,68,68,0.12);
+  --red-border:    rgba(239,68,68,0.45);
+  --cyan:          #06b6d4;
+  --yellow:        #eab308;
+  --amber-bg:      rgba(234,179,8,0.08);
+  --amber-border:  rgba(234,179,8,0.4);
+  --amber-bright:  rgba(234,179,8,0.14);
+  --amber-text:    #ca8a04;
+  --nav-height:    48px;
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.6);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.8);
+  --font-sans:     'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  --fs-xs:         11px;
+  --fs-sm:         12px;
+  --fs-base:       13px;
+  --fs-md:         14px;
+  --fs-lg:         16px;
+  --fs-xl:         20px;
+  --fw-normal:     400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
+
+/* ---- Navigation ---- */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(59,130,246,0.08);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-brand:hover { text-decoration: none; }
+.q-nav-brand .brand-name {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-size: 15px;
+}
+.q-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+.q-nav-links a {
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-links a:hover { color: var(--text); background: var(--surface-hover); text-decoration: none; }
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--blue-soft);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
+}
+
+/* ---- Main Content ---- */
+.legal-main {
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+
+/* ---- Page Header ---- */
+.legal-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 0 36px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.legal-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.legal-logo .brand-name {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 22px;
+}
+.legal-page-title {
+  font-size: 28px;
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.legal-subtitle {
+  font-size: var(--fs-md);
+  color: var(--text-dim);
+  max-width: 520px;
+  margin: 0 auto 8px;
+  line-height: 1.5;
+}
+.legal-meta {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.legal-meta span {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin-bottom: 28px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.back-link:hover { color: var(--text); border-color: var(--border-light); text-decoration: none; }
+
+/* ---- Legal Sections ---- */
+.legal-section {
+  margin-bottom: 32px;
+}
+.legal-section h2 {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  padding-left: 14px;
+  border-left: 4px solid var(--blue);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+.legal-section p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.legal-section p:last-child { margin-bottom: 0; }
+.legal-section ul, .legal-section ol {
+  margin: 8px 0 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.legal-section li {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.6;
+}
+.legal-section strong { color: var(--text-bright); font-weight: var(--fw-semibold); }
+.legal-section a { color: var(--blue); }
+
+/* ---- Warning Boxes ---- */
+
+/* Amber / caution */
+.notice-box {
+  background: var(--amber-bg);
+  border-left: 4px solid var(--amber-border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.notice-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Red / danger */
+.danger-box {
+  background: var(--red-soft);
+  border-left: 4px solid var(--red-border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.danger-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Blue / info */
+.info-box {
+  background: var(--blue-soft);
+  border-left: 4px solid rgba(59,130,246,0.5);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.info-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ---- Market Risk Banner (prominent) ---- */
+.risk-banner {
+  background: var(--amber-bright);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin: 16px 0;
+  text-align: center;
+}
+.risk-banner p {
+  font-size: 15px;
+  font-weight: var(--fw-bold);
+  color: #fbbf24;
+  line-height: 1.5;
+  letter-spacing: 0.1px;
+}
+.risk-banner-label {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--amber-text);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.risk-banner-label::before,
+.risk-banner-label::after {
+  content: '';
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: var(--amber-border);
+}
+
+/* SEBI badge */
+.sebi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: #f87171;
+  letter-spacing: 0.3px;
+  margin-bottom: 10px;
+}
+.sebi-badge svg { flex-shrink: 0; }
+
+/* Regulations list */
+.reg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+.reg-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-md);
+}
+.reg-item .reg-icon {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--cyan);
+  background: rgba(6,182,212,0.1);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  margin-top: 1px;
+  font-weight: var(--fw-semibold);
+}
+.reg-item .reg-text { color: var(--text); line-height: 1.5; }
+.reg-item .reg-text strong { color: var(--text-bright); }
+
+/* Acknowledgment box */
+.ack-box {
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  margin: 16px 0;
+}
+.ack-box h3 {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ack-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ---- Divider ---- */
+.legal-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 36px 0;
+}
+
+/* ---- Footer ---- */
+.q-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.q-footer a { color: var(--text-dim); }
+.q-footer a:hover { color: var(--blue); }
+.footer-links { display: flex; gap: 16px; }
+
+@media (max-width: 640px) {
+  .q-nav { padding: 0 10px; gap: 8px; }
+  .q-nav-links a { padding: 5px 8px; font-size: var(--fs-xs); }
+  .legal-main { padding: 24px 16px 48px; }
+  .legal-page-title { font-size: 22px; }
+  .risk-banner p { font-size: 13px; }
+  .q-footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="qg1" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#3b82f6"/>
+          <stop offset="100%" stop-color="#06b6d4"/>
+        </linearGradient>
+      </defs>
+      <circle cx="12" cy="12" r="9.5" stroke="url(#qg1)" stroke-width="2.2" fill="none"/>
+      <line x1="18.5" y1="18.5" x2="23" y2="23" stroke="url(#qg1)" stroke-width="2.2" stroke-linecap="round"/>
+      <rect x="5.5" y="9" width="2" height="6" rx="0.5" fill="#3b82f6" opacity="0.85"/>
+      <rect x="5" y="7.5" width="3" height="1" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+      <rect x="5" y="16" width="3" height="1" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+      <rect x="9" y="8" width="2" height="8" rx="0.5" fill="#06b6d4" opacity="0.85"/>
+      <rect x="8.5" y="6.5" width="3" height="1" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+      <rect x="8.5" y="17" width="3" height="1" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+    </svg>
+    <span class="brand-name">QUANTRA</span>
+  </a>
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/disclaimer" class="active">Disclaimer</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="legal-main">
+
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to Dashboard
+  </a>
+
+  <!-- Page Header -->
+  <div class="legal-hero">
+    <div class="legal-logo">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="qg-hero" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="100%" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <circle cx="18" cy="18" r="14" stroke="url(#qg-hero)" stroke-width="2.5" fill="none"/>
+        <line x1="28" y1="28" x2="36" y2="36" stroke="url(#qg-hero)" stroke-width="2.5" stroke-linecap="round"/>
+        <rect x="8" y="13" width="3" height="10" rx="0.8" fill="#3b82f6" opacity="0.9"/>
+        <rect x="7" y="11" width="5" height="1.5" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+        <rect x="7" y="24.5" width="5" height="1.5" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+        <rect x="14" y="11" width="3" height="14" rx="0.8" fill="#06b6d4" opacity="0.9"/>
+        <rect x="13" y="9" width="5" height="1.5" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+        <rect x="13" y="26" width="5" height="1.5" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+      </svg>
+      <span class="brand-name">QUANTRA</span>
+    </div>
+    <h1 class="legal-page-title">Disclaimer</h1>
+    <p class="legal-subtitle">Important disclosures regarding the nature, limitations, and regulatory status of QUANTRA Terminal</p>
+    <p class="legal-meta">Last Updated: <span>May 2026</span></p>
+  </div>
+
+  <!-- SEBI badge -->
+  <div style="margin-bottom: 20px;">
+    <span class="sebi-badge">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 4v2.5M6 8h.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Not SEBI Registered &mdash; Not an Investment Adviser
+    </span>
+  </div>
+
+  <!-- 1. General Disclaimer -->
+  <section class="legal-section">
+    <h2>1. General Disclaimer</h2>
+    <p>QUANTRA Terminal is an <strong>analytics and educational tool</strong> designed to help traders understand derivatives markets, analyse option chains, and test trading strategies in a simulated environment. It is <strong>not an investment advisory service</strong>, brokerage platform, or portfolio management service.</p>
+    <p>Nothing on this platform should be construed as financial advice, a recommendation to buy or sell any security, or a solicitation to invest in any financial instrument.</p>
+  </section>
+
+  <!-- 2. SEBI Compliance -->
+  <section class="legal-section">
+    <h2>2. SEBI Compliance Notice</h2>
+    <div class="danger-box">
+      <p><strong>QUANTRA Terminal is not registered as a Research Analyst (RA) under SEBI (Research Analysts) Regulations, 2014, nor as an Investment Adviser (IA) under SEBI (Investment Advisers) Regulations, 2013.</strong> We do not provide personalised investment advice, specific buy/sell recommendations for any securities, or any form of managed investment service.</p>
+    </div>
+    <p>Users seeking personalised investment advice should consult a <strong>SEBI-registered Research Analyst or Investment Adviser</strong>. A list of registered advisers is available on the SEBI website at <a href="https://www.sebi.gov.in" target="_blank" rel="noopener noreferrer">www.sebi.gov.in</a>.</p>
+  </section>
+
+  <!-- 3. Market Risk Warning (prominent) -->
+  <section class="legal-section">
+    <h2>3. Market Risk Warning</h2>
+    <div class="risk-banner">
+      <div class="risk-banner-label">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L12.5 11.5H1.5L7 1.5Z" stroke="#ca8a04" stroke-width="1.3" stroke-linejoin="round" fill="none"/><path d="M7 5.5v3M7 9.5h.01" stroke="#ca8a04" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Regulatory Risk Warning
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L12.5 11.5H1.5L7 1.5Z" stroke="#ca8a04" stroke-width="1.3" stroke-linejoin="round" fill="none"/><path d="M7 5.5v3M7 9.5h.01" stroke="#ca8a04" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+      <p>"<strong>Investment in securities market are subject to market risks. Read all the related documents carefully before investing.</strong>"</p>
+    </div>
+  </section>
+
+  <!-- 4. Derivatives Risk -->
+  <section class="legal-section">
+    <h2>4. Derivatives &amp; F&amp;O Risk Warning</h2>
+    <div class="notice-box">
+      <p><strong>Trading in Futures &amp; Options (F&amp;O) and other derivatives is extremely risky.</strong> Derivatives carry non-linear payoff structures and can result in losses <strong>exceeding your initial margin deposit</strong>. Key risks include:</p>
+    </div>
+    <ul>
+      <li><strong>Leverage risk:</strong> Small adverse price movements can result in large percentage losses relative to margin</li>
+      <li><strong>Time decay (Theta):</strong> Options lose value as expiry approaches, regardless of underlying price movement</li>
+      <li><strong>Liquidity risk:</strong> Far OTM or illiquid contracts may be difficult to exit at fair prices</li>
+      <li><strong>Volatility risk:</strong> Sudden spikes in implied volatility can dramatically affect option premiums</li>
+      <li><strong>Gap risk:</strong> Overnight or weekend gaps can bypass stop-loss orders</li>
+    </ul>
+    <p><strong>Past performance of any strategy, signal, or analysis does not guarantee future returns.</strong> Only deploy risk capital — funds you can afford to lose entirely — in derivatives trading.</p>
+  </section>
+
+  <!-- 5. AI/Algorithm Disclaimer -->
+  <section class="legal-section">
+    <h2>5. AI &amp; Algorithm Disclaimer</h2>
+    <p>QUANTRA Terminal may display AI-generated signals, option flow analysis, technical scores, and trade suggestions. You must understand the following:</p>
+    <ul>
+      <li>All signals and scores are generated by <strong>proprietary algorithms based on technical analysis</strong> of publicly available market data</li>
+      <li>They are provided for <strong>informational and educational purposes only</strong> and do not constitute financial advice</li>
+      <li><strong>No algorithm can predict market movements with certainty.</strong> Markets are influenced by unpredictable macro, geopolitical, and sentiment factors that no model can fully capture</li>
+      <li>Algorithm outputs may be delayed, erroneous, or based on incomplete data</li>
+      <li>Historical algorithmic accuracy is not a reliable predictor of future performance</li>
+    </ul>
+  </section>
+
+  <!-- 6. Paper Trading -->
+  <section class="legal-section">
+    <h2>6. Paper Trading Disclaimer</h2>
+    <div class="notice-box">
+      <p>Paper trades simulated on QUANTRA Terminal <strong>do not involve real money or real market orders</strong>. They are executed against simulated or delayed price feeds and do not reflect actual trading conditions. Specifically, paper trading does not account for:</p>
+    </div>
+    <ul>
+      <li><strong>Slippage</strong> — the difference between expected and actual execution price in live markets</li>
+      <li><strong>Market impact</strong> — the effect of your own order on the market price</li>
+      <li><strong>Liquidity constraints</strong> — inability to fill orders at desired quantity or price</li>
+      <li><strong>Execution latency</strong> — delays between signal generation and order fill in live trading</li>
+      <li><strong>Brokerage charges</strong> — STT, exchange fees, GST, and brokerage that reduce net returns</li>
+    </ul>
+    <p>Paper trading performance is <strong>not indicative of live trading performance</strong> and should not be used as a basis for deploying real capital.</p>
+  </section>
+
+  <!-- 7. Data Accuracy -->
+  <section class="legal-section">
+    <h2>7. Data Accuracy</h2>
+    <p>While we strive to display accurate and timely market data, QUANTRA Terminal <strong>cannot guarantee the accuracy, completeness, or timeliness</strong> of data sourced from broker APIs and exchanges. Data may be subject to:</p>
+    <ul>
+      <li>Real-time or delayed feeds depending on API subscription tier</li>
+      <li>API outages, throttling, or connection interruptions</li>
+      <li>Incorrect or stale data from upstream data providers</li>
+    </ul>
+    <p><strong>QUANTRA Terminal is not responsible for any trading decisions made based on data displayed on this platform.</strong> Always verify critical data against your broker's official platform before executing trades.</p>
+  </section>
+
+  <!-- 8. No Guarantee of Profits -->
+  <section class="legal-section">
+    <h2>8. No Guarantee of Profits</h2>
+    <div class="danger-box">
+      <p><strong>There is absolutely no assurance or guarantee</strong> that any strategy, analysis, signal, or tool provided by QUANTRA Terminal will result in profits or will prevent losses. The use of any information on this platform for actual trading is entirely at your own risk.</p>
+    </div>
+  </section>
+
+  <!-- 9. Third-Party Data -->
+  <section class="legal-section">
+    <h2>9. Third-Party Data &amp; APIs</h2>
+    <p>Market data on QUANTRA Terminal is sourced via third-party broker APIs (including Upstox and other supported brokers). This data is subject to:</p>
+    <ul>
+      <li>The respective broker's <strong>terms of service and data licensing agreements</strong></li>
+      <li>NSE/BSE data redistribution restrictions — market data displayed is for personal use only</li>
+      <li>Potential inaccuracies or changes in data format from third-party providers</li>
+    </ul>
+    <p>QUANTRA Terminal assumes no responsibility for the accuracy or availability of third-party data feeds.</p>
+  </section>
+
+  <!-- 10. Limitation of Liability -->
+  <section class="legal-section">
+    <h2>10. Limitation of Liability</h2>
+    <p>To the fullest extent permitted by applicable law, <strong>QUANTRA Terminal, its developers, and affiliates shall not be held liable</strong> for any:</p>
+    <ul>
+      <li>Direct, indirect, incidental, or consequential financial losses</li>
+      <li>Trading losses resulting from use of, or reliance on, information displayed on the platform</li>
+      <li>Damages arising from platform downtime, data errors, or algorithm inaccuracies</li>
+      <li>Losses arising from your inability to access the platform at any time</li>
+    </ul>
+    <p>The platform is provided <strong>"as is"</strong> without any warranty of fitness for a particular purpose.</p>
+  </section>
+
+  <!-- 11. Regulatory References -->
+  <section class="legal-section">
+    <h2>11. Key Regulatory References</h2>
+    <p>Users of QUANTRA Terminal should be aware of the following key regulations governing securities markets and investment services in India:</p>
+    <div class="reg-list">
+      <div class="reg-item">
+        <span class="reg-icon">SEBI</span>
+        <span class="reg-text"><strong>SEBI (Research Analysts) Regulations, 2014</strong> — Governs the registration and conduct of entities providing research reports and investment recommendations. QUANTRA is not registered under this regulation.</span>
+      </div>
+      <div class="reg-item">
+        <span class="reg-icon">SEBI</span>
+        <span class="reg-text"><strong>SEBI (Investment Advisers) Regulations, 2013</strong> — Governs entities providing personalised investment advice. QUANTRA does not provide personalised advice and is not registered under this regulation.</span>
+      </div>
+      <div class="reg-item">
+        <span class="reg-icon">SEBI</span>
+        <span class="reg-text"><strong>SEBI Act, 1992</strong> — The primary legislation governing the securities market in India and establishing the Securities and Exchange Board of India.</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="legal-divider">
+
+  <!-- 12. User Acknowledgment -->
+  <section class="legal-section">
+    <h2>12. User Acknowledgment</h2>
+    <div class="ack-box">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#3b82f6" stroke-width="1.5"/><path d="M5 8.5l2 2 4-4" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        By using QUANTRA Terminal, you acknowledge that:
+      </h3>
+      <p>You have read and understood this disclaimer in its entirety; you understand that QUANTRA Terminal is an educational and analytical tool only; you are solely responsible for all investment and trading decisions you make; you have evaluated your own financial situation and risk tolerance; and you will not hold QUANTRA Terminal or its developers liable for any financial losses incurred through trading activities.</p>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="legal-section">
+    <h2>13. Contact</h2>
+    <p>For questions regarding this disclaimer or to report concerns, please contact:</p>
+    <p><a href="mailto:support@quantraterminal.com">support@quantraterminal.com</a></p>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="q-footer">
+  <span>&copy; 2026 QUANTRA Terminal &mdash; For educational purposes only. Not SEBI registered.</span>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+</footer>
+
+</body>
+</html>

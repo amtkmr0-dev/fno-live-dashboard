@@ -6,7 +6,7 @@
 <title>Quantra Terminal &mdash; F&amp;O Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style id="theme-css">
 /* ============================================================
    Quantra Terminal - Shared Design System
@@ -111,9 +111,11 @@ a:hover { text-decoration: underline; }
   display: flex;
   align-items: center;
   height: var(--nav-height);
-  background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+  background: linear-gradient(180deg, rgba(24,24,27,0.95) 0%, rgba(18,18,20,0.98) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(59,130,246,0.08);
+  box-shadow: 0 1px 0 rgba(59,130,246,0.08), 0 4px 16px rgba(0,0,0,0.3);
   padding: 0 16px;
   position: sticky;
   top: 0;
@@ -121,10 +123,19 @@ a:hover { text-decoration: underline; }
   flex-shrink: 0;
   gap: 16px;
 }
+.q-nav::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(6,182,212,0.2) 70%, transparent 100%);
+}
 .q-nav-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-weight: var(--fw-bold);
   font-size: var(--fs-lg);
   color: var(--text-bright);
@@ -133,22 +144,39 @@ a:hover { text-decoration: underline; }
   text-decoration: none;
 }
 .q-nav-brand:hover { text-decoration: none; }
-.q-nav-brand img {
-  height: 28px;
-  width: auto;
-  display: block;
+.q-nav-brand img, .q-nav-brand .brand-png {
+  display: none; /* Hide old PNG logo */
 }
 .q-nav-brand .brand-icon {
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(135deg, var(--blue), #6366f1);
-  border-radius: var(--radius-sm);
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--blue), #06b6d4);
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+.q-nav-brand .brand-text {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.q-nav-brand .brand-tag {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-left: -2px;
 }
 .q-nav-links {
   display: flex;
@@ -643,10 +671,10 @@ a:hover { text-decoration: underline; }
 /* Logout button in nav */
 .q-nav-logout {
   margin-left: 8px;
-  padding: 5px 12px;
+  padding: 5px 14px;
   border-radius: 999px;
-  background: transparent;
-  border: 1px solid var(--border);
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.15);
   color: var(--text-dim);
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
@@ -659,7 +687,9 @@ a:hover { text-decoration: underline; }
 .q-nav-logout:hover {
   color: var(--red);
   border-color: var(--red);
-  background: rgba(239,68,68,0.08);
+  background: rgba(239,68,68,0.12);
+  text-decoration: none;
+  box-shadow: 0 0 12px rgba(239,68,68,0.15);
 }
 </style>
 <style>
@@ -1091,6 +1121,24 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   font-size: var(--fs-xs);
   color: var(--text-dim);
   flex-shrink: 0;
+}
+.compliance-bar {
+  background: var(--bg);
+  border-top: 1px solid rgba(255,255,255,0.03);
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.6;
+  color: #3f3f46;
+  flex-shrink: 0;
+}
+.compliance-bar a {
+  color: #52525b;
+  text-decoration: none;
+}
+.compliance-bar a:hover {
+  color: #71717a;
+  text-decoration: underline;
 }
 
 /* --- Toast (page-specific class for JS compat) --- */
@@ -1649,7 +1697,17 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 <!-- Navigation Bar -->
 <nav class="q-nav">
   <a href="/" class="q-nav-brand">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAXCAIAAADsjHrMAAAEAElEQVR42p1VXWgcVRQ+596Z3exf2ibdJjFUiIWmpqQkKKmKDyLYRktNEawWrSAUnyp5Kf4+1Bctgr4GX1oRqQhFQQWRoKJIKpUWitGWxDZpmtZszGZ/53/uvceHZDazm81m9T7MXObcO9/5vvOH0NID4YUABE0sBAQgWv+5ch2x1s5qTzeJBPWQgusI9e0M/vtCDP4XvEKbRg7/HzAiCtwmRKyF2tjJTcGoGWWp0RlsnhmGhFkHjEBETbi7umGbEaLgQQCAyBhjAMQ4R0SgJhXEBswqqlD4MOcaua6yigikzBxJgZwDNRYwLAxw0LZVE8Ka5EIAxjkpIjvX1n3PC6dPH337NYil7v4xKcw86jFkKwWFTRCsKerqqCBjCKisoh6LD798/NDJ0WRH2rAAo3Dj96mvPzgz9d23AAwTKVJyU8j1zMJInGybfPOBgwdPjo09fvyYqxK5vOMpVsi72NbZe+hIa+++7Oy0/fcMoA5cg4ZhrGFGocplZBvdvbufff3U0OERKaGQs3kihjosZW0/GcvnlOn4Ih4tldzrX5y9dX7MK+QwGiNSG+GtMCOAqtRijJNr7B8ZOfXZ+Z39/aWC73oUT0eXFjJfvvveN++/ZRh+qm/Q0qP5rOtIPTUwlHp0pDh5yV+6C1qkbpFVwCpJgQErRp75zJvvdPT1ZjN2NB4VqH44d/aT0Vf/mvjRLnnzF8dnfxnHLZ0tPXsMi0rLNqXb3eyydXUcI8nqFF1rblpNIwKsNFmtYHqmTSoSuXknc2H0xNzlCdCSLNFGSiGLFaenrrzx4vYDz28/8SEoXZRJuH7jLqGtFRbiKtJqr1WIkHdxpsBnrt6euzzBEu2klJISAEgKjCVIeNmL38snDT2einIUkuqNKaoGW43WWtBWZMgYWFyAsgOWZKgnSMqwOqQUELF40rGF7brc06WnGs8oLeCxQo5CNY+3i7DDAiHA9lZ6YJXHyBkQI6GE5YLGhNSU6a8mWkMZIQRJFXpCUtkGX4BlS1ASGAclgAg4B6nILAIo1tqplA6WDTqALwKHKp5hzTyr7rkhq+2R6ULZUBbfirEkWDlAhlwHywLfufeVl9JPDaula/TrORJIjk+eUzfjw6m/NRjza8cQGfhO5JFjqv0+p2ioljS7/wAZyypzDdxyamDfg59/1PXc023DD/uOXbowBktzuPMhWJyCO7+BHguRqwMWmNbixUC6kNxBux6TrhKWpVrace9h7Oil5VtgZLYMDmJX2ikXU08MYU+X8dWnavoKOstgLgLTN+IXgNUqTKBFxY1L/vwkdPUrlpBWSRol2LYL+o6I2T8XPz4Dre0tA7uNfxb0vd2R/Xucn35W8zchGg+Kdb2S+C9oNgc7Ni61CwAAAABJRU5ErkJggg==" alt="Quantra" style="height:28px;width:auto;">
+    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="navLogoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+      <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#navLogoGrad)" stroke-width="3.5" fill="none"/>
+      <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
+      <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#navLogoGrad)" opacity="0.85"/>
+      <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
+      <line x1="18" y1="28" x2="46" y2="20" stroke="url(#navLogoGrad)" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    </svg>
+    <div style="display:flex;flex-direction:column;line-height:1;">
+      <span class="brand-text">QUANTRA</span>
+    </div>
   </a>
   <div class="q-nav-links">
     <a href="/" class="active">Dashboard</a>
@@ -1787,6 +1845,10 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   <span id="footerFilter">Showing all stocks</span>
   <span id="footerFresh">LTP: -- | OHLC: -- | Chain: --</span>
   <span id="footerConn">--</span>
+</div>
+<div class="compliance-bar">
+  Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
+  &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a>
 </div>
 
 <!-- Analysis Panel Overlay + Slide-out -->
@@ -2423,10 +2485,13 @@ function handleMessage(msg) {
       if (msg.d) {
         for (const [sym, d] of Object.entries(msg.d)) {
           if (!stocks[sym]) continue;
-          Object.assign(stocks[sym], d);
-          updateCell(sym, 'ltp', d.ltp, fmtPrice);
+          // Selective merge — only copy non-null/undefined fields to avoid blanking cached values
+          for (const [k, v] of Object.entries(d)) {
+            if (v != null) stocks[sym][k] = v;
+          }
+          if (d.ltp != null) updateCell(sym, 'ltp', d.ltp, fmtPrice);
           if (d.chg_pct != null) updateCell(sym, 'chg_pct', d.chg_pct, fmtPct, valClass(d.chg_pct));
-        if (typeof heatmapVisible !== "undefined" && heatmapVisible) renderHeatmap();
+          if (typeof heatmapVisible !== "undefined" && heatmapVisible) renderHeatmap();
           if (d.vol != null) updateCell(sym, 'vol', d.vol, fmtVol);
         }
       }
@@ -2438,8 +2503,10 @@ function handleMessage(msg) {
       if (msg.d) {
         for (const [sym, d] of Object.entries(msg.d)) {
           if (!stocks[sym]) continue;
-          Object.assign(stocks[sym], d);
-          updateCell(sym, 'ltp', d.ltp, fmtPrice);
+          for (const [k, v] of Object.entries(d)) {
+            if (v != null) stocks[sym][k] = v;
+          }
+          if (d.ltp != null) updateCell(sym, 'ltp', d.ltp, fmtPrice);
           updateCell(sym, 'chg_pct', d.chg_pct, fmtPct, valClass(d.chg_pct));
           updateCell(sym, 'gap_pct', d.gap_pct, fmtPct, valClass(d.gap_pct));
           updateCell(sym, 'open', d.open, fmtPrice);
@@ -2460,7 +2527,9 @@ function handleMessage(msg) {
       if (msg.d) {
         for (const [sym, d] of Object.entries(msg.d)) {
           if (!stocks[sym]) continue;
-          Object.assign(stocks[sym], d);
+          for (const [k, v] of Object.entries(d)) {
+            if (v != null) stocks[sym][k] = v;
+          }
           updateCell(sym, 'pcr', d.pcr, v => v != null ? v.toFixed(2) : '\u2013', pcrClass(d.pcr));
           updateCellHTML(sym, 'pcr_sig', sigPill(d.pcr_sig));
           updateCellHTML(sym, 'buildup', buPill(d.buildup));

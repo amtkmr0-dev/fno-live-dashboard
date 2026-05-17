@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service &mdash; QUANTRA Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUANTRA Terminal — Obsidian Premium Theme
+   Terms of Service Page
+   ============================================================ */
+
+:root {
+  --bg:            #09090b;
+  --surface:       #18181b;
+  --surface-alt:   #1c1c20;
+  --surface-hover: #27272a;
+  --surface-active:#2e2e33;
+  --bg-elevated:   #27272a;
+  --border:        #2e2e35;
+  --border-light:  #3f3f46;
+  --border-focus:  #3b82f6;
+  --text:          #e4e4e7;
+  --text-dim:      #71717a;
+  --text-vdim:     #52525b;
+  --text-bright:   #fafafa;
+  --blue:          #3b82f6;
+  --blue-soft:     rgba(59,130,246,0.12);
+  --blue-hover:    #2563eb;
+  --green:         #10b981;
+  --red:           #ef4444;
+  --cyan:          #06b6d4;
+  --yellow:        #eab308;
+  --amber-bg:      rgba(234,179,8,0.08);
+  --amber-border:  rgba(234,179,8,0.4);
+  --nav-height:    48px;
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.6);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.8);
+  --font-sans:     'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  --fs-xs:         11px;
+  --fs-sm:         12px;
+  --fs-base:       13px;
+  --fs-md:         14px;
+  --fs-lg:         16px;
+  --fs-xl:         20px;
+  --fw-normal:     400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
+
+/* ---- Navigation ---- */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(59,130,246,0.08);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-brand:hover { text-decoration: none; }
+.q-nav-brand .brand-name {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-size: 15px;
+}
+.q-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+.q-nav-links a {
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-links a:hover { color: var(--text); background: var(--surface-hover); text-decoration: none; }
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--blue-soft);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
+}
+
+/* ---- Main Content ---- */
+.legal-main {
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+
+/* ---- Page Header ---- */
+.legal-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 0 36px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.legal-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.legal-logo .brand-name {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 22px;
+}
+.legal-page-title {
+  font-size: 28px;
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.legal-meta {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.legal-meta span {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin-bottom: 28px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.back-link:hover { color: var(--text); border-color: var(--border-light); text-decoration: none; }
+
+/* ---- Legal Sections ---- */
+.legal-section {
+  margin-bottom: 32px;
+}
+.legal-section h2 {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  padding-left: 14px;
+  border-left: 4px solid var(--blue);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+.legal-section p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.legal-section p:last-child { margin-bottom: 0; }
+.legal-section ul, .legal-section ol {
+  margin: 8px 0 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.legal-section li {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.6;
+}
+.legal-section strong { color: var(--text-bright); font-weight: var(--fw-semibold); }
+.legal-section a { color: var(--blue); }
+
+/* Warning / notice box */
+.notice-box {
+  background: var(--amber-bg);
+  border-left: 4px solid var(--amber-border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.notice-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Info box (blue) */
+.info-box {
+  background: var(--blue-soft);
+  border-left: 4px solid rgba(59,130,246,0.5);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.info-box p {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ---- Divider ---- */
+.legal-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 36px 0;
+}
+
+/* ---- Footer ---- */
+.q-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.q-footer a { color: var(--text-dim); }
+.q-footer a:hover { color: var(--blue); }
+.footer-links { display: flex; gap: 16px; }
+
+@media (max-width: 640px) {
+  .q-nav { padding: 0 10px; gap: 8px; }
+  .q-nav-links a { padding: 5px 8px; font-size: var(--fs-xs); }
+  .legal-main { padding: 24px 16px 48px; }
+  .legal-page-title { font-size: 22px; }
+  .q-footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="qg1" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#3b82f6"/>
+          <stop offset="100%" stop-color="#06b6d4"/>
+        </linearGradient>
+      </defs>
+      <!-- Geometric Q -->
+      <circle cx="12" cy="12" r="9.5" stroke="url(#qg1)" stroke-width="2.2" fill="none"/>
+      <line x1="18.5" y1="18.5" x2="23" y2="23" stroke="url(#qg1)" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Candlestick bars -->
+      <rect x="5.5" y="9" width="2" height="6" rx="0.5" fill="#3b82f6" opacity="0.85"/>
+      <rect x="5" y="7.5" width="3" height="1" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+      <rect x="5" y="16" width="3" height="1" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+      <rect x="9" y="8" width="2" height="8" rx="0.5" fill="#06b6d4" opacity="0.85"/>
+      <rect x="8.5" y="6.5" width="3" height="1" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+      <rect x="8.5" y="17" width="3" height="1" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+    </svg>
+    <span class="brand-name">QUANTRA</span>
+  </a>
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/terms" class="active">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="legal-main">
+
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to Dashboard
+  </a>
+
+  <!-- Page Header -->
+  <div class="legal-hero">
+    <div class="legal-logo">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="qg-hero" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="100%" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <circle cx="18" cy="18" r="14" stroke="url(#qg-hero)" stroke-width="2.5" fill="none"/>
+        <line x1="28" y1="28" x2="36" y2="36" stroke="url(#qg-hero)" stroke-width="2.5" stroke-linecap="round"/>
+        <rect x="8" y="13" width="3" height="10" rx="0.8" fill="#3b82f6" opacity="0.9"/>
+        <rect x="7" y="11" width="5" height="1.5" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+        <rect x="7" y="24.5" width="5" height="1.5" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+        <rect x="14" y="11" width="3" height="14" rx="0.8" fill="#06b6d4" opacity="0.9"/>
+        <rect x="13" y="9" width="5" height="1.5" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+        <rect x="13" y="26" width="5" height="1.5" rx="0.5" fill="#06b6d4" opacity="0.6"/>
+      </svg>
+      <span class="brand-name">QUANTRA</span>
+    </div>
+    <h1 class="legal-page-title">Terms of Service</h1>
+    <p class="legal-meta">Last Updated: <span>May 2026</span></p>
+  </div>
+
+  <!-- 1. Acceptance -->
+  <section class="legal-section">
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing or using <strong>QUANTRA Terminal</strong> ("the Platform", "we", "us"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any part of these terms, you must not use this platform.</p>
+    <p>These terms constitute a binding agreement between you and QUANTRA Terminal. Your continued use of the platform following any changes constitutes acceptance of the revised terms.</p>
+  </section>
+
+  <!-- 2. Description of Service -->
+  <section class="legal-section">
+    <h2>2. Description of Service</h2>
+    <p>QUANTRA Terminal is an <strong>F&amp;O (Futures &amp; Options) analytics platform</strong> providing:</p>
+    <ul>
+      <li>Real-time market data visualization for NSE-listed instruments</li>
+      <li>Option chain analysis and Greeks visualization</li>
+      <li>Paper trading simulation for strategy testing</li>
+      <li>AI-powered trade signals for educational purposes</li>
+      <li>Technical analysis tools and market scanners</li>
+    </ul>
+    <div class="notice-box">
+      <p><strong>Important:</strong> All features are provided for <strong>informational and educational purposes only</strong>. QUANTRA Terminal does not execute real trades, manage real funds, or provide investment advisory services.</p>
+    </div>
+  </section>
+
+  <!-- 3. User Accounts -->
+  <section class="legal-section">
+    <h2>3. User Accounts</h2>
+    <p>To access certain features, you must register and create an account. By registering, you agree to:</p>
+    <ul>
+      <li>Provide <strong>accurate, current, and complete</strong> information during registration</li>
+      <li>Maintain and promptly update your account information</li>
+      <li>Keep your password secure and not share it with any third party</li>
+      <li>Accept responsibility for all activities that occur under your account</li>
+      <li>Notify us immediately of any unauthorised use of your account</li>
+    </ul>
+    <p>You must be at least 18 years of age to create an account and use the platform.</p>
+  </section>
+
+  <!-- 4. Acceptable Use -->
+  <section class="legal-section">
+    <h2>4. Acceptable Use</h2>
+    <p>You agree not to misuse QUANTRA Terminal. Prohibited activities include, but are not limited to:</p>
+    <ul>
+      <li><strong>Reverse engineering</strong> or attempting to extract source code or algorithms from the platform</li>
+      <li><strong>Scraping, crawling, or harvesting</strong> any data from the platform using automated tools</li>
+      <li><strong>Redistribution of market data</strong> obtained through the platform to any third party</li>
+      <li>Attempting to gain unauthorised access to any part of the platform or its infrastructure</li>
+      <li>Using the platform for any unlawful purpose or in violation of any applicable regulation</li>
+      <li>Interfering with the operation of the platform or other users' access</li>
+    </ul>
+  </section>
+
+  <!-- 5. Paper Trading -->
+  <section class="legal-section">
+    <h2>5. Paper Trading Disclaimer</h2>
+    <div class="notice-box">
+      <p><strong>Paper trades executed on QUANTRA Terminal are simulations only.</strong> They are not actual market orders and do not involve real money, real securities, or real market execution. Paper trading results do not reflect actual trading conditions including market impact, slippage, liquidity constraints, or execution speed.</p>
+    </div>
+    <p>Paper trading performance is provided solely for educational and strategy-testing purposes. Past paper trading results are not indicative of future live trading performance.</p>
+  </section>
+
+  <!-- 6. AI Trade Signals -->
+  <section class="legal-section">
+    <h2>6. AI Trade Signals</h2>
+    <p>QUANTRA Terminal may display AI-generated signals, scores, and trade suggestions. These are:</p>
+    <ul>
+      <li>Generated by proprietary algorithms based on <strong>technical analysis of publicly available market data</strong></li>
+      <li>Provided for <strong>informational and educational purposes only</strong></li>
+      <li><strong>Not personalized investment advice</strong> tailored to your financial situation</li>
+      <li>Not guaranteed to be accurate, timely, or suitable for any particular trading strategy</li>
+    </ul>
+    <p>No algorithm can predict market movements with certainty. You should not rely solely on AI signals to make investment decisions.</p>
+  </section>
+
+  <!-- 7. Data Sources -->
+  <section class="legal-section">
+    <h2>7. Data Sources &amp; Accuracy</h2>
+    <p>Market data displayed on QUANTRA Terminal is sourced from <strong>NSE (National Stock Exchange) via broker APIs</strong>. Data may be subject to:</p>
+    <ul>
+      <li>Real-time or delayed feeds depending on the data subscription</li>
+      <li>Occasional errors, gaps, or interruptions in data delivery</li>
+      <li>The terms and limitations of the underlying broker or data provider</li>
+    </ul>
+    <p>QUANTRA Terminal is <strong>not responsible for the accuracy, completeness, or timeliness</strong> of market data, and shall not be liable for any trading decisions made based on data displayed on the platform.</p>
+  </section>
+
+  <!-- 8. Intellectual Property -->
+  <section class="legal-section">
+    <h2>8. Intellectual Property</h2>
+    <p>All content, design, user interface, algorithms, code, and other materials on QUANTRA Terminal are the exclusive property of QUANTRA Terminal and its licensors. This includes, without limitation:</p>
+    <ul>
+      <li>Platform design, layout, and visual elements</li>
+      <li>Proprietary trading algorithms and signal generation logic</li>
+      <li>Software, code, and system architecture</li>
+    </ul>
+    <p>You are granted a limited, non-exclusive, non-transferable licence to use the platform for personal, non-commercial purposes in accordance with these terms.</p>
+  </section>
+
+  <!-- 9. Limitation of Liability -->
+  <section class="legal-section">
+    <h2>9. Limitation of Liability</h2>
+    <p>The platform is provided <strong>"as is"</strong> and <strong>"as available"</strong> without any warranty of any kind, express or implied. QUANTRA Terminal makes no guarantee of profits, trading performance, or suitability of any information or analysis for any particular purpose.</p>
+    <div class="notice-box">
+      <p>To the maximum extent permitted by applicable law, QUANTRA Terminal, its developers, and affiliates shall not be liable for any direct, indirect, incidental, consequential, or punitive damages arising from your use of or reliance on the platform, including but not limited to any financial losses.</p>
+    </div>
+  </section>
+
+  <!-- 10. No Investment Advice -->
+  <section class="legal-section">
+    <h2>10. No Investment Advice</h2>
+    <div class="info-box">
+      <p><strong>QUANTRA Terminal is not registered as a Research Analyst (RA) or Investment Adviser (IA) with SEBI.</strong> Nothing on this platform constitutes investment advisory services as defined under SEBI (Research Analysts) Regulations, 2014 or SEBI (Investment Advisers) Regulations, 2013. For personalised investment advice, please consult a SEBI-registered investment adviser.</p>
+    </div>
+  </section>
+
+  <!-- 11. Termination -->
+  <section class="legal-section">
+    <h2>11. Termination</h2>
+    <p>QUANTRA Terminal reserves the right to suspend or terminate your account at any time, with or without notice, for any reason including, but not limited to, violation of these Terms of Service. Upon termination, your right to use the platform ceases immediately.</p>
+  </section>
+
+  <!-- 12. Governing Law -->
+  <section class="legal-section">
+    <h2>12. Governing Law</h2>
+    <p>These Terms of Service are governed by and construed in accordance with the laws of <strong>India</strong>. Any disputes arising in connection with these terms shall be subject to the exclusive jurisdiction of the courts in <strong>Delhi, India</strong>.</p>
+  </section>
+
+  <!-- 13. Changes to Terms -->
+  <section class="legal-section">
+    <h2>13. Changes to Terms</h2>
+    <p>We may update these Terms of Service from time to time. Material changes will be communicated via the platform or by email. Your continued use of QUANTRA Terminal after any changes constitutes your acceptance of the updated terms. We encourage you to review these terms periodically.</p>
+  </section>
+
+  <hr class="legal-divider">
+
+  <!-- Contact -->
+  <section class="legal-section">
+    <h2>14. Contact</h2>
+    <p>For questions or concerns regarding these Terms of Service, please contact us at:</p>
+    <p><a href="mailto:support@quantraterminal.com">support@quantraterminal.com</a></p>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="q-footer">
+  <span>&copy; 2026 QUANTRA Terminal &mdash; For educational purposes only. Not SEBI registered.</span>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+</footer>
+
+</body>
+</html>
