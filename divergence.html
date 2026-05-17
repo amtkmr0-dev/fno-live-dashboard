@@ -577,15 +577,42 @@ a:hover{text-decoration:underline}
 }
 .ms-option.selected .ms-check{background:var(--info);border-color:var(--info);color:#fff}
 .tv-sym-link{color:var(--text);text-decoration:none;font-weight:600;transition:color .15s} .tv-sym-link:hover{color:var(--info);text-decoration:underline}
+
+/* Compliance bar */
+.compliance-bar {
+  text-align: center;
+  padding: 10px 24px;
+  font-size: 9px;
+  line-height: 1.6;
+  color: #3f3f46;
+  border-top: 1px solid rgba(255,255,255,0.03);
+  background: var(--bg);
+}
+.compliance-bar a {
+  color: #52525b;
+  text-decoration: none;
+}
+.compliance-bar a:hover {
+  color: #71717a;
+  text-decoration: underline;
+}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-icon">SR</div>
-    <div class="logo-text">SignalReady</div>
+    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="navLogoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+      <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#navLogoGrad)" stroke-width="3.5" fill="none"/>
+      <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
+      <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#navLogoGrad)" opacity="0.85"/>
+      <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
+      <line x1="18" y1="28" x2="46" y2="20" stroke="url(#navLogoGrad)" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    </svg>
+    <div class="logo-text" style="font-size:13px;font-weight:800;letter-spacing:2.5px;background:linear-gradient(135deg,#fafafa,#a1a1aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">QUANTRA</div>
   </div>
   <div class="sidebar-nav">
     <a class="nav-item" href="/">
@@ -1620,5 +1647,9 @@ function showToast(msg, type) {
   }, 4000);
 }
 </script>
+<div class="compliance-bar">
+  Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
+  &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a>
+</div>
 </body>
 </html>
