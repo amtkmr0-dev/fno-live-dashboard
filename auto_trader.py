@@ -1173,14 +1173,36 @@ class AutoTrader:
 
 
 # ===========================================================================
-# LiveDataBridge — Fetches real Upstox data for auto-scan
+# LiveDataBridge — Fetches real Upstox data with rate-limit protection
 # ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rate-limit / throttle constants
+# ---------------------------------------------------------------------------
+# Upstox v2 documented limits: 25 requests/second, varies by endpoint.
+# We stay well under by throttling to ~4 req/sec (250 ms gap between calls).
+
+_THROTTLE_MS           = 250    # minimum gap between consecutive API calls (ms)
+_RETRY_MAX             = 3      # max retries on 429 / 5xx
+_RETRY_BASE_WAIT_S     = 2.0   # first retry waits 2 s, then 4 s, then 8 s
+_CACHE_TTL_NIFTY_S     = 120   # cache NIFTY direction result for 2 minutes
+_CACHE_TTL_CHAIN_S     = 180   # cache per-stock chain data for 3 minutes
+_CIRCUIT_BREAKER_429   = 5     # after 5 consecutive 429s, stop scanning for this cycle
+_CIRCUIT_BREAKER_COOL  = 60    # cool-down seconds after circuit breaker trips
+
 
 class LiveDataBridge:
     """
     Async bridge between the auto-trade engine and Upstox API v2.
 
-    Reuses functions from chat_analysis.py for option chain / candles data.
+    Built-in protections against Upstox rate limits:
+      - Per-call throttle: minimum 250 ms between consecutive HTTP requests
+      - Retry with exponential backoff on HTTP 429 / 5xx (up to 3 retries)
+      - Response caching: NIFTY direction cached 2 min, stock chains cached 3 min
+      - Circuit breaker: 5 consecutive 429s → stop scanning, cool down 60 s
+      - Respects Retry-After header from 429 responses
+
+    Reuses functions from chat_analysis.py for instrument resolution.
     Designed to be called from auth_proxy.py's periodic timer.
 
     Usage (inside an async context):
@@ -1192,6 +1214,17 @@ class LiveDataBridge:
     def __init__(self):
         self._token = None
         self._token_checked_at = 0
+        # Throttle state
+        self._last_request_at = 0.0          # monotonic timestamp of last API call
+        # Response cache: key → (timestamp, data)
+        self._cache = {}
+        # Circuit breaker
+        self._consecutive_429s = 0
+        self._circuit_open_until = 0.0       # monotonic time when circuit breaker resets
+
+    # ------------------------------------------------------------------
+    # Token management
+    # ------------------------------------------------------------------
 
     def _get_token(self):
         """Read Upstox token (reuses chat_analysis.get_upstox_token)."""
@@ -1214,15 +1247,157 @@ class LiveDataBridge:
             "Authorization": f"Bearer {token}",
         }
 
+    # ------------------------------------------------------------------
+    # Rate-limit helpers
+    # ------------------------------------------------------------------
+
+    async def _throttle(self):
+        """Enforce minimum gap between API calls."""
+        import asyncio
+        now = time.monotonic()
+        elapsed_ms = (now - self._last_request_at) * 1000
+        if elapsed_ms < _THROTTLE_MS:
+            wait_s = (_THROTTLE_MS - elapsed_ms) / 1000.0
+            await asyncio.sleep(wait_s)
+        self._last_request_at = time.monotonic()
+
+    def _circuit_is_open(self) -> bool:
+        """Return True if circuit breaker is tripped (too many 429s)."""
+        if self._consecutive_429s >= _CIRCUIT_BREAKER_429:
+            if time.monotonic() < self._circuit_open_until:
+                return True
+            # Cool-down expired — reset
+            self._consecutive_429s = 0
+        return False
+
+    def _record_429(self):
+        """Record a 429 response; trip circuit breaker if threshold reached."""
+        self._consecutive_429s += 1
+        if self._consecutive_429s >= _CIRCUIT_BREAKER_429:
+            self._circuit_open_until = time.monotonic() + _CIRCUIT_BREAKER_COOL
+            log.warning(
+                "LiveDataBridge: circuit breaker TRIPPED — %d consecutive 429s, "
+                "cooling down %d s",
+                self._consecutive_429s, _CIRCUIT_BREAKER_COOL,
+            )
+
+    def _record_success(self):
+        """Reset consecutive 429 counter on a successful response."""
+        self._consecutive_429s = 0
+
+    def _cache_get(self, key, ttl_s):
+        """Return cached value if fresh, else None."""
+        entry = self._cache.get(key)
+        if entry and (time.monotonic() - entry[0]) < ttl_s:
+            log.debug("LiveDataBridge: cache HIT for %s", key)
+            return entry[1]
+        return None
+
+    def _cache_set(self, key, value):
+        """Store value in cache with current timestamp."""
+        self._cache[key] = (time.monotonic(), value)
+
+    async def _api_get(self, session, url, headers, params, timeout_s=15):
+        """
+        Rate-limited GET with retry on 429/5xx and circuit breaker.
+
+        Returns (status_code, json_data) or (error_code, None) on failure.
+        Special return codes:
+          -1  = circuit breaker open
+          -2  = all retries exhausted
+          401 = token expired (no retry)
+        """
+        import aiohttp
+        import asyncio
+
+        if self._circuit_is_open():
+            log.debug("LiveDataBridge: circuit breaker OPEN — skipping request to %s", url)
+            return -1, None
+
+        for attempt in range(_RETRY_MAX):
+            await self._throttle()
+
+            try:
+                async with session.get(
+                    url, headers=headers, params=params,
+                    timeout=aiohttp.ClientTimeout(total=timeout_s),
+                ) as resp:
+                    status = resp.status
+
+                    if status == 200:
+                        self._record_success()
+                        data = await resp.json()
+                        return 200, data
+
+                    if status == 401:
+                        log.error("LiveDataBridge: Upstox token expired (401)")
+                        return 401, None
+
+                    if status == 429:
+                        self._record_429()
+                        # Respect Retry-After header if present
+                        retry_after = resp.headers.get("Retry-After")
+                        if retry_after:
+                            try:
+                                wait_s = float(retry_after)
+                            except ValueError:
+                                wait_s = _RETRY_BASE_WAIT_S * (2 ** attempt)
+                        else:
+                            wait_s = _RETRY_BASE_WAIT_S * (2 ** attempt)
+                        log.warning(
+                            "LiveDataBridge: 429 rate limited (attempt %d/%d), "
+                            "waiting %.1f s before retry",
+                            attempt + 1, _RETRY_MAX, wait_s,
+                        )
+                        await asyncio.sleep(wait_s)
+                        continue
+
+                    if status >= 500:
+                        wait_s = _RETRY_BASE_WAIT_S * (2 ** attempt)
+                        log.warning(
+                            "LiveDataBridge: server error %d (attempt %d/%d), "
+                            "waiting %.1f s",
+                            status, attempt + 1, _RETRY_MAX, wait_s,
+                        )
+                        await asyncio.sleep(wait_s)
+                        continue
+
+                    # Other 4xx — don't retry
+                    log.debug("LiveDataBridge: HTTP %d for %s — not retrying", status, url)
+                    return status, None
+
+            except asyncio.TimeoutError:
+                wait_s = _RETRY_BASE_WAIT_S * (2 ** attempt)
+                log.warning(
+                    "LiveDataBridge: timeout (attempt %d/%d), waiting %.1f s",
+                    attempt + 1, _RETRY_MAX, wait_s,
+                )
+                await asyncio.sleep(wait_s)
+                continue
+            except Exception as exc:
+                log.error("LiveDataBridge: request error: %s", exc)
+                return -2, None
+
+        log.warning("LiveDataBridge: all %d retries exhausted for %s", _RETRY_MAX, url)
+        return -2, None
+
+    # ------------------------------------------------------------------
+    # NIFTY direction
+    # ------------------------------------------------------------------
+
     async def fetch_nifty_direction(self):
         """
         Determine NIFTY direction from Upstox live option chain data.
+        Cached for 2 minutes to avoid redundant API calls.
 
         Returns (direction: str, score: float)
-        Direction: BULLISH / BEARISH / NEUTRAL
-        Score: 0-100 confidence
         """
         import aiohttp
+
+        # Check cache first
+        cached = self._cache_get("nifty_direction", _CACHE_TTL_NIFTY_S)
+        if cached:
+            return cached
 
         token = self._get_token()
         if not token:
@@ -1234,23 +1409,16 @@ class LiveDataBridge:
 
         try:
             async with aiohttp.ClientSession() as session:
-                # 1) Fetch NIFTY option chain for PCR + OI walls
-                chain_url = "https://api.upstox.com/v2/option/chain"
-                # Get nearest expiry first
+                # 1) Get nearest expiry
                 contract_url = "https://api.upstox.com/v2/option/contract"
-                async with session.get(
-                    contract_url, headers=headers,
+                status, resp_json = await self._api_get(
+                    session, contract_url, headers,
                     params={"instrument_key": nifty_key},
-                    timeout=aiohttp.ClientTimeout(total=15),
-                ) as resp:
-                    if resp.status == 401:
-                        log.error("LiveDataBridge: Upstox token expired (401)")
-                        return "NEUTRAL", 50.0
-                    if resp.status != 200:
-                        log.error("LiveDataBridge: contract fetch failed %d", resp.status)
-                        return "NEUTRAL", 50.0
-                    contracts = (await resp.json()).get("data", [])
+                )
+                if status != 200 or not resp_json:
+                    return "NEUTRAL", 50.0
 
+                contracts = resp_json.get("data", [])
                 if not contracts:
                     return "NEUTRAL", 50.0
 
@@ -1259,16 +1427,17 @@ class LiveDataBridge:
                     return "NEUTRAL", 50.0
                 expiry = expiries[0]
 
-                # Fetch chain data
-                async with session.get(
-                    chain_url, headers=headers,
+                # 2) Fetch chain data
+                chain_url = "https://api.upstox.com/v2/option/chain"
+                status, resp_json = await self._api_get(
+                    session, chain_url, headers,
                     params={"instrument_key": nifty_key, "expiry_date": expiry},
-                    timeout=aiohttp.ClientTimeout(total=20),
-                ) as resp:
-                    if resp.status != 200:
-                        return "NEUTRAL", 50.0
-                    data = (await resp.json()).get("data", [])
+                    timeout_s=20,
+                )
+                if status != 200 or not resp_json:
+                    return "NEUTRAL", 50.0
 
+                data = resp_json.get("data", [])
                 if not data:
                     return "NEUTRAL", 50.0
 
@@ -1293,12 +1462,8 @@ class LiveDataBridge:
 
                 pcr = total_pe_oi / total_ce_oi if total_ce_oi > 0 else 1.0
 
-                # Direction logic:
-                # PCR > 1.2 → bullish (more PE writing = support)
-                # PCR < 0.8 → bearish (more CE writing = resistance)
-                # OI change: net PE buildup = bullish, net CE buildup = bearish
+                # Direction scoring
                 score = 50.0
-
                 if pcr > 1.3:
                     score += 20
                 elif pcr > 1.1:
@@ -1310,11 +1475,10 @@ class LiveDataBridge:
 
                 # OI change signal
                 if pe_oi_chg_sum > ce_oi_chg_sum * 1.5:
-                    score += 10  # strong PE writing = bullish
+                    score += 10
                 elif ce_oi_chg_sum > pe_oi_chg_sum * 1.5:
-                    score -= 10  # strong CE writing = bearish
+                    score -= 10
 
-                # Clamp
                 score = max(0, min(100, score))
 
                 if score >= 60:
@@ -1325,22 +1489,33 @@ class LiveDataBridge:
                     direction = "NEUTRAL"
 
                 log.info(
-                    "LiveDataBridge NIFTY: spot=%.2f pcr=%.3f ce_oi_chg=%d pe_oi_chg=%d → %s (%.0f)",
+                    "LiveDataBridge NIFTY: spot=%.2f pcr=%.3f "
+                    "ce_oi_chg=%d pe_oi_chg=%d → %s (%.0f)",
                     spot, pcr, ce_oi_chg_sum, pe_oi_chg_sum, direction, score,
                 )
-                return direction, score
+
+                # Cache the result
+                result = (direction, score)
+                self._cache_set("nifty_direction", result)
+                return result
 
         except Exception as exc:
-            log.error("LiveDataBridge.fetch_nifty_direction failed: %s", exc, exc_info=True)
+            log.error(
+                "LiveDataBridge.fetch_nifty_direction failed: %s",
+                exc, exc_info=True,
+            )
             return "NEUTRAL", 50.0
+
+    # ------------------------------------------------------------------
+    # Whitelisted stock scan
+    # ------------------------------------------------------------------
 
     async def scan_whitelisted_stocks(self, nifty_direction, max_stocks=10):
         """
-        Scan whitelisted stocks via Upstox option chains.
-        Returns a list of candidate dicts ready for AutoTrader.run_scan().
+        Scan whitelisted stocks via Upstox option chains with rate-limit
+        protection. Each stock chain fetch is throttled and cached.
 
-        Fetches the nearest-expiry ATM option for each whitelisted stock
-        and builds candidate entries with real premiums, lot sizes, and strikes.
+        Returns a list of candidate dicts ready for AutoTrader.run_scan().
         """
         import aiohttp
 
@@ -1352,94 +1527,126 @@ class LiveDataBridge:
         headers = self._headers(token)
         candidates = []
 
-        # Pick direction for options: BULLISH → CE, BEARISH → PE, NEUTRAL → CE (default)
         opt_type = "PE" if nifty_direction == "BEARISH" else "CE"
 
-        # Resolve instruments first
+        # Resolve instruments (cached for the day inside chat_analysis)
         try:
             from chat_analysis import _load_instruments
         except ImportError:
-            log.warning("LiveDataBridge: chat_analysis not importable for instruments")
+            log.warning("LiveDataBridge: chat_analysis not importable")
             return []
 
         try:
             async with aiohttp.ClientSession() as session:
                 instruments = await _load_instruments(session)
 
-                # Select a subset of whitelisted stocks to scan
-                # (scanning all 48 would be slow — pick the most liquid ones)
-                scan_symbols = []
-                for sym in WHITELISTED_STOCKS:
-                    if sym in instruments and instruments[sym].get("lot_size", 0) > 0:
-                        scan_symbols.append(sym)
-                scan_symbols = scan_symbols[:max_stocks]
+                scan_symbols = [
+                    sym for sym in WHITELISTED_STOCKS
+                    if sym in instruments
+                    and instruments[sym].get("lot_size", 0) > 0
+                ][:max_stocks]
 
                 log.info(
-                    "LiveDataBridge: scanning %d whitelisted stocks for %s setups",
+                    "LiveDataBridge: scanning %d stocks for %s setups "
+                    "(throttle=%d ms, cache_ttl=%d s)",
                     len(scan_symbols), opt_type,
+                    _THROTTLE_MS, _CACHE_TTL_CHAIN_S,
                 )
 
+                scanned = 0
+                skipped_429 = 0
+
                 for sym in scan_symbols:
+                    # Check circuit breaker before each stock
+                    if self._circuit_is_open():
+                        log.warning(
+                            "LiveDataBridge: circuit breaker open — "
+                            "stopping after %d/%d stocks",
+                            scanned, len(scan_symbols),
+                        )
+                        break
+
                     try:
                         cand = await self._fetch_stock_candidate(
                             session, headers, sym, opt_type, instruments,
                         )
                         if cand:
                             candidates.append(cand)
+                        scanned += 1
+                    except _RateLimitedError:
+                        skipped_429 += 1
+                        log.debug("LiveDataBridge: %s skipped (rate limited)", sym)
+                        continue
                     except Exception as exc:
                         log.debug("LiveDataBridge: error scanning %s: %s", sym, exc)
+                        scanned += 1
                         continue
 
         except Exception as exc:
-            log.error("LiveDataBridge.scan_whitelisted_stocks failed: %s", exc, exc_info=True)
+            log.error(
+                "LiveDataBridge.scan_whitelisted_stocks failed: %s",
+                exc, exc_info=True,
+            )
 
         log.info(
-            "LiveDataBridge: %d candidates from %d scanned stocks",
-            len(candidates), len(scan_symbols) if 'scan_symbols' in dir() else 0,
+            "LiveDataBridge: %d candidates from %d scanned "
+            "(%d rate-limited skips, circuit_breaker=%s)",
+            len(candidates),
+            scanned if 'scanned' in dir() else 0,
+            skipped_429 if 'skipped_429' in dir() else 0,
+            "OPEN" if self._circuit_is_open() else "closed",
         )
         return candidates
 
-    async def _fetch_stock_candidate(self, session, headers, symbol, opt_type, instruments):
+    async def _fetch_stock_candidate(
+        self, session, headers, symbol, opt_type, instruments,
+    ):
         """
-        Fetch option chain for a single stock and return a candidate dict
-        if a valid ATM option is found with premium >= MIN_PREMIUM_RS.
+        Fetch option chain for a single stock (with cache + rate-limit).
+        Returns a candidate dict or None.
+        Raises _RateLimitedError if circuit breaker or 429 blocks us.
         """
-        import aiohttp
+        # Check cache first
+        cache_key = f"chain:{symbol}:{opt_type}"
+        cached = self._cache_get(cache_key, _CACHE_TTL_CHAIN_S)
+        if cached is not None:
+            return cached  # may be None (= "no valid candidate", also cached)
 
         info = instruments.get(symbol, {})
         lot_size = info.get("lot_size", 0)
         nearest_expiry = info.get("nearest_expiry", "")
 
         if not lot_size or not nearest_expiry:
+            self._cache_set(cache_key, None)
             return None
 
-        # Construct instrument key for option chain
         eq_key = info.get("equity_key", "")
         if not eq_key:
+            self._cache_set(cache_key, None)
             return None
 
-        # Derive F&O key from equity key
         fo_key = eq_key.replace("NSE_EQ|", "NSE_FO|")
 
-        # Fetch chain
         chain_url = "https://api.upstox.com/v2/option/chain"
-        try:
-            async with session.get(
-                chain_url, headers=headers,
-                params={"instrument_key": fo_key, "expiry_date": nearest_expiry},
-                timeout=aiohttp.ClientTimeout(total=15),
-            ) as resp:
-                if resp.status != 200:
-                    return None
-                data = (await resp.json()).get("data", [])
-        except Exception:
+        status, resp_json = await self._api_get(
+            session, chain_url, headers,
+            params={"instrument_key": fo_key, "expiry_date": nearest_expiry},
+        )
+
+        if status == -1:
+            raise _RateLimitedError("circuit breaker open")
+        if status != 200 or not resp_json:
+            self._cache_set(cache_key, None)
             return None
 
+        data = resp_json.get("data", [])
         if not data:
+            self._cache_set(cache_key, None)
             return None
 
         spot = data[0].get("underlying_spot_price", 0)
         if spot <= 0:
+            self._cache_set(cache_key, None)
             return None
 
         # Find ATM strike
@@ -1460,14 +1667,15 @@ class LiveDataBridge:
                 atm_premium = md.get("ltp", 0) or 0
 
         if not atm_strike or atm_premium < MIN_PREMIUM_RS:
+            self._cache_set(cache_key, None)
             return None
 
-        # Capital check (quick — use 1 lot)
         capital = atm_premium * lot_size
-        if capital > 50_000:  # default max capital
+        if capital > 50_000:
+            self._cache_set(cache_key, None)
             return None
 
-        return {
+        result = {
             "symbol": symbol,
             "direction": opt_type,
             "strike": atm_strike,
@@ -1477,6 +1685,13 @@ class LiveDataBridge:
             "expiry": nearest_expiry,
             "spot_price": round(spot, 2),
         }
+        self._cache_set(cache_key, result)
+        return result
+
+
+class _RateLimitedError(Exception):
+    """Internal signal that a request was blocked by rate-limit protection."""
+    pass
 
 
 # ===========================================================================
