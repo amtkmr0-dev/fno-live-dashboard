@@ -150,7 +150,7 @@ a:hover { text-decoration: underline; }
   color: #fff;
 }
 .q-nav-brand .brand-text {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 3px;
   color: #ffffff;
@@ -168,9 +168,9 @@ a:hover { text-decoration: underline; }
   border-left: 1px solid var(--border);
 }
 .q-nav-links a {
-  padding: 6px 12px;
-  color: #a1a1aa;
-  font-size: 13px;
+  padding: 6px 14px;
+  color: #c4c4cc;
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.15s;
   white-space: nowrap;
@@ -691,12 +691,11 @@ a:hover { text-decoration: underline; }
   border-color: var(--border-light);
   color: var(--text-bright);
 }
-/* CSS-only dropdown: show on focus-within OR .show class */
-.user-dropdown:focus-within .user-menu,
+/* Dropdown: JS-toggle only — .show class controls visibility */
 .user-menu.show {
   display: block;
 }
-.user-dropdown:focus-within .user-avatar-btn {
+.user-avatar-btn.open {
   background: rgba(59,130,246,0.1);
   border-color: var(--blue);
   color: var(--text-bright);
@@ -1917,7 +1916,7 @@ td[data-intensity="low"] { opacity: 0.65; }
     <span id="paperBadge" style="display:none"></span>
   </div>
   <div class="user-dropdown" id="userDropdown">
-    <button class="user-avatar-btn" id="userAvatarBtn" title="Account" onclick="toggleUserMenu(event)">
+    <button class="user-avatar-btn" id="userAvatarBtn" title="Account" type="button">
       <span id="userAvatarText">Account</span>
     </button>
     <div class="user-menu" id="userMenu">
@@ -1931,22 +1930,31 @@ td[data-intensity="low"] { opacity: 0.65; }
   </div>
 </nav>
 <script>
-function toggleUserMenu(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  var menu = document.getElementById('userMenu');
+(function(){
   var btn = document.getElementById('userAvatarBtn');
-  var isOpen = menu.classList.toggle('show');
-  btn.classList.toggle('open', isOpen);
-}
-document.addEventListener('click', function(e) {
   var menu = document.getElementById('userMenu');
-  var btn = document.getElementById('userAvatarBtn');
-  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-    menu.classList.remove('show');
-    btn.classList.remove('open');
-  }
-});
+  if(!btn||!menu) return;
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = menu.classList.toggle('show');
+    btn.classList.toggle('open', open);
+  });
+
+  document.addEventListener('click', function(e){
+    if(!menu.contains(e.target) && !btn.contains(e.target)){
+      menu.classList.remove('show');
+      btn.classList.remove('open');
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){
+      menu.classList.remove('show');
+      btn.classList.remove('open');
+    }
+  });
+})();
 </script>
 
 <!-- Metrics Strip (Bloomberg-style) -->
