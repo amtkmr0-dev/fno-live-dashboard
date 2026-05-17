@@ -105,126 +105,111 @@ a:hover { text-decoration: underline; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
 
 /* ============================================================
-   NAVIGATION BAR
+   NAVIGATION BAR — Professional fintech nav
    ============================================================ */
 .q-nav {
   display: flex;
   align-items: center;
-  height: var(--nav-height);
-  background: linear-gradient(180deg, rgba(24,24,27,0.95) 0%, rgba(18,18,20,0.98) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  height: 48px;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(59,130,246,0.08), 0 4px 16px rgba(0,0,0,0.3);
-  padding: 0 16px;
+  padding: 0 20px;
   position: sticky;
   top: 0;
   z-index: 100;
   flex-shrink: 0;
-  gap: 16px;
+  gap: 0;
 }
-.q-nav::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(6,182,212,0.2) 70%, transparent 100%);
-}
+.q-nav::after { display: none; }
+
+/* Brand */
 .q-nav-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-weight: var(--fw-bold);
-  font-size: var(--fs-lg);
   color: var(--text-bright);
-  letter-spacing: 0.5px;
   white-space: nowrap;
   text-decoration: none;
+  margin-right: 6px;
+  flex-shrink: 0;
 }
-.q-nav-brand:hover { text-decoration: none; }
-.q-nav-brand img, .q-nav-brand .brand-png {
-  display: none; /* Hide old PNG logo */
-}
+.q-nav-brand:hover { text-decoration: none; opacity: 0.9; }
+.q-nav-brand img, .q-nav-brand .brand-png { display: none; }
+.q-nav-brand svg { width: 28px; height: 28px; flex-shrink: 0; border-radius: 7px; }
 .q-nav-brand .brand-icon {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   background: linear-gradient(135deg, var(--blue), #06b6d4);
-  border-radius: 7px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 800;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
 }
 .q-nav-brand .brand-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
-  letter-spacing: 2.5px;
-  background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: 3px;
+  color: #ffffff;
 }
-.q-nav-brand .brand-tag {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  opacity: 0.6;
-  margin-left: -2px;
-}
+.q-nav-brand .brand-tag { display: none; }
+
+/* Nav links */
 .q-nav-links {
   display: flex;
   align-items: center;
   gap: 2px;
   flex: 1;
-  justify-content: center;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
 }
 .q-nav-links a {
-  padding: 5px 13px;
-  border-radius: 999px;
-  color: var(--text-dim);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  transition: all 0.15s ease;
+  padding: 6px 12px;
+  color: #a1a1aa;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
   white-space: nowrap;
   text-decoration: none;
+  border-radius: 6px;
 }
 .q-nav-links a:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+  color: #ffffff;
+  background: rgba(255,255,255,0.05);
   text-decoration: none;
 }
 .q-nav-links a.active {
-  color: var(--text-bright);
-  background: var(--blue-soft);
-  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
+  color: #ffffff;
+  font-weight: 600;
+  background: rgba(255,255,255,0.08);
 }
+
+/* Connection status */
 .q-nav-status {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: var(--fs-xs);
+  gap: 8px;
+  font-size: 11px;
   color: var(--text-dim);
   white-space: nowrap;
   margin-left: auto;
   flex-shrink: 0;
+  font-family: var(--font-mono);
 }
 
 /* Connection indicators */
 .conn-dot {
-  width: 7px; height: 7px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
 }
-.conn-dot.on  { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
-.conn-dot.off { background: var(--red); }
+.conn-dot.on  { background: var(--green); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+.conn-dot.off { background: var(--red); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
 .conn-dot.reconn { background: var(--orange); }
 
 .pulse-dot {
@@ -663,33 +648,106 @@ a:hover { text-decoration: underline; }
    RESPONSIVE
    ============================================================ */
 @media (max-width: 768px) {
-  .q-nav { padding: 0 10px; gap: 8px; }
-  .q-nav-links a { padding: 5px 9px; font-size: var(--fs-xs); }
+  .q-nav { padding: 0 12px; height: 44px; }
+  .q-nav-links a { padding: 4px 8px; font-size: 12px; }
+  .q-nav-links { margin-left: 8px; padding-left: 8px; }
+  .q-nav-status { display: none; }
   .q-stats-row { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Logout button in nav */
-.q-nav-logout {
-  margin-left: 8px;
-  padding: 5px 14px;
-  border-radius: 999px;
-  background: rgba(239,68,68,0.06);
-  border: 1px solid rgba(239,68,68,0.15);
-  color: var(--text-dim);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
+/* User dropdown */
+.user-dropdown {
+  position: relative;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+.user-avatar-btn {
+  height: 30px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-sans);
   cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  transition: all 0.15s;
+  line-height: 1;
   white-space: nowrap;
 }
-.q-nav-logout:hover {
-  color: var(--red);
-  border-color: var(--red);
-  background: rgba(239,68,68,0.12);
+.user-avatar-btn::after {
+  content: '\25BE';
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 2px;
+}
+.user-avatar-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: var(--border-light);
+  color: var(--text-bright);
+}
+.user-avatar-btn.open {
+  background: rgba(59,130,246,0.1);
+  border-color: var(--blue);
+  color: var(--text-bright);
+}
+.user-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  z-index: 200;
+  padding: 6px 0;
+  animation: menuSlide 0.15s ease;
+}
+.user-menu.show { display: block; }
+@keyframes menuSlide {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.user-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  color: #a1a1aa;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
   text-decoration: none;
-  box-shadow: 0 0 12px rgba(239,68,68,0.15);
+  transition: all 0.12s;
+}
+.user-menu a:hover {
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+  text-decoration: none;
+}
+.user-menu .menu-icon {
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+.user-menu .menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+.user-menu .menu-logout:hover {
+  color: #f87171;
+  background: rgba(239,68,68,0.08);
 }
 </style>
 <style>
@@ -707,23 +765,24 @@ body {
   flex-direction: column;
 }
 
-/* --- Controls Bar --- */
+/* --- Controls Bar (Bloomberg reference match) --- */
 .header-controls {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 20px;
+  background: var(--bg);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 8px 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
   overflow-x: auto;
   z-index: 99;
+  flex-wrap: wrap;
 }
 .header-controls::-webkit-scrollbar { height: 0; }
 .filters {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   flex-wrap: nowrap;
 }
@@ -739,12 +798,12 @@ body {
 .search-box {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 6px 10px 6px 30px;
+  border-radius: 6px;
+  padding: 5px 10px 5px 28px;
   color: var(--text);
-  font-size: var(--fs-sm);
-  font-family: inherit;
-  width: 180px;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  width: 140px;
   outline: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23787B86' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -753,48 +812,49 @@ body {
 }
 .search-box:focus { border-color: var(--blue); }
 
-/* --- Filter selects --- */
+/* --- Filter selects (Bloomberg reference match) --- */
 .filter-select {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 6px 10px;
-  color: var(--text);
-  font-size: var(--fs-sm);
-  font-family: inherit;
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: var(--font-sans);
   outline: none;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s;
 }
 .filter-select:focus { border-color: var(--blue); }
 
 /* --- Toggle buttons --- */
+/* Bloomberg toggle buttons — reference match */
 .btn-toggle {
-  background: transparent;
+  padding: 4px 10px;
+  border-radius: 6px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 5px 12px;
+  background: transparent;
   color: var(--text-dim);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
+  font-size: 10px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   white-space: nowrap;
-  font-family: inherit;
+  font-family: var(--font-sans);
 }
-.btn-toggle:hover { border-color: var(--text-dim); color: var(--text); }
-.btn-toggle.active { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
-.btn-n50 { border-color: rgba(255,215,0,0.3); color: var(--gold); }
-.btn-n50.active { border-color: var(--gold); background: var(--gold-soft); }
-.btn-poised { border-color: rgba(38,166,154,0.3); color: var(--green); }
-.btn-poised.active { border-color: var(--green); background: var(--green-soft); }
+.btn-toggle:hover { color: var(--text); border-color: var(--border-light); }
+.btn-toggle.active { background: rgba(59,130,246,0.1); border-color: var(--blue); color: var(--blue); }
+.btn-n50 { color: var(--text-dim); }
+.btn-n50.active { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.08); }
+.btn-poised { color: var(--gold); border-color: var(--gold); }
+.btn-poised.active { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.1); }
 
 /* --- Column toggles & view presets --- */
 .col-toggles {
   display: flex;
   gap: 4px;
   margin-left: 4px;
-  border-left: 1px solid var(--border);
+  border-left: 1px solid rgba(255,255,255,0.06);
   padding-left: 10px;
 }
 .col-toggles .btn-toggle { font-size: 10px; padding: 4px 8px; }
@@ -802,15 +862,15 @@ body {
   display: flex;
   gap: 4px;
   margin-left: 4px;
-  border-left: 1px solid var(--border);
+  border-left: 1px solid rgba(255,255,255,0.06);
   padding-left: 10px;
 }
-.view-presets .btn-toggle { font-size: 10px; padding: 4px 8px; border-style: dashed; }
+.view-presets .btn-toggle { font-size: 10px; padding: 4px 8px; }
 
 /* --- Sector Heatmap --- */
 .heatmap-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
   padding: 6px 16px;
   display: flex;
   gap: 4px;
@@ -834,13 +894,14 @@ body {
 .heat-cell .h-val { display: block; font-weight: var(--fw-normal); font-size: 9px; opacity: 0.8; }
 
 /* --- Top Picks Bar --- */
+/* --- Top Picks / Recommended Picks --- */
 .top-picks-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
   padding: 8px 16px;
   display: flex;
-  gap: 8px;
-  align-items: center;
+  gap: 10px;
+  align-items: stretch;
   flex-shrink: 0;
   overflow-x: auto;
 }
@@ -848,44 +909,49 @@ body {
 .top-picks-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .top-picks-label {
   font-size: 10px;
-  font-weight: var(--fw-bold);
-  color: var(--green);
-  letter-spacing: 1px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   white-space: nowrap;
-  padding-right: 8px;
+  padding-right: 12px;
   border-right: 1px solid var(--border);
-  margin-right: 4px;
+  margin-right: 2px;
+  display: flex;
+  align-items: center;
 }
 .pick-card {
-  background: rgba(38,166,154,0.06);
-  border: 1px solid rgba(38,166,154,0.2);
-  border-radius: var(--radius-md);
-  padding: 6px 10px;
-  min-width: 200px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 210px;
+  max-width: 240px;
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
 }
-.pick-card:hover { border-color: var(--green); background: rgba(38,166,154,0.12); }
+.pick-card:hover { border-color: var(--border-light); background: rgba(255,255,255,0.04); }
 .pick-card .pc-head {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
-.pick-card .pc-sym { font-size: var(--fs-sm); font-weight: var(--fw-bold); color: var(--text); }
-.pick-card .pc-dir { font-size: 9px; font-weight: var(--fw-bold); padding: 1px 5px; border-radius: 3px; }
-.pick-card .pc-dir.dir-CE { background: rgba(38,166,154,0.25); color: #4DD0C0; }
-.pick-card .pc-dir.dir-PE { background: rgba(239,83,80,0.25); color: #FF8A80; }
-.pick-card .pc-score { font-size: 10px; font-weight: var(--fw-bold); margin-left: auto; }
-.pick-card .pc-detail { font-size: 9px; color: var(--text-dim); line-height: 1.4; }
-.pick-card .pc-detail span { color: var(--text); }
+.pick-card .pc-sym { font-size: 12px; font-weight: 700; color: var(--text-bright); font-family: var(--font-sans); }
+.pick-card .pc-dir { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.3px; }
+.pick-card .pc-dir.dir-CE { background: rgba(16,185,129,0.15); color: var(--green-text); }
+.pick-card .pc-dir.dir-PE { background: rgba(239,68,68,0.15); color: var(--red-text); }
+.pick-card .pc-score { font-size: 11px; font-weight: 700; margin-left: auto; font-family: var(--font-mono); }
+.pick-card .pc-detail { font-size: 10px; color: var(--text-dim); line-height: 1.5; font-family: var(--font-mono); }
+.pick-card .pc-detail span { color: var(--text); font-weight: 500; }
 .top-picks-empty {
-  font-size: var(--fs-xs);
+  font-size: 11px;
   color: var(--text-vdim);
   font-style: italic;
   padding: 2px 0;
+  display: flex;
+  align-items: center;
 }
 
 /* --- Main Table --- */
@@ -907,7 +973,7 @@ table {
 }
 thead { position: sticky; top: 0; z-index: 10; }
 thead th {
-  background: var(--bg-elevated);
+  background: var(--bg);
   padding: 10px 8px;
   text-align: right;
   font-size: 10px;
@@ -915,7 +981,7 @@ thead th {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-dim);
-  border-bottom: 2px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
@@ -929,23 +995,23 @@ thead th.col-score { text-align: center; }
 
 /* Column group header row */
 .col-group-row th {
-  background: #0f0f12;
+  background: var(--bg);
   padding: 3px 6px;
-  font-size: 10px;
-  color: #6b6f7c;
+  font-size: 9px;
+  color: rgba(255,255,255,0.25);
   text-align: center;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
   cursor: default;
   font-weight: var(--fw-semibold);
 }
 .col-group-header { /* JS references this class */ }
 
 tbody tr {
-  border-bottom: 1px solid rgba(54,58,69,0.4);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
   transition: background 0.15s;
 }
-tbody tr:nth-child(even) { background: var(--surface-alt); }
-tbody tr:hover { background: var(--surface-hover) !important; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:hover { background: rgba(255,255,255,0.04) !important; }
 tbody tr.hidden { display: none; }
 
 td {
@@ -962,35 +1028,33 @@ td.col-sector { text-align: left; }
 td.col-score { text-align: center; }
 td.null-val { color: var(--text-vdim); }
 
-/* Column widths */
-.w-score { width: 52px; }
-.w-sym { width: 120px; }
-.w-sector { width: 72px; }
-.w-price { width: 80px; }
-.w-pct { width: 62px; }
-.w-vol { width: 78px; }
-.w-oi { width: 72px; }
-.w-sig { width: 86px; }
-.w-prem { width: 68px; }
-.w-small { width: 55px; }
+/* Column widths (Bloomberg compact) */
+.w-score { width: 42px; }
+.w-sym { width: 130px; }
+.w-sector { width: 64px; }
+.w-price { width: 74px; }
+.w-pct { width: 56px; }
+.w-vol { width: 70px; }
+.w-oi { width: 66px; }
+.w-sig { width: 82px; }
+.w-prem { width: 62px; }
+.w-small { width: 48px; }
 
 /* Sticky symbol column */
 td.col-sym, th.col-sym { position: sticky; left: 0; z-index: 5; background: inherit; }
-thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
+thead th.col-sym { z-index: 15; background: var(--bg); }
 
-/* --- Score Ring --- */
+/* --- Score Ring (Bloomberg compact) --- */
 .score-ring {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px; height: 36px;
+  width: 28px; height: 28px;
   border-radius: 50%;
-  font-size: var(--fs-xs);
+  font-size: 10px;
   font-weight: var(--fw-bold);
-  position: relative;
+  font-family: var(--font-mono);
 }
-.score-ring svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
-.score-ring .s-val { position: relative; z-index: 1; }
 .score-high { color: var(--green); }
 .score-mid { color: var(--gold); }
 .score-low { color: var(--orange); }
@@ -1075,12 +1139,12 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 
 /* --- Poised / Trade Ready Row --- */
 .row-poised {
-  border-left: 3px solid var(--green) !important;
-  background: rgba(38,166,154,0.04) !important;
+  border-left: 2px solid var(--green) !important;
+  background: rgba(38,166,154,0.03) !important;
   cursor: pointer;
 }
-.row-poised:nth-child(even) { background: rgba(38,166,154,0.06) !important; }
-.row-poised:hover { background: rgba(38,166,154,0.10) !important; }
+.row-poised:nth-child(even) { background: rgba(38,166,154,0.04) !important; }
+.row-poised:hover { background: rgba(38,166,154,0.08) !important; }
 
 /* --- Direction Badge --- */
 .dir-badge {
@@ -1658,11 +1722,124 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   transition: opacity 0.15s;
 }
 .chat-setup button:hover { opacity: 0.85; }
+
+/* ============================================================
+   BLOOMBERG TERMINAL DENSITY OVERRIDES
+   ============================================================ */
+
+/* --- Metrics Strip (Bloomberg reference match) --- */
+.metrics-strip {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(180deg, var(--surface-alt), var(--surface));
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.metrics-strip::-webkit-scrollbar { height: 4px; }
+.metrics-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.metric-card {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 120px;
+  transition: border-color 0.15s;
+}
+.metric-card:hover { border-color: var(--border-light); }
+.metric-card .mc-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.metric-card .mc-val {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+.metric-card .mc-chg {
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+.metric-card.mc-glow {
+  border-color: rgba(59,130,246,0.3);
+  box-shadow: 0 0 12px rgba(59,130,246,0.08);
+}
+
+/* --- Bloomberg Table Density (reference match) --- */
+tbody td {
+  font-family: var(--font-mono);
+  font-size: 11px !important;
+  padding: 5px 10px !important;
+}
+tbody tr { height: 32px; }
+tbody tr:nth-child(even) td { background: rgba(255,255,255,0.01); }
+tbody tr:hover td { background: rgba(59,130,246,0.04) !important; }
+thead th {
+  font-size: 9px !important;
+  padding: 6px 10px !important;
+  font-weight: 600 !important;
+  color: var(--text-dim) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* --- Status Bar (replaces old footer) --- */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.status-bar .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+  margin-right: 4px;
+  box-shadow: 0 0 4px rgba(16,185,129,0.4);
+}
+.status-bar .status-dot.off { background: var(--red); box-shadow: 0 0 4px rgba(239,68,68,0.4); }
+.status-bar .status-dot.warn { background: var(--orange); box-shadow: 0 0 4px rgba(249,115,22,0.4); }
+.status-bar .sb-spacer { flex: 1; }
+.status-bar .sb-label { color: var(--text-vdim); }
+.status-bar .sb-val { color: var(--text); }
+
+/* Flash animations for Bloomberg feel */
+@keyframes flash-up {
+  0% { background: rgba(16,185,129,0.25); }
+  100% { background: transparent; }
+}
+@keyframes flash-down {
+  0% { background: rgba(239,68,68,0.25); }
+  100% { background: transparent; }
+}
+td.flash-up { animation: flash-up 0.6s ease-out; }
+td.flash-down { animation: flash-down 0.6s ease-out; }
+
+/* Value intensity — stronger color for bigger absolute values */
+td[data-intensity="high"] { opacity: 1; }
+td[data-intensity="mid"] { opacity: 0.85; }
+td[data-intensity="low"] { opacity: 0.65; }
 </style>
 </head>
 <body>
 <script>
-// Auth gate: verify session, enforce role-based nav visibility
+// Auth gate + user dropdown init
 (function(){
   fetch('/api/auth/verify',{credentials:'same-origin'})
     .then(function(r){if(!r.ok)throw r;return r.json()})
@@ -1670,17 +1847,33 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
       if(!d.ok){window.location.href='/login';return}
       window.__quantra_role=d.role;
       window.__quantra_user=d.user;
-      if(d.role!=='admin'&&d.admin_paths){
+      // Set avatar text from username/email
+      var avatarText=document.getElementById('userAvatarText');
+      if(avatarText&&d.user){
+        // Show first name or username (before @)
+        var name=d.user.split('@')[0];
+        // Capitalize first letter
+        name=name.charAt(0).toUpperCase()+name.slice(1);
+        // Truncate if too long
+        if(name.length>8) name=name.substring(0,8);
+        avatarText.textContent=name;
+      }
+      // Hide admin links for non-admins
+      if(d.role!=='admin'){
         var links=document.querySelectorAll('.q-nav-links a');
         links.forEach(function(a){
           var href=a.getAttribute('href');
-          if(d.admin_paths.indexOf(href)!==-1){
+          if(d.admin_paths&&d.admin_paths.indexOf(href)!==-1){
             a.style.display='none';
           }
         });
+        // Hide admin in dropdown too
+        var menuAdmin=document.getElementById('menuAdmin');
+        if(menuAdmin)menuAdmin.style.display='none';
       }
     })
     .catch(function(){window.location.href='/login'});
+
 })();
 </script>
 
@@ -1697,17 +1890,15 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 <!-- Navigation Bar -->
 <nav class="q-nav">
   <a href="/" class="q-nav-brand">
-    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="navLogoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
-      <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#navLogoGrad)" stroke-width="3.5" fill="none"/>
-      <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#navLogoGrad)" opacity="0.85"/>
-      <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <line x1="18" y1="28" x2="46" y2="20" stroke="url(#navLogoGrad)" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="qLogo" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="12" fill="url(#qLogo)"/>
+      <polyline points="8,30 16,30 20,18 24,36 28,22 32,28 36,24 40,30" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <text x="24" y="17" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="sans-serif" font-weight="800" font-size="12">Q</text>
     </svg>
-    <div style="display:flex;flex-direction:column;line-height:1;">
-      <span class="brand-text">QUANTRA</span>
-    </div>
+    <span class="brand-text">QUANTRA</span>
   </a>
   <div class="q-nav-links">
     <a href="/" class="active">Dashboard</a>
@@ -1716,8 +1907,6 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
     <a href="/rsi">RSI Scanner</a>
     <a href="/rsi-analysis">Stock Analysis</a>
     <a href="/divergence">Divergence</a>
-    <a href="/profile">Profile</a>
-    <a href="/admin">Admin</a>
   </div>
   <div class="q-nav-status">
     <span class="pulse-dot" id="pulseDot"></span>
@@ -1727,8 +1916,74 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
     <span id="stockCount"></span>
     <span id="paperBadge" style="display:none"></span>
   </div>
-  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
+  <div class="user-dropdown" id="userDropdown">
+    <button class="user-avatar-btn" id="userAvatarBtn" title="Account" onclick="toggleUserMenu(event)">
+      <span id="userAvatarText">Account</span>
+    </button>
+    <div class="user-menu" id="userMenu">
+      <a href="/profile"><span class="menu-icon">&#9679;</span> Profile</a>
+      <a href="/paper"><span class="menu-icon">&#9998;</span> Paper Trades</a>
+      <a href="/settings" id="menuSettings"><span class="menu-icon">&#9881;</span> Settings</a>
+      <a href="/admin" id="menuAdmin"><span class="menu-icon">&#9733;</span> Admin</a>
+      <div class="menu-divider"></div>
+      <a href="/api/auth/logout" class="menu-logout"><span class="menu-icon">&#10140;</span> Logout</a>
+    </div>
+  </div>
 </nav>
+<script>
+function toggleUserMenu(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userAvatarBtn');
+  var isOpen = menu.classList.toggle('show');
+  btn.classList.toggle('open', isOpen);
+}
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userAvatarBtn');
+  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('show');
+    btn.classList.remove('open');
+  }
+});
+</script>
+
+<!-- Metrics Strip (Bloomberg-style) -->
+<div class="metrics-strip" id="metricsStrip">
+  <div class="metric-card mc-glow">
+    <div class="mc-label">NIFTY Spot</div>
+    <div class="mc-val" id="msNiftySpot">--</div>
+  </div>
+  <div class="metric-card">
+    <div class="mc-label">NIFTY Fut Basis</div>
+    <div class="mc-val" id="msNiftyFut">--</div>
+  </div>
+  <div class="metric-card">
+    <div class="mc-label">India VIX</div>
+    <div class="mc-val" id="msVix">--</div>
+  </div>
+  <div class="metric-card">
+    <div class="mc-label">NIFTY PCR</div>
+    <div class="mc-val" id="msPcr">--</div>
+  </div>
+  <div class="metric-card">
+    <div class="mc-label">Max Pain</div>
+    <div class="mc-val" id="msMaxPain">--</div>
+  </div>
+  <div class="metric-card mc-glow">
+    <div class="mc-label">Sentiment</div>
+    <div class="mc-val" id="msSentiment">--</div>
+  </div>
+  <div class="metric-card">
+    <div class="mc-label">Trade Ready</div>
+    <div class="mc-val" id="msTradeReady" style="color:var(--gold)">--</div>
+  </div>
+  <div class="metric-card">
+    <div class="mc-label">Breadth</div>
+    <div class="mc-val" id="msBreadth">--</div>
+  </div>
+</div>
 
 <!-- Controls Bar -->
 <div class="header-controls">
@@ -1786,7 +2041,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 <!-- Sector Heatmap -->
 <div class="heatmap-bar collapsed" id="heatmapBar"></div>
 
-<!-- Top Picks -->
+<!-- Top Picks (hidden in Bloomberg mode) -->
 <div class="top-picks-bar" id="topPicksBar">
   <span class="top-picks-label">&#9733; TOP PICKS</span>
   <span class="top-picks-empty" id="topPicksEmpty">Waiting for chain data...</span>
@@ -1840,14 +2095,18 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 </table>
 </div>
 
-<!-- Footer -->
-<div class="footer">
-  <span id="footerFilter">Showing all stocks</span>
-  <span id="footerFresh">LTP: -- | OHLC: -- | Chain: --</span>
-  <span id="footerConn">--</span>
+<!-- Status Bar (Bloomberg-style) -->
+<div class="status-bar" id="statusBar">
+  <span><span class="status-dot" id="statusDot"></span><span id="statusText">Connecting</span></span>
+  <span><span class="sb-label">LTP</span> <span class="sb-val" id="sbLtp">--</span></span>
+  <span><span class="sb-label">OHLC</span> <span class="sb-val" id="sbOhlc">--</span></span>
+  <span><span class="sb-label">Chain</span> <span class="sb-val" id="sbChain">--</span></span>
+  <span><span class="sb-label">Filter</span> <span class="sb-val" id="sbFilter">All</span></span>
+  <span class="sb-spacer"></span>
+  <span id="sbStockCount">--</span>
 </div>
 <div class="compliance-bar">
-  Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
+  Investment in securities market are subject to market risks. QUANTRA Terminal provides analytics for informational purposes only &mdash; not investment advice.
   &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a>
 </div>
 
@@ -1969,25 +2228,15 @@ function fmtMPDist(v) {
   return v.toFixed(1) + '%';
 }
 
-// === Score Ring SVG ===
+// === Score Ring (Bloomberg compact) ===
 function scoreHTML(val) {
   val = val || 0;
-  const pct = val / 100;
-  const r = 15, circ = 2 * Math.PI * r;
-  const dash = pct * circ;
   let cls = 'score-vlow';
-  let stroke = '#EF5350';
-  if (val >= 60) { cls = 'score-high'; stroke = '#26A69A'; }
-  else if (val >= 40) { cls = 'score-mid'; stroke = '#FFD700'; }
-  else if (val >= 20) { cls = 'score-low'; stroke = '#FF9800'; }
-  return `<div class="score-ring ${cls}">
-    <svg width="36" height="36" viewBox="0 0 36 36">
-      <circle cx="18" cy="18" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
-      <circle cx="18" cy="18" r="${r}" fill="none" stroke="${stroke}" stroke-width="3"
-        stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
-    </svg>
-    <span class="s-val">${val}</span>
-  </div>`;
+  let border = '#EF5350';
+  if (val >= 60) { cls = 'score-high'; border = '#26A69A'; }
+  else if (val >= 40) { cls = 'score-mid'; border = '#FFD700'; }
+  else if (val >= 20) { cls = 'score-low'; border = '#FF9800'; }
+  return `<div class="score-ring ${cls}" style="width:28px;height:28px;font-size:10px;border:2px solid ${border};border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-mono)">${val}</div>`;
 }
 
 // === Signal/Buildup pills ===
@@ -2046,7 +2295,7 @@ function buildTable() {
     const fields = [
       // Always visible
       { key: 'score', cls: 'col-score w-score', html: scoreHTML(d.score) },
-      { key: 'symbol', cls: 'col-sym w-sym', html: '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(d.symbol) + '" target="_blank" rel="noopener" class="tv-link" title="Open in TradingView" onclick="event.stopPropagation()">' + d.symbol + '</a>' + (d.is_n50 ? '<span class="n50-badge">N50</span>' : '') + (_poised ? '<span class="poised-badge">READY</span>' : '') + (_dir ? '<span class="dir-badge dir-' + _dir + '">' + (_dir === 'CE' ? 'BUY CE' : 'BUY PE') + '</span>' : '') },
+      { key: 'symbol', cls: 'col-sym w-sym', html: '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(d.symbol) + '" target="_blank" rel="noopener" class="tv-link" title="Open in TradingView" onclick="event.stopPropagation()">' + d.symbol + '</a>' + (d.is_n50 ? '<span class="n50-badge">N50</span>' : '') + (_poised ? ' <span style="color:var(--gold);font-size:9px" title="Trade Ready">★</span>' : '') + (_dir ? '<span class="dir-badge dir-' + _dir + '" style="font-size:7px;padding:1px 4px">' + _dir + '</span>' : '') },
       { key: 'sector', cls: 'col-sector w-sector', html: sectorPill(d.sector) },
       { key: 'ltp', cls: 'w-price', text: fmtPrice(d.ltp) },
       { key: 'chg_pct', cls: 'w-pct ' + valClass(d.chg_pct), text: fmtPct(d.chg_pct) },
@@ -2314,7 +2563,10 @@ function updateFooterFilter() {
   if (filters.buildup) parts.push('Buildup: ' + filters.buildup);
   if (filters.n50) parts.push('NIFTY 50 only');
   if (filters.poised) parts.push('\uD83C\uDFAF Trade Ready only');
-  document.getElementById('footerFilter').textContent = parts.length ? parts.join(' | ') : 'Showing all stocks';
+  const ff = document.getElementById('footerFilter');
+  if (ff) ff.textContent = parts.length ? parts.join(' | ') : 'Showing all stocks';
+  const sbFilter = document.getElementById('sbFilter');
+  if (sbFilter) sbFilter.textContent = parts.length ? parts.join(' | ') : 'All';
 }
 
 // === Column Visibility ===
@@ -2465,7 +2717,8 @@ function setConnStatus(status) {
   if (status === 'on') { text.textContent = 'Connected'; pulse.className = 'pulse-dot'; }
   else if (status === 'off') { text.textContent = 'Disconnected'; pulse.className = 'pulse-dot off'; }
   else { text.textContent = 'Reconnecting...'; pulse.className = 'pulse-dot warn'; }
-  document.getElementById('footerConn').textContent = text.textContent;
+  const fc = document.getElementById('footerConn');
+  if (fc) fc.textContent = text.textContent;
 }
 
 function handleMessage(msg) {
@@ -2478,6 +2731,7 @@ function handleMessage(msg) {
       lastTick = lastOhlc = lastChain = Date.now();
       showToast('Connected \u2014 ' + Object.keys(stocks).length + ' stocks loaded', 'info');
       if (heatmapVisible) renderHeatmap();
+      updateMetricsStrip();
       break;
 
     case 'tick':
@@ -2496,6 +2750,7 @@ function handleMessage(msg) {
         }
       }
       updateTimestamp();
+      updateMetricsStrip();
       break;
 
     case 'ohlc':
@@ -2557,8 +2812,8 @@ function handleMessage(msg) {
             if (symCell) {
               symCell.innerHTML = '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(sym) + '" target="_blank" rel="noopener" class="tv-link" title="Open in TradingView" onclick="event.stopPropagation()">' + sym + '</a>'
                 + (stocks[sym].is_n50 ? '<span class="n50-badge">N50</span>' : '')
-                + (p ? '<span class="poised-badge">READY</span>' : '')
-                + (dir ? '<span class="dir-badge dir-' + dir + '">' + (dir === 'CE' ? 'BUY CE' : 'BUY PE') + '</span>' : '');
+                + (p ? ' <span style="color:var(--gold);font-size:9px" title="Trade Ready">★</span>' : '')
+                + (dir ? '<span class="dir-badge dir-' + dir + '" style="font-size:7px;padding:1px 4px">' + dir + '</span>' : '');
             }
           }
         }
@@ -2567,6 +2822,7 @@ function handleMessage(msg) {
       renderTopPicks();
       // Refresh analysis panel if open for a stock whose chain just updated
       if (analysisSym && stocks[analysisSym]) refreshAnalysisPanel();
+      updateMetricsStrip();
       break;
 
     case 'paper':
@@ -2619,10 +2875,11 @@ function updateFreshness() {
     if (s < 60) return s + 's ago';
     return Math.floor(s / 60) + 'm ago';
   };
-  document.getElementById('footerFresh').textContent =
-    'LTP: ' + fmt(lastTick) + ' | OHLC: ' + fmt(lastOhlc) + ' | Chain: ' + fmt(lastChain);
+  const ffr = document.getElementById('footerFresh');
+  if (ffr) ffr.textContent = 'LTP: ' + fmt(lastTick) + ' | OHLC: ' + fmt(lastOhlc) + ' | Chain: ' + fmt(lastChain);
 }
 setInterval(updateFreshness, 5000);
+setInterval(updateStatusBar, 2000);
 
 // === Toast ===
 let toastTimer = null;
@@ -3364,6 +3621,97 @@ document.querySelector('#headerRow th[data-key="score"]').classList.add('sort-de
 
 // Apply initial column visibility (all detail groups hidden by default)
 applyColVisibility();
+
+// === Metrics Strip Updates ===
+function updateMetricsStrip() {
+  // NIFTY spot — check for NIFTY 50 or NIFTY in stocks
+  const nifty = stocks['NIFTY 50'] || stocks['NIFTY'] || meta.nifty || {};
+  if (nifty.ltp) {
+    const chgPct = nifty.chg_pct || 0;
+    const chgHtml = chgPct !== 0 ? ' <span class="mc-chg ' + (chgPct > 0 ? 'val-pos' : 'val-neg') + '">' + (chgPct > 0 ? '+' : '') + chgPct.toFixed(2) + '%</span>' : '';
+    document.getElementById('msNiftySpot').innerHTML = fmtPrice(nifty.ltp).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + chgHtml;
+  }
+
+  // NIFTY futures basis
+  const niftyFut = meta.nifty_fut || {};
+  if (niftyFut.basis != null) {
+    document.getElementById('msNiftyFut').innerHTML = (niftyFut.basis > 0 ? '+' : '') + niftyFut.basis.toFixed(1) + ' <span class="mc-chg" style="color:var(--text-dim)">pts</span>';
+  }
+
+  // VIX
+  const vix = meta.vix || {};
+  if (vix.ltp) {
+    const vChg = vix.chg_pct || 0;
+    const vHtml = vChg !== 0 ? ' <span class="mc-chg ' + (vChg > 0 ? 'val-neg' : 'val-pos') + '">' + (vChg > 0 ? '+' : '') + vChg.toFixed(1) + '%</span>' : '';
+    document.getElementById('msVix').innerHTML = vix.ltp.toFixed(2) + vHtml;
+  }
+
+  // NIFTY PCR
+  const niftyPcr = meta.nifty_pcr || meta.pcr;
+  if (niftyPcr != null) {
+    const pcrLabel = niftyPcr > 1.2 ? 'BULLISH' : niftyPcr < 0.8 ? 'BEARISH' : 'NEUTRAL';
+    const pcrCls = niftyPcr > 1.0 ? 'val-pos' : 'val-neg';
+    document.getElementById('msPcr').innerHTML = (typeof niftyPcr === 'number' ? niftyPcr.toFixed(2) : niftyPcr) + ' <span class="mc-chg ' + pcrCls + '">' + pcrLabel + '</span>';
+  }
+
+  // Max Pain
+  const mp = meta.max_pain || meta.nifty_max_pain;
+  if (mp) {
+    document.getElementById('msMaxPain').textContent = typeof mp === 'number' ? mp.toLocaleString('en-IN') : mp;
+  }
+
+  // Sentiment
+  const sent = meta.sentiment;
+  if (sent != null) {
+    document.getElementById('msSentiment').innerHTML = sent + '<span style="font-size:11px;color:var(--text-dim)">/100</span>';
+  }
+
+  // Trade Ready count
+  const poisedCount = Object.keys(stocks).filter(s => isPoised(stocks[s])).length;
+  document.getElementById('msTradeReady').innerHTML = poisedCount + ' <span style="font-size:11px;color:var(--text-dim)">stocks</span>';
+
+  // Breadth
+  let adv = 0, decl = 0;
+  Object.keys(stocks).forEach(s => {
+    const c = stocks[s].chg_pct || 0;
+    if (c > 0.1) adv++;
+    else if (c < -0.1) decl++;
+  });
+  const breadthCls = adv > decl ? 'val-pos' : adv < decl ? 'val-neg' : '';
+  document.getElementById('msBreadth').innerHTML = '<span class="' + breadthCls + '">' + adv + '</span><span style="color:var(--text-vdim)">:</span><span class="val-neg">' + decl + '</span>';
+}
+
+// === Status Bar Updates ===
+function updateStatusBar() {
+  // Connection status
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  const connDot = document.getElementById('connDot');
+  if (connDot) {
+    const cls = connDot.className;
+    if (cls.includes(' on')) { dot.className = 'status-dot'; text.textContent = 'Connected'; }
+    else if (cls.includes(' off')) { dot.className = 'status-dot off'; text.textContent = 'Disconnected'; }
+    else { dot.className = 'status-dot warn'; text.textContent = 'Reconnecting'; }
+  }
+
+  // Freshness
+  const now = Date.now();
+  const fmtAge = ms => {
+    if (ms === 0) return '--';
+    const s = Math.floor((now - ms) / 1000);
+    if (s < 60) return s + 's';
+    return Math.floor(s / 60) + 'm';
+  };
+  document.getElementById('sbLtp').textContent = fmtAge(lastTick);
+  document.getElementById('sbOhlc').textContent = fmtAge(lastOhlc);
+  document.getElementById('sbChain').textContent = fmtAge(lastChain);
+
+  // Stock count
+  const visible = symbolOrder.filter(s => rowElements[s] && !rowElements[s].classList.contains('hidden')).length;
+  const total = symbolOrder.length;
+  const poisedCount = Object.keys(stocks).filter(s => isPoised(stocks[s])).length;
+  document.getElementById('sbStockCount').textContent = visible + '/' + total + ' stocks · ' + poisedCount + ' trade ready';
+}
 
 connectWS();
 
