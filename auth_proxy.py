@@ -1,31 +1,35 @@
 #!/usr/bin/env python3
 """
-auth_proxy.py - Authentication reverse proxy for Quantra Terminal.
+auth_proxy.py - Secure authentication reverse proxy for Quantra Terminal.
 
 Runs on port 8080 (public). Proxies authenticated requests to ws_server.py
 on port 8081 (internal). ZERO modifications to ws_server.py required.
+
+Security:
+  - PBKDF2-HMAC-SHA256 password hashing (600K iterations) via db.py
+  - Rate limiting: login (5/15m), register (3/hr), API (120/min), chat (20/min)
+  - Brute force protection: IP-based exponential backoff lockout
+  - Account lockout: 5 failures → 15-min DB-level lock
+  - CSRF: double-submit cookie on all state-changing API calls
+  - Security headers: CSP, X-Frame-Options, HSTS, no-sniff, etc.
+  - Request size limits: 100KB default, 500KB for chat
+  - Audit logging: all auth events to audit.log + DB
+  - Session: HttpOnly + SameSite=Strict cookies, DB-backed, IP-tracked
+  - Input validation: strict regex + HTML escaping on all user inputs
 
 Features:
   - SQLite-backed users, sessions, settings, paper trades (via db.py)
   - Cookie-based session auth (HttpOnly, SameSite=Strict)
   - Role-based access: "admin" (full) vs "user" (restricted)
-  - Admin-only pages: /admin, /divergence (configurable in auth_config.json)
   - User registration + profile management
   - Per-user paper trades (manual + auto)
-  - AI chat via Perplexity / NVIDIA NIM (multi-provider, admin-configurable)
+  - AI chat via Perplexity / NVIDIA NIM (multi-provider)
   - Chat context includes live dashboard data + deep Upstox analysis
-
-Deploy:
-  1. Change ws_server.py to listen on 8081
-  2. python3 setup_auth.py amit MyPass admin   (seed first admin in JSON)
-  3. nohup venv/bin/python3 auth_proxy.py >> auth_proxy.log 2>&1 &
-     On first run, existing auth_config.json users are migrated into SQLite.
 """
 
 import asyncio
 import json
 import os
-import re
 import secrets
 import time
 import logging
@@ -37,6 +41,15 @@ try:
     DB_AVAILABLE = True
 except ImportError:
     DB_AVAILABLE = False
+
+try:
+    from security import (
+        RateLimiter, BruteForceGuard, CSRFProtection,
+        apply_security_headers, AuditLogger, InputValidator,
+    )
+    SECURITY_AVAILABLE = True
+except ImportError:
+    SECURITY_AVAILABLE = False
 
 try:
     from chat_analysis import run_analysis, get_upstox_token
@@ -55,6 +68,9 @@ CONFIG_FILE = "auth_config.json"
 SESSION_COOKIE = "quantra_session"
 SESSION_MAX_AGE = 86400  # 24 hours
 DEFAULT_ADMIN_PATHS = ["/admin", "/divergence"]
+MAX_REQUEST_SIZE = 100 * 1024       # 100KB default
+MAX_CHAT_REQUEST_SIZE = 500 * 1024  # 500KB for chat (includes context)
+MAX_CONCURRENT_SESSIONS = 5         # per user
 
 logging.basicConfig(
     level=logging.INFO,
@@ -69,11 +85,14 @@ log = logging.getLogger("auth_proxy")
 
 _db = None       # DB instance (SQLite)
 _config = None   # JSON config (AI settings, admin paths, etc.)
+_rate_limiter = None
+_brute_guard = None
+_audit = None
 
 
 def load_config():
-    """Load JSON config for AI settings + initialize SQLite database."""
-    global _config, _db
+    """Load JSON config for AI settings + initialize SQLite database + security."""
+    global _config, _db, _rate_limiter, _brute_guard, _audit
 
     # Load JSON config (still needed for AI keys, admin paths)
     if os.path.exists(CONFIG_FILE):
@@ -88,7 +107,6 @@ def load_config():
     if DB_AVAILABLE:
         _db = DB("quantra.db")
         _db.init()
-        # Migrate users from JSON if any exist
         migrated = _db.migrate_from_json(CONFIG_FILE)
         if migrated:
             log.info(f"Migrated {migrated} user(s) from {CONFIG_FILE} to SQLite")
@@ -97,7 +115,34 @@ def load_config():
         if user_count == 0:
             log.warning("No users in database. Create one via /register or setup_auth.py")
     else:
-        log.error("db.py not found — database features disabled. Auth will fail.")
+        log.error("db.py not found — database features disabled.")
+
+    # Initialize security modules
+    if SECURITY_AVAILABLE:
+        _rate_limiter = RateLimiter()
+        _rate_limiter.configure("login", max_requests=5, window_seconds=900)     # 5 per 15m
+        _rate_limiter.configure("register", max_requests=3, window_seconds=3600)  # 3 per hour
+        _rate_limiter.configure("api", max_requests=120, window_seconds=60)       # 120 per min
+        _rate_limiter.configure("chat", max_requests=20, window_seconds=60)       # 20 per min
+        _rate_limiter.configure("password", max_requests=3, window_seconds=900)   # 3 per 15m
+
+        _brute_guard = BruteForceGuard(threshold=5, base_lockout=60, max_lockout=3600)
+        _audit = AuditLogger(db=_db)
+        log.info("Security modules initialized: rate limiter, brute force guard, audit logger")
+    else:
+        log.warning("security.py not found — security features degraded")
+
+
+def get_client_ip(request):
+    """Get real client IP, accounting for reverse proxies."""
+    # Trust X-Forwarded-For if behind nginx/cloudflare
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    real_ip = request.headers.get("X-Real-IP", "")
+    if real_ip:
+        return real_ip.strip()
+    return request.remote or "unknown"
 
 
 def get_session_from_request(request):
@@ -116,6 +161,82 @@ def is_admin_path(path):
     """Check if path requires admin role."""
     admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
     return path in admin_paths
+
+
+def check_rate_limit(rule, key, request):
+    """Check rate limit. Returns None if OK, or a 429 response."""
+    if not _rate_limiter:
+        return None
+    if not _rate_limiter.allow(rule, key):
+        retry = _rate_limiter.retry_after(rule, key)
+        ip = get_client_ip(request)
+        if _audit:
+            _audit.rate_limited(ip, rule)
+        log.warning(f"Rate limited: {rule} key={key} ip={ip} retry_after={retry}s")
+        resp = web.json_response(
+            {"error": "Too many requests. Try again later.", "retry_after": retry},
+            status=429,
+        )
+        resp.headers["Retry-After"] = str(retry)
+        return resp
+    return None
+
+
+async def check_request_size(request, max_size=MAX_REQUEST_SIZE):
+    """Reject requests that exceed size limit."""
+    content_length = request.content_length
+    if content_length and content_length > max_size:
+        return web.json_response(
+            {"error": f"Request too large (max {max_size // 1024}KB)"},
+            status=413,
+        )
+    return None
+
+
+# ============================================================
+# MIDDLEWARE
+# ============================================================
+
+@web.middleware
+async def security_middleware(request, handler):
+    """
+    Global middleware:
+    1. Security headers on all responses
+    2. CSRF validation on state-changing API requests
+    3. General API rate limiting
+    """
+    ip = get_client_ip(request)
+
+    # CSRF check for state-changing /api/ requests
+    if SECURITY_AVAILABLE and request.path.startswith("/api/") and request.method not in ("GET", "HEAD", "OPTIONS"):
+        ok, reason = CSRFProtection.validate(request)
+        if not ok:
+            if _audit:
+                _audit.csrf_violation(ip, request.path)
+            log.warning(f"CSRF violation: {ip} {request.method} {request.path} — {reason}")
+            return web.json_response({"error": "CSRF validation failed"}, status=403)
+
+    # General API rate limiting (per IP for unauthenticated, per user for authenticated)
+    if request.path.startswith("/api/") and request.path not in ("/api/auth/login", "/api/auth/register"):
+        token = get_session_from_request(request)
+        session = validate_session(token)
+        rate_key = f"user:{session['user_id']}" if session else f"ip:{ip}"
+        rate_resp = check_rate_limit("api", rate_key, request)
+        if rate_resp:
+            return rate_resp
+
+    # Call the actual handler
+    response = await handler(request)
+
+    # Apply security headers
+    if SECURITY_AVAILABLE:
+        apply_security_headers(response)
+
+    # Ensure CSRF cookie is set on HTML page responses
+    if SECURITY_AVAILABLE and response.content_type and "text/html" in response.content_type:
+        CSRFProtection.get_or_set_token(request, response)
+
+    return response
 
 
 # ============================================================
@@ -142,6 +263,28 @@ async def handle_login_api(request):
     if not _db:
         return web.json_response({"error": "Database not available"}, status=503)
 
+    ip = get_client_ip(request)
+
+    # Brute force check (IP-level)
+    if _brute_guard and _brute_guard.is_locked(ip):
+        remaining = _brute_guard.lockout_remaining(ip)
+        if _audit:
+            _audit.login_locked(ip)
+        return web.json_response(
+            {"error": f"Too many failed attempts. Try again in {remaining} seconds.", "retry_after": remaining},
+            status=429,
+        )
+
+    # Rate limit (IP-level)
+    rate_resp = check_rate_limit("login", f"ip:{ip}", request)
+    if rate_resp:
+        return rate_resp
+
+    # Request size check
+    size_resp = await check_request_size(request)
+    if size_resp:
+        return size_resp
+
     try:
         data = await request.json()
     except Exception:
@@ -153,21 +296,44 @@ async def handle_login_api(request):
     if not username or not password:
         return web.json_response({"error": "Username and password required"}, status=400)
 
+    # Validate input format (prevent injection-style inputs)
+    if len(username) > 100 or len(password) > 128:
+        return web.json_response({"error": "Input too long"}, status=400)
+
     user_record = _db.verify_password(username, password)
     if not user_record:
-        log.warning(f"Failed login attempt for '{username}' from {request.remote}")
+        # Record failure
+        if _brute_guard:
+            _brute_guard.record_failure(ip)
+        if _audit:
+            _audit.login_failed(ip, username, details=f"attempts={_brute_guard.get_attempt_count(ip) if _brute_guard else '?'}")
+        log.warning(f"Failed login: '{username}' from {ip}")
         return web.json_response({"error": "Invalid credentials"}, status=401)
+
+    # Success
+    if _brute_guard:
+        _brute_guard.record_success(ip)
 
     role = user_record.get("role", "user")
     user_id = user_record["id"]
     max_age = _config.get("session_max_age", SESSION_MAX_AGE)
 
+    # Enforce concurrent session limit
+    active_sessions = _db.count_user_sessions(user_id)
+    if active_sessions >= MAX_CONCURRENT_SESSIONS:
+        # Delete oldest sessions to make room
+        _db.delete_user_sessions(user_id)
+        log.info(f"Cleared {active_sessions} old sessions for {username} (concurrent limit)")
+
     token = _db.create_session(
         user_id, max_age=max_age,
-        ip=request.remote,
+        ip=ip,
         ua=request.headers.get("User-Agent", "")[:200],
     )
-    log.info(f"Login: {username} (role={role}) from {request.remote}")
+
+    if _audit:
+        _audit.login_success(ip, username, user_id)
+    log.info(f"Login: {username} (role={role}) from {ip}")
 
     resp = web.json_response({
         "ok": True,
@@ -180,8 +346,12 @@ async def handle_login_api(request):
         max_age=max_age,
         httponly=True,
         samesite="Strict",
-        path="/"
+        path="/",
+        secure=False,  # Set True when behind HTTPS
     )
+    # Set CSRF cookie on login
+    if SECURITY_AVAILABLE:
+        CSRFProtection.get_or_set_token(request, resp)
     return resp
 
 
@@ -197,7 +367,7 @@ async def handle_verify_api(request):
             "role": session["role"],
             "display_name": session.get("display_name", session["username"]),
             "user_id": session["user_id"],
-            "admin_paths": admin_paths
+            "admin_paths": admin_paths,
         })
     return web.json_response({"ok": False}, status=401)
 
@@ -213,6 +383,8 @@ async def handle_logout_api(request):
 
     resp = web.HTTPFound("/login")
     resp.del_cookie(SESSION_COOKIE, path="/")
+    if SECURITY_AVAILABLE:
+        resp.del_cookie(CSRFProtection.COOKIE_NAME, path="/")
     return resp
 
 
@@ -222,7 +394,6 @@ async def handle_logout_api(request):
 
 async def handle_register_page(request):
     """Serve register.html."""
-    # Already logged in → redirect to dashboard
     token = get_session_from_request(request)
     session = validate_session(token)
     if session:
@@ -237,45 +408,76 @@ async def handle_register_page(request):
 
 
 async def handle_register_api(request):
-    """POST /api/auth/register - create new user account."""
+    """POST /api/auth/register - create new user account with full validation."""
     if not _db:
         return web.json_response({"error": "Database not available"}, status=503)
+
+    ip = get_client_ip(request)
+
+    # Rate limit (IP-level)
+    rate_resp = check_rate_limit("register", f"ip:{ip}", request)
+    if rate_resp:
+        return rate_resp
+
+    # Brute force check (reuse login guard — repeated reg attempts are suspicious)
+    if _brute_guard and _brute_guard.is_locked(ip):
+        remaining = _brute_guard.lockout_remaining(ip)
+        return web.json_response(
+            {"error": f"Too many attempts. Try again in {remaining} seconds."},
+            status=429,
+        )
+
+    # Request size check
+    size_resp = await check_request_size(request)
+    if size_resp:
+        return size_resp
 
     try:
         data = await request.json()
     except Exception:
         return web.json_response({"error": "Invalid JSON"}, status=400)
 
-    username = data.get("username", "").strip()
-    email = data.get("email", "").strip().lower()
-    password = data.get("password", "")
-    confirm = data.get("confirm_password", "")
-    display_name = data.get("display_name", "").strip() or None
+    # === STRICT INPUT VALIDATION ===
+    if SECURITY_AVAILABLE:
+        ok, username, err = InputValidator.username(data.get("username", ""))
+        if not ok:
+            return web.json_response({"error": err}, status=400)
 
-    # Validation
-    if not username or not password:
-        return web.json_response({"error": "Username and password required"}, status=400)
+        ok, email, err = InputValidator.email(data.get("email", ""))
+        if not ok:
+            return web.json_response({"error": err}, status=400)
 
-    if len(username) < 3 or len(username) > 30:
-        return web.json_response({"error": "Username must be 3-30 characters"}, status=400)
+        password = data.get("password", "")
+        ok, err = InputValidator.password(password, min_length=8)
+        if not ok:
+            return web.json_response({"error": err}, status=400)
 
-    if not re.match(r'^[a-zA-Z0-9_]+$', username):
-        return web.json_response({"error": "Username can only contain letters, numbers, underscore"}, status=400)
+        confirm = data.get("confirm_password", "")
+        if password != confirm:
+            return web.json_response({"error": "Passwords do not match"}, status=400)
 
-    if email and not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
-        return web.json_response({"error": "Invalid email format"}, status=400)
+        ok, display_name, err = InputValidator.display_name(data.get("display_name", ""))
+        if not ok:
+            return web.json_response({"error": err}, status=400)
+    else:
+        # Fallback validation without security module
+        username = data.get("username", "").strip()
+        email = data.get("email", "").strip().lower() or None
+        password = data.get("password", "")
+        confirm = data.get("confirm_password", "")
+        display_name = data.get("display_name", "").strip() or None
 
-    if len(password) < 6:
-        return web.json_response({"error": "Password must be at least 6 characters"}, status=400)
+        if not username or len(username) < 3:
+            return web.json_response({"error": "Username must be at least 3 characters"}, status=400)
+        if len(password) < 8:
+            return web.json_response({"error": "Password must be at least 8 characters"}, status=400)
+        if password != confirm:
+            return web.json_response({"error": "Passwords do not match"}, status=400)
 
-    if password != confirm:
-        return web.json_response({"error": "Passwords do not match"}, status=400)
-
-    # New users always get "user" role (admins created via setup_auth.py or promoted)
     try:
         user_id = _db.create_user(
             username=username,
-            email=email or None,
+            email=email,
             password=password,
             role="user",
             display_name=display_name,
@@ -286,7 +488,9 @@ async def handle_register_api(request):
         log.error(f"Registration error: {e}")
         return web.json_response({"error": "Registration failed"}, status=500)
 
-    log.info(f"New user registered: {username} (id={user_id}) from {request.remote}")
+    if _audit:
+        _audit.registration(ip, username, user_id)
+    log.info(f"New user registered: {username} (id={user_id}) from {ip}")
     return web.json_response({"ok": True, "user_id": user_id, "username": username})
 
 
@@ -358,27 +562,42 @@ async def handle_user_profile_post(request):
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
 
+    size_resp = await check_request_size(request)
+    if size_resp:
+        return size_resp
+
     try:
         data = await request.json()
     except Exception:
         return web.json_response({"error": "Invalid JSON"}, status=400)
 
-    # Only allow safe profile fields
     allowed = {}
-    if "display_name" in data:
-        dn = str(data["display_name"]).strip()
-        if dn and len(dn) <= 50:
-            allowed["display_name"] = dn
-    if "phone" in data:
-        ph = str(data["phone"]).strip()[:20]
-        allowed["phone"] = ph
-    if "bio" in data:
-        bio = str(data["bio"]).strip()[:500]
-        allowed["bio"] = bio
-    if "email" in data:
-        em = str(data["email"]).strip().lower()
-        if em and re.match(r'^[^@]+@[^@]+\.[^@]+$', em):
-            allowed["email"] = em
+    if SECURITY_AVAILABLE:
+        if "display_name" in data:
+            ok, val, err = InputValidator.display_name(data["display_name"])
+            if ok and val:
+                allowed["display_name"] = val
+        if "phone" in data:
+            ok, val, err = InputValidator.phone(data["phone"])
+            if ok:
+                allowed["phone"] = val
+        if "bio" in data:
+            ok, val, err = InputValidator.bio(data["bio"])
+            if ok:
+                allowed["bio"] = val
+        if "email" in data:
+            ok, val, err = InputValidator.email(data["email"])
+            if ok and val:
+                allowed["email"] = val
+    else:
+        if "display_name" in data:
+            allowed["display_name"] = str(data["display_name"]).strip()[:50]
+        if "phone" in data:
+            allowed["phone"] = str(data["phone"]).strip()[:20]
+        if "bio" in data:
+            allowed["bio"] = str(data["bio"]).strip()[:500]
+        if "email" in data:
+            allowed["email"] = str(data["email"]).strip().lower()[:254]
 
     if not allowed:
         return web.json_response({"error": "No valid fields to update"}, status=400)
@@ -446,7 +665,10 @@ async def handle_user_auto_settings_post(request):
         updates["auto_trade_max_capital"] = max(10000, min(10000000, v))
     if "preferred_sectors" in data:
         if isinstance(data["preferred_sectors"], list):
-            updates["preferred_sectors"] = data["preferred_sectors"]
+            # Sanitize sector names
+            safe = [InputValidator.sanitize_string(s, 30) if SECURITY_AVAILABLE else str(s)[:30]
+                    for s in data["preferred_sectors"][:20]]
+            updates["preferred_sectors"] = safe
 
     if not updates:
         return web.json_response({"error": "No valid settings to update"}, status=400)
@@ -457,11 +679,18 @@ async def handle_user_auto_settings_post(request):
 
 
 async def handle_user_change_password(request):
-    """POST /api/user/change-password - change user password."""
+    """POST /api/user/change-password - change user password with validation."""
     token = get_session_from_request(request)
     session = validate_session(token)
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
+
+    ip = get_client_ip(request)
+
+    # Rate limit password changes
+    rate_resp = check_rate_limit("password", f"user:{session['user_id']}", request)
+    if rate_resp:
+        return rate_resp
 
     try:
         data = await request.json()
@@ -474,8 +703,15 @@ async def handle_user_change_password(request):
 
     if not current_pw or not new_pw:
         return web.json_response({"error": "Current and new passwords required"}, status=400)
-    if len(new_pw) < 6:
-        return web.json_response({"error": "New password must be at least 6 characters"}, status=400)
+
+    # Validate new password strength
+    if SECURITY_AVAILABLE:
+        ok, err = InputValidator.password(new_pw, min_length=8)
+        if not ok:
+            return web.json_response({"error": err}, status=400)
+    elif len(new_pw) < 8:
+        return web.json_response({"error": "New password must be at least 8 characters"}, status=400)
+
     if new_pw != confirm_pw:
         return web.json_response({"error": "New passwords do not match"}, status=400)
 
@@ -483,8 +719,30 @@ async def handle_user_change_password(request):
     if not ok:
         return web.json_response({"error": msg}, status=400)
 
+    # Invalidate all other sessions (force re-login with new password)
+    _db.delete_user_sessions(session["user_id"])
+
+    # Create a new session for the current user
+    new_token = _db.create_session(
+        session["user_id"],
+        max_age=_config.get("session_max_age", SESSION_MAX_AGE),
+        ip=ip,
+        ua=request.headers.get("User-Agent", "")[:200],
+    )
+
+    if _audit:
+        _audit.password_change(ip, session["username"], session["user_id"])
     log.info(f"Password changed: {session['username']}")
-    return web.json_response({"ok": True, "message": "Password changed successfully"})
+
+    resp = web.json_response({"ok": True, "message": "Password changed. All other sessions terminated."})
+    resp.set_cookie(
+        SESSION_COOKIE, new_token,
+        max_age=_config.get("session_max_age", SESSION_MAX_AGE),
+        httponly=True,
+        samesite="Strict",
+        path="/",
+    )
+    return resp
 
 
 async def handle_user_stats(request):
@@ -494,13 +752,9 @@ async def handle_user_stats(request):
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
 
-    # Overall stats
     stats_all = _db.get_trade_stats(session["user_id"])
-    # Last 7 days
     stats_week = _db.get_trade_stats(session["user_id"], days=7)
-    # Last 30 days
     stats_month = _db.get_trade_stats(session["user_id"], days=30)
-    # Trades today count
     today_count = _db.count_user_trades_today(session["user_id"])
 
     return web.json_response({
@@ -519,7 +773,10 @@ async def handle_user_logout_all(request):
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
 
+    ip = get_client_ip(request)
     _db.delete_user_sessions(session["user_id"])
+    if _audit:
+        _audit.logout_all(ip, session["username"], session["user_id"])
     log.info(f"Logout all devices: {session['username']}")
 
     resp = web.json_response({"ok": True, "message": "All sessions terminated"})
@@ -541,7 +798,7 @@ async def handle_paper_trades_list(request):
     status = request.query.get("status")
     trade_type = request.query.get("type")
     limit = min(int(request.query.get("limit", 50)), 200)
-    offset = int(request.query.get("offset", 0))
+    offset = max(int(request.query.get("offset", 0)), 0)
 
     trades = _db.get_paper_trades(
         session["user_id"], status=status, trade_type=trade_type,
@@ -557,16 +814,28 @@ async def handle_paper_trade_create(request):
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
 
+    size_resp = await check_request_size(request)
+    if size_resp:
+        return size_resp
+
     try:
         data = await request.json()
     except Exception:
         return web.json_response({"error": "Invalid JSON"}, status=400)
 
-    symbol = data.get("symbol", "").strip().upper()
-    direction = data.get("direction", "").strip().upper()
+    # Validate symbol
+    if SECURITY_AVAILABLE:
+        ok, symbol, err = InputValidator.symbol(data.get("symbol", ""))
+        if not ok:
+            return web.json_response({"error": err}, status=400)
+    else:
+        symbol = data.get("symbol", "").strip().upper()
+        if not symbol:
+            return web.json_response({"error": "Symbol required"}, status=400)
 
-    if not symbol or direction not in ("BULLISH", "BEARISH", "CE", "PE"):
-        return web.json_response({"error": "symbol and direction (BULLISH/BEARISH/CE/PE) required"}, status=400)
+    direction = data.get("direction", "").strip().upper()
+    if direction not in ("BULLISH", "BEARISH", "CE", "PE"):
+        return web.json_response({"error": "direction must be BULLISH/BEARISH/CE/PE"}, status=400)
 
     # Check daily limit
     settings = _db.get_user_settings(session["user_id"]) or {}
@@ -590,7 +859,7 @@ async def handle_paper_trade_create(request):
         t1_premium=data.get("t1_premium"),
         t2_premium=data.get("t2_premium"),
         status=data.get("status", "PENDING"),
-        entry_reason=data.get("entry_reason"),
+        entry_reason=InputValidator.sanitize_string(data.get("entry_reason", ""), 500) if SECURITY_AVAILABLE else str(data.get("entry_reason", ""))[:500],
     )
 
     log.info(f"Paper trade created: {session['username']} {symbol} {direction} (id={trade_id})")
@@ -604,7 +873,10 @@ async def handle_paper_trade_update(request):
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
 
-    trade_id = int(request.match_info["id"])
+    try:
+        trade_id = int(request.match_info["id"])
+    except (ValueError, KeyError):
+        return web.json_response({"error": "Invalid trade ID"}, status=400)
 
     # Verify ownership
     trade = _db.get_paper_trade(trade_id, user_id=session["user_id"])
@@ -679,12 +951,21 @@ def get_ai_config():
 
 
 async def handle_chat_api(request):
-    """POST /api/chat - AI chat via active provider (Perplexity or NVIDIA)."""
-    # Auth check
+    """POST /api/chat - AI chat with rate limiting and size checks."""
     token = get_session_from_request(request)
     session = validate_session(token)
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
+
+    # Chat-specific rate limit
+    rate_resp = check_rate_limit("chat", f"user:{session['user_id']}", request)
+    if rate_resp:
+        return rate_resp
+
+    # Larger size limit for chat (includes dashboard context)
+    size_resp = await check_request_size(request, MAX_CHAT_REQUEST_SIZE)
+    if size_resp:
+        return size_resp
 
     provider_id, api_url, api_key, model = get_ai_config()
     provider_name = AI_PROVIDERS[provider_id]["name"]
@@ -702,12 +983,15 @@ async def handle_chat_api(request):
     user_message = data.get("message", "").strip()
     if not user_message:
         return web.json_response({"error": "Empty message"}, status=400)
+    # Truncate extremely long messages
+    if len(user_message) > 4000:
+        user_message = user_message[:4000]
 
     history = data.get("history", [])
     focused_stock = data.get("focused_stock")
     dash_context = data.get("context", {})
 
-    # Build messages array (OpenAI-compatible for both providers)
+    # Build messages array
     system_content = CHAT_SYSTEM_PROMPT
 
     # Inject live dashboard data as context
@@ -787,23 +1071,19 @@ async def handle_chat_api(request):
 
     messages = [{"role": "system", "content": system_content}]
 
-    # Add recent history (last 6 messages for context, skip system)
     for msg in history[-6:]:
         role = msg.get("role", "user")
         content = msg.get("content", "")
         if role in ("user", "assistant") and content:
-            messages.append({"role": role, "content": content})
+            messages.append({"role": role, "content": content[:4000]})
 
-    # Ensure the last message is the current user message
     if not messages or messages[-1].get("content") != user_message:
         messages.append({"role": "user", "content": user_message})
 
-    # Call provider API (both use OpenAI-compatible format)
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
-    # More tokens when deep analysis is present
     max_tok = 2048 if analysis_text else 1024
     payload = {
         "model": model,
@@ -836,6 +1116,10 @@ async def handle_chat_api(request):
         log.error(f"Chat error ({provider_name}): {e}")
         return web.json_response({"reply": f"Connection error with {provider_name}: {str(e)}"})
 
+
+# ============================================================
+# ADMIN AI SETTINGS
+# ============================================================
 
 async def handle_ai_settings_get(request):
     """GET /api/admin/ai-settings - Return current AI config (admin only)."""
@@ -871,6 +1155,8 @@ async def handle_ai_settings_post(request):
     if not session or session["role"] != "admin":
         return web.json_response({"error": "Admin access required"}, status=403)
 
+    ip = get_client_ip(request)
+
     try:
         data = await request.json()
     except Exception:
@@ -878,7 +1164,6 @@ async def handle_ai_settings_post(request):
 
     updated = []
 
-    # Active provider
     if "active_provider" in data:
         ap = data["active_provider"]
         if ap in AI_PROVIDERS:
@@ -887,7 +1172,6 @@ async def handle_ai_settings_post(request):
         else:
             return web.json_response({"error": f"Unknown provider: {ap}"}, status=400)
 
-    # Provider-specific keys and models
     for pid, prov in AI_PROVIDERS.items():
         key_field = f"{pid}_key"
         if key_field in data:
@@ -906,16 +1190,17 @@ async def handle_ai_settings_post(request):
     if not updated:
         return web.json_response({"error": "No valid fields to update"}, status=400)
 
-    # Persist to disk
     with open(CONFIG_FILE, "w") as f:
         json.dump(_config, f, indent=2)
 
+    if _audit:
+        _audit.admin_action(ip, session["username"], session["user_id"], f"ai_settings: {', '.join(updated)}")
     log.info(f"AI settings updated by {session['username']}: {', '.join(updated)}")
     return web.json_response({"ok": True, "updated": updated})
 
 
 async def handle_ai_test(request):
-    """POST /api/admin/ai-test - Test the active (or specified) provider connection."""
+    """POST /api/admin/ai-test - Test AI provider connection."""
     token = get_session_from_request(request)
     session = validate_session(token)
     if not session or session["role"] != "admin":
@@ -926,7 +1211,6 @@ async def handle_ai_test(request):
     except Exception:
         data = {}
 
-    # Allow testing a specific provider, or default to active
     test_provider = data.get("provider", _config.get("active_ai_provider", "perplexity"))
     if test_provider not in AI_PROVIDERS:
         return web.json_response({"error": f"Unknown provider: {test_provider}"}, status=400)
@@ -970,11 +1254,11 @@ async def handle_ai_test(request):
 
 
 # ============================================================
-# ADMIN: USER MANAGEMENT
+# ADMIN USER MANAGEMENT
 # ============================================================
 
 async def handle_admin_users(request):
-    """GET /api/admin/users - list all users (admin only)."""
+    """GET /api/admin/users - list all users + platform stats (admin only)."""
     token = get_session_from_request(request)
     session = validate_session(token)
     if not session or session["role"] != "admin":
@@ -983,6 +1267,71 @@ async def handle_admin_users(request):
     users = _db.list_users(include_inactive=True)
     stats = _db.get_platform_stats()
     return web.json_response({"ok": True, "users": users, "stats": stats})
+
+
+async def handle_admin_unlock_user(request):
+    """POST /api/admin/unlock-user - unlock a locked-out user (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    user_id = data.get("user_id")
+    if not user_id:
+        return web.json_response({"error": "user_id required"}, status=400)
+
+    _db.unlock_user(int(user_id))
+    ip = get_client_ip(request)
+    if _audit:
+        _audit.admin_action(ip, session["username"], session["user_id"], f"unlock_user: {user_id}")
+    log.info(f"Admin {session['username']} unlocked user_id={user_id}")
+    return web.json_response({"ok": True})
+
+
+async def handle_admin_deactivate_user(request):
+    """POST /api/admin/deactivate-user - soft-delete a user (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    user_id = data.get("user_id")
+    if not user_id:
+        return web.json_response({"error": "user_id required"}, status=400)
+    if int(user_id) == session["user_id"]:
+        return web.json_response({"error": "Cannot deactivate yourself"}, status=400)
+
+    _db.deactivate_user(int(user_id))
+    ip = get_client_ip(request)
+    if _audit:
+        _audit.admin_action(ip, session["username"], session["user_id"], f"deactivate_user: {user_id}")
+    log.info(f"Admin {session['username']} deactivated user_id={user_id}")
+    return web.json_response({"ok": True})
+
+
+async def handle_admin_audit_log(request):
+    """GET /api/admin/audit - get recent security audit events (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    limit = min(int(request.query.get("limit", 50)), 200)
+    event_type = request.query.get("type")
+    username = request.query.get("username")
+
+    events = _db.get_recent_audit_events(limit=limit, event_type=event_type, username=username)
+    return web.json_response({"ok": True, "events": events, "count": len(events)})
 
 
 # ============================================================
@@ -1049,11 +1398,9 @@ async def proxy_http(request):
         token = get_session_from_request(request)
         session = validate_session(token)
 
-        # Not logged in at all -> redirect to login
         if not session:
             raise web.HTTPFound("/login")
 
-        # Logged in but accessing admin-only page as regular user -> 403
         if is_admin_path(path) and session["role"] != "admin":
             log.warning(f"Access denied: {session['username']} ({session['role']}) tried {path}")
             return web.Response(
@@ -1067,10 +1414,8 @@ async def proxy_http(request):
                 status=403
             )
 
-    # Build backend URL
     backend_url = f"http://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
 
-    # Forward headers (strip hop-by-hop)
     headers = {}
     skip_headers = {"host", "connection", "transfer-encoding", "keep-alive"}
     for key, val in request.headers.items():
@@ -1112,21 +1457,29 @@ async def proxy_http(request):
 # ============================================================
 
 async def session_cleanup_task(app):
-    """Periodic session cleanup via DB."""
+    """Periodic cleanup: sessions, brute force records, audit log."""
     while True:
         await asyncio.sleep(300)
-        if _db:
-            try:
+        try:
+            if _db:
                 n = _db.cleanup_expired_sessions()
                 if n:
                     log.info(f"Cleaned up {n} expired sessions")
-            except Exception as e:
-                log.warning(f"Session cleanup error: {e}")
+                # Clean old audit entries quarterly
+                _db.cleanup_old_audit(days=90)
+            if _brute_guard:
+                _brute_guard.cleanup_stale()
+        except Exception as e:
+            log.warning(f"Cleanup error: {e}")
 
 
 async def on_startup(app):
     app["cleanup_task"] = asyncio.create_task(session_cleanup_task(app))
     log.info(f"Auth proxy started on :{PROXY_PORT}, backend at {BACKEND_HOST}:{BACKEND_PORT}")
+    if SECURITY_AVAILABLE:
+        log.info("Security: rate limiting, brute force guard, CSRF, security headers — ALL ACTIVE")
+    else:
+        log.warning("Security: DEGRADED — security.py not found")
 
 
 async def on_shutdown(app):
@@ -1139,9 +1492,12 @@ async def on_shutdown(app):
 def create_app():
     load_config()
 
-    app = web.Application()
+    app = web.Application(
+        middlewares=[security_middleware],
+        client_max_size=MAX_CHAT_REQUEST_SIZE,  # Global request size limit
+    )
 
-    # Auth routes (handled directly, not proxied)
+    # Auth routes
     app.router.add_get("/login", handle_login_page)
     app.router.add_post("/api/auth/login", handle_login_api)
     app.router.add_get("/api/auth/verify", handle_verify_api)
@@ -1166,7 +1522,7 @@ def create_app():
     app.router.add_post("/api/user/trades", handle_paper_trade_create)
     app.router.add_post("/api/user/trades/{id}", handle_paper_trade_update)
 
-    # AI Chat routes (handled directly, not proxied)
+    # AI Chat
     app.router.add_post("/api/chat", handle_chat_api)
     app.router.add_get("/api/admin/ai-settings", handle_ai_settings_get)
     app.router.add_post("/api/admin/ai-settings", handle_ai_settings_post)
@@ -1174,6 +1530,9 @@ def create_app():
 
     # Admin user management
     app.router.add_get("/api/admin/users", handle_admin_users)
+    app.router.add_post("/api/admin/unlock-user", handle_admin_unlock_user)
+    app.router.add_post("/api/admin/deactivate-user", handle_admin_deactivate_user)
+    app.router.add_get("/api/admin/audit", handle_admin_audit_log)
 
     # WebSocket proxy
     app.router.add_get("/ws", proxy_websocket)

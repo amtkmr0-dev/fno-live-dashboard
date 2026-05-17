@@ -1851,6 +1851,10 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 </div>
 
 <script>
+function getCsrfToken() {
+  var match = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
+  return match ? match[1] : '';
+}
 // === State ===
 let stocks = {};       // symbol \u2192 data object
 let meta = {};
@@ -3252,7 +3256,7 @@ async function sendChatMessage() {
   try {
     const resp = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
       body: JSON.stringify({
         message: text,
         history: chatHistory.slice(-10),

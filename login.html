@@ -305,6 +305,10 @@ body {
 </div>
 
 <script>
+function getCsrfToken() {
+  var match = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
+  return match ? match[1] : '';
+}
 (function() {
   var form = document.getElementById('loginForm');
   var btn = document.getElementById('loginBtn');
@@ -345,7 +349,7 @@ body {
 
     fetch('/api/auth/login', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken()},
       body: JSON.stringify({username: user, password: pass}),
       credentials: 'same-origin'
     })

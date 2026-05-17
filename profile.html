@@ -830,6 +830,10 @@ a:hover { text-decoration: underline; }
 /* ============================================================
    Quantra Terminal — Profile Page JS
    ============================================================ */
+function getCsrfToken() {
+  var match = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
+  return match ? match[1] : '';
+}
 
 var SECTORS = ['BANK','IT','AUTO','PHARMA','METAL','OIL','FMCG','REALTY','INFRA','MEDIA'];
 var _selectedSectors = [];
@@ -1002,7 +1006,7 @@ function saveProfile() {
   setSaveStatus('prof-save-status', 'Saving...', 'var(--text-dim)');
   fetch('/api/user/profile', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
     credentials: 'same-origin',
     body: JSON.stringify(payload),
   })
@@ -1026,7 +1030,7 @@ function saveSettings() {
   setSaveStatus('ts-save-status', 'Saving...', 'var(--text-dim)');
   fetch('/api/user/settings', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
     credentials: 'same-origin',
     body: JSON.stringify(payload),
   })
@@ -1049,7 +1053,7 @@ function saveAutoSettings() {
   setSaveStatus('at-save-status', 'Saving...', 'var(--text-dim)');
   fetch('/api/user/auto-settings', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
     credentials: 'same-origin',
     body: JSON.stringify(payload),
   })
@@ -1075,7 +1079,7 @@ function changePassword() {
   setSaveStatus('sec-pw-status','Updating...','var(--text-dim)');
   fetch('/api/user/change-password', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
     credentials: 'same-origin',
     body: JSON.stringify({ current_password: cur, new_password: nw }),
   })
@@ -1098,7 +1102,7 @@ function changePassword() {
 /* ---- Logout all ---- */
 function logoutAll() {
   if (!confirm('This will end all active sessions including this one. Continue?')) return;
-  fetch('/api/user/logout-all', { method: 'POST', credentials: 'same-origin' })
+  fetch('/api/user/logout-all', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() }, credentials: 'same-origin' })
     .then(function(r){ return r.json(); })
     .then(function(d){
       if (d.ok) { window.location.href = '/login'; }

@@ -1153,6 +1153,10 @@ a:hover { text-decoration: underline; }
 </main>
 
 <script>
+function getCsrfToken() {
+  var match = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
+  return match ? match[1] : '';
+}
 // ----- Status polling -----
 async function loadStatus() {
  try {
@@ -1211,7 +1215,7 @@ async function updateToken() {
  try {
  const resp = await fetch('/api/admin/token', {
  method: 'POST',
- headers: { 'Content-Type': 'application/json' },
+ headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
  body: JSON.stringify({ token }),
  });
  const data = await resp.json();
@@ -1264,7 +1268,7 @@ async function saveSettings() {
  try {
  const resp = await fetch('/api/admin/settings', {
  method: 'POST',
- headers: { 'Content-Type': 'application/json' },
+ headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
  body: JSON.stringify(settings),
  });
  const data = await resp.json();
@@ -1301,7 +1305,7 @@ async function clearClosed() {
  try {
  const resp = await fetch('/api/admin/trades/clear', {
  method: 'POST',
- headers: { 'Content-Type': 'application/json' },
+ headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
  body: JSON.stringify({ clear_all: false }),
  });
  const data = await resp.json();
@@ -1320,7 +1324,7 @@ async function clearAll() {
  try {
  const resp = await fetch('/api/admin/trades/clear', {
  method: 'POST',
- headers: { 'Content-Type': 'application/json' },
+ headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
  body: JSON.stringify({ clear_all: true }),
  });
  const data = await resp.json();
@@ -1450,7 +1454,7 @@ async function saveAiSettings() {
  try {
   const resp = await fetch('/api/admin/ai-settings', {
    method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
+   headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
    body: JSON.stringify(payload),
   });
   const data = await resp.json();
@@ -1483,7 +1487,7 @@ async function testProvider(pid) {
  try {
   const resp = await fetch('/api/admin/ai-test', {
    method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
+   headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
    body: JSON.stringify({ provider: pid }),
   });
   const data = await resp.json();

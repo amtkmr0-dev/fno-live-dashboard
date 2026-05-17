@@ -2,18 +2,24 @@
 """
 db.py — SQLite database layer for Quantra Terminal.
 
+Security features:
+  - PBKDF2-HMAC-SHA256 password hashing (600K iterations, OWASP 2024 rec)
+  - Account lockout tracking (failed_attempts + locked_until columns)
+  - Login audit trail (login_audit table)
+  - Session IP binding
+  - Schema versioning with auto-migration
+
 Handles: users, sessions, user settings, paper trades (manual + auto),
-auto-trade signals. Provides async-safe wrappers (SQLite ops run in executor).
+auto-trade signals, login audit, security events.
 
 Usage:
     from db import DB
     db = DB("quantra.db")
-    db.init()  # creates tables if needed
-    user_id = db.create_user("amit", "amit@example.com", "hashedpw", "salt", role="admin")
-    user = db.get_user_by_username("amit")
+    db.init()  # creates tables + runs migrations
 """
 
 import hashlib
+import hmac
 import json
 import os
 import secrets
@@ -25,7 +31,60 @@ from typing import Optional
 
 log = logging.getLogger("quantra.db")
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # Bumped: added PBKDF2, lockout, audit table
+
+# ============================================================
+# PASSWORD HASHING — PBKDF2-HMAC-SHA256
+# ============================================================
+# OWASP 2024 recommends 600K iterations for PBKDF2-SHA256.
+# This is stdlib-only (no bcrypt/argon2 dependency).
+
+PBKDF2_ITERATIONS = 600_000
+PBKDF2_HASH_LEN = 32  # 256 bits
+HASH_ALGORITHM = "pbkdf2"  # stored in DB to detect legacy SHA-256 hashes
+
+
+def hash_password_pbkdf2(password, salt=None):
+    """
+    Hash a password using PBKDF2-HMAC-SHA256.
+    Returns (hash_hex, salt_hex, algorithm_tag).
+    """
+    if salt is None:
+        salt = secrets.token_hex(32)  # 256-bit salt
+    dk = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        PBKDF2_ITERATIONS,
+        dklen=PBKDF2_HASH_LEN,
+    )
+    return dk.hex(), salt, HASH_ALGORITHM
+
+
+def verify_password_hash(password, stored_hash, salt, algorithm=None):
+    """
+    Verify a password against a stored hash.
+    Supports both legacy SHA-256 and new PBKDF2.
+    Returns True if match.
+    """
+    if algorithm == "pbkdf2":
+        dk = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode("utf-8"),
+            salt.encode("utf-8"),
+            PBKDF2_ITERATIONS,
+            dklen=PBKDF2_HASH_LEN,
+        )
+        return hmac.compare_digest(dk.hex(), stored_hash)
+    else:
+        # Legacy SHA-256 (from setup_auth.py / JSON migration)
+        legacy_hash = hashlib.sha256((salt + password).encode()).hexdigest()
+        return hmac.compare_digest(legacy_hash, stored_hash)
+
+
+# ============================================================
+# SCHEMA
+# ============================================================
 
 CREATE_TABLES = """
 -- Users
@@ -35,11 +94,14 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT UNIQUE COLLATE NOCASE,
     password_hash TEXT NOT NULL,
     salt TEXT NOT NULL,
+    hash_algorithm TEXT NOT NULL DEFAULT 'sha256',
     role TEXT NOT NULL DEFAULT 'user',
     display_name TEXT,
     phone TEXT,
     avatar_url TEXT,
     bio TEXT,
+    failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+    locked_until TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     last_login TEXT,
     is_active INTEGER NOT NULL DEFAULT 1
@@ -121,6 +183,17 @@ CREATE TABLE IF NOT EXISTS auto_signals (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Login audit trail
+CREATE TABLE IF NOT EXISTS login_audit (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type TEXT NOT NULL,
+    ip_address TEXT,
+    username TEXT,
+    user_id INTEGER,
+    details TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Schema version tracking
 CREATE TABLE IF NOT EXISTS schema_meta (
     key TEXT PRIMARY KEY,
@@ -136,11 +209,18 @@ CREATE INDEX IF NOT EXISTS idx_paper_trades_date ON paper_trades(created_at);
 CREATE INDEX IF NOT EXISTS idx_auto_signals_user ON auto_signals(user_id);
 CREATE INDEX IF NOT EXISTS idx_auto_signals_date ON auto_signals(created_at);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_login_audit_date ON login_audit(created_at);
+CREATE INDEX IF NOT EXISTS idx_login_audit_ip ON login_audit(ip_address);
+CREATE INDEX IF NOT EXISTS idx_login_audit_user ON login_audit(username);
 """
 
 
 class DB:
     """SQLite database wrapper for Quantra Terminal."""
+
+    # Account lockout config
+    MAX_FAILED_ATTEMPTS = 5       # lock after 5 failures
+    LOCKOUT_DURATION_SEC = 900    # 15 minutes
 
     def __init__(self, db_path="quantra.db"):
         self.db_path = db_path
@@ -157,8 +237,9 @@ class DB:
         return self._conn
 
     def init(self):
-        """Initialize database — create tables if they don't exist."""
+        """Initialize database — create tables, run migrations."""
         self.conn.executescript(CREATE_TABLES)
+        self._run_migrations()
         # Set schema version
         self.conn.execute(
             "INSERT OR REPLACE INTO schema_meta (key, value) VALUES (?, ?)",
@@ -166,6 +247,49 @@ class DB:
         )
         self.conn.commit()
         log.info(f"Database initialized: {self.db_path} (schema v{SCHEMA_VERSION})")
+
+    def _run_migrations(self):
+        """Run schema migrations for existing databases."""
+        # Check current schema version
+        try:
+            row = self.conn.execute(
+                "SELECT value FROM schema_meta WHERE key = 'schema_version'"
+            ).fetchone()
+            current_version = int(row["value"]) if row else 0
+        except Exception:
+            current_version = 0
+
+        if current_version < 2:
+            self._migrate_v1_to_v2()
+
+    def _migrate_v1_to_v2(self):
+        """
+        v1 → v2 migration:
+        - Add hash_algorithm column to users
+        - Add failed_login_attempts, locked_until columns to users
+        - Create login_audit table (handled by CREATE_TABLES)
+        """
+        log.info("Running migration v1 → v2...")
+        try:
+            # Add columns if they don't exist (SQLite doesn't have IF NOT EXISTS for ALTER)
+            cols = {r[1] for r in self.conn.execute("PRAGMA table_info(users)").fetchall()}
+
+            if "hash_algorithm" not in cols:
+                self.conn.execute("ALTER TABLE users ADD COLUMN hash_algorithm TEXT NOT NULL DEFAULT 'sha256'")
+                log.info("  Added hash_algorithm column")
+
+            if "failed_login_attempts" not in cols:
+                self.conn.execute("ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER NOT NULL DEFAULT 0")
+                log.info("  Added failed_login_attempts column")
+
+            if "locked_until" not in cols:
+                self.conn.execute("ALTER TABLE users ADD COLUMN locked_until TEXT")
+                log.info("  Added locked_until column")
+
+            self.conn.commit()
+            log.info("Migration v1 → v2 complete")
+        except Exception as e:
+            log.warning(f"Migration v1→v2 error (may already be applied): {e}")
 
     def close(self):
         if self._conn:
@@ -176,23 +300,15 @@ class DB:
     # USERS
     # ============================================================
 
-    @staticmethod
-    def hash_password(password, salt=None):
-        """Hash password with salt. Returns (hash, salt)."""
-        if salt is None:
-            salt = secrets.token_hex(16)
-        hashed = hashlib.sha256((salt + password).encode()).hexdigest()
-        return hashed, salt
-
     def create_user(self, username, email, password, role="user", display_name=None):
-        """Create a new user. Returns user_id or raises on duplicate."""
-        pw_hash, salt = self.hash_password(password)
+        """Create a new user with PBKDF2 hashing. Returns user_id."""
+        pw_hash, salt, algo = hash_password_pbkdf2(password)
         try:
             cur = self.conn.execute(
-                """INSERT INTO users (username, email, password_hash, salt, role, display_name)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO users (username, email, password_hash, salt, hash_algorithm, role, display_name)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (username.strip(), email.strip().lower() if email else None,
-                 pw_hash, salt, role, display_name or username),
+                 pw_hash, salt, algo, role, display_name or username),
             )
             user_id = cur.lastrowid
             # Create default settings
@@ -200,7 +316,7 @@ class DB:
                 "INSERT INTO user_settings (user_id) VALUES (?)", (user_id,)
             )
             self.conn.commit()
-            log.info(f"User created: {username} (id={user_id}, role={role})")
+            log.info(f"User created: {username} (id={user_id}, role={role}, hash=PBKDF2)")
             return user_id
         except sqlite3.IntegrityError as e:
             self.conn.rollback()
@@ -212,28 +328,73 @@ class DB:
             raise
 
     def verify_password(self, username, password):
-        """Verify login credentials. Returns user dict or None."""
+        """
+        Verify login credentials with account lockout and auto-upgrade.
+        Returns user dict or None.
+        """
+        # Find user by username or email
         row = self.conn.execute(
             "SELECT * FROM users WHERE username = ? AND is_active = 1",
             (username,),
         ).fetchone()
         if not row:
-            # Try by email
             row = self.conn.execute(
                 "SELECT * FROM users WHERE email = ? AND is_active = 1",
                 (username.lower(),),
             ).fetchone()
         if not row:
             return None
-        pw_hash, _ = self.hash_password(password, row["salt"])
-        if pw_hash != row["password_hash"]:
+
+        # Check account lockout
+        if row["locked_until"]:
+            try:
+                lock_time = datetime.fromisoformat(row["locked_until"])
+                if lock_time > datetime.utcnow():
+                    remaining = int((lock_time - datetime.utcnow()).total_seconds())
+                    log.warning(f"Login blocked — account locked: {row['username']} ({remaining}s remaining)")
+                    return None
+                else:
+                    # Lockout expired — reset
+                    self.conn.execute(
+                        "UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?",
+                        (row["id"],),
+                    )
+            except ValueError:
+                pass  # malformed date, ignore
+
+        # Verify password (handles both legacy SHA-256 and PBKDF2)
+        algo = row["hash_algorithm"] if "hash_algorithm" in row.keys() else "sha256"
+        if not verify_password_hash(password, row["password_hash"], row["salt"], algo):
+            # Record failed attempt
+            new_count = (row["failed_login_attempts"] or 0) + 1
+            locked_until = None
+            if new_count >= self.MAX_FAILED_ATTEMPTS:
+                locked_until = (datetime.utcnow() + timedelta(seconds=self.LOCKOUT_DURATION_SEC)).isoformat()
+                log.warning(f"Account locked: {row['username']} after {new_count} failed attempts")
+            self.conn.execute(
+                "UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?",
+                (new_count, locked_until, row["id"]),
+            )
+            self.conn.commit()
             return None
-        # Update last_login
+
+        # Success — reset lockout counters
         self.conn.execute(
-            "UPDATE users SET last_login = datetime('now') WHERE id = ?",
+            "UPDATE users SET failed_login_attempts = 0, locked_until = NULL, last_login = datetime('now') WHERE id = ?",
             (row["id"],),
         )
         self.conn.commit()
+
+        # Auto-upgrade legacy SHA-256 → PBKDF2 on successful login
+        if algo != "pbkdf2":
+            new_hash, new_salt, new_algo = hash_password_pbkdf2(password)
+            self.conn.execute(
+                "UPDATE users SET password_hash = ?, salt = ?, hash_algorithm = ? WHERE id = ?",
+                (new_hash, new_salt, new_algo, row["id"]),
+            )
+            self.conn.commit()
+            log.info(f"Password hash upgraded to PBKDF2 for user: {row['username']}")
+
         return dict(row)
 
     def get_user(self, user_id):
@@ -261,26 +422,28 @@ class DB:
         return True
 
     def change_password(self, user_id, old_password, new_password):
-        """Change user password. Verifies old password first."""
+        """Change user password — verifies old, hashes new with PBKDF2."""
         row = self.conn.execute(
-            "SELECT password_hash, salt FROM users WHERE id = ?", (user_id,)
+            "SELECT password_hash, salt, hash_algorithm FROM users WHERE id = ?", (user_id,)
         ).fetchone()
         if not row:
             return False, "User not found"
-        old_hash, _ = self.hash_password(old_password, row["salt"])
-        if old_hash != row["password_hash"]:
+
+        algo = row["hash_algorithm"] if "hash_algorithm" in row.keys() else "sha256"
+        if not verify_password_hash(old_password, row["password_hash"], row["salt"], algo):
             return False, "Current password is incorrect"
-        new_hash, new_salt = self.hash_password(new_password)
+
+        new_hash, new_salt, new_algo = hash_password_pbkdf2(new_password)
         self.conn.execute(
-            "UPDATE users SET password_hash = ?, salt = ? WHERE id = ?",
-            (new_hash, new_salt, user_id),
+            "UPDATE users SET password_hash = ?, salt = ?, hash_algorithm = ? WHERE id = ?",
+            (new_hash, new_salt, new_algo, user_id),
         )
         self.conn.commit()
         return True, "Password changed"
 
     def list_users(self, include_inactive=False):
         """List all users (admin use)."""
-        q = "SELECT id, username, email, role, display_name, created_at, last_login, is_active FROM users"
+        q = "SELECT id, username, email, role, display_name, created_at, last_login, is_active, failed_login_attempts, locked_until FROM users"
         if not include_inactive:
             q += " WHERE is_active = 1"
         q += " ORDER BY created_at DESC"
@@ -291,6 +454,21 @@ class DB:
         return self.conn.execute(
             "SELECT COUNT(*) FROM users WHERE is_active = 1"
         ).fetchone()[0]
+
+    def deactivate_user(self, user_id):
+        """Soft-delete a user (admin action)."""
+        self.conn.execute("UPDATE users SET is_active = 0 WHERE id = ?", (user_id,))
+        # Kill all their sessions
+        self.conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+        self.conn.commit()
+
+    def unlock_user(self, user_id):
+        """Manually unlock a locked-out user (admin action)."""
+        self.conn.execute(
+            "UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?",
+            (user_id,),
+        )
+        self.conn.commit()
 
     # ============================================================
     # USER SETTINGS
@@ -341,21 +519,22 @@ class DB:
     # ============================================================
 
     def create_session(self, user_id, max_age=86400, ip=None, ua=None):
-        """Create a new session. Returns session token."""
+        """Create a new session with a cryptographically secure token."""
         token = secrets.token_hex(32)
         expires = (datetime.utcnow() + timedelta(seconds=max_age)).isoformat()
         self.conn.execute(
             """INSERT INTO sessions (token, user_id, expires_at, ip_address, user_agent)
                VALUES (?, ?, ?, ?, ?)""",
-            (token, user_id, expires, ip, ua),
+            (token, user_id, expires, ip, (ua or "")[:200]),
         )
         self.conn.commit()
         return token
 
     def validate_session(self, token):
-        """Validate a session token. Returns (user_id, role, username) or None."""
+        """Validate a session token. Returns dict with user_id, username, role or None."""
         row = self.conn.execute(
-            """SELECT s.user_id, s.expires_at, u.username, u.role, u.display_name, u.is_active
+            """SELECT s.user_id, s.expires_at, s.ip_address,
+                      u.username, u.role, u.display_name, u.is_active
                FROM sessions s JOIN users u ON s.user_id = u.id
                WHERE s.token = ?""",
             (token,),
@@ -391,6 +570,13 @@ class DB:
         """Delete all sessions for a user."""
         self.conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
         self.conn.commit()
+
+    def count_user_sessions(self, user_id):
+        """Count active sessions for a user."""
+        return self.conn.execute(
+            "SELECT COUNT(*) FROM sessions WHERE user_id = ? AND expires_at > datetime('now')",
+            (user_id,),
+        ).fetchone()[0]
 
     def cleanup_expired_sessions(self):
         """Remove all expired sessions."""
@@ -557,6 +743,54 @@ class DB:
         ).fetchall()]
 
     # ============================================================
+    # LOGIN AUDIT
+    # ============================================================
+
+    def log_audit_event(self, event_type, ip=None, username=None, user_id=None, details=None):
+        """Log a security/audit event."""
+        self.conn.execute(
+            """INSERT INTO login_audit (event_type, ip_address, username, user_id, details)
+               VALUES (?, ?, ?, ?, ?)""",
+            (event_type, ip, username, user_id, details),
+        )
+        self.conn.commit()
+
+    def get_recent_audit_events(self, limit=50, event_type=None, username=None):
+        """Get recent audit events (admin use)."""
+        q = "SELECT * FROM login_audit WHERE 1=1"
+        params = []
+        if event_type:
+            q += " AND event_type = ?"
+            params.append(event_type)
+        if username:
+            q += " AND username = ?"
+            params.append(username)
+        q += " ORDER BY created_at DESC LIMIT ?"
+        params.append(limit)
+        return [dict(r) for r in self.conn.execute(q, params).fetchall()]
+
+    def count_failed_logins(self, ip=None, username=None, minutes=15):
+        """Count recent failed login attempts (for rate limit decisions)."""
+        q = "SELECT COUNT(*) FROM login_audit WHERE event_type = 'LOGIN_FAILED' AND created_at >= datetime('now', ?)"
+        params = [f"-{minutes} minutes"]
+        if ip:
+            q += " AND ip_address = ?"
+            params.append(ip)
+        if username:
+            q += " AND username = ?"
+            params.append(username)
+        return self.conn.execute(q, params).fetchone()[0]
+
+    def cleanup_old_audit(self, days=90):
+        """Clean up audit entries older than N days."""
+        n = self.conn.execute(
+            "DELETE FROM login_audit WHERE created_at < datetime('now', ?)",
+            (f"-{days} days",),
+        ).rowcount
+        self.conn.commit()
+        return n
+
+    # ============================================================
     # ADMIN
     # ============================================================
 
@@ -573,12 +807,20 @@ class DB:
         auto_trades = self.conn.execute(
             "SELECT COUNT(*) FROM paper_trades WHERE trade_type = 'auto'"
         ).fetchone()[0]
+        locked_accounts = self.conn.execute(
+            "SELECT COUNT(*) FROM users WHERE locked_until > datetime('now')"
+        ).fetchone()[0]
+        failed_logins_24h = self.conn.execute(
+            "SELECT COUNT(*) FROM login_audit WHERE event_type = 'LOGIN_FAILED' AND created_at >= datetime('now', '-1 day')"
+        ).fetchone()[0]
         return {
             "total_users": users,
             "active_sessions": active_sessions,
             "trades_today": trades_today,
             "total_trades": total_trades,
             "auto_trades": auto_trades,
+            "locked_accounts": locked_accounts,
+            "failed_logins_24h": failed_logins_24h,
         }
 
     # ============================================================
@@ -604,17 +846,17 @@ class DB:
             if existing:
                 continue
             try:
-                # Insert directly with existing hash/salt (don't re-hash)
+                # Insert with legacy hash/salt — marked as sha256 for auto-upgrade on next login
                 cur = self.conn.execute(
-                    """INSERT INTO users (username, password_hash, salt, role, display_name)
-                       VALUES (?, ?, ?, ?, ?)""",
-                    (u["username"], u["hash"], u["salt"],
+                    """INSERT INTO users (username, password_hash, salt, hash_algorithm, role, display_name)
+                       VALUES (?, ?, ?, ?, ?, ?)""",
+                    (u["username"], u["hash"], u["salt"], "sha256",
                      u.get("role", "admin"), u["username"]),
                 )
                 uid = cur.lastrowid
                 self.conn.execute("INSERT INTO user_settings (user_id) VALUES (?)", (uid,))
                 migrated += 1
-                log.info(f"Migrated user from JSON: {u['username']} (role={u.get('role', 'admin')})")
+                log.info(f"Migrated user from JSON: {u['username']} (role={u.get('role', 'admin')}, hash=SHA256→will auto-upgrade)")
             except sqlite3.IntegrityError:
                 continue
 
