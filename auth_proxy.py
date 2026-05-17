@@ -1574,17 +1574,127 @@ async def session_cleanup_task(app):
             log.warning(f"Cleanup error: {e}")
 
 
+async def auto_scan_timer(app):
+    """
+    Periodic auto-trade scanner. Runs every 5 minutes during market hours.
+    Scans all users with auto_trade_enabled, fetches live Upstox data,
+    and feeds candidates into the AutoTrader engine.
+    """
+    AUTO_SCAN_INTERVAL = 300  # 5 minutes
+    # Wait 60 seconds after startup before first scan
+    await asyncio.sleep(60)
+
+    log.info("Auto-scan timer started (every %d seconds)", AUTO_SCAN_INTERVAL)
+
+    while True:
+        try:
+            trader = get_auto_trader()
+            if trader is None:
+                log.debug("Auto-scan: AutoTrader not available, sleeping")
+                await asyncio.sleep(AUTO_SCAN_INTERVAL)
+                continue
+
+            # Check trading window
+            if not trader.is_trading_window():
+                log.debug("Auto-scan: outside trading hours, sleeping")
+                await asyncio.sleep(AUTO_SCAN_INTERVAL)
+                continue
+
+            # Find all users with auto_trade_enabled
+            if not _db:
+                await asyncio.sleep(AUTO_SCAN_INTERVAL)
+                continue
+
+            try:
+                users_with_auto = _db.conn.execute(
+                    "SELECT u.id, u.username FROM users u "
+                    "JOIN user_settings s ON s.user_id = u.id "
+                    "WHERE s.auto_trade_enabled = 1 AND u.is_active = 1"
+                ).fetchall()
+            except Exception as exc:
+                log.error("Auto-scan: failed to query auto-trade users: %s", exc)
+                await asyncio.sleep(AUTO_SCAN_INTERVAL)
+                continue
+
+            if not users_with_auto:
+                log.debug("Auto-scan: no users with auto_trade_enabled")
+                await asyncio.sleep(AUTO_SCAN_INTERVAL)
+                continue
+
+            # Fetch NIFTY direction (once for all users)
+            nifty_direction = "NEUTRAL"
+            nifty_score = 50.0
+            try:
+                from auto_trader import LiveDataBridge
+                bridge = LiveDataBridge()
+                nifty_direction, nifty_score = await bridge.fetch_nifty_direction()
+                log.info(
+                    "Auto-scan: NIFTY %s (%.0f) — scanning %d users",
+                    nifty_direction, nifty_score, len(users_with_auto),
+                )
+            except Exception as exc:
+                log.error("Auto-scan: NIFTY direction fetch failed: %s", exc)
+
+            # Fetch candidates (once — same candidates for all users)
+            candidates = []
+            try:
+                bridge = LiveDataBridge() if 'bridge' not in dir() else bridge
+                candidates = await bridge.scan_whitelisted_stocks(
+                    nifty_direction, max_stocks=10,
+                )
+                log.info("Auto-scan: %d candidates found", len(candidates))
+            except Exception as exc:
+                log.error("Auto-scan: stock scan failed: %s", exc)
+
+            # Run scan for each user
+            for row in users_with_auto:
+                uid = row[0]
+                uname = row[1]
+                try:
+                    result = trader.run_scan(
+                        user_id=uid,
+                        candidates=candidates if candidates else None,
+                        nifty_direction=nifty_direction,
+                        nifty_score=nifty_score,
+                    )
+                    trades_ct = len(result.get("trades_entered", []))
+                    if trades_ct > 0:
+                        log.info(
+                            "Auto-scan: user %s — %d trade(s) entered",
+                            uname, trades_ct,
+                        )
+                    else:
+                        log.debug(
+                            "Auto-scan: user %s — skip: %s",
+                            uname, result.get("skip_reason", "no trades"),
+                        )
+                except Exception as exc:
+                    log.error("Auto-scan: error for user %s: %s", uname, exc)
+
+        except asyncio.CancelledError:
+            log.info("Auto-scan timer cancelled")
+            return
+        except Exception as exc:
+            log.error("Auto-scan timer error: %s", exc, exc_info=True)
+
+        await asyncio.sleep(AUTO_SCAN_INTERVAL)
+
+
 async def on_startup(app):
     app["cleanup_task"] = asyncio.create_task(session_cleanup_task(app))
+    app["auto_scan_task"] = asyncio.create_task(auto_scan_timer(app))
     log.info(f"Auth proxy started on :{PROXY_PORT}, backend at {BACKEND_HOST}:{BACKEND_PORT}")
     if SECURITY_AVAILABLE:
         log.info("Security: rate limiting, brute force guard, CSRF, security headers — ALL ACTIVE")
     else:
         log.warning("Security: DEGRADED — security.py not found")
+    log.info("Auto-scan timer: ACTIVE (every 5 min during market hours)")
 
 
 async def on_shutdown(app):
     app["cleanup_task"].cancel()
+    if "auto_scan_task" in app:
+        app["auto_scan_task"].cancel()
     if _db:
         _db.close()
     log.info("Auth proxy shutting down")

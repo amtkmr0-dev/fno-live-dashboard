@@ -34,6 +34,7 @@ Usage:
 import json
 import logging
 import math
+import os
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -668,6 +669,7 @@ class AutoTrader:
         candidates: list = None,
         nifty_direction: str = None,
         nifty_score: float = None,
+        force: bool = False,
     ) -> dict:
         """
         Execute the full auto-trade pipeline for a single user.
@@ -744,7 +746,7 @@ class AutoTrader:
         # ----------------------------------------------------------------
         # Stage 0a — Trading window check
         # ----------------------------------------------------------------
-        if not self.is_trading_window():
+        if not force and not self.is_trading_window():
             log.info("run_scan: outside trading hours — aborting")
             return _result(
                 success=False,
@@ -1168,6 +1170,313 @@ class AutoTrader:
                 "_log_scan_signal failed (non-fatal): %s", exc, exc_info=True
             )
             return None
+
+
+# ===========================================================================
+# LiveDataBridge — Fetches real Upstox data for auto-scan
+# ===========================================================================
+
+class LiveDataBridge:
+    """
+    Async bridge between the auto-trade engine and Upstox API v2.
+
+    Reuses functions from chat_analysis.py for option chain / candles data.
+    Designed to be called from auth_proxy.py's periodic timer.
+
+    Usage (inside an async context):
+        bridge = LiveDataBridge()
+        nifty_dir, nifty_score = await bridge.fetch_nifty_direction()
+        candidates = await bridge.scan_whitelisted_stocks(nifty_dir)
+    """
+
+    def __init__(self):
+        self._token = None
+        self._token_checked_at = 0
+
+    def _get_token(self):
+        """Read Upstox token (reuses chat_analysis.get_upstox_token)."""
+        now = time.time()
+        if self._token and (now - self._token_checked_at) < 300:
+            return self._token
+        try:
+            from chat_analysis import get_upstox_token
+            self._token = get_upstox_token()
+        except ImportError:
+            log.warning("LiveDataBridge: chat_analysis.py not available")
+            self._token = os.environ.get("UPSTOX_ACCESS_TOKEN", "")
+        self._token_checked_at = now
+        return self._token
+
+    def _headers(self, token):
+        return {
+            "Accept": "application/json",
+            "Api-Version": "2.0",
+            "Authorization": f"Bearer {token}",
+        }
+
+    async def fetch_nifty_direction(self):
+        """
+        Determine NIFTY direction from Upstox live option chain data.
+
+        Returns (direction: str, score: float)
+        Direction: BULLISH / BEARISH / NEUTRAL
+        Score: 0-100 confidence
+        """
+        import aiohttp
+
+        token = self._get_token()
+        if not token:
+            log.warning("LiveDataBridge: no Upstox token — defaulting NEUTRAL")
+            return "NEUTRAL", 50.0
+
+        headers = self._headers(token)
+        nifty_key = "NSE_INDEX|Nifty 50"
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                # 1) Fetch NIFTY option chain for PCR + OI walls
+                chain_url = "https://api.upstox.com/v2/option/chain"
+                # Get nearest expiry first
+                contract_url = "https://api.upstox.com/v2/option/contract"
+                async with session.get(
+                    contract_url, headers=headers,
+                    params={"instrument_key": nifty_key},
+                    timeout=aiohttp.ClientTimeout(total=15),
+                ) as resp:
+                    if resp.status == 401:
+                        log.error("LiveDataBridge: Upstox token expired (401)")
+                        return "NEUTRAL", 50.0
+                    if resp.status != 200:
+                        log.error("LiveDataBridge: contract fetch failed %d", resp.status)
+                        return "NEUTRAL", 50.0
+                    contracts = (await resp.json()).get("data", [])
+
+                if not contracts:
+                    return "NEUTRAL", 50.0
+
+                expiries = sorted(set(c.get("expiry") or c for c in contracts if c))
+                if not expiries:
+                    return "NEUTRAL", 50.0
+                expiry = expiries[0]
+
+                # Fetch chain data
+                async with session.get(
+                    chain_url, headers=headers,
+                    params={"instrument_key": nifty_key, "expiry_date": expiry},
+                    timeout=aiohttp.ClientTimeout(total=20),
+                ) as resp:
+                    if resp.status != 200:
+                        return "NEUTRAL", 50.0
+                    data = (await resp.json()).get("data", [])
+
+                if not data:
+                    return "NEUTRAL", 50.0
+
+                # Parse chain — compute PCR, OI buildup direction
+                spot = data[0].get("underlying_spot_price", 0)
+                total_ce_oi = 0
+                total_pe_oi = 0
+                ce_oi_chg_sum = 0
+                pe_oi_chg_sum = 0
+
+                for r in data:
+                    ce = r.get("call_options", {}).get("market_data", {})
+                    pe = r.get("put_options", {}).get("market_data", {})
+                    ce_oi = ce.get("oi", 0) or 0
+                    pe_oi = pe.get("oi", 0) or 0
+                    ce_prev_oi = ce.get("prev_oi", 0) or 0
+                    pe_prev_oi = pe.get("prev_oi", 0) or 0
+                    total_ce_oi += ce_oi
+                    total_pe_oi += pe_oi
+                    ce_oi_chg_sum += (ce_oi - ce_prev_oi)
+                    pe_oi_chg_sum += (pe_oi - pe_prev_oi)
+
+                pcr = total_pe_oi / total_ce_oi if total_ce_oi > 0 else 1.0
+
+                # Direction logic:
+                # PCR > 1.2 → bullish (more PE writing = support)
+                # PCR < 0.8 → bearish (more CE writing = resistance)
+                # OI change: net PE buildup = bullish, net CE buildup = bearish
+                score = 50.0
+
+                if pcr > 1.3:
+                    score += 20
+                elif pcr > 1.1:
+                    score += 10
+                elif pcr < 0.7:
+                    score -= 20
+                elif pcr < 0.9:
+                    score -= 10
+
+                # OI change signal
+                if pe_oi_chg_sum > ce_oi_chg_sum * 1.5:
+                    score += 10  # strong PE writing = bullish
+                elif ce_oi_chg_sum > pe_oi_chg_sum * 1.5:
+                    score -= 10  # strong CE writing = bearish
+
+                # Clamp
+                score = max(0, min(100, score))
+
+                if score >= 60:
+                    direction = "BULLISH"
+                elif score <= 40:
+                    direction = "BEARISH"
+                else:
+                    direction = "NEUTRAL"
+
+                log.info(
+                    "LiveDataBridge NIFTY: spot=%.2f pcr=%.3f ce_oi_chg=%d pe_oi_chg=%d → %s (%.0f)",
+                    spot, pcr, ce_oi_chg_sum, pe_oi_chg_sum, direction, score,
+                )
+                return direction, score
+
+        except Exception as exc:
+            log.error("LiveDataBridge.fetch_nifty_direction failed: %s", exc, exc_info=True)
+            return "NEUTRAL", 50.0
+
+    async def scan_whitelisted_stocks(self, nifty_direction, max_stocks=10):
+        """
+        Scan whitelisted stocks via Upstox option chains.
+        Returns a list of candidate dicts ready for AutoTrader.run_scan().
+
+        Fetches the nearest-expiry ATM option for each whitelisted stock
+        and builds candidate entries with real premiums, lot sizes, and strikes.
+        """
+        import aiohttp
+
+        token = self._get_token()
+        if not token:
+            log.warning("LiveDataBridge: no token — cannot scan stocks")
+            return []
+
+        headers = self._headers(token)
+        candidates = []
+
+        # Pick direction for options: BULLISH → CE, BEARISH → PE, NEUTRAL → CE (default)
+        opt_type = "PE" if nifty_direction == "BEARISH" else "CE"
+
+        # Resolve instruments first
+        try:
+            from chat_analysis import _load_instruments
+        except ImportError:
+            log.warning("LiveDataBridge: chat_analysis not importable for instruments")
+            return []
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                instruments = await _load_instruments(session)
+
+                # Select a subset of whitelisted stocks to scan
+                # (scanning all 48 would be slow — pick the most liquid ones)
+                scan_symbols = []
+                for sym in WHITELISTED_STOCKS:
+                    if sym in instruments and instruments[sym].get("lot_size", 0) > 0:
+                        scan_symbols.append(sym)
+                scan_symbols = scan_symbols[:max_stocks]
+
+                log.info(
+                    "LiveDataBridge: scanning %d whitelisted stocks for %s setups",
+                    len(scan_symbols), opt_type,
+                )
+
+                for sym in scan_symbols:
+                    try:
+                        cand = await self._fetch_stock_candidate(
+                            session, headers, sym, opt_type, instruments,
+                        )
+                        if cand:
+                            candidates.append(cand)
+                    except Exception as exc:
+                        log.debug("LiveDataBridge: error scanning %s: %s", sym, exc)
+                        continue
+
+        except Exception as exc:
+            log.error("LiveDataBridge.scan_whitelisted_stocks failed: %s", exc, exc_info=True)
+
+        log.info(
+            "LiveDataBridge: %d candidates from %d scanned stocks",
+            len(candidates), len(scan_symbols) if 'scan_symbols' in dir() else 0,
+        )
+        return candidates
+
+    async def _fetch_stock_candidate(self, session, headers, symbol, opt_type, instruments):
+        """
+        Fetch option chain for a single stock and return a candidate dict
+        if a valid ATM option is found with premium >= MIN_PREMIUM_RS.
+        """
+        import aiohttp
+
+        info = instruments.get(symbol, {})
+        lot_size = info.get("lot_size", 0)
+        nearest_expiry = info.get("nearest_expiry", "")
+
+        if not lot_size or not nearest_expiry:
+            return None
+
+        # Construct instrument key for option chain
+        eq_key = info.get("equity_key", "")
+        if not eq_key:
+            return None
+
+        # Derive F&O key from equity key
+        fo_key = eq_key.replace("NSE_EQ|", "NSE_FO|")
+
+        # Fetch chain
+        chain_url = "https://api.upstox.com/v2/option/chain"
+        try:
+            async with session.get(
+                chain_url, headers=headers,
+                params={"instrument_key": fo_key, "expiry_date": nearest_expiry},
+                timeout=aiohttp.ClientTimeout(total=15),
+            ) as resp:
+                if resp.status != 200:
+                    return None
+                data = (await resp.json()).get("data", [])
+        except Exception:
+            return None
+
+        if not data:
+            return None
+
+        spot = data[0].get("underlying_spot_price", 0)
+        if spot <= 0:
+            return None
+
+        # Find ATM strike
+        atm_strike = None
+        atm_premium = 0
+        min_dist = float("inf")
+
+        for r in data:
+            strike = r.get("strike_price", 0)
+            dist = abs(strike - spot)
+            if dist < min_dist:
+                min_dist = dist
+                atm_strike = strike
+                if opt_type == "CE":
+                    md = r.get("call_options", {}).get("market_data", {})
+                else:
+                    md = r.get("put_options", {}).get("market_data", {})
+                atm_premium = md.get("ltp", 0) or 0
+
+        if not atm_strike or atm_premium < MIN_PREMIUM_RS:
+            return None
+
+        # Capital check (quick — use 1 lot)
+        capital = atm_premium * lot_size
+        if capital > 50_000:  # default max capital
+            return None
+
+        return {
+            "symbol": symbol,
+            "direction": opt_type,
+            "strike": atm_strike,
+            "entry_premium": round(atm_premium, 2),
+            "lots": 1,
+            "lot_size": lot_size,
+            "expiry": nearest_expiry,
+            "spot_price": round(spot, 2),
+        }
 
 
 # ===========================================================================

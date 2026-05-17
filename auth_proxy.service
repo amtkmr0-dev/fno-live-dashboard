@@ -1,0 +1,18 @@
+[Unit]
+Description=Quantra Terminal Auth Proxy
+After=network.target
+
+[Service]
+User=amitkumar
+Group=amitkumar
+WorkingDirectory=/home/amitkumar/deploy
+ExecStart=/home/amitkumar/deploy/venv/bin/python3 /home/amitkumar/deploy/auth_proxy.py
+Restart=on-failure
+RestartSec=5
+Environment=PATH=/home/amitkumar/deploy/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
