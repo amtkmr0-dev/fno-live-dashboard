@@ -1335,6 +1335,107 @@ async def handle_admin_audit_log(request):
 
 
 # ============================================================
+# AUTO-TRADE ENGINE
+# ============================================================
+
+_auto_trader = None
+
+def get_auto_trader():
+    """Lazy-init AutoTrader instance."""
+    global _auto_trader
+    if _auto_trader is None:
+        try:
+            from auto_trader import AutoTrader
+            _auto_trader = AutoTrader(_db)
+            log.info("AutoTrader engine loaded successfully")
+        except ImportError:
+            log.warning("auto_trader.py not found — auto-trade endpoint disabled")
+        except Exception as e:
+            log.error(f"Failed to load AutoTrader: {e}")
+    return _auto_trader
+
+
+async def handle_auto_trade_run(request):
+    """POST /api/admin/auto-trade/run - trigger an auto-trade scan (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    trader = get_auto_trader()
+    if trader is None:
+        return web.json_response({"error": "AutoTrader engine not available"}, status=503)
+
+    # Parse optional parameters
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+
+    target_user_id = data.get("user_id", session["user_id"])
+    nifty_direction = data.get("nifty_direction")
+    nifty_score = data.get("nifty_score")
+    candidates = data.get("candidates")
+    force = data.get("force", False)  # bypass trading window check
+
+    try:
+        result = trader.run_scan(
+            user_id=target_user_id,
+            candidates=candidates,
+            nifty_direction=nifty_direction,
+            nifty_score=nifty_score,
+            force=force,
+        )
+        log.info(
+            f"Auto-trade scan by {session['username']}: "
+            f"direction={result.get('nifty_direction')} "
+            f"trades={len(result.get('trades_entered', []))} "
+            f"skip={result.get('skip_reason')}"
+        )
+
+        if SECURITY_AVAILABLE:
+            _audit.admin_action(
+                request.remote, session["username"],
+                f"auto_trade_scan: {result.get('nifty_direction')}, "
+                f"entered={len(result.get('trades_entered', []))}"
+            )
+
+        return web.json_response({"ok": True, **result})
+    except Exception as e:
+        log.error(f"Auto-trade scan error: {e}", exc_info=True)
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_auto_trade_status(request):
+    """GET /api/admin/auto-trade/status - get auto-trade engine status."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    trader = get_auto_trader()
+    if trader is None:
+        return web.json_response({
+            "ok": True, "available": False,
+            "reason": "AutoTrader engine not loaded",
+        })
+
+    settings = _db.get_user_settings(session["user_id"]) or {}
+    today_auto = _db.count_user_trades_today(session["user_id"], trade_type="auto")
+
+    return web.json_response({
+        "ok": True,
+        "available": True,
+        "in_trading_window": trader.is_trading_window(),
+        "auto_trade_enabled": bool(settings.get("auto_trade_enabled", 0)),
+        "max_positions": settings.get("auto_trade_max_positions", 2),
+        "max_capital": settings.get("auto_trade_max_capital", 50000),
+        "today_auto_trades": today_auto,
+        "daily_limit": 2,
+    })
+
+
+# ============================================================
 # REVERSE PROXY
 # ============================================================
 
@@ -1533,6 +1634,8 @@ def create_app():
     app.router.add_post("/api/admin/unlock-user", handle_admin_unlock_user)
     app.router.add_post("/api/admin/deactivate-user", handle_admin_deactivate_user)
     app.router.add_get("/api/admin/audit", handle_admin_audit_log)
+    app.router.add_post("/api/admin/auto-trade/run", handle_auto_trade_run)
+    app.router.add_get("/api/admin/auto-trade/status", handle_auto_trade_status)
 
     # WebSocket proxy
     app.router.add_get("/ws", proxy_websocket)

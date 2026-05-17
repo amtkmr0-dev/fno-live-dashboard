@@ -695,7 +695,7 @@ body {
 .sc-val.negative { color: var(--red); }
 .sc-val.neutral  { color: var(--text-dim); }
 
-/* --- Scanner Panel --- */
+/* --- Scanner Panel (Quick Actions) --- */
 .scanner-panel {
   margin-bottom: 16px;
 }
@@ -1196,13 +1196,63 @@ body {
 }
 .modal .modal-btn.btn-confirm:hover { opacity: 0.9; }
 
+/* --- New Trade Modal --- */
+.new-trade-modal {
+  max-width: 560px;
+  width: 95%;
+}
+.ntm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.ntm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ntm-field label {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.ntm-field .q-input,
+.ntm-field .q-select {
+  width: 100%;
+}
+.ntm-field-full {
+  grid-column: 1 / -1;
+}
+
 /* --- Connection dot overrides (JS sets 'conn-dot warn') --- */
 .conn-dot.warn { background: var(--orange); }
+
+/* --- Quick Actions Bar --- */
+.quick-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: var(--radius-md);
+}
+.quick-actions-bar .qa-info {
+  flex: 1;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.quick-actions-bar .qa-info strong {
+  color: var(--text);
+}
 
 /* --- Responsive --- */
 @media (max-width: 900px) {
   #summaryBar { grid-template-columns: repeat(3, 1fr); }
   .scanner-info { grid-template-columns: repeat(2, 1fr); }
+  .ntm-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
   .page-wrap { padding: 12px 10px; }
@@ -1210,6 +1260,7 @@ body {
   .tc-header { gap: 6px; }
   .tc-body { grid-template-columns: repeat(2, 1fr); }
   .scanner-header { flex-wrap: wrap; }
+  .ntm-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -1253,9 +1304,78 @@ body {
   </div>
 </div>
 
+<!-- New Trade Modal -->
+<div class="modal-overlay" id="newTradeModal">
+  <div class="modal new-trade-modal">
+    <h3>New Paper Trade</h3>
+    <form id="newTradeForm" onsubmit="submitNewTrade(event)">
+      <div class="ntm-grid">
+        <div class="ntm-field">
+          <label>Symbol</label>
+          <input type="text" class="q-input" id="nt_symbol" placeholder="e.g. NIFTY" required style="text-transform:uppercase">
+        </div>
+        <div class="ntm-field">
+          <label>Direction</label>
+          <select class="q-select" id="nt_direction" required>
+            <option value="CE">CE</option>
+            <option value="PE">PE</option>
+          </select>
+        </div>
+        <div class="ntm-field">
+          <label>Strike</label>
+          <input type="number" class="q-input" id="nt_strike" placeholder="24000" step="any">
+        </div>
+        <div class="ntm-field">
+          <label>Expiry</label>
+          <input type="text" class="q-input" id="nt_expiry" placeholder="2025-01-30">
+        </div>
+        <div class="ntm-field">
+          <label>Entry Premium</label>
+          <input type="number" class="q-input" id="nt_entry_premium" placeholder="150.00" step="any" required>
+        </div>
+        <div class="ntm-field">
+          <label>Lots</label>
+          <input type="number" class="q-input" id="nt_lots" placeholder="1" value="1" min="1">
+        </div>
+        <div class="ntm-field">
+          <label>Lot Size</label>
+          <input type="number" class="q-input" id="nt_lot_size" placeholder="75" value="75" min="1">
+        </div>
+        <div class="ntm-field">
+          <label>SL Premium</label>
+          <input type="number" class="q-input" id="nt_sl_premium" placeholder="100.00" step="any">
+        </div>
+        <div class="ntm-field">
+          <label>T1 Premium</label>
+          <input type="number" class="q-input" id="nt_t1_premium" placeholder="200.00" step="any">
+        </div>
+        <div class="ntm-field">
+          <label>T2 Premium</label>
+          <input type="number" class="q-input" id="nt_t2_premium" placeholder="300.00" step="any">
+        </div>
+        <div class="ntm-field">
+          <label>Status</label>
+          <select class="q-select" id="nt_status">
+            <option value="PENDING">PENDING</option>
+            <option value="ENTERED">ENTERED</option>
+          </select>
+        </div>
+        <div class="ntm-field ntm-field-full">
+          <label>Reason / Notes</label>
+          <input type="text" class="q-input" id="nt_reason" placeholder="Entry reason or notes">
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button type="button" class="modal-btn" onclick="closeNewTradeModal()">Cancel</button>
+        <button type="submit" class="modal-btn btn-confirm" id="newTradeSubmitBtn" style="background:var(--blue);border-color:var(--blue)">Add Trade</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Navigation -->
 <nav class="q-nav">
-  <a href="/" class="q-nav-brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAXCAIAAADsjHrMAAAEAElEQVR42p1VXWgcVRQ+596Z3exf2ibdJjFUiIWmpqQkKKmKDyLYRktNEawWrSAUnyp5Kf4+1Bctgr4GX1oRqQhFQQWRoKJIKpUWitGWxDZpmtZszGZ/53/uvceHZDazm81m9T7MXObcO9/5vvOH0NID4YUABE0sBAQgWv+5ch2x1s5qTzeJBPWQgusI9e0M/vtCDP4XvEKbRg7/HzAiCtwmRKyF2tjJTcGoGWWp0RlsnhmGhFkHjEBETbi7umGbEaLgQQCAyBhjAMQ4R0SgJhXEBswqqlD4MOcaua6yigikzBxJgZwDNRYwLAxw0LZVE8Ka5EIAxjkpIjvX1n3PC6dPH337NYil7v4xKcw86jFkKwWFTRCsKerqqCBjCKisoh6LD798/NDJ0WRH2rAAo3Dj96mvPzgz9d23AAwTKVJyU8j1zMJInGybfPOBgwdPjo09fvyYqxK5vOMpVsi72NbZe+hIa+++7Oy0/fcMoA5cg4ZhrGFGocplZBvdvbufff3U0OERKaGQs3kihjosZW0/GcvnlOn4Ih4tldzrX5y9dX7MK+QwGiNSG+GtMCOAqtRijJNr7B8ZOfXZ+Z39/aWC73oUT0eXFjJfvvveN++/ZRh+qm/Q0qP5rOtIPTUwlHp0pDh5yV+6C1qkbpFVwCpJgQErRp75zJvvdPT1ZjN2NB4VqH44d/aT0Vf/mvjRLnnzF8dnfxnHLZ0tPXsMi0rLNqXb3eyydXUcI8nqFF1rblpNIwKsNFmtYHqmTSoSuXknc2H0xNzlCdCSLNFGSiGLFaenrrzx4vYDz28/8SEoXZRJuH7jLqGtFRbiKtJqr1WIkHdxpsBnrt6euzzBEu2klJISAEgKjCVIeNmL38snDT2einIUkuqNKaoGW43WWtBWZMgYWFyAsgOWZKgnSMqwOqQUELF40rGF7brc06WnGs8oLeCxQo5CNY+3i7DDAiHA9lZ6YJXHyBkQI6GE5YLGhNSU6a8mWkMZIQRJFXpCUtkGX4BlS1ASGAclgAg4B6nILAIo1tqplA6WDTqALwKHKp5hzTyr7rkhq+2R6ULZUBbfirEkWDlAhlwHywLfufeVl9JPDaula/TrORJIjk+eUzfjw6m/NRjza8cQGfhO5JFjqv0+p2ioljS7/wAZyypzDdxyamDfg59/1PXc023DD/uOXbowBktzuPMhWJyCO7+BHguRqwMWmNbixUC6kNxBux6TrhKWpVrace9h7Oil5VtgZLYMDmJX2ikXU08MYU+X8dWnavoKOstgLgLTN+IXgNUqTKBFxY1L/vwkdPUrlpBWSRol2LYL+o6I2T8XPz4Dre0tA7uNfxb0vd2R/Xucn35W8zchGg+Kdb2S+C9oNgc7Ni61CwAAAABJRU5ErkJggg==" alt="Quantra" style="height:28px;width:auto;"></a>
+  <a href="/" class="q-nav-brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAXCAIAAADsjHrMAAAEAElEQVR42p1VXWgcVRQ+596Z3exf2ibdJjFUiIWmpqQkKKmKDyLYRktNEawWrSAUnyp5Kf4+1Bctgr4GX1oRqQhFQQWRoKJIKpUWitGWxDZpmtZszGZ/53/uvceHZDazm81m9T7MXObcO9/5vvOH0NID4YUABE0sBAQgWv+5ch2x1s5qTzeJBPWQgusI9e0M/vtCDP4XvEKbRg7/HzAiCtwmRKyF2tjJTcGoGWWp0RlsnhmGhFkHjEBETbi7umGbEaLgQQCAyBhjAMQ4R0SgJhXEBswqqlD4MOcaua6yigikzBxJgZwDNRYwLAxw0LZVE8Ka5EIAxjkpIjvX1n3PC6dPH337NYil7v4xKcw86jFkKwWFTRCsKerqqCBjCKisoh6LD798/NDJ0WRH2rAAo3Dj96mvPzgz9d23AAwTKVJyU8j1zMJInGybfPOBgwdPjo09fvyYqxK5vOMpVsi72NbZe+hIa+++7Oy0/fcMoA5cg4ZhrGFGocplZBvdvbufff3U0OERKaGQs3kihjosZW0/GcvnlOn4Ih4tldzrX5y9dX7MK+QwGiNSG+GtMCOAqtRijJNr7B8ZOfXZ+Z39/aWC73oUT0eXFjJfvvveN++/ZRh+qm/Q0qP5rOtIPTUwlHp0pDh5yV+6C1qkbpFVwCpJgQErRp75zJvvdPT1ZjN2NB4VqH44d/aT0Vf/mvjRLnnzF8dnfxnHLZ0tPXsMi0rLNqXb3eyydXUcI8nqFF1rblpNIwKsNFmtYHqmTSoSuXknc2H0xNzlCdCSLNFGSiGLFaenrrzx4vYDz28/8SEoXZRJuH7jLqGtFRbiKtJqr1WIkHdxpsBnrt6euzzBEu2klJISAEgKjCVIeNmL38snDT2einIUkuqNKaoGW43WWtBWZMgYWFyAsgOWZKgnSMqwOqQUELF40rGF7brc06WnGs8oLeCxQo5CNY+3i7DDAiHA9lZ6YJXHyBkQI6GE5YLGhNSU6a8mWkMZIQRJFXpCUtkGX4BlS1ASGAclgAg4B6nILAIo1tqplA6WDTqALwKHKp5hzTyr7rkhq+2R6ULZUBbfirEkWDlAhlwHywLfufeVl9JPDaula/TrORJIjk+eUzfjw6m/NRjza8cQGfhO5JFjqv0+p2ioljS7/wAZyypzDdxyamDfg59/1PXc023DD/uOXbowBktzuPMhWJyCO7+BHguRqwMWmNbixUC6kNxBux6TrhKWpVace9h7Oil5VtgZLYMDmJX2ikXU08MYU+X8dWnavoKOstgLgLTN+IXgNUqTKBFxY1L/vwkdPUrlpBWSRol2LYL+o6I2T8XPz4Dre0tA7uNfxb0vd2R/Xucn35W8zchGg+Kdb2S+C9oNgc7Ni61CwAAAABJRU5ErkJggg==" alt="Quantra" style="height:28px;width:auto;"></a>
   <div class="q-nav-links">
     <a href="/">Dashboard</a>
     <a href="/paper" class="active">Paper Trades</a>
@@ -1263,13 +1383,11 @@ body {
     <a href="/rsi">RSI Scanner</a>
     <a href="/rsi-analysis">Stock Analysis</a>
     <a href="/divergence">Divergence</a>
+    <a href="/profile">Profile</a>
     <a href="/admin">Admin</a>
   </div>
   <div class="q-nav-status">
-    <span class="pulse-dot" id="pulseDot"></span>
-    <span class="conn-dot off" id="connDot"></span>
-    <span id="connText">Connecting</span>
-    <span id="updateTime"></span>
+    <span id="updateTime" style="font-size:var(--fs-xs);color:var(--text-vdim)"></span>
   </div>
   <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
 </nav>
@@ -1285,14 +1403,14 @@ body {
       <div class="q-stat-sub" id="totalPnlSub">No trades yet</div>
     </div>
     <div class="q-stat-card">
-      <div class="q-stat-label">Open P&amp;L</div>
-      <div class="sc-val neutral" id="openPnl">&#8377;0</div>
-      <div class="q-stat-sub" id="openPnlSub">0 open positions</div>
+      <div class="q-stat-label">Avg P&amp;L</div>
+      <div class="sc-val neutral" id="avgPnl">&#8377;0</div>
+      <div class="q-stat-sub" id="avgPnlSub">Per trade</div>
     </div>
     <div class="q-stat-card">
-      <div class="q-stat-label">Closed P&amp;L</div>
-      <div class="sc-val neutral" id="closedPnl">&#8377;0</div>
-      <div class="q-stat-sub" id="closedPnlSub">0 closed trades</div>
+      <div class="q-stat-label">Best / Worst</div>
+      <div class="sc-val neutral" id="bestWorst">&mdash;</div>
+      <div class="q-stat-sub" id="bestWorstSub">Best / Worst trade</div>
     </div>
     <div class="q-stat-card">
       <div class="q-stat-label">Win Rate</div>
@@ -1300,29 +1418,23 @@ body {
       <div class="q-stat-sub" id="winRateSub">W: 0 &middot; L: 0</div>
     </div>
     <div class="q-stat-card">
-      <div class="q-stat-label">Open Positions</div>
-      <div class="sc-val neutral" id="openCount">0</div>
-      <div class="q-stat-sub" id="openCountSub">Max 2 per day</div>
+      <div class="q-stat-label">Total Trades</div>
+      <div class="sc-val neutral" id="totalCount">0</div>
+      <div class="q-stat-sub" id="totalCountSub">Manual: 0 &middot; Auto: 0</div>
     </div>
   </div>
 
-  <!-- Auto-Trade Scanner Panel -->
+  <!-- Quick Actions Panel -->
   <div class="q-card scanner-panel" id="scannerPanel">
     <div class="scanner-header">
-      <h3>Auto-Trade Scanner</h3>
-      <span class="scanner-status idle" id="scannerStatus">Loading...</span>
-      <button class="scanner-scan-btn" id="scanNowBtn" onclick="triggerScan()" disabled>Scan Now</button>
-      <button class="scanner-toggle" id="scannerToggle" onclick="toggleAutoTrade()">Disable</button>
+      <h3>Quick Actions</h3>
     </div>
-    <div class="scanner-info" id="scannerInfo">
-      <div><div class="si-label">Regime</div><div class="si-val" id="siRegime">&mdash;</div></div>
-      <div><div class="si-label">Breadth</div><div class="si-val" id="siBreadth">&mdash;</div></div>
-      <div><div class="si-label">Scans</div><div class="si-val" id="siScans">0</div></div>
-      <div><div class="si-label">Today Trades</div><div class="si-val" id="siTrades">0 / 2</div></div>
-      <div><div class="si-label">Candidates</div><div class="si-val" id="siCandidates">&mdash;</div></div>
-      <div><div class="si-label">Last Skip</div><div class="si-val" id="siSkip" style="font-size:10px">&mdash;</div></div>
-      <div><div class="si-label">WF Universe</div><div class="si-val" id="siWfUniverse">&mdash;</div></div>
-      <div><div class="si-label">Risk Model</div><div class="si-val" id="siRiskModel">&mdash;</div></div>
+    <div class="quick-actions-bar">
+      <button class="q-btn q-btn-primary" onclick="openNewTradeModal()">+ New Trade</button>
+      <div class="qa-info">
+        Auto-trade is configured via your <a href="/profile" style="color:var(--blue)">Profile settings</a>.
+        Trades refresh every 15 seconds.
+      </div>
     </div>
   </div>
 
@@ -1344,548 +1456,477 @@ body {
     <div class="trades-empty">
       <div class="te-icon">&#128203;</div>
       <div class="te-text">No paper trades yet</div>
-      <div class="te-sub">Auto-trader scans every 5 min (9:30&ndash;14:50 IST) using walk-forward validated signals:<br>
-      NIFTY regime &#8594; Sector alignment &#8594; WF-ranked stocks (41 universe, 3 tiers) &#8594; ITM option<br>
-      SL: 0.5% spot | Target: 5x SL | Max 2 trades/day<br>
-      Or go to the <a href="/" style="color:var(--blue)">Dashboard</a> and click a Trade Ready stock for manual entry</div>
+      <div class="te-sub">Click <strong>+ New Trade</strong> to add a trade manually, or configure auto-trade in your <a href="/profile" style="color:var(--blue)">Profile</a></div>
     </div>
   </div>
 
 </div>
 
 <script>
+// === CSRF Helper ===
+function getCsrfToken() {
+  const m = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
 // === State ===
 let trades = [];
 let summary = {};
 let activeTab = 'open';
-let wsConn = null;
-let reconnectDelay = 3000;
-let reconnectTimer = null;
 let exitTradeId = null;
 
 // === Formatting ===
 function fmtCurrency(v) {
- if (v == null || isNaN(v)) return '\u20B90';
- const sign = v >= 0 ? '' : '-';
- const abs = Math.abs(v);
- if (abs >= 10000000) return sign + '\u20B9' + (abs / 10000000).toFixed(2) + 'Cr';
- if (abs >= 100000) return sign + '\u20B9' + (abs / 100000).toFixed(2) + 'L';
- if (abs >= 1000) return sign + '\u20B9' + Math.round(abs).toLocaleString('en-IN');
- return sign + '\u20B9' + abs.toFixed(2);
+  if (v == null || isNaN(v)) return '₹0';
+  const sign = v >= 0 ? '' : '-';
+  const abs = Math.abs(v);
+  if (abs >= 10000000) return sign + '₹' + (abs / 10000000).toFixed(2) + 'Cr';
+  if (abs >= 100000) return sign + '₹' + (abs / 100000).toFixed(2) + 'L';
+  if (abs >= 1000) return sign + '₹' + Math.round(abs).toLocaleString('en-IN');
+  return sign + '₹' + abs.toFixed(2);
 }
 
 function fmtPct(v) {
- if (v == null || isNaN(v)) return '\u2013';
- return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+  if (v == null || isNaN(v)) return '–';
+  return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 }
 
 function fmtPrice(v) {
- if (v == null || v === 0) return '\u2013';
- return v.toFixed(2);
+  if (v == null || v === 0) return '–';
+  return v.toFixed(2);
 }
 
 function fmtTime(iso) {
- if (!iso) return '\u2013';
- const d = new Date(iso);
- return d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, day: '2-digit', month: 'short' });
+  if (!iso) return '–';
+  const d = new Date(iso);
+  return d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, day: '2-digit', month: 'short' });
 }
 
 function pnlClass(v) {
- if (v == null || v === 0) return 'neutral';
- return v >0 ? 'positive' : 'negative';
+  if (v == null || v === 0) return 'neutral';
+  return v > 0 ? 'positive' : 'negative';
+}
+
+// === Stats Fetch ===
+async function fetchStats() {
+  try {
+    const resp = await fetch('/api/user/stats', {credentials: 'same-origin'});
+    const data = await resp.json();
+    if (data.ok) { summary = data.stats; updateSummary(); }
+  } catch (e) { console.error('Stats fetch error:', e); }
 }
 
 // === Summary Update ===
 function updateSummary() {
- const s = summary;
+  const s = summary;
 
- const totalEl = document.getElementById('totalPnl');
- totalEl.textContent = fmtCurrency(s.total_pnl || 0);
- totalEl.className = 'sc-val ' + pnlClass(s.total_pnl);
- document.getElementById('totalPnlSub').textContent =
- (s.open_count || 0) + ' open \u00B7 ' + (s.closed_count || 0) + ' closed';
+  const totalEl = document.getElementById('totalPnl');
+  totalEl.textContent = fmtCurrency(s.total_pnl || 0);
+  totalEl.className = 'sc-val ' + pnlClass(s.total_pnl);
+  document.getElementById('totalPnlSub').textContent =
+    (s.total || 0) + ' total · ' + (s.wins || 0) + ' wins';
 
- const openEl = document.getElementById('openPnl');
- openEl.textContent = fmtCurrency(s.total_open_pnl || 0);
- openEl.className = 'sc-val ' + pnlClass(s.total_open_pnl);
- document.getElementById('openPnlSub').textContent = (s.open_count || 0) + ' open positions';
+  const avgEl = document.getElementById('avgPnl');
+  avgEl.textContent = fmtCurrency(s.avg_pnl || 0);
+  avgEl.className = 'sc-val ' + pnlClass(s.avg_pnl);
+  document.getElementById('avgPnlSub').textContent = 'Per closed trade';
 
- const closedEl = document.getElementById('closedPnl');
- closedEl.textContent = fmtCurrency(s.total_closed_pnl || 0);
- closedEl.className = 'sc-val ' + pnlClass(s.total_closed_pnl);
- document.getElementById('closedPnlSub').textContent = (s.closed_count || 0) + ' closed trades';
+  const bestEl = document.getElementById('bestWorst');
+  if ((s.best != null || s.worst != null)) {
+    bestEl.innerHTML = '<span style="color:var(--green)">' + fmtCurrency(s.best || 0) + '</span> / <span style="color:var(--red)">' + fmtCurrency(s.worst || 0) + '</span>';
+  } else {
+    bestEl.textContent = '–';
+  }
+  bestEl.className = 'sc-val neutral';
+  document.getElementById('bestWorstSub').textContent = 'Best / Worst trade';
 
- const wrEl = document.getElementById('winRate');
- const wr = s.win_rate || 0;
- wrEl.textContent = (s.wins + s.losses) >0 ? wr.toFixed(1) + '%' : '\u2013';
- wrEl.className = 'sc-val ' + (wr >= 50 ? 'positive' : wr >0 ? 'negative' : 'neutral');
- document.getElementById('winRateSub').textContent = 'W: ' + (s.wins || 0) + ' \u00B7 L: ' + (s.losses || 0);
+  const wrEl = document.getElementById('winRate');
+  const wr = s.win_rate || 0;
+  wrEl.textContent = (s.wins + s.losses) > 0 ? wr.toFixed(1) + '%' : '–';
+  wrEl.className = 'sc-val ' + (wr >= 50 ? 'positive' : wr > 0 ? 'negative' : 'neutral');
+  document.getElementById('winRateSub').textContent = 'W: ' + (s.wins || 0) + ' · L: ' + (s.losses || 0);
 
- const ocEl = document.getElementById('openCount');
- ocEl.textContent = s.open_count || 0;
- ocEl.className = 'sc-val ' + ((s.open_count || 0) >0 ? 'positive' : 'neutral');
+  const tcEl = document.getElementById('totalCount');
+  tcEl.textContent = s.total || 0;
+  tcEl.className = 'sc-val ' + ((s.total || 0) > 0 ? 'positive' : 'neutral');
+  document.getElementById('totalCountSub').textContent = 'Manual: ' + (s.manual_count || 0) + ' · Auto: ' + (s.auto_count || 0);
 
- // Tab counts
- const openTrades = trades.filter(t =>t.status === 'OPEN');
- const closedTrades = trades.filter(t =>t.status === 'CLOSED');
- document.getElementById('tabOpenCount').textContent = openTrades.length;
- document.getElementById('tabClosedCount').textContent = closedTrades.length;
- document.getElementById('tabAllCount').textContent = trades.length;
+  // Tab counts — computed from local trades array
+  const openTrades = trades.filter(t => t.status === 'PENDING' || t.status === 'ENTERED');
+  const closedTrades = trades.filter(t => t.status === 'EXITED');
+  document.getElementById('tabOpenCount').textContent = openTrades.length;
+  document.getElementById('tabClosedCount').textContent = closedTrades.length;
+  document.getElementById('tabAllCount').textContent = trades.length;
 }
 
 // === Tab Switching ===
 function switchTab(tab) {
- activeTab = tab;
- document.querySelectorAll('.tab-btn').forEach(b =>b.classList.remove('active'));
- document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
- renderTrades();
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  renderTrades();
 }
 
 // === Render Trades ===
 function renderTrades() {
- const container = document.getElementById('tradesContainer');
+  const container = document.getElementById('tradesContainer');
 
- let filtered = trades;
- if (activeTab === 'open') filtered = trades.filter(t =>t.status === 'OPEN');
- else if (activeTab === 'closed') filtered = trades.filter(t =>t.status === 'CLOSED');
+  // Map status: Open = PENDING|ENTERED, Closed = EXITED
+  let filtered = trades;
+  if (activeTab === 'open') filtered = trades.filter(t => t.status === 'PENDING' || t.status === 'ENTERED');
+  else if (activeTab === 'closed') filtered = trades.filter(t => t.status === 'EXITED');
 
- // Sort: open by entry_time desc, closed by exit_time desc
- filtered.sort((a, b) =>{
- if (a.status === 'OPEN' && b.status === 'OPEN') {
- return new Date(b.entry_time) - new Date(a.entry_time);
- }
- if (a.status === 'CLOSED' && b.status === 'CLOSED') {
- return new Date(b.exit_time || b.entry_time) - new Date(a.exit_time || a.entry_time);
- }
- // Open before closed
- if (a.status === 'OPEN') return -1;
- if (b.status === 'OPEN') return 1;
- return 0;
- });
+  // Sort: open by entered_at desc, closed by exited_at desc
+  filtered.sort((a, b) => {
+    const aOpen = a.status === 'PENDING' || a.status === 'ENTERED';
+    const bOpen = b.status === 'PENDING' || b.status === 'ENTERED';
+    if (aOpen && bOpen) {
+      return new Date(b.entered_at || b.created_at) - new Date(a.entered_at || a.created_at);
+    }
+    if (!aOpen && !bOpen) {
+      return new Date(b.exited_at || b.entered_at || b.created_at) - new Date(a.exited_at || a.entered_at || a.created_at);
+    }
+    if (aOpen) return -1;
+    if (bOpen) return 1;
+    return 0;
+  });
 
- if (filtered.length === 0) {
- const msg = activeTab === 'open' ? 'No open positions' :
- activeTab === 'closed' ? 'No closed trades yet' : 'No paper trades yet';
- const sub = activeTab === 'open'
- ? '\uD83E\uDD16 Auto-trader scans every 5 min during market hours (9:30\u201314:50 IST)<br>Logic: NIFTY regime \u2192 Sector alignment \u2192 OI + Volume + Score \u2192 ITM option<br>Or use the <a href="/" style="color:var(--blue)">Dashboard</a>to enter trades manually'
- : 'Auto trades and manual trades appear here once they close';
- container.innerHTML = `<div class="trades-empty"><div class="te-icon">${activeTab === 'open' ? '\uD83E\uDD16' : '\uD83D\uDCCB'}</div><div class="te-text">${msg}</div><div class="te-sub">${sub}</div></div>`;
- return;
- }
+  if (filtered.length === 0) {
+    const msg = activeTab === 'open' ? 'No open positions' :
+      activeTab === 'closed' ? 'No closed trades yet' : 'No paper trades yet';
+    const sub = activeTab === 'open'
+      ? 'Click <strong>+ New Trade</strong> to add a trade, or configure auto-trade in your <a href="/profile" style="color:var(--blue)">Profile</a>'
+      : 'Exited trades appear here once they close';
+    container.innerHTML = `<div class="trades-empty"><div class="te-icon">${activeTab === 'open' ? '📋' : '📊'}</div><div class="te-text">${msg}</div><div class="te-sub">${sub}</div></div>`;
+    return;
+  }
 
- container.innerHTML = '';
- for (const t of filtered) {
- container.appendChild(buildTradeCard(t));
- }
+  container.innerHTML = '';
+  for (const t of filtered) {
+    container.appendChild(buildTradeCard(t));
+  }
 }
 
 function buildTradeCard(t) {
- const isOpen = t.status === 'OPEN';
- const pnl = isOpen ? (t.pnl_total || 0) : (t.final_pnl || 0);
- const pnlPct = isOpen ? (t.pnl_pct || 0) :
- (t.entry_premium >0 ? ((t.exit_premium - t.entry_premium) / t.entry_premium * 100) : 0);
- const borderClass = pnl >0 ? 'tc-profit' : pnl < 0 ? 'tc-loss' : 'tc-flat';
+  const isOpen = t.status === 'PENDING' || t.status === 'ENTERED';
+  const pnl = t.pnl || 0;
+  const pnlPct = t.pnl_pct || 0;
+  const borderClass = pnl > 0 ? 'tc-profit' : pnl < 0 ? 'tc-loss' : 'tc-flat';
 
- const card = document.createElement('div');
- card.className = 'trade-card ' + borderClass;
- card.dataset.id = t.id;
+  const card = document.createElement('div');
+  card.className = 'trade-card ' + borderClass;
+  card.dataset.id = t.id;
 
- // Progress bar position (SL to T2 range)
- let progressPct = 50; // entry = middle
- let progressColor = 'var(--text-vdim)';
- if (isOpen && t.current_premium != null) {
- const range = t.target2 - t.sl_premium;
- if (range >0) {
- progressPct = Math.max(0, Math.min(100, ((t.current_premium - t.sl_premium) / range) * 100));
- }
- progressColor = pnl >0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--text-dim)';
- }
+  // Progress bar position (SL to T2 range) — for open trades using entry vs SL/T2
+  let progressPct = 50;
+  let progressColor = 'var(--text-vdim)';
+  if (isOpen && t.sl_premium != null && t.t2_premium != null) {
+    const range = t.t2_premium - t.sl_premium;
+    if (range > 0) {
+      progressPct = Math.max(0, Math.min(100, ((t.entry_premium - t.sl_premium) / range) * 100));
+    }
+    progressColor = 'var(--blue)';
+  }
 
- // Alerts
- let alerts = '';
- if (isOpen) {
- if (t.sl_hit) alerts += '<span class="tc-alert alert-sl">\u26A0 SL HIT</span>';
- if (t.t2_hit) alerts += '<span class="tc-alert alert-t2">\uD83C\uDFAF T2 HIT</span>';
- else if (t.t1_hit) alerts += '<span class="tc-alert alert-t1">\uD83C\uDFAF T1 HIT</span>';
- if (t.sl_premium >= t.entry_premium && t.entry_premium >0) alerts += '<span class="tc-alert alert-t1" style="background:rgba(59,130,246,0.15);color:#5B8DEF">\uD83D\uDD12 COST-FREE</span>';
- } else {
- if (t.exit_reason) {
- const reasonLabel = { SL_HIT: '\u26D4 SL Hit', T1_HIT: '\u2705 T1 Hit', T2_HIT: '\uD83C\uDFAF T2 Hit', MANUAL: '\uD83D\uDD27 Manual', EOD: '\uD83D\uDD50 EOD' };
- alerts += `<span class="tc-alert ${pnl >0 ? 'alert-t1' : 'alert-sl'}">${reasonLabel[t.exit_reason] || t.exit_reason}</span>`;
- }
- }
+  // Direction badge — map CE/PE/BULLISH/BEARISH
+  const dirRaw = (t.direction || '').toUpperCase();
+  let dirDisplay = dirRaw;
+  let dirBadgeClass = 'badge-CE';
+  if (dirRaw === 'PE' || dirRaw === 'BEARISH') {
+    dirDisplay = dirRaw === 'BEARISH' ? 'BEARISH' : 'PE';
+    dirBadgeClass = 'badge-PE';
+  } else {
+    dirDisplay = dirRaw === 'BULLISH' ? 'BULLISH' : 'CE';
+    dirBadgeClass = 'badge-CE';
+  }
 
- // Actions (only for open)
- let actions = '';
- if (isOpen) {
- actions = `
- <button class="tc-btn btn-t1" onclick="exitTrade('${t.id}','T1_HIT',${t.target1})">Exit @ T1</button>
- <button class="tc-btn btn-exit" onclick="showExitModal('${t.id}')">Exit Trade</button>
- `;
- }
+  // Status badge
+  let statusBadgeClass = 'badge-open';
+  let statusLabel = t.status;
+  if (t.status === 'EXITED') {
+    statusBadgeClass = 'badge-closed';
+    statusLabel = 'EXITED';
+  } else if (t.status === 'PENDING') {
+    statusLabel = 'PENDING';
+  } else if (t.status === 'ENTERED') {
+    statusLabel = 'ENTERED';
+  }
 
- const qty = t.lot_size * t.lots;
+  // Exit reason alert
+  let alerts = '';
+  if (!isOpen && t.exit_reason) {
+    const reasonLabel = {
+      SL_HIT: '⛔ SL Hit', T1_HIT: '✅ T1 Hit', T2_HIT: '🎯 T2 Hit',
+      MANUAL: '🔧 Manual', EOD: '🕐 EOD', EOD_EXIT: '🕐 EOD Auto'
+    };
+    const label = reasonLabel[t.exit_reason] || t.exit_reason;
+    alerts += `<span class="tc-alert ${pnl > 0 ? 'alert-t1' : 'alert-sl'}">${label}</span>`;
+  }
 
- // Auto-trade badge
- const typeBadge = t.auto_trade
- ? '<span class="auto-badge">\uD83E\uDD16 AUTO</span>'
- : '<span class="manual-badge">\u270B MANUAL</span>';
+  // Actions (only for open trades)
+  let actions = '';
+  if (isOpen) {
+    const t1Val = t.t1_premium ? t.t1_premium : null;
+    if (t1Val) {
+      actions += `<button class="tc-btn btn-t1" onclick="exitTrade(${t.id},'T1_HIT',${t1Val})">Exit @ T1</button>`;
+    }
+    actions += `<button class="tc-btn btn-exit" onclick="showExitModal(${t.id})">Exit Trade</button>`;
+  }
 
- // WF tier badge
- let wfBadge = '';
- if (t.wf_tier) {
- const tierCls = t.wf_tier === 1 ? 'wf-t1' : t.wf_tier === 2 ? 'wf-t2' : 'wf-t3';
- const tierLabel = t.wf_tier === 1 ? 'WF-T1' : t.wf_tier === 2 ? 'WF-T2' : 'WF-T3';
- const pfLabel = t.wf_pf ? ` PF=${t.wf_pf.toFixed(1)}` : '';
- wfBadge = `<span class="wf-badge ${tierCls}">${tierLabel}${pfLabel}</span>`;
- // Side match indicator
- if (t.wf_side) {
- const sideOk = t.side_match;
- const sideCls = sideOk ? 'wf-side-match' : 'wf-side-contra';
- const sideIcon = sideOk ? '\u2713' : '\u2717';
- wfBadge += `<span class="wf-side-tag ${sideCls}">${sideIcon} ${t.wf_side}</span>`;
- }
- }
+  const lots = t.lots || 1;
+  const lotSize = t.lot_size || 1;
+  const qty = lotSize * lots;
 
- // Signal tags for auto trades
- let signalTags = '';
- if (t.signals && t.signals.length >0) {
- signalTags = '<div class="tc-signals">';
- for (const sig of t.signals) {
- let cls = 'sig-score';
- const sl = sig.toLowerCase();
- if (sl.includes('wf-t')) cls = 'sig-wf';
- else if (sl.includes('side-match')) cls = 'sig-side-match';
- else if (sl.includes('side-contra')) cls = 'sig-side-contra';
- else if (sl.includes('oi:') || sl.includes('buildup')) cls = 'sig-oi';
- else if (sl.includes('vol')) cls = 'sig-vol';
- else if (sl.includes('pcr')) cls = 'sig-bull';
- else if (sl.includes('mom')) cls = sl.includes('-') ? 'sig-bear' : 'sig-bull';
- else if (sl.includes('no-wf')) cls = 'sig-prem';
- else if (sl.includes('prem')) cls = 'sig-prem';
- signalTags += `<span class="tc-sig-tag ${cls}">${sig}</span>`;
- }
- signalTags += '</div>';
- }
+  // Trade type badge
+  const typeBadge = (t.trade_type === 'auto')
+    ? '<span class="auto-badge">🤖 AUTO</span>'
+    : '<span class="manual-badge">✋ MANUAL</span>';
 
- // Reason block (expandable) for auto trades
- let reasonBlock = '';
- if (t.reason) {
- const rid = 'reason_' + t.id;
- reasonBlock = `
- <div class="tc-reason collapsed" id="${rid}" onclick="this.classList.toggle('collapsed')">
- <div class="tc-reason-label">Signal Chain</div>
- ${t.reason}
- </div>
- `;
- }
+  // Reason block (expandable)
+  let reasonBlock = '';
+  const reasonText = t.entry_reason || '';
+  if (reasonText) {
+    const rid = 'reason_' + t.id;
+    reasonBlock = `
+      <div class="tc-reason collapsed" id="${rid}" onclick="this.classList.toggle('collapsed')">
+        <div class="tc-reason-label">Entry Reason</div>
+        ${reasonText}
+      </div>
+    `;
+  }
 
- // Exit reason label
- const exitReasonLabel = {
- SL_HIT: '\u26D4 SL Hit', T1_HIT: '\u2705 T1 Hit', T2_HIT: '\uD83C\uDFAF T2 Hit',
- MANUAL: '\uD83D\uDD27 Manual', EOD: '\uD83D\uDD50 EOD', EOD_EXIT: '\uD83D\uDD50 EOD Auto'
- };
+  // Exit reason block if exited
+  let exitReasonBlock = '';
+  if (!isOpen && t.exit_reason) {
+    exitReasonBlock = `
+      <div class="tc-reason" style="background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.15)">
+        <div class="tc-reason-label" style="color:var(--red-text)">Exit Reason</div>
+        ${t.exit_reason}
+      </div>
+    `;
+  }
 
- card.innerHTML = `
- <div class="tc-header">
- <span class="tc-sym">${t.symbol}</span>
- <span class="tc-badge badge-${t.option_type}">${t.option_type} ${t.strike}</span>
- <span class="tc-badge ${isOpen ? 'badge-open' : 'badge-closed'}">${t.status}</span>
- ${typeBadge}
- ${wfBadge}
- <span class="tc-id">${t.id}</span>
- <div class="tc-pnl">
- <div class="tc-pnl-val ${pnlClass(pnl)}">${fmtCurrency(pnl)}</div>
- <div class="tc-pnl-pct ${pnlClass(pnlPct)}">${fmtPct(pnlPct)}</div>
- </div>
- </div>
- ${signalTags}
- ${isOpen ? `
- <div class="tc-progress">
- <div class="tc-progress-fill" style="width:${progressPct.toFixed(1)}%;background:${progressColor}"></div>
- </div>
- <div class="tc-progress-markers">
- <span>SL \u20B9${fmtPrice(t.sl_premium)}</span>
- <span>Entry \u20B9${fmtPrice(t.entry_premium)}</span>
- <span>T1 \u20B9${fmtPrice(t.target1)}</span>
- <span>T2 \u20B9${fmtPrice(t.target2)}</span>
- </div>` : ''}
- <div class="tc-body">
- <div class="tc-cell"><div class="tcc-label">Entry</div><div class="tcc-val">\u20B9${fmtPrice(t.entry_premium)}</div></div>
- ${isOpen
- ? `<div class="tc-cell"><div class="tcc-label">Current</div><div class="tcc-val ${pnlClass(pnl)}">\u20B9${fmtPrice(t.current_premium)}</div></div>`
- : `<div class="tc-cell"><div class="tcc-label">Exit</div><div class="tcc-val">\u20B9${fmtPrice(t.exit_premium)}</div></div>`}
- <div class="tc-cell"><div class="tcc-label">SL${t.sl_method ? ' <span class="sl-method-tag">(' + t.sl_method + ')</span>' : ''}</div><div class="tcc-val" style="color:var(--red)">\u20B9${fmtPrice(t.sl_premium)}${t.sl_spot_trigger ? ' / Spot \u20B9'+fmtPrice(t.sl_spot_trigger) : ''}</div></div>
- <div class="tc-cell"><div class="tcc-label">T1 / T2${t.tgt_method ? ' <span class="sl-method-tag">(' + t.tgt_method + ')</span>' : ''}</div><div class="tcc-val" style="color:var(--green)">\u20B9${fmtPrice(t.target1)} / \u20B9${fmtPrice(t.target2)}</div></div>
- <div class="tc-cell"><div class="tcc-label">Qty</div><div class="tcc-val">${qty} (${t.lots}${t.lot_size})</div></div>
- <div class="tc-cell"><div class="tcc-label">Spot @ Entry</div><div class="tcc-val">\u20B9${fmtPrice(t.spot_at_entry)}</div></div>
- <div class="tc-cell"><div class="tcc-label">Sector</div><div class="tcc-val">${t.sector || '\u2013'}</div></div>
- <div class="tc-cell"><div class="tcc-label">Rank</div><div class="tcc-val">${t.rank_score ? t.rank_score.toFixed(0) : '\u2013'} ${t.score_at_entry ? '(base ' + t.score_at_entry + ')' : ''}</div></div>
- </div>
- ${reasonBlock}
- <div class="tc-footer">
- <span class="tc-time">${isOpen ? 'Entered ' + fmtTime(t.entry_time) : fmtTime(t.entry_time) + ' \u2192 ' + fmtTime(t.exit_time)}</span>
- <div class="tc-alerts">${alerts}</div>
- <div class="tc-actions">${actions}</div>
- </div>
- `;
+  // Net PnL note
+  const netPnlNote = t.net_pnl != null && t.net_pnl !== t.pnl
+    ? `<span style="font-size:9px;color:var(--text-vdim);margin-left:4px">Net: ${fmtCurrency(t.net_pnl)}</span>`
+    : '';
 
- return card;
+  card.innerHTML = `
+    <div class="tc-header">
+      <span class="tc-sym">${t.symbol || '–'}</span>
+      <span class="tc-badge ${dirBadgeClass}">${dirDisplay}${t.strike ? ' ' + t.strike : ''}</span>
+      <span class="tc-badge ${statusBadgeClass}">${statusLabel}</span>
+      ${typeBadge}
+      <span class="tc-id">#${t.id}</span>
+      <div class="tc-pnl">
+        <div class="tc-pnl-val ${pnlClass(pnl)}">${fmtCurrency(pnl)}${netPnlNote}</div>
+        <div class="tc-pnl-pct ${pnlClass(pnlPct)}">${fmtPct(pnlPct)}</div>
+      </div>
+    </div>
+    ${isOpen && t.sl_premium != null && t.t2_premium != null ? `
+    <div class="tc-progress">
+      <div class="tc-progress-fill" style="width:${progressPct.toFixed(1)}%;background:${progressColor}"></div>
+    </div>
+    <div class="tc-progress-markers">
+      <span>SL ₹${fmtPrice(t.sl_premium)}</span>
+      <span>Entry ₹${fmtPrice(t.entry_premium)}</span>
+      <span>T1 ₹${fmtPrice(t.t1_premium)}</span>
+      <span>T2 ₹${fmtPrice(t.t2_premium)}</span>
+    </div>` : ''}
+    <div class="tc-body">
+      <div class="tc-cell"><div class="tcc-label">Entry</div><div class="tcc-val">₹${fmtPrice(t.entry_premium)}</div></div>
+      ${!isOpen
+        ? `<div class="tc-cell"><div class="tcc-label">Exit</div><div class="tcc-val">₹${fmtPrice(t.exit_premium)}</div></div>`
+        : `<div class="tc-cell"><div class="tcc-label">Status</div><div class="tcc-val" style="color:var(--blue)">${t.status}</div></div>`}
+      <div class="tc-cell"><div class="tcc-label">SL</div><div class="tcc-val" style="color:var(--red)">${t.sl_premium != null ? '₹' + fmtPrice(t.sl_premium) : '–'}${t.sl_spot != null ? ' / Spot ₹' + fmtPrice(t.sl_spot) : ''}</div></div>
+      <div class="tc-cell"><div class="tcc-label">T1 / T2</div><div class="tcc-val" style="color:var(--green)">₹${fmtPrice(t.t1_premium)} / ₹${fmtPrice(t.t2_premium)}</div></div>
+      <div class="tc-cell"><div class="tcc-label">Qty</div><div class="tcc-val">${qty} (${lots}&times;${lotSize})</div></div>
+      ${t.expiry ? `<div class="tc-cell"><div class="tcc-label">Expiry</div><div class="tcc-val">${t.expiry}</div></div>` : ''}
+    </div>
+    ${reasonBlock}
+    ${exitReasonBlock}
+    <div class="tc-footer">
+      <span class="tc-time">${isOpen
+        ? 'Entered ' + fmtTime(t.entered_at || t.created_at)
+        : fmtTime(t.entered_at || t.created_at) + ' → ' + fmtTime(t.exited_at)}</span>
+      <div class="tc-alerts">${alerts}</div>
+      <div class="tc-actions">${actions}</div>
+    </div>
+  `;
+
+  return card;
 }
 
-// === Trade Actions ===
+// === Exit Trade ===
 async function exitTrade(id, reason, exitPremium) {
- try {
- const resp = await fetch('/api/paper/exit', {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({ id, reason, exit_premium: exitPremium || undefined }),
- });
- const data = await resp.json();
- if (data.ok) {
- showToast('Trade ' + id + ' exited \u2014 P&L: ' + fmtCurrency(data.trade.final_pnl), data.trade.final_pnl >= 0 ? 'success' : 'error');
- } else {
- showToast('Exit failed: ' + (data.error || 'Unknown error'), 'error');
- }
- } catch (e) {
- showToast('Exit failed: ' + e.message, 'error');
- }
+  try {
+    const resp = await fetch('/api/user/trades/' + id, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken()},
+      body: JSON.stringify({
+        status: 'EXITED',
+        exit_premium: exitPremium || undefined,
+        exit_reason: reason,
+        exited_at: new Date().toISOString(),
+      }),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Trade #' + id + ' exited — ' + reason, 'success');
+      fetchTrades();
+    } else {
+      showToast('Exit failed: ' + (data.error || 'Unknown'), 'error');
+    }
+  } catch (e) {
+    showToast('Exit failed: ' + e.message, 'error');
+  }
 }
 
 function showExitModal(id) {
- exitTradeId = id;
- const t = trades.find(x =>x.id === id);
- if (!t) return;
+  exitTradeId = id;
+  const t = trades.find(x => x.id === id);
+  if (!t) return;
 
- const pnl = t.pnl_total || 0;
- document.getElementById('exitModalBody').innerHTML = `
- <p>Exit <strong>${t.symbol} ${t.option_type} ${t.strike}</strong>at current market premium?</p>
- <p style="margin-top:8px">
- Entry: <strong>\u20B9${fmtPrice(t.entry_premium)}</strong>\u00B7
- Current: <strong class="${pnlClass(pnl)}">\u20B9${fmtPrice(t.current_premium)}</strong>\u00B7
- P&L: <strong class="${pnlClass(pnl)}">${fmtCurrency(pnl)}</strong>
- </p>
- `;
- document.getElementById('exitModal').classList.add('open');
+  document.getElementById('exitModalBody').innerHTML = `
+    <p>Exit <strong>${t.symbol} ${t.direction} ${t.strike || ''}</strong> at market?</p>
+    <p style="margin-top:8px">
+      Entry: <strong>₹${fmtPrice(t.entry_premium)}</strong> &middot;
+      Lots: <strong>${t.lots || 1}</strong> &middot;
+      Lot Size: <strong>${t.lot_size || 1}</strong>
+    </p>
+  `;
+  document.getElementById('exitModal').classList.add('open');
 }
 
 function closeExitModal() {
- exitTradeId = null;
- document.getElementById('exitModal').classList.remove('open');
+  exitTradeId = null;
+  document.getElementById('exitModal').classList.remove('open');
 }
 
 function confirmExit() {
- if (exitTradeId) {
- exitTrade(exitTradeId, 'MANUAL');
- closeExitModal();
- }
+  if (exitTradeId) {
+    exitTrade(exitTradeId, 'MANUAL');
+    closeExitModal();
+  }
 }
 
-// === WebSocket ===
-function connectWS() {
- const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
- const url = proto + '//' + location.host + '/ws';
- setConnStatus('warn');
-
- wsConn = new WebSocket(url);
-
- wsConn.onopen = function() {
- setConnStatus('on');
- reconnectDelay = 3000;
- if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
- // Fetch initial paper trades
- fetchTrades();
- };
-
- wsConn.onclose = function() {
- setConnStatus('off');
- scheduleReconnect();
- };
-
- wsConn.onerror = function() {
- setConnStatus('off');
- };
-
- wsConn.onmessage = function(e) {
- try {
- const msg = JSON.parse(e.data);
- if (msg.type === 'paper') {
- trades = msg.trades || [];
- summary = msg.summary || {};
- updateSummary();
- renderTrades();
- updateTimestamp();
- }
- if (msg.type === 'paper_exit' && msg.trades) {
- for (const t of msg.trades) {
- const pnl = t.final_pnl || 0;
- const reason = t.exit_reason === 'SL_HIT' ? '\u26D4 SL Hit' : t.exit_reason === 'T2_HIT' ? '\uD83C\uDFAF T2 Hit' : t.exit_reason === 'EOD_EXIT' ? '\uD83D\uDD50 EOD' : t.exit_reason;
- showToast('AUTO-EXIT: ' + t.symbol + ' ' + t.option_type + ' ' + reason + ' \u2014 P&L: ' + fmtCurrency(pnl), pnl >= 0 ? 'success' : 'error');
- }
- }
- if (msg.type === 'auto_trade' && msg.trade) {
- const at = msg.trade;
- showToast('\uD83E\uDD16 AUTO TRADE: ' + at.symbol + ' ' + at.option_type + ' ' + at.strike + ' @ \u20B9' + fmtPrice(at.entry_premium) + ' \u2014 ' + (at.signals || []).join(', '), 'success');
- }
- } catch (err) {
- console.error('WS parse error:', err);
- }
- };
+// === New Trade Modal ===
+function openNewTradeModal() {
+  document.getElementById('newTradeModal').classList.add('open');
 }
 
-function scheduleReconnect() {
- if (reconnectTimer) return;
- reconnectTimer = setTimeout(() =>{
- reconnectTimer = null;
- reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
- connectWS();
- }, reconnectDelay);
+function closeNewTradeModal() {
+  document.getElementById('newTradeModal').classList.remove('open');
+  document.getElementById('newTradeForm').reset();
 }
 
-function setConnStatus(status) {
- const dot = document.getElementById('connDot');
- const text = document.getElementById('connText');
- dot.className = 'conn-dot' + (status === 'off' ? ' off' : status === 'warn' ? ' warn' : '');
- if (status === 'on') text.textContent = 'Connected';
- else if (status === 'off') text.textContent = 'Disconnected';
- else text.textContent = 'Connecting...';
+async function submitNewTrade(event) {
+  event.preventDefault();
+  const btn = document.getElementById('newTradeSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+
+  const symbol = document.getElementById('nt_symbol').value.trim().toUpperCase();
+  const direction = document.getElementById('nt_direction').value;
+  const strike = parseFloat(document.getElementById('nt_strike').value) || null;
+  const expiry = document.getElementById('nt_expiry').value.trim() || null;
+  const entry_premium = parseFloat(document.getElementById('nt_entry_premium').value);
+  const lots = parseInt(document.getElementById('nt_lots').value) || 1;
+  const lot_size = parseInt(document.getElementById('nt_lot_size').value) || 75;
+  const sl_premium = parseFloat(document.getElementById('nt_sl_premium').value) || null;
+  const t1_premium = parseFloat(document.getElementById('nt_t1_premium').value) || null;
+  const t2_premium = parseFloat(document.getElementById('nt_t2_premium').value) || null;
+  const status = document.getElementById('nt_status').value;
+  const entry_reason = document.getElementById('nt_reason').value.trim() || null;
+
+  const body = {
+    symbol,
+    direction,
+    trade_type: 'manual',
+    strike,
+    expiry,
+    entry_premium,
+    lots,
+    lot_size,
+    sl_premium,
+    t1_premium,
+    t2_premium,
+    status,
+    entry_reason,
+  };
+
+  try {
+    const resp = await fetch('/api/user/trades', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken()},
+      body: JSON.stringify(body),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Trade #' + data.trade_id + ' added successfully', 'success');
+      closeNewTradeModal();
+      fetchTrades();
+      fetchStats();
+    } else {
+      showToast('Failed to add trade: ' + (data.error || 'Unknown error'), 'error');
+    }
+  } catch (e) {
+    showToast('Failed to add trade: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add Trade';
+  }
+}
+
+// === Fetch Trades ===
+async function fetchTrades() {
+  try {
+    const resp = await fetch('/api/user/trades?limit=100', {credentials: 'same-origin'});
+    const data = await resp.json();
+    if (data.ok) {
+      trades = data.trades || [];
+    } else {
+      trades = [];
+    }
+    updateSummary();
+    renderTrades();
+    updateTimestamp();
+  } catch (e) {
+    console.error('Failed to fetch trades:', e);
+  }
 }
 
 function updateTimestamp() {
- document.getElementById('updateTime').textContent =
- new Date().toLocaleTimeString('en-IN', { hour12: false });
-}
-
-async function fetchTrades() {
- try {
- const resp = await fetch('/api/paper/trades');
- const data = await resp.json();
- trades = data.trades || [];
- summary = data.summary || {};
- updateSummary();
- renderTrades();
- } catch (e) {
- console.error('Failed to fetch trades:', e);
- }
+  const el = document.getElementById('updateTime');
+  el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', { hour12: false });
 }
 
 // === Toast ===
 let toastTimer = null;
 function showToast(msg, level) {
- const el = document.getElementById('toast');
- el.textContent = msg;
- el.className = 'toast show' + (level === 'error' ? ' error' : level === 'success' ? ' success' : '');
- if (toastTimer) clearTimeout(toastTimer);
- toastTimer = setTimeout(() =>el.classList.remove('show'), 5000);
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (level === 'error' ? ' error' : level === 'success' ? ' success' : '');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 5000);
 }
 
 // === Keyboard shortcuts ===
 document.addEventListener('keydown', function(e) {
- if (e.key === 'Escape') closeExitModal();
+  if (e.key === 'Escape') {
+    closeExitModal();
+    closeNewTradeModal();
+  }
 });
 
-// === Auto-Trade Scanner ===
-let scannerData = null;
-
-async function fetchScannerStatus() {
- try {
- const resp = await fetch('/api/paper/auto-status');
- scannerData = await resp.json();
- updateScannerPanel();
- } catch (e) {
- console.error('Scanner status fetch error:', e);
- }
-}
-
-function updateScannerPanel() {
- if (!scannerData) return;
- const d = scannerData;
-
- // Status badge
- const statusEl = document.getElementById('scannerStatus');
- if (!d.enabled) {
- statusEl.textContent = 'Disabled';
- statusEl.className = 'scanner-status off';
- } else if (d.in_trading_window) {
- statusEl.textContent = 'Scanning';
- statusEl.className = 'scanner-status active';
- } else {
- statusEl.textContent = 'Outside Hours';
- statusEl.className = 'scanner-status idle';
- }
-
- // Toggle button
- const toggleBtn = document.getElementById('scannerToggle');
- toggleBtn.textContent = d.enabled ? 'Disable' : 'Enable';
-
- // Scan button
- document.getElementById('scanNowBtn').disabled = false;
-
- // Info
- const last = d.last_scan || {};
- const regime = last.regime || d.regime || '\u2014';
- const regimeEl = document.getElementById('siRegime');
- regimeEl.innerHTML = `<span class="scanner-regime ${regime === 'BULLISH' ? 'regime-bull' : regime === 'BEARISH' ? 'regime-bear' : 'regime-neutral'}">${regime === 'BULLISH' ? '\u25B2' : regime === 'BEARISH' ? '\u25BC' : '\u2014'} ${regime}</span>`;
-
- const breadth = last.breadth || last.regime_details?.breadth_pct;
- document.getElementById('siBreadth').textContent = breadth != null ? breadth.toFixed(0) + '%' : '\u2014';
- document.getElementById('siScans').textContent = d.scan_count || 0;
- document.getElementById('siTrades').textContent = (d.today_auto_trades || 0) + ' / ' + (d.max_per_day || 2);
- document.getElementById('siCandidates').textContent = last.candidates_found != null ? last.candidates_found : '\u2014';
- document.getElementById('siSkip').textContent = last.skip_reason || '\u2014';
-
- // WF config info
- const wf = d.wf_config;
- if (wf) {
- document.getElementById('siWfUniverse').innerHTML = `${wf.total_stocks} stocks <span style="color:var(--gold)">T1:${wf.tier_1}</span><span style="color:var(--cyan)">T2:${wf.tier_2}</span><span style="color:var(--text-dim)">T3:${wf.tier_3}</span>| BL:${wf.blacklist_size}`;
- document.getElementById('siRiskModel').textContent = `SL ${wf.sl_pct}% spot | TGT ${wf.tgt_mult}x`;
- }
-}
-
-async function toggleAutoTrade() {
- const current = scannerData?.enabled ?? true;
- try {
- await fetch('/api/admin/settings', {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({ auto_trade_enabled: !current }),
- });
- showToast('Auto-trade ' + (!current ? 'enabled' : 'disabled'), 'success');
- setTimeout(fetchScannerStatus, 1000);
- } catch (e) {
- showToast('Failed to toggle: ' + e.message, 'error');
- }
-}
-
-async function triggerScan() {
- const btn = document.getElementById('scanNowBtn');
- btn.disabled = true;
- btn.textContent = 'Scanning...';
- try {
- const resp = await fetch('/api/paper/auto-scan', { method: 'POST' });
- const result = await resp.json();
- if (result.trades_entered && result.trades_entered.length >0) {
- showToast('Scan complete \u2014 ' + result.trades_entered.length + ' trade(s) entered!', 'success');
- } else if (result.skip_reason) {
- showToast('Scan: ' + result.skip_reason, 'error');
- } else {
- showToast('Scan complete \u2014 no trades entered', 'success');
- }
- setTimeout(fetchScannerStatus, 500);
- } catch (e) {
- showToast('Scan failed: ' + e.message, 'error');
- } finally {
- btn.disabled = false;
- btn.textContent = 'Scan Now';
- }
-}
-
-// Poll scanner status every 30 seconds
-setInterval(fetchScannerStatus, 30000);
+// === Polling: refresh every 15 seconds ===
+setInterval(fetchTrades, 15000);
 
 // === Init ===
-connectWS();
-fetchScannerStatus();
+fetchTrades();
+fetchStats();
 </script>
 </body>
 </html>
