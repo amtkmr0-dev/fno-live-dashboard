@@ -3222,7 +3222,7 @@ function fmtMPDist(v) {
 
 // === Score Ring (Bloomberg compact) ===
 function scoreHTML(val) {
-  val = val || 0;
+  val = Math.min(val || 0, 100);  // NEVER display > 100
   let cls = 'score-vlow';
   let border = '#EF5350';
   if (val >= 60) { cls = 'score-high'; border = '#26A69A'; }
@@ -3951,7 +3951,7 @@ function renderAnalysisPanel() {
       <div class="ap-snapshot">
         <div class="snap-item"><div class="si-label">LTP</div><div class="si-val">\u20B9${fmtPrice(d.ltp)}</div></div>
         <div class="snap-item"><div class="si-label">Change</div><div class="si-val ${valClass(d.chg_pct)}">${fmtPct(d.chg_pct)}%</div></div>
-        <div class="snap-item"><div class="si-label">Score</div><div class="si-val" style="color:${(d.score||0)>=60?'var(--green)':(d.score||0)>=40?'var(--gold)':'var(--orange)'}">${d.score || 0}/100</div></div>
+        <div class="snap-item"><div class="si-label">Score</div><div class="si-val" style="color:${(d.score||0)>=60?'var(--green)':(d.score||0)>=40?'var(--gold)':'var(--orange)'}">${Math.min(d.score||0,100)}/100</div></div>
         <div class="snap-item"><div class="si-label">Sector</div><div class="si-val">${d.sector || '\u2013'}</div></div>
         <div class="snap-item"><div class="si-label">Vol Surge</div><div class="si-val ${surgeClass(d.vol_surge)}">${fmtSurge(d.vol_surge)}</div></div>
         <div class="snap-item"><div class="si-label">Lot Size</div><div class="si-val">${d.lot || '\u2013'}</div></div>
@@ -3990,7 +3990,7 @@ function renderAnalysisPanel() {
       <div class="trade-rec-card rec-${dir || 'CE'}">
         <div class="rec-header">
           <span class="rec-dir dir-${dir || 'CE'}">${isBull ? '\u25B2 BUY CE' : '\u25BC BUY PE'} ${rec.strike}</span>
-          <span class="rec-conf">Confluence ${d.score || 0}/100</span>
+          <span class="rec-conf">Confluence ${Math.min(d.score||0,100)}/100</span>
         </div>
         <div class="rec-grid">
           <div class="rec-item">
@@ -4080,7 +4080,7 @@ function renderChartOnlyPanel() {
       <div class="ap-snapshot">
         <div class="snap-item"><div class="si-label">LTP</div><div class="si-val">\u20B9${fmtPrice(d.ltp)}</div></div>
         <div class="snap-item"><div class="si-label">Change</div><div class="si-val ${valClass(d.chg_pct)}">${fmtPct(d.chg_pct)}%</div></div>
-        <div class="snap-item"><div class="si-label">Score</div><div class="si-val" style="color:${(d.score||0)>=60?'var(--green)':(d.score||0)>=40?'var(--gold)':'var(--orange)'}">${d.score || 0}/100</div></div>
+        <div class="snap-item"><div class="si-label">Score</div><div class="si-val" style="color:${(d.score||0)>=60?'var(--green)':(d.score||0)>=40?'var(--gold)':'var(--orange)'}">${Math.min(d.score||0,100)}/100</div></div>
         <div class="snap-item"><div class="si-label">Sector</div><div class="si-val">${d.sector || '\u2013'}</div></div>
         <div class="snap-item"><div class="si-label">Range%</div><div class="si-val">${fmtPct(d.range_pct)}</div></div>
         <div class="snap-item"><div class="si-label">Lot Size</div><div class="si-val">${d.lot || '\u2013'}</div></div>
@@ -4201,9 +4201,9 @@ function buildReasons(d, dir) {
 
   // 7. Score
   if ((d.score || 0) >= 70) {
-    reasons.push({ icon: '\uD83C\uDFAF', text: 'Composite tradability score <span class="rc-val">' + d.score + '/100</span> \u2014 high confluence across all metrics' });
+    reasons.push({ icon: '\uD83C\uDFAF', text: 'Composite tradability score <span class="rc-val">' + Math.min(d.score||0,100) + '/100</span> \u2014 high confluence across all metrics' });
   } else if ((d.score || 0) >= 50) {
-    reasons.push({ icon: '\uD83C\uDFAF', text: 'Composite tradability score <span class="rc-val">' + d.score + '/100</span> \u2014 good confluence of signals' });
+    reasons.push({ icon: '\uD83C\uDFAF', text: 'Composite tradability score <span class="rc-val">' + Math.min(d.score||0,100) + '/100</span> \u2014 good confluence of signals' });
   }
 
   return reasons;
