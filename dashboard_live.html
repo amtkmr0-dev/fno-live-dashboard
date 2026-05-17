@@ -2029,6 +2029,686 @@ td[data-intensity="high"] { opacity: 1; }
 td[data-intensity="mid"] { opacity: 0.85; }
 td[data-intensity="low"] { opacity: 0.65; }
 </style>
+
+<!-- ============================================================
+     QUANTRA PREMIUM POLISH — Bloomberg × Linear × Vercel
+     All CSS-only. Zero JS changes.
+     ============================================================ -->
+<style id="premium-polish">
+
+/* ============================================================
+   1. GLOBAL SCROLLBAR REFINEMENT
+   ============================================================ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+/* Show scrollbar only when the container is hovered */
+*:hover::-webkit-scrollbar-thumb { background: rgba(63,63,70,0.7); }
+*::-webkit-scrollbar-thumb:hover  { background: rgba(113,113,122,0.9) !important; }
+
+/* Table-wrap specific (always slightly visible so user knows it scrolls) */
+.table-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
+.table-wrap::-webkit-scrollbar-track { background: transparent; }
+.table-wrap::-webkit-scrollbar-thumb { background: rgba(46,46,53,0.8); border-radius: 999px; }
+.table-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-vdim) !important; }
+
+
+/* ============================================================
+   2. FLASH ANIMATIONS — smoother, with subtle scale pulse
+   ============================================================ */
+@keyframes flash-up-premium {
+  0%   { background: rgba(16,185,129,0.28); transform: scaleY(1.02); }
+  40%  { background: rgba(16,185,129,0.14); transform: scaleY(1); }
+  100% { background: transparent; transform: scaleY(1); }
+}
+@keyframes flash-down-premium {
+  0%   { background: rgba(239,68,68,0.28); transform: scaleY(1.02); }
+  40%  { background: rgba(239,68,68,0.14); transform: scaleY(1); }
+  100% { background: transparent; transform: scaleY(1); }
+}
+td.flash-up   { animation: flash-up-premium   0.75s ease-out forwards; }
+td.flash-down { animation: flash-down-premium  0.75s ease-out forwards; }
+
+
+/* ============================================================
+   3. TOAST NOTIFICATION — glass-morphism + entrance slide
+   ============================================================ */
+.toast {
+  background: rgba(24,24,27,0.88) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 8px 24px rgba(0,0,0,0.55),
+    0 2px 6px rgba(0,0,0,0.4);
+  border-radius: var(--radius-lg) !important;
+  transform: translateX(20px) translateY(0) scale(0.97) !important;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+.toast.show {
+  transform: translateX(0) translateY(0) scale(1) !important;
+}
+
+
+/* ============================================================
+   4. LOADING OVERLAY — branded QUANTRA pulse
+   ============================================================ */
+.loading-overlay {
+  background: radial-gradient(ellipse at center, #0f0f12 0%, var(--bg) 70%) !important;
+}
+
+/* Replace the basic spinner with a more branded version via pseudo-elements */
+.loading-spinner {
+  position: relative;
+  width: 48px !important;
+  height: 48px !important;
+  border: 1.5px solid rgba(59,130,246,0.15) !important;
+  border-top-color: var(--blue) !important;
+  border-right-color: rgba(59,130,246,0.45) !important;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 8px rgba(59,130,246,0.04),
+    0 0 24px rgba(59,130,246,0.18) !important;
+  animation: q-spin 0.65s cubic-bezier(0.4,0,0.2,1) infinite !important;
+}
+
+/* Brand name below spinner */
+.loading-text {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm) !important;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-vdim) !important;
+  margin-top: 4px;
+}
+
+/* Pulsing ring behind spinner */
+@keyframes loading-ring-pulse {
+  0%   { transform: scale(1);   opacity: 0.5; }
+  50%  { transform: scale(1.3); opacity: 0; }
+  100% { transform: scale(1);   opacity: 0; }
+}
+
+
+/* ============================================================
+   5. CONTROLS BAR — glass refinement + highlight line
+   ============================================================ */
+.header-controls {
+  background: rgba(9,9,11,0.85) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  /* subtle top highlight line using box-shadow so it doesn't affect layout */
+  box-shadow:
+    inset 0 1px 0 0 rgba(59,130,246,0.18),
+    0 1px 0 0 rgba(0,0,0,0.4);
+  padding: 7px 16px !important;
+}
+
+/* Search box — glass + focus ring animation */
+.search-box {
+  background: rgba(255,255,255,0.035) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  color: var(--text) !important;
+  padding: 5px 10px 5px 30px !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  transition: border-color 0.2s, box-shadow 0.25s, background 0.2s !important;
+  /* keep bg-image from original for the search icon */
+}
+.search-box:hover {
+  background: rgba(255,255,255,0.055) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+.search-box:focus {
+  background: rgba(59,130,246,0.06) !important;
+  border-color: rgba(59,130,246,0.5) !important;
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,0.3),
+    0 0 0 3px rgba(59,130,246,0.12),
+    0 0 12px rgba(59,130,246,0.08) !important;
+}
+
+/* Filter selects */
+.filter-select {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 7px !important;
+  color: var(--text-dim) !important;
+  font-size: 11px !important;
+  padding: 5px 10px 5px 8px !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
+  transition: border-color 0.18s, box-shadow 0.18s, color 0.18s !important;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Custom chevron via background-image */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%2352525b' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px !important;
+  cursor: pointer;
+}
+.filter-select:hover {
+  border-color: rgba(255,255,255,0.13) !important;
+  color: var(--text) !important;
+  background-color: rgba(255,255,255,0.055) !important;
+}
+.filter-select:focus {
+  border-color: rgba(59,130,246,0.45) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+  color: var(--text) !important;
+  outline: none;
+}
+.filter-select option {
+  background: #1c1c20;
+  color: var(--text);
+}
+
+/* Toggle buttons — pill shape, smooth active state */
+.btn-toggle {
+  border-radius: 20px !important;
+  padding: 4px 11px !important;
+  font-size: 10px !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  background: rgba(255,255,255,0.03) !important;
+  color: var(--text-vdim) !important;
+  transition: all 0.18s ease !important;
+  letter-spacing: 0.2px;
+}
+.btn-toggle:hover {
+  color: var(--text) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  background: rgba(255,255,255,0.07) !important;
+  transform: scale(1.03);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.3);
+}
+.btn-toggle.active {
+  background: rgba(59,130,246,0.14) !important;
+  border-color: rgba(59,130,246,0.4) !important;
+  color: var(--blue) !important;
+  box-shadow: 0 0 10px rgba(59,130,246,0.12), inset 0 0 0 1px rgba(59,130,246,0.1);
+}
+/* N50 special */
+.btn-n50.active {
+  background: rgba(245,158,11,0.1) !important;
+  border-color: rgba(245,158,11,0.4) !important;
+  color: var(--gold) !important;
+  box-shadow: 0 0 10px rgba(245,158,11,0.1) !important;
+}
+/* Poised star button */
+.btn-poised {
+  color: var(--gold) !important;
+  border-color: rgba(245,158,11,0.3) !important;
+  background: rgba(245,158,11,0.05) !important;
+}
+.btn-poised.active {
+  background: rgba(245,158,11,0.12) !important;
+  border-color: rgba(245,158,11,0.5) !important;
+  box-shadow: 0 0 10px rgba(245,158,11,0.12) !important;
+}
+
+/* Dividers — gradient fade */
+.filter-divider {
+  width: 1px !important;
+  height: 20px !important;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.1), transparent) !important;
+  flex-shrink: 0;
+  margin: 0 2px !important;
+}
+/* col-toggles & view-presets border-left refinement */
+.col-toggles,
+.view-presets {
+  border-left: 1px solid transparent !important;
+  background-image: linear-gradient(180deg, transparent 10%, rgba(255,255,255,0.07) 50%, transparent 90%);
+  background-repeat: no-repeat;
+  background-size: 1px 100%;
+  background-position: left center;
+  padding-left: 10px !important;
+}
+
+
+/* ============================================================
+   6. METRICS STRIP — glass cards with accent bars + glow
+   ============================================================ */
+.metrics-strip {
+  background: rgba(12,12,14,0.7) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  padding: 7px 16px !important;
+  gap: 6px !important;
+}
+.metrics-strip::-webkit-scrollbar { height: 3px; }
+.metrics-strip::-webkit-scrollbar-thumb { background: transparent; border-radius: 999px; }
+.metrics-strip:hover::-webkit-scrollbar-thumb { background: rgba(63,63,70,0.6); }
+
+.metric-card {
+  background: rgba(255,255,255,0.025) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 8px !important;
+  padding: 7px 13px 7px 16px !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
+  /* gradient border effect via box-shadow */
+  box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.05);
+}
+/* Left accent bar — default blue (price) */
+.metric-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 2px;
+  border-radius: 0 1px 1px 0;
+  background: var(--blue);
+  opacity: 0.6;
+}
+/* Override accent colors per card type */
+#metricsStrip .metric-card:nth-child(1)::before { background: var(--blue); }    /* NIFTY Spot */
+#metricsStrip .metric-card:nth-child(2)::before { background: var(--cyan); }    /* Fut Basis */
+#metricsStrip .metric-card:nth-child(3)::before { background: var(--orange); }  /* VIX */
+#metricsStrip .metric-card:nth-child(4)::before { background: var(--purple); }  /* PCR */
+#metricsStrip .metric-card:nth-child(5)::before { background: var(--text-dim); } /* Max Pain */
+#metricsStrip .metric-card:nth-child(6)::before { background: var(--gold); }    /* Sentiment */
+#metricsStrip .metric-card:nth-child(7)::before { background: var(--green); }   /* Trade Ready */
+#metricsStrip .metric-card:nth-child(8)::before { background: var(--green); }   /* Breadth */
+
+.metric-card:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(255,255,255,0.14) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.07),
+    0 4px 16px rgba(0,0,0,0.4),
+    0 1px 4px rgba(0,0,0,0.3) !important;
+}
+
+.metric-card .mc-label {
+  font-size: 9px !important;
+  color: rgba(113,113,122,0.85) !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase;
+  margin-bottom: 3px !important;
+}
+.metric-card .mc-val {
+  font-size: 15px !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+}
+
+/* Glowing metric cards (NIFTY Spot + Sentiment) — pulsing glow */
+@keyframes mc-pulse-blue {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 10px rgba(59,130,246,0.06); }
+  50%       { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 18px rgba(59,130,246,0.16); }
+}
+@keyframes mc-pulse-gold {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 10px rgba(245,158,11,0.06); }
+  50%       { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 18px rgba(245,158,11,0.16); }
+}
+.metric-card.mc-glow:nth-child(1) {
+  border-color: rgba(59,130,246,0.22) !important;
+  animation: mc-pulse-blue 3s ease-in-out infinite;
+}
+.metric-card.mc-glow:not(:nth-child(1)) {
+  border-color: rgba(245,158,11,0.22) !important;
+  animation: mc-pulse-gold 3s ease-in-out infinite;
+}
+.metric-card.mc-glow:hover { animation: none !important; }
+
+
+/* ============================================================
+   7. TOP PICKS BAR — gold accent + glass cards
+   ============================================================ */
+.top-picks-bar {
+  background: rgba(12,12,14,0.65) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  /* gold top accent line */
+  box-shadow: inset 0 1px 0 0 rgba(245,158,11,0.25), 0 1px 0 rgba(0,0,0,0.3);
+  padding: 8px 16px !important;
+}
+.top-picks-bar::-webkit-scrollbar { height: 3px; }
+
+/* TOP PICKS label refinement */
+.top-picks-label {
+  font-size: 9px !important;
+  letter-spacing: 1.8px !important;
+  color: var(--gold) !important;
+  text-shadow: 0 0 12px rgba(245,158,11,0.4);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-right: 1px solid rgba(245,158,11,0.2) !important;
+  padding-right: 14px !important;
+  white-space: nowrap;
+}
+/* Star SVG icon added via ::before */
+.top-picks-label::before {
+  content: '';
+  display: inline-block;
+  width: 12px; height: 12px;
+  background: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+/* Pick cards — glass + hover lift */
+.pick-card {
+  background: rgba(255,255,255,0.025) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 9px !important;
+  transition: all 0.2s cubic-bezier(0.34,1.2,0.64,1) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.pick-card:hover {
+  background: rgba(255,255,255,0.05) !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 6px 20px rgba(0,0,0,0.4),
+    0 0 12px rgba(59,130,246,0.08) !important;
+}
+/* Direction badges — slightly more padding + polish */
+.pick-card .pc-dir {
+  padding: 2px 8px !important;
+  border-radius: 5px !important;
+  font-size: 9px !important;
+  letter-spacing: 0.4px;
+}
+.pick-card .pc-dir.dir-CE {
+  background: rgba(16,185,129,0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(16,185,129,0.25);
+}
+.pick-card .pc-dir.dir-PE {
+  background: rgba(239,68,68,0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(239,68,68,0.25);
+}
+/* Score glow on high values — applied via CSS for cards whose score color is green */
+.pick-card .pc-score {
+  text-shadow: 0 0 8px rgba(16,185,129,0.3);
+}
+
+
+/* ============================================================
+   8. MAIN TABLE — premium treatment
+   ============================================================ */
+
+/* Header row — gradient background, more contrast */
+thead th {
+  background: linear-gradient(180deg,
+    rgba(20,20,23,0.98) 0%,
+    rgba(16,16,19,0.96) 100%) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.09) !important;
+  transition: color 0.15s !important;
+}
+/* Sort indicator — styled SVG-like triangles with color transition */
+thead th.sort-asc::after {
+  content: " ▲" !important;
+  font-size: 7px !important;
+  color: var(--blue) !important;
+  filter: drop-shadow(0 0 3px rgba(59,130,246,0.6));
+  transition: color 0.2s;
+}
+thead th.sort-desc::after {
+  content: " ▼" !important;
+  font-size: 7px !important;
+  color: var(--blue) !important;
+  filter: drop-shadow(0 0 3px rgba(59,130,246,0.6));
+  transition: color 0.2s;
+}
+
+/* Column group header */
+.col-group-row th {
+  background: linear-gradient(180deg, rgba(14,14,17,0.99), rgba(12,12,15,0.99)) !important;
+  color: rgba(255,255,255,0.2) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+/* Row hover — left border accent + smooth transition */
+tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.028) !important;
+  transition: background 0.12s ease !important;
+  position: relative;
+}
+tbody tr:hover {
+  background: rgba(255,255,255,0.04) !important;
+}
+tbody tr:hover td { background: transparent !important; }
+
+/* Left accent on row hover via outline trick on first cell */
+tbody tr:hover td.col-sym {
+  box-shadow: inset 3px 0 0 rgba(59,130,246,0.5) !important;
+  transition: box-shadow 0.12s ease !important;
+}
+
+/* Even rows */
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012) !important; }
+tbody tr:nth-child(even):hover { background: rgba(255,255,255,0.04) !important; }
+
+/* Sticky sym column — right edge shadow when scrolled */
+td.col-sym, th.col-sym {
+  background: inherit;
+}
+/* Shadow on sticky col right edge */
+td.col-sym::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -6px; bottom: 0;
+  width: 6px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.18), transparent);
+  pointer-events: none;
+}
+thead th.col-sym::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -6px; bottom: 0;
+  width: 6px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.2), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Score ring — subtle glow per level */
+.score-ring {
+  border-radius: 50% !important;
+  transition: box-shadow 0.2s;
+}
+.score-high { text-shadow: 0 0 8px rgba(16,185,129,0.5); }
+.score-mid  { text-shadow: 0 0 8px rgba(245,158,11,0.4); }
+.score-low  { text-shadow: 0 0 6px rgba(249,115,22,0.4); }
+.score-vlow { text-shadow: 0 0 6px rgba(239,68,68,0.4); }
+
+/* Signal pills — micro-shadow + rounder */
+.sig-pill {
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35) !important;
+}
+.sig-BULLISH     { box-shadow: 0 1px 4px rgba(16,185,129,0.2), 0 1px 3px rgba(0,0,0,0.35) !important; }
+.sig-MILDLY_BULL { box-shadow: 0 1px 3px rgba(0,0,0,0.35) !important; }
+.sig-BEARISH     { box-shadow: 0 1px 4px rgba(239,68,68,0.2), 0 1px 3px rgba(0,0,0,0.35) !important; }
+
+/* Buildup pills */
+.bu-pill {
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35) !important;
+}
+.bu-LONG_BUILD  { box-shadow: 0 1px 4px rgba(16,185,129,0.2), 0 1px 3px rgba(0,0,0,0.35) !important; }
+.bu-SHORT_BUILD { box-shadow: 0 1px 4px rgba(239,68,68,0.2), 0 1px 3px rgba(0,0,0,0.35) !important; }
+
+/* Sector pills */
+.sector-pill {
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+/* Poised rows — premium gradient left border + subtle glow */
+.row-poised {
+  border-left: none !important;
+  position: relative;
+}
+.row-poised td.col-sym {
+  box-shadow: inset 3px 0 0 var(--green) !important;
+}
+.row-poised:hover td.col-sym {
+  box-shadow: inset 3px 0 0 var(--green), inset 6px 0 12px rgba(16,185,129,0.06) !important;
+}
+.row-poised td {
+  background: rgba(16,185,129,0.025) !important;
+}
+.row-poised:nth-child(even) td {
+  background: rgba(16,185,129,0.035) !important;
+}
+.row-poised:hover td {
+  background: rgba(16,185,129,0.06) !important;
+}
+
+/* Dir badge */
+.dir-badge {
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+.dir-CE { box-shadow: 0 1px 4px rgba(16,185,129,0.15) !important; }
+.dir-PE { box-shadow: 0 1px 4px rgba(239,68,68,0.15) !important; }
+
+
+/* ============================================================
+   9. STATUS BAR — glass + pulse dot animation
+   ============================================================ */
+.status-bar {
+  background: rgba(18,18,21,0.88) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.05) !important;
+  font-size: 10px !important;
+  padding: 5px 16px !important;
+  gap: 0 !important;
+}
+
+/* Subtle dividers between status items */
+.status-bar > span {
+  padding: 0 12px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  white-space: nowrap;
+}
+.status-bar > span:first-child { padding-left: 0; }
+.status-bar > span:last-child,
+.status-bar > .sb-spacer { border-right: none; }
+.status-bar > .sb-spacer { padding: 0; flex: 1; }
+
+/* Status dot — pulse animation for connected */
+@keyframes status-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+  50%       { box-shadow: 0 0 0 4px rgba(16,185,129,0.12); }
+}
+.status-bar .status-dot {
+  width: 6px !important;
+  height: 6px !important;
+  margin-right: 5px !important;
+  animation: status-dot-pulse 2.5s ease-in-out infinite;
+}
+.status-bar .status-dot.off { animation: none !important; }
+.status-bar .status-dot.warn {
+  animation: status-dot-pulse 1.2s ease-in-out infinite !important;
+  box-shadow: 0 0 4px rgba(249,115,22,0.5) !important;
+}
+.status-bar .sb-label { color: rgba(82,82,91,0.8) !important; margin-right: 3px; }
+.status-bar .sb-val { color: rgba(212,212,216,0.9) !important; }
+
+
+/* ============================================================
+   10. FOOTER / COMPLIANCE BAR — subtle refinement
+   ============================================================ */
+.footer {
+  background: rgba(18,18,21,0.75) !important;
+  backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(255,255,255,0.04) !important;
+  font-size: 10px !important;
+  padding: 5px 16px !important;
+}
+.compliance-bar {
+  background: transparent !important;
+  border-top: 1px solid rgba(255,255,255,0.025) !important;
+  color: rgba(63,63,70,0.75) !important;
+  font-size: 9px !important;
+  padding: 7px 16px !important;
+  letter-spacing: 0.1px;
+}
+.compliance-bar a {
+  color: rgba(82,82,91,0.7) !important;
+  transition: color 0.15s, opacity 0.15s;
+}
+.compliance-bar a:hover {
+  color: rgba(113,113,122,0.9) !important;
+  text-decoration: none !important;
+}
+/* Dot separators in compliance bar */
+.compliance-bar .sep {
+  opacity: 0.4;
+  margin: 0 4px;
+}
+
+
+/* ============================================================
+   11. SCORE RING — border ring glow based on level
+   ============================================================ */
+.score-ring.score-high {
+  border: 1.5px solid rgba(16,185,129,0.35);
+  box-shadow: 0 0 6px rgba(16,185,129,0.2), inset 0 0 6px rgba(16,185,129,0.06);
+}
+.score-ring.score-mid {
+  border: 1.5px solid rgba(245,158,11,0.3);
+  box-shadow: 0 0 6px rgba(245,158,11,0.15);
+}
+.score-ring.score-low {
+  border: 1.5px solid rgba(249,115,22,0.25);
+  box-shadow: 0 0 4px rgba(249,115,22,0.12);
+}
+.score-ring.score-vlow {
+  border: 1.5px solid rgba(239,68,68,0.2);
+  box-shadow: 0 0 4px rgba(239,68,68,0.1);
+}
+
+
+/* ============================================================
+   12. ANALYSIS PANEL — small polish touches
+   ============================================================ */
+.analysis-panel {
+  background: rgba(9,9,11,0.95) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(255,255,255,0.07) !important;
+}
+.ap-header {
+  background: rgba(20,20,23,0.9) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+  backdrop-filter: blur(8px);
+}
+.ap-body::-webkit-scrollbar { width: 4px; }
+.ap-body::-webkit-scrollbar-thumb { background: rgba(63,63,70,0.6); border-radius: 999px; }
+.ap-body::-webkit-scrollbar-thumb:hover { background: var(--text-vdim) !important; }
+
+
+/* ============================================================
+   13. NAV MICRO-POLISH
+   ============================================================ */
+/* Slightly more premium nav bottom border */
+.q-nav {
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.3);
+}
+
+</style>
 </head>
 <body>
 <script>
@@ -2305,7 +2985,8 @@ td[data-intensity="low"] { opacity: 0.65; }
       <option value="SHORT_COVER">Short Cover</option>
     </select>
     <button class="btn-toggle btn-n50" id="n50Btn" onclick="toggleN50()">NIFTY 50</button>
-    <button class="btn-toggle btn-poised" id="poisedBtn" onclick="togglePoised()">&#9733; Trade Ready</button>
+    <button class="btn-toggle btn-poised" id="poisedBtn" onclick="togglePoised()">
+      <svg width="9" height="9" viewBox="0 0 12 12" fill="currentColor" style="margin-right:3px;vertical-align:middle;flex-shrink:0"><path d="M6 1l1.54 3.12L11 4.72l-2.5 2.44.59 3.44L6 8.89l-3.09 1.71.59-3.44L1 4.72l3.46-.6L6 1z"/></svg>Trade Ready</button>
     <div class="col-toggles" id="col-toggles">
       <button class="btn-toggle" data-group="pricedetail" onclick="toggleColGroup('pricedetail')">Price Detail</button>
       <button class="btn-toggle" data-group="vol" onclick="toggleColGroup('vol')">Volume</button>
@@ -2325,7 +3006,7 @@ td[data-intensity="low"] { opacity: 0.65; }
 
 <!-- Top Picks (hidden in Bloomberg mode) -->
 <div class="top-picks-bar" id="topPicksBar">
-  <span class="top-picks-label">&#9733; TOP PICKS</span>
+  <span class="top-picks-label">TOP PICKS</span>
   <span class="top-picks-empty" id="topPicksEmpty">Waiting for chain data...</span>
 </div>
 
@@ -3961,7 +4642,42 @@ function updateMetricsStrip() {
   });
   const breadthCls = adv > decl ? 'val-pos' : adv < decl ? 'val-neg' : '';
   document.getElementById('msBreadth').innerHTML = '<span class="' + breadthCls + '">' + adv + '</span><span style="color:var(--text-vdim)">:</span><span class="val-neg">' + decl + '</span>';
+
+  // Cache metrics to localStorage so they show on next page load (even when markets closed)
+  try {
+    var metricsCache = {};
+    ['msNiftySpot','msNiftyFut','msVix','msPcr','msMaxPain','msSentiment','msTradeReady','msBreadth'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.innerHTML !== '--') metricsCache[id] = el.innerHTML;
+    });
+    if (Object.keys(metricsCache).length > 0) {
+      metricsCache._ts = Date.now();
+      localStorage.setItem('quantra_metrics_cache', JSON.stringify(metricsCache));
+    }
+  } catch(e) { /* localStorage not available — ignore */ }
 }
+
+// Restore cached metrics on page load (before WS connects)
+(function restoreCachedMetrics() {
+  try {
+    var cached = JSON.parse(localStorage.getItem('quantra_metrics_cache'));
+    if (!cached || !cached._ts) return;
+    // Show cached values with a "cached" indicator
+    var age = Date.now() - cached._ts;
+    var ageLabel = age < 3600000 ? Math.round(age/60000) + 'm ago' :
+                   age < 86400000 ? Math.round(age/3600000) + 'h ago' :
+                   Math.round(age/86400000) + 'd ago';
+    ['msNiftySpot','msNiftyFut','msVix','msPcr','msMaxPain','msSentiment','msTradeReady','msBreadth'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && cached[id] && el.innerHTML === '--') {
+        el.innerHTML = cached[id];
+      }
+    });
+    // Show cached timestamp in status bar
+    var sbChain = document.getElementById('sbChain');
+    if (sbChain) sbChain.textContent = 'cached ' + ageLabel;
+  } catch(e) { /* ignore */ }
+})();
 
 // === Status Bar Updates ===
 function updateStatusBar() {
