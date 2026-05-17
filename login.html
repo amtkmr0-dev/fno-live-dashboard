@@ -201,13 +201,40 @@ body {
 }
 .login-error.show { display: flex; }
 
+/* Success banner (registration complete) */
+.login-success {
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--green);
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.login-success.show { display: flex; }
+
 /* Footer */
 .login-footer {
   text-align: center;
   margin-top: 24px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
+}
+.login-footer a {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+.login-footer a:hover {
+  text-decoration: underline;
+}
+.login-footer .version {
+  font-size: 11px;
   opacity: 0.6;
+  margin-top: 8px;
 }
 
 /* Loading state on button */
@@ -238,6 +265,11 @@ body {
     </div>
 
     <form class="login-form" id="loginForm" autocomplete="on">
+      <div class="login-success" id="loginSuccess">
+        <span>&#x2714;</span>
+        <span>Account created! Sign in below.</span>
+      </div>
+
       <div class="login-error" id="loginError">
         <span id="errorIcon">&#x26A0;</span>
         <span id="errorMsg">Invalid credentials</span>
@@ -266,7 +298,8 @@ body {
     </form>
 
     <div class="login-footer">
-      Quantra Terminal v1.0 &mdash; Secure Access
+      Don't have an account? <a href="/register">Create Account</a>
+      <div class="version">Quantra Terminal v1.0</div>
     </div>
   </div>
 </div>
@@ -277,6 +310,16 @@ body {
   var btn = document.getElementById('loginBtn');
   var errBox = document.getElementById('loginError');
   var errMsg = document.getElementById('errorMsg');
+  var successBox = document.getElementById('loginSuccess');
+
+  // Show success banner if redirected from registration
+  if (window.location.search.indexOf('registered=1') !== -1) {
+    successBox.classList.add('show');
+    // Clean URL
+    if (window.history.replaceState) {
+      window.history.replaceState({}, document.title, '/login');
+    }
+  }
 
   // Check if already authenticated (cookie-based)
   fetch('/api/auth/verify', {credentials: 'same-origin'})

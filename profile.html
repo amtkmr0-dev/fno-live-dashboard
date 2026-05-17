@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile &mdash; Quantra Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="theme-css">
+/* ============================================================
+   Quantra Terminal - Shared Design System
+   Theme: Obsidian Premium
+   ============================================================ */
+
+:root {
+  --bg:            #09090b;
+  --surface:       #18181b;
+  --surface-alt:   #1c1c20;
+  --surface-hover: #27272a;
+  --surface-active:#2e2e33;
+  --bg-elevated:   #27272a;
+  --border:        #2e2e35;
+  --border-light:  #3f3f46;
+  --border-focus:  #3b82f6;
+  --text:          #e4e4e7;
+  --text-dim:      #71717a;
+  --text-vdim:     #52525b;
+  --text-bright:   #fafafa;
+  --blue:          #3b82f6;
+  --blue-soft:     rgba(59,130,246,0.12);
+  --blue-hover:    #2563eb;
+  --green:         #10b981;
+  --green-soft:    rgba(16,185,129,0.12);
+  --green-text:    #34d399;
+  --red:           #ef4444;
+  --red-soft:      rgba(239,68,68,0.12);
+  --red-text:      #f87171;
+  --gold:          #f59e0b;
+  --gold-soft:     rgba(245,158,11,0.1);
+  --orange:        #f97316;
+  --orange-soft:   rgba(249,115,22,0.1);
+  --purple:        #a855f7;
+  --purple-soft:   rgba(168,85,247,0.1);
+  --cyan:          #06b6d4;
+  --cyan-soft:     rgba(6,182,212,0.1);
+  --yellow:        #eab308;
+  --nav-height:    48px;
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.6);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.8);
+  --font-sans:     'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --fs-xs:         11px;
+  --fs-sm:         12px;
+  --fs-base:       13px;
+  --fs-md:         14px;
+  --fs-lg:         16px;
+  --fs-xl:         20px;
+  --fs-2xl:        24px;
+  --fs-3xl:        32px;
+  --fw-normal:     400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
+
+/* ---- Nav ---- */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(59,130,246,0.08);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-brand:hover { text-decoration: none; }
+.q-nav-brand img { height: 28px; width: auto; display: block; }
+.q-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+.q-nav-links a {
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-links a:hover { color: var(--text); background: var(--surface-hover); text-decoration: none; }
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--blue-soft);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
+}
+.q-nav-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  white-space: nowrap;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.q-nav-logout {
+  margin-left: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.q-nav-logout:hover { color: var(--red); border-color: var(--red); background: rgba(239,68,68,0.08); }
+
+/* ---- Buttons ---- */
+.q-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.q-btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 1px 8px rgba(59,130,246,0.35); }
+.q-btn-primary:hover { background: var(--blue-hover); box-shadow: 0 2px 12px rgba(59,130,246,0.45); }
+.q-btn-ghost { background: transparent; color: var(--text-dim); border-color: var(--border); }
+.q-btn-ghost:hover { color: var(--text); border-color: var(--border-light); }
+.q-btn-sm { padding: 4px 10px; font-size: var(--fs-xs); }
+.q-btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
+.q-btn-danger:hover { background: #dc2626; }
+.q-btn-success { background: var(--green); color: #fff; border-color: var(--green); }
+.q-btn-success:hover { background: #059669; }
+.q-btn-warning { background: var(--orange); color: #fff; border-color: var(--orange); }
+.q-btn-warning:hover { background: #ea6400; }
+
+/* ---- Inputs ---- */
+.q-input, .q-textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 7px 10px;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+.q-input:focus, .q-textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.q-input::placeholder, .q-textarea::placeholder { color: var(--text-vdim); }
+.q-input[readonly], .q-input:disabled {
+  background: var(--surface-alt);
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+.q-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+/* ---- Badges ---- */
+.q-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1.4;
+}
+.q-badge-green  { background: var(--green-soft); color: var(--green-text); }
+.q-badge-red    { background: var(--red-soft); color: var(--red-text); }
+.q-badge-blue   { background: var(--blue-soft); color: var(--blue); }
+.q-badge-gold   { background: var(--gold-soft); color: var(--gold); }
+.q-badge-orange { background: var(--orange-soft); color: var(--orange); }
+.q-badge-purple { background: var(--purple-soft); color: var(--purple); }
+.q-badge-dim    { background: rgba(113,113,122,0.1); color: var(--text-dim); }
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  max-width: 400px;
+  box-shadow: var(--shadow-lg);
+}
+.toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.success { border-left: 3px solid var(--green); }
+.toast.warning { border-left: 3px solid var(--orange); }
+</style>
+<style>
+/* ---- Profile Page Layout ---- */
+.profile-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---- Cards ---- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.01);
+}
+.card-header .ch-icon { font-size: 16px; }
+.card-header h2 {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+.card-header .ch-sub {
+  margin-left: 6px;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  font-weight: var(--fw-normal);
+}
+.card-body { padding: 18px; }
+
+/* ---- Form grid ---- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.form-grid.single { grid-template-columns: 1fr; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field-group.full { grid-column: 1 / -1; }
+.field-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ---- Read-only field display ---- */
+.field-readonly {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 7px 10px;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Toggle Switch ---- */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+.toggle-switch {
+  position: relative;
+  width: 38px;
+  height: 20px;
+  cursor: pointer;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.toggle-switch input { display: none; }
+.toggle-switch .slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+.toggle-switch .slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.toggle-switch input:checked + .slider { background: var(--green); }
+.toggle-switch input:checked + .slider::before { transform: translateX(18px); background: #fff; }
+.toggle-label { font-size: var(--fs-sm); color: var(--text); }
+
+/* ---- Big auto-trade toggle ---- */
+.auto-trade-toggle-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(249,115,22,0.06);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+.auto-trade-toggle-wrap .big-toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  cursor: pointer;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.auto-trade-toggle-wrap .big-toggle input { display: none; }
+.auto-trade-toggle-wrap .big-toggle .slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border-light);
+  border-radius: 14px;
+  transition: background 0.2s;
+}
+.auto-trade-toggle-wrap .big-toggle .slider::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.auto-trade-toggle-wrap .big-toggle input:checked + .slider { background: var(--orange); }
+.auto-trade-toggle-wrap .big-toggle input:checked + .slider::before { transform: translateX(24px); background: #fff; }
+.auto-trade-title {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  margin-bottom: 3px;
+}
+.auto-trade-warning {
+  font-size: var(--fs-xs);
+  color: var(--orange);
+  line-height: 1.5;
+}
+
+/* ---- Sector checkboxes ---- */
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+.sector-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  transition: all 0.15s;
+  user-select: none;
+}
+.sector-check:hover { border-color: var(--border-light); color: var(--text); }
+.sector-check input[type="checkbox"] { display: none; }
+.sector-check .sector-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1.5px solid var(--border-light);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.sector-check.checked {
+  border-color: rgba(59,130,246,0.4);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.sector-check.checked .sector-dot {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+/* ---- Stats grid ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.stat-item {
+  text-align: center;
+  padding: 12px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(54,58,69,0.3);
+}
+.stat-item .si-label {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  color: var(--text-vdim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 5px;
+}
+.stat-item .si-val {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  line-height: 1.2;
+}
+.si-val.ok   { color: var(--green); }
+.si-val.bad  { color: var(--red); }
+.si-val.info { color: var(--blue); }
+.stat-item .si-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  margin-top: 2px;
+}
+
+/* ---- Sessions section ---- */
+.sessions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
+}
+.sessions-count {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  min-width: 40px;
+}
+.sessions-label { font-size: var(--fs-sm); color: var(--text-dim); flex: 1; }
+
+/* ---- Section divider ---- */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ---- Save row ---- */
+.save-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.save-status {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+/* ---- Char counter ---- */
+.char-counter {
+  font-size: 10px;
+  color: var(--text-vdim);
+  text-align: right;
+  margin-top: 2px;
+}
+.char-counter.warn { color: var(--orange); }
+.char-counter.limit { color: var(--red); }
+
+/* ---- Utility ---- */
+.text-green  { color: var(--green) !important; }
+.text-red    { color: var(--red) !important; }
+.text-blue   { color: var(--blue) !important; }
+.text-dim    { color: var(--text-dim) !important; }
+.hidden { display: none !important; }
+
+@media (max-width: 768px) {
+  .q-nav { padding: 0 10px; gap: 8px; }
+  .q-nav-links a { padding: 5px 9px; font-size: var(--fs-xs); }
+  .profile-main { padding: 16px 12px; }
+}
+</style>
+</head>
+<body>
+<script>
+// Auth gate: verify session, enforce role-based nav visibility
+(function(){
+  fetch('/api/auth/verify',{credentials:'same-origin'})
+    .then(function(r){if(!r.ok)throw r;return r.json()})
+    .then(function(d){
+      if(!d.ok){window.location.href='/login';return}
+      window.__quantra_role=d.role;
+      window.__quantra_user=d.user;
+      if(d.role!=='admin'&&d.admin_paths){
+        var links=document.querySelectorAll('.q-nav-links a');
+        links.forEach(function(a){
+          var href=a.getAttribute('href');
+          if(d.admin_paths.indexOf(href)!==-1){
+            a.style.display='none';
+          }
+        });
+      }
+    })
+    .catch(function(){window.location.href='/login'});
+})();
+</script>
+
+<div class="toast" id="toast"></div>
+
+<!-- Navigation Bar -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAXCAIAAADsjHrMAAAEAElEQVR42p1VXWgcVRQ+596Z3exf2ibdJjFUiIWmpqQkKKmKDyLYRktNEawWrSAUnyp5Kf4+1Bctgr4GX1oRqQhFQQWRoKJIKpUWitGWxDZpmtZszGZ/53/uvceHZDazm81m9T7MXObcO9/5vvOH0NID4YUABE0sBAQgWv+5ch2x1s5qTzeJBPWQgusI9e0M/vtCDP4XvEKbRg7/HzAiCtwmRKyF2tjJTcGoGWWp0RlsnhmGhFkHjEBETbi7umGbEaLgQQCAyBhjAMQ4R0SgJhXEBswqqlD4MOcaua6yigikzBxJgZwDNRYwLAxw0LZVE8Ka5EIAxjkpIjvX1n3PC6dPH337NYil7v4xKcw86jFkKwWFTRCsKerqqCBjCKisoh6LD798/NDJ0WRH2rAAo3Dj96mvPzgz9d23AAwTKVJyU8j1zMJInGybfPOBgwdPjo09fvyYqxK5vOMpVsi72NbZe+hIa+++7Oy0/fcMoA5cg4ZhrGFGocplZBvdvbufff3U0OERKaGQs3kihjosZW0/GcvnlOn4Ih4tldzrX5y9dX7MK+QwGiNSG+GtMCOAqtRijJNr7B8ZOfXZ+Z39/aWC73oUT0eXFjJfvvveN++/ZRh+qm/Q0qP5rOtIPTUwlHp0pDh5yV+6C1qkbpFVwCpJgQErRp75zJvvdPT1ZjN2NB4VqH44d/aT0Vf/mvjRLnnzF8dnfxnHLZ0tPXsMi0rLNqXb3eyydXUcI8nqFF1rblpNIwKsNFmtYHqmTSoSuXknc2H0xNzlCdCSLNFGSiGLFaenrrzx4vYDz28/8SEoXZRJuH7jLqGtFRbiKtJqr1WIkHdxpsBnrt6euzzBEu2klJISAEgKjCVIeNmL38snDT2einIUkuqNKaoGW43WWtBWZMgYWFyAsgOWZKgnSMqwOqQUELF40rGF7brc06WnGs8oLeCxQo5CNY+3i7DDAiHA9lZ6YJXHyBkQI6GE5YLGhNSU6a8mWkMZIQRJFXpCUtkGX4BlS1ASGAclgAg4B6nILAIo1tqplA6WDTqALwKHKp5hzTyr7rkhq+2R6ULZUBbfirEkWDlAhlwHywLfufeVl9JPDaula/TrORJIjk+eUzfjw6m/NRjza8cQGfhO5JFjqv0+p2ioljS7/wAZyypzDdxyamDfg59/1PXc023DD/uOXbowBktzuPMhWJyCO7+BHguRqwMWmNbixUC6kNxBux6TrhKWpVace9h7Oil5VtgZLYMDmJX2ikXU08MYU+X8dWnavoKOstgLgLTN+IXgNUqTKBFxY1L/vwkdPUrlpBWSRol2LYL+o6I2T8XPz4Dre0tA7uNfxb0vd2R/Xucn35W8zchGg+Kdb2S+C9oNgc7Ni61CwAAAABJRU5ErkJggg==" alt="Quantra" style="height:28px;width:auto;"></a>
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/paper">Paper Trades</a>
+    <a href="/sectors">Sectors</a>
+    <a href="/rsi">RSI Scanner</a>
+    <a href="/rsi-analysis">Stock Analysis</a>
+    <a href="/profile" class="active">Profile</a>
+    <a href="/divergence">Divergence</a>
+    <a href="/admin">Admin</a>
+  </div>
+  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
+</nav>
+
+<main class="profile-main">
+
+  <!-- ===== Card 1: Profile ===== -->
+  <div class="card" id="profileCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128100;</span>
+      <h2>Profile</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <!-- Display Name -->
+        <div class="field-group">
+          <label class="field-label" for="prof-display-name">Display Name</label>
+          <input class="q-input" type="text" id="prof-display-name" placeholder="Your display name" maxlength="50">
+        </div>
+        <!-- Email -->
+        <div class="field-group">
+          <label class="field-label" for="prof-email">Email</label>
+          <input class="q-input" type="email" id="prof-email" placeholder="you@example.com">
+        </div>
+        <!-- Phone -->
+        <div class="field-group">
+          <label class="field-label" for="prof-phone">Phone <span style="color:var(--text-vdim);font-weight:400;text-transform:none">(optional)</span></label>
+          <input class="q-input" type="tel" id="prof-phone" placeholder="+91 98765 43210">
+        </div>
+        <!-- Username (readonly) -->
+        <div class="field-group">
+          <label class="field-label">Username</label>
+          <div class="field-readonly" id="prof-username-display">&mdash;</div>
+        </div>
+        <!-- Bio -->
+        <div class="field-group full">
+          <label class="field-label" for="prof-bio">Bio <span style="color:var(--text-vdim);font-weight:400;text-transform:none">(optional, max 200 chars)</span></label>
+          <textarea class="q-textarea" id="prof-bio" placeholder="A short bio about yourself..." maxlength="200" rows="3"
+            oninput="updateCharCounter('prof-bio','bio-counter',200)"></textarea>
+          <div class="char-counter" id="bio-counter">0 / 200</div>
+        </div>
+        <!-- Role & Member since -->
+        <div class="field-group">
+          <label class="field-label">Role</label>
+          <div class="field-readonly">
+            <span class="q-badge" id="prof-role-badge">USER</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Member Since</label>
+          <div class="field-readonly" id="prof-member-since">&mdash;</div>
+        </div>
+      </div>
+      <div class="save-row">
+        <button class="q-btn q-btn-success" onclick="saveProfile()">Save Profile</button>
+        <span class="save-status" id="prof-save-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Card 2: Trading Settings ===== -->
+  <div class="card" id="tradingSettingsCard">
+    <div class="card-header">
+      <span class="ch-icon">&#9881;&#65039;</span>
+      <h2>Trading Settings</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label" for="ts-max-trades">Max Paper Trades / Day</label>
+          <input class="q-input" type="number" id="ts-max-trades" min="1" max="10" value="2">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="ts-default-lots">Default Lots</label>
+          <input class="q-input" type="number" id="ts-default-lots" min="1" max="20" value="1">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="ts-default-capital">Default Capital (&#8377;)</label>
+          <input class="q-input" type="number" id="ts-default-capital" min="1000" step="1000" placeholder="e.g. 100000">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Auto Exit on SL / T2</label>
+          <div class="toggle-wrap">
+            <label class="toggle-switch">
+              <input type="checkbox" id="ts-auto-exit" checked>
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label" id="ts-auto-exit-label">Enabled</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Trail SL to Entry on T1</label>
+          <div class="toggle-wrap">
+            <label class="toggle-switch">
+              <input type="checkbox" id="ts-trail-sl" checked>
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label" id="ts-trail-sl-label">Enabled</span>
+          </div>
+        </div>
+      </div>
+      <div class="save-row">
+        <button class="q-btn q-btn-success" onclick="saveSettings()">Save Settings</button>
+        <span class="save-status" id="ts-save-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Card 3: Auto-Trade Settings ===== -->
+  <div class="card" id="autoTradeCard">
+    <div class="card-header">
+      <span class="ch-icon">&#129302;</span>
+      <h2>Auto-Trade Settings</h2>
+    </div>
+    <div class="card-body">
+      <!-- Big prominent auto-trade toggle -->
+      <div class="auto-trade-toggle-wrap">
+        <label class="big-toggle">
+          <input type="checkbox" id="at-enabled">
+          <span class="slider"></span>
+        </label>
+        <div>
+          <div class="auto-trade-title">Auto-Trade Enabled</div>
+          <div class="auto-trade-warning">
+            &#9888;&#65039; Enables automatic paper trading based on NIFTY direction + sector momentum signals.
+            Use with caution and only when you understand the strategy.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label" for="at-max-positions">Max Auto Positions</label>
+          <input class="q-input" type="number" id="at-max-positions" min="1" max="5" value="2">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="at-max-capital">Max Auto Capital (&#8377;)</label>
+          <input class="q-input" type="number" id="at-max-capital" min="1000" step="1000" placeholder="e.g. 200000">
+        </div>
+        <div class="field-group full">
+          <label class="field-label">Preferred Sectors</label>
+          <div class="sector-grid" id="sectorGrid">
+            <!-- Dynamically rendered -->
+          </div>
+        </div>
+      </div>
+      <div class="save-row">
+        <button class="q-btn q-btn-warning" onclick="saveAutoSettings()">Save Auto Settings</button>
+        <span class="save-status" id="at-save-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Card 4: Security ===== -->
+  <div class="card" id="securityCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128274;</span>
+      <h2>Security</h2>
+    </div>
+    <div class="card-body">
+      <!-- Change Password -->
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label" for="sec-cur-pw">Current Password</label>
+          <input class="q-input" type="password" id="sec-cur-pw" placeholder="Current password" autocomplete="current-password">
+        </div>
+        <div class="field-group">
+          <!-- spacer on wide layouts -->
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="sec-new-pw">New Password</label>
+          <input class="q-input" type="password" id="sec-new-pw" placeholder="8+ characters" autocomplete="new-password">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="sec-conf-pw">Confirm New Password</label>
+          <input class="q-input" type="password" id="sec-conf-pw" placeholder="Re-enter new password" autocomplete="new-password">
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+        <button class="q-btn q-btn-primary" onclick="changePassword()">Change Password</button>
+        <span class="save-status" id="sec-pw-status"></span>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Active Sessions -->
+      <div class="sessions-row">
+        <div class="sessions-count" id="sec-sessions-count">&mdash;</div>
+        <div class="sessions-label">Active session(s) across all devices</div>
+        <button class="q-btn q-btn-danger q-btn-sm" onclick="logoutAll()">Logout All Devices</button>
+      </div>
+      <div style="font-size:var(--fs-xs);color:var(--text-vdim)">
+        Logging out all devices will invalidate all active sessions including this one.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Card 5: Trade Performance ===== -->
+  <div class="card" id="perfCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128200;</span>
+      <h2>Trade Performance</h2>
+      <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--text-vdim)">Read-only summary</span>
+    </div>
+    <div class="card-body">
+      <div class="stats-grid" id="perfGrid">
+        <div class="stat-item"><div class="si-label">Total Trades</div><div class="si-val" id="ps-total">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Wins</div><div class="si-val ok" id="ps-wins">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Losses</div><div class="si-val bad" id="ps-losses">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Win Rate</div><div class="si-val" id="ps-winrate">&mdash;</div><div class="si-sub">of closed trades</div></div>
+        <div class="stat-item"><div class="si-label">Total P&amp;L</div><div class="si-val" id="ps-pnl">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Best Trade</div><div class="si-val ok" id="ps-best">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Worst Trade</div><div class="si-val bad" id="ps-worst">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Manual Trades</div><div class="si-val" id="ps-manual">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Auto Trades</div><div class="si-val info" id="ps-auto">&mdash;</div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ============================================================
+   Quantra Terminal — Profile Page JS
+   ============================================================ */
+
+var SECTORS = ['BANK','IT','AUTO','PHARMA','METAL','OIL','FMCG','REALTY','INFRA','MEDIA'];
+var _selectedSectors = [];
+
+/* ---- Toast ---- */
+var _toastTimer = null;
+function showToast(msg, level) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (level === 'error' ? ' error' : level === 'success' ? ' success' : level === 'warning' ? ' warning' : '');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 5000);
+}
+
+/* ---- Char counter ---- */
+function updateCharCounter(inputId, counterId, max) {
+  var val = document.getElementById(inputId).value.length;
+  var el  = document.getElementById(counterId);
+  el.textContent = val + ' / ' + max;
+  el.className = 'char-counter' + (val >= max ? ' limit' : val >= max * 0.85 ? ' warn' : '');
+}
+
+/* ---- Save status helper ---- */
+function setSaveStatus(id, msg, color) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.color = color || 'var(--text-dim)';
+  setTimeout(function(){ el.textContent = ''; }, 4000);
+}
+
+/* ---- Build sector grid ---- */
+function buildSectorGrid(selected) {
+  _selectedSectors = selected || [];
+  var grid = document.getElementById('sectorGrid');
+  grid.innerHTML = '';
+  SECTORS.forEach(function(s) {
+    var isChecked = _selectedSectors.indexOf(s) !== -1;
+    var wrap = document.createElement('label');
+    wrap.className = 'sector-check' + (isChecked ? ' checked' : '');
+    wrap.setAttribute('data-sector', s);
+    wrap.innerHTML = '<input type="checkbox" ' + (isChecked ? 'checked' : '') + '><span class="sector-dot"></span>' + s;
+    wrap.addEventListener('click', function(e) {
+      e.preventDefault();
+      var sec = this.getAttribute('data-sector');
+      var idx = _selectedSectors.indexOf(sec);
+      if (idx === -1) {
+        _selectedSectors.push(sec);
+        this.classList.add('checked');
+        this.querySelector('.sector-dot').style.background = 'var(--blue)';
+      } else {
+        _selectedSectors.splice(idx, 1);
+        this.classList.remove('checked');
+        this.querySelector('.sector-dot').style.background = '';
+      }
+    });
+    grid.appendChild(wrap);
+  });
+}
+
+/* ---- Load profile ---- */
+function loadProfile() {
+  fetch('/api/user/profile', { credentials: 'same-origin' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.ok) { showToast('Failed to load profile', 'error'); return; }
+      var p = d.profile;
+      var s = d.settings || {};
+      var at = d.auto_settings || {};
+
+      /* Profile fields */
+      document.getElementById('prof-display-name').value = p.display_name || '';
+      document.getElementById('prof-email').value        = p.email || '';
+      document.getElementById('prof-phone').value        = p.phone || '';
+      document.getElementById('prof-bio').value          = p.bio || '';
+      document.getElementById('prof-username-display').textContent = p.username || '';
+      updateCharCounter('prof-bio', 'bio-counter', 200);
+
+      /* Role badge */
+      var badge = document.getElementById('prof-role-badge');
+      if (p.role === 'admin') {
+        badge.textContent = 'ADMIN';
+        badge.className   = 'q-badge q-badge-green';
+      } else {
+        badge.textContent = 'USER';
+        badge.className   = 'q-badge q-badge-blue';
+      }
+
+      /* Member since */
+      if (p.created_at) {
+        var dt = new Date(p.created_at);
+        document.getElementById('prof-member-since').textContent =
+          dt.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+
+      /* Trading settings */
+      if (s.max_paper_trades_per_day) document.getElementById('ts-max-trades').value   = s.max_paper_trades_per_day;
+      if (s.default_lots)             document.getElementById('ts-default-lots').value = s.default_lots;
+      if (s.default_capital)          document.getElementById('ts-default-capital').value = s.default_capital;
+      document.getElementById('ts-auto-exit').checked  = s.auto_exit_enabled !== false;
+      document.getElementById('ts-trail-sl').checked   = s.auto_trail_sl_on_t1 !== false;
+      updateToggleLabel('ts-auto-exit', 'ts-auto-exit-label');
+      updateToggleLabel('ts-trail-sl', 'ts-trail-sl-label');
+
+      /* Auto-trade settings */
+      document.getElementById('at-enabled').checked        = !!at.auto_trade_enabled;
+      if (at.max_auto_positions) document.getElementById('at-max-positions').value = at.max_auto_positions;
+      if (at.max_auto_capital)   document.getElementById('at-max-capital').value   = at.max_auto_capital;
+      buildSectorGrid(at.preferred_sectors || []);
+    })
+    .catch(function(e) { showToast('Error loading profile: ' + e.message, 'error'); });
+}
+
+/* ---- Load sessions count ---- */
+function loadSessions() {
+  // Piggyback on profile or dedicated endpoint
+  fetch('/api/user/profile', { credentials: 'same-origin' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.sessions !== undefined) {
+        document.getElementById('sec-sessions-count').textContent = d.sessions;
+      }
+    })
+    .catch(function(){});
+}
+
+/* ---- Load trade stats ---- */
+function loadStats() {
+  fetch('/api/user/stats', { credentials: 'same-origin' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.ok) return;
+      var s = d.stats;
+      document.getElementById('ps-total').textContent   = s.total_trades   || 0;
+      document.getElementById('ps-wins').textContent    = s.wins           || 0;
+      document.getElementById('ps-losses').textContent  = s.losses         || 0;
+
+      var wr = s.total_trades > 0 ? Math.round((s.wins / s.total_trades) * 100) : 0;
+      document.getElementById('ps-winrate').textContent = wr + '%';
+      document.getElementById('ps-winrate').className   = 'si-val' + (wr >= 50 ? ' ok' : wr > 0 ? '' : '');
+
+      var pnl = s.total_pnl || 0;
+      document.getElementById('ps-pnl').textContent  = (pnl >= 0 ? '+' : '') + '\u20b9' + pnl.toLocaleString('en-IN');
+      document.getElementById('ps-pnl').className    = 'si-val' + (pnl > 0 ? ' ok' : pnl < 0 ? ' bad' : '');
+
+      document.getElementById('ps-best').textContent   = s.best_trade   ? '+\u20b9' + s.best_trade.toLocaleString('en-IN')  : '\u2014';
+      document.getElementById('ps-worst').textContent  = s.worst_trade  ? '\u20b9' + s.worst_trade.toLocaleString('en-IN') : '\u2014';
+      document.getElementById('ps-manual').textContent = s.manual_count || 0;
+      document.getElementById('ps-auto').textContent   = s.auto_count   || 0;
+    })
+    .catch(function(){});
+}
+
+/* ---- Toggle label helper ---- */
+function updateToggleLabel(cbId, labelId) {
+  var cb  = document.getElementById(cbId);
+  var lbl = document.getElementById(labelId);
+  if (cb && lbl) lbl.textContent = cb.checked ? 'Enabled' : 'Disabled';
+}
+document.getElementById('ts-auto-exit').addEventListener('change', function(){ updateToggleLabel('ts-auto-exit','ts-auto-exit-label'); });
+document.getElementById('ts-trail-sl').addEventListener('change',  function(){ updateToggleLabel('ts-trail-sl','ts-trail-sl-label');   });
+
+/* ---- Save profile ---- */
+function saveProfile() {
+  var payload = {
+    display_name: document.getElementById('prof-display-name').value.trim(),
+    email:        document.getElementById('prof-email').value.trim(),
+    phone:        document.getElementById('prof-phone').value.trim(),
+    bio:          document.getElementById('prof-bio').value.trim(),
+  };
+  setSaveStatus('prof-save-status', 'Saving...', 'var(--text-dim)');
+  fetch('/api/user/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) { showToast('Profile updated!', 'success'); setSaveStatus('prof-save-status', 'Saved!', 'var(--green)'); }
+    else { showToast(d.error || 'Failed to save profile', 'error'); setSaveStatus('prof-save-status', 'Failed', 'var(--red)'); }
+  })
+  .catch(function(e){ showToast('Error: ' + e.message, 'error'); setSaveStatus('prof-save-status','',''); });
+}
+
+/* ---- Save trading settings ---- */
+function saveSettings() {
+  var payload = {
+    max_paper_trades_per_day: parseInt(document.getElementById('ts-max-trades').value) || 2,
+    default_lots:             parseInt(document.getElementById('ts-default-lots').value) || 1,
+    default_capital:          parseFloat(document.getElementById('ts-default-capital').value) || 0,
+    auto_exit_enabled:        document.getElementById('ts-auto-exit').checked,
+    auto_trail_sl_on_t1:      document.getElementById('ts-trail-sl').checked,
+  };
+  setSaveStatus('ts-save-status', 'Saving...', 'var(--text-dim)');
+  fetch('/api/user/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) { showToast('Settings saved!', 'success'); setSaveStatus('ts-save-status', 'Saved!', 'var(--green)'); }
+    else { showToast(d.error || 'Failed to save settings', 'error'); setSaveStatus('ts-save-status','Failed','var(--red)'); }
+  })
+  .catch(function(e){ showToast('Error: ' + e.message, 'error'); setSaveStatus('ts-save-status','',''); });
+}
+
+/* ---- Save auto-trade settings ---- */
+function saveAutoSettings() {
+  var payload = {
+    auto_trade_enabled:  document.getElementById('at-enabled').checked,
+    max_auto_positions:  parseInt(document.getElementById('at-max-positions').value) || 2,
+    max_auto_capital:    parseFloat(document.getElementById('at-max-capital').value) || 0,
+    preferred_sectors:   _selectedSectors.slice(),
+  };
+  setSaveStatus('at-save-status', 'Saving...', 'var(--text-dim)');
+  fetch('/api/user/auto-settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) { showToast('Auto-trade settings saved!', 'success'); setSaveStatus('at-save-status', 'Saved!', 'var(--green)'); }
+    else { showToast(d.error || 'Failed to save auto settings', 'error'); setSaveStatus('at-save-status','Failed','var(--red)'); }
+  })
+  .catch(function(e){ showToast('Error: ' + e.message, 'error'); setSaveStatus('at-save-status','',''); });
+}
+
+/* ---- Change password ---- */
+function changePassword() {
+  var cur  = document.getElementById('sec-cur-pw').value;
+  var nw   = document.getElementById('sec-new-pw').value;
+  var conf = document.getElementById('sec-conf-pw').value;
+  var statusEl = document.getElementById('sec-pw-status');
+
+  if (!cur)  { setSaveStatus('sec-pw-status','Enter current password','var(--red)'); return; }
+  if (!nw || nw.length < 8) { setSaveStatus('sec-pw-status','New password must be 8+ chars','var(--red)'); return; }
+  if (nw !== conf) { setSaveStatus('sec-pw-status','Passwords do not match','var(--red)'); return; }
+
+  setSaveStatus('sec-pw-status','Updating...','var(--text-dim)');
+  fetch('/api/user/change-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ current_password: cur, new_password: nw }),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) {
+      showToast('Password changed successfully!', 'success');
+      setSaveStatus('sec-pw-status','Changed!','var(--green)');
+      document.getElementById('sec-cur-pw').value  = '';
+      document.getElementById('sec-new-pw').value  = '';
+      document.getElementById('sec-conf-pw').value = '';
+    } else {
+      showToast(d.error || 'Failed to change password', 'error');
+      setSaveStatus('sec-pw-status','Failed','var(--red)');
+    }
+  })
+  .catch(function(e){ showToast('Error: ' + e.message, 'error'); setSaveStatus('sec-pw-status','',''); });
+}
+
+/* ---- Logout all ---- */
+function logoutAll() {
+  if (!confirm('This will end all active sessions including this one. Continue?')) return;
+  fetch('/api/user/logout-all', { method: 'POST', credentials: 'same-origin' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.ok) { window.location.href = '/login'; }
+      else { showToast(d.error || 'Failed to logout all sessions', 'error'); }
+    })
+    .catch(function(e){ showToast('Error: ' + e.message, 'error'); });
+}
+
+/* ---- Init ---- */
+buildSectorGrid([]);
+loadProfile();
+loadStats();
+</script>
+</body>
+</html>

@@ -6,31 +6,26 @@ Runs on port 8080 (public). Proxies authenticated requests to ws_server.py
 on port 8081 (internal). ZERO modifications to ws_server.py required.
 
 Features:
+  - SQLite-backed users, sessions, settings, paper trades (via db.py)
   - Cookie-based session auth (HttpOnly, SameSite=Strict)
   - Role-based access: "admin" (full) vs "user" (restricted)
   - Admin-only pages: /admin, /divergence (configurable in auth_config.json)
-  - Password hashed with SHA-256 + salt
-  - Serves login.html directly for /login
-  - Proxies all other routes (HTTP + WebSocket) to backend
-  - Sessions expire after configurable timeout (default 24h)
-  - AI chat via Perplexity API (sonar model, web search enabled)
-  - Chat context includes live dashboard data for smarter answers
+  - User registration + profile management
+  - Per-user paper trades (manual + auto)
+  - AI chat via Perplexity / NVIDIA NIM (multi-provider, admin-configurable)
+  - Chat context includes live dashboard data + deep Upstox analysis
 
 Deploy:
   1. Change ws_server.py to listen on 8081
-  2. python3 setup_auth.py amit MyPass admin
-  3. python3 setup_auth.py guest ViewPass user
-  4. nohup venv/bin/python3 auth_proxy.py >> auth_proxy.log 2>&1 &
-
-Rollback:
-  pkill -f auth_proxy.py; python3 switch_port.py 8080; pkill -f ws_server; sleep 2; nohup venv/bin/python3 ws_server.py >> server.log 2>&1 &
+  2. python3 setup_auth.py amit MyPass admin   (seed first admin in JSON)
+  3. nohup venv/bin/python3 auth_proxy.py >> auth_proxy.log 2>&1 &
+     On first run, existing auth_config.json users are migrated into SQLite.
 """
 
 import asyncio
-import hashlib
-import hmac
 import json
 import os
+import re
 import secrets
 import time
 import logging
@@ -38,11 +33,16 @@ import logging
 from aiohttp import web, ClientSession, WSMsgType
 
 try:
+    from db import DB
+    DB_AVAILABLE = True
+except ImportError:
+    DB_AVAILABLE = False
+
+try:
     from chat_analysis import run_analysis, get_upstox_token
     ANALYSIS_AVAILABLE = True
 except ImportError:
     ANALYSIS_AVAILABLE = False
-    log = logging.getLogger("auth_proxy")
 
 # ============================================================
 # CONFIG
@@ -67,74 +67,37 @@ log = logging.getLogger("auth_proxy")
 # AUTH STATE
 # ============================================================
 
-_sessions = {}  # token -> {user, role, created, last_seen}
-_config = None
+_db = None       # DB instance (SQLite)
+_config = None   # JSON config (AI settings, admin paths, etc.)
 
 
 def load_config():
-    """Load auth config from JSON file."""
-    global _config
-    if not os.path.exists(CONFIG_FILE):
-        log.error(f"{CONFIG_FILE} not found. Run setup_auth.py first.")
-        raise SystemExit(1)
-    with open(CONFIG_FILE, "r") as f:
-        _config = json.load(f)
-    users = _config.get("users", [])
-    admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
-    log.info(f"Loaded config: {len(users)} user(s), admin paths: {admin_paths}")
-    return _config
+    """Load JSON config for AI settings + initialize SQLite database."""
+    global _config, _db
 
+    # Load JSON config (still needed for AI keys, admin paths)
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            _config = json.load(f)
+        log.info(f"Loaded {CONFIG_FILE}: AI provider={_config.get('active_ai_provider', 'perplexity')}")
+    else:
+        _config = {"admin_paths": DEFAULT_ADMIN_PATHS, "session_max_age": SESSION_MAX_AGE}
+        log.warning(f"{CONFIG_FILE} not found — using defaults (no AI keys)")
 
-def hash_password(password, salt):
-    """SHA-256 hash with salt."""
-    return hashlib.sha256((salt + password).encode()).hexdigest()
-
-
-def get_user_record(username):
-    """Find user record by username."""
-    for user in _config.get("users", []):
-        if isinstance(user, dict) and user.get("username") == username:
-            return user
-    return None
-
-
-def verify_password(username, password):
-    """Check password against stored hash. Returns user record or None."""
-    user = get_user_record(username)
-    if not user:
-        return None
-    hashed = hash_password(password, user["salt"])
-    if hmac.compare_digest(hashed, user["hash"]):
-        return user
-    return None
-
-
-def create_session(username, role):
-    """Create a new session token."""
-    token = secrets.token_hex(32)
-    _sessions[token] = {
-        "user": username,
-        "role": role,
-        "created": time.time(),
-        "last_seen": time.time()
-    }
-    log.info(f"Session created for {username} (role={role})")
-    return token
-
-
-def validate_session(token):
-    """Validate session token. Returns session dict or None."""
-    if not token or token not in _sessions:
-        return None
-    session = _sessions[token]
-    age = time.time() - session["created"]
-    max_age = _config.get("session_max_age", SESSION_MAX_AGE)
-    if age > max_age:
-        del _sessions[token]
-        log.info(f"Session expired for {session['user']}")
-        return None
-    session["last_seen"] = time.time()
-    return session
+    # Initialize SQLite database
+    if DB_AVAILABLE:
+        _db = DB("quantra.db")
+        _db.init()
+        # Migrate users from JSON if any exist
+        migrated = _db.migrate_from_json(CONFIG_FILE)
+        if migrated:
+            log.info(f"Migrated {migrated} user(s) from {CONFIG_FILE} to SQLite")
+        user_count = _db.count_users()
+        log.info(f"Database ready: {user_count} user(s)")
+        if user_count == 0:
+            log.warning("No users in database. Create one via /register or setup_auth.py")
+    else:
+        log.error("db.py not found — database features disabled. Auth will fail.")
 
 
 def get_session_from_request(request):
@@ -142,21 +105,17 @@ def get_session_from_request(request):
     return request.cookies.get(SESSION_COOKIE)
 
 
+def validate_session(token):
+    """Validate session token via DB. Returns session dict or None."""
+    if not token or not _db:
+        return None
+    return _db.validate_session(token)
+
+
 def is_admin_path(path):
     """Check if path requires admin role."""
     admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
     return path in admin_paths
-
-
-def cleanup_sessions():
-    """Remove expired sessions."""
-    max_age = _config.get("session_max_age", SESSION_MAX_AGE)
-    now = time.time()
-    expired = [t for t, s in _sessions.items() if now - s["created"] > max_age]
-    for t in expired:
-        del _sessions[t]
-    if expired:
-        log.info(f"Cleaned up {len(expired)} expired sessions")
 
 
 # ============================================================
@@ -180,6 +139,9 @@ async def handle_login_page(request):
 
 async def handle_login_api(request):
     """POST /api/auth/login - authenticate and set session cookie."""
+    if not _db:
+        return web.json_response({"error": "Database not available"}, status=503)
+
     try:
         data = await request.json()
     except Exception:
@@ -191,19 +153,27 @@ async def handle_login_api(request):
     if not username or not password:
         return web.json_response({"error": "Username and password required"}, status=400)
 
-    user_record = verify_password(username, password)
+    user_record = _db.verify_password(username, password)
     if not user_record:
         log.warning(f"Failed login attempt for '{username}' from {request.remote}")
         return web.json_response({"error": "Invalid credentials"}, status=401)
 
-    role = user_record.get("role", "admin")
-    token = create_session(username, role)
+    role = user_record.get("role", "user")
+    user_id = user_record["id"]
     max_age = _config.get("session_max_age", SESSION_MAX_AGE)
+
+    token = _db.create_session(
+        user_id, max_age=max_age,
+        ip=request.remote,
+        ua=request.headers.get("User-Agent", "")[:200],
+    )
+    log.info(f"Login: {username} (role={role}) from {request.remote}")
 
     resp = web.json_response({
         "ok": True,
         "user": username,
-        "role": role
+        "role": role,
+        "display_name": user_record.get("display_name", username),
     })
     resp.set_cookie(
         SESSION_COOKIE, token,
@@ -223,8 +193,10 @@ async def handle_verify_api(request):
         admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
         return web.json_response({
             "ok": True,
-            "user": session["user"],
+            "user": session["username"],
             "role": session["role"],
+            "display_name": session.get("display_name", session["username"]),
+            "user_id": session["user_id"],
             "admin_paths": admin_paths
         })
     return web.json_response({"ok": False}, status=401)
@@ -233,14 +205,420 @@ async def handle_verify_api(request):
 async def handle_logout_api(request):
     """GET /api/auth/logout - destroy session and redirect to login."""
     token = get_session_from_request(request)
-    if token and token in _sessions:
-        user = _sessions[token]["user"]
-        del _sessions[token]
-        log.info(f"Logout: {user}")
+    if token and _db:
+        session = _db.validate_session(token)
+        if session:
+            log.info(f"Logout: {session['username']}")
+        _db.delete_session(token)
 
     resp = web.HTTPFound("/login")
     resp.del_cookie(SESSION_COOKIE, path="/")
     return resp
+
+
+# ============================================================
+# REGISTRATION
+# ============================================================
+
+async def handle_register_page(request):
+    """Serve register.html."""
+    # Already logged in → redirect to dashboard
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if session:
+        raise web.HTTPFound("/")
+
+    reg_file = os.path.join(os.path.dirname(__file__) or ".", "register.html")
+    if not os.path.exists(reg_file):
+        return web.Response(text="Registration page not found", status=500)
+    with open(reg_file, "r") as f:
+        html = f.read()
+    return web.Response(text=html, content_type="text/html")
+
+
+async def handle_register_api(request):
+    """POST /api/auth/register - create new user account."""
+    if not _db:
+        return web.json_response({"error": "Database not available"}, status=503)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    username = data.get("username", "").strip()
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+    confirm = data.get("confirm_password", "")
+    display_name = data.get("display_name", "").strip() or None
+
+    # Validation
+    if not username or not password:
+        return web.json_response({"error": "Username and password required"}, status=400)
+
+    if len(username) < 3 or len(username) > 30:
+        return web.json_response({"error": "Username must be 3-30 characters"}, status=400)
+
+    if not re.match(r'^[a-zA-Z0-9_]+$', username):
+        return web.json_response({"error": "Username can only contain letters, numbers, underscore"}, status=400)
+
+    if email and not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        return web.json_response({"error": "Invalid email format"}, status=400)
+
+    if len(password) < 6:
+        return web.json_response({"error": "Password must be at least 6 characters"}, status=400)
+
+    if password != confirm:
+        return web.json_response({"error": "Passwords do not match"}, status=400)
+
+    # New users always get "user" role (admins created via setup_auth.py or promoted)
+    try:
+        user_id = _db.create_user(
+            username=username,
+            email=email or None,
+            password=password,
+            role="user",
+            display_name=display_name,
+        )
+    except ValueError as e:
+        return web.json_response({"error": str(e)}, status=409)
+    except Exception as e:
+        log.error(f"Registration error: {e}")
+        return web.json_response({"error": "Registration failed"}, status=500)
+
+    log.info(f"New user registered: {username} (id={user_id}) from {request.remote}")
+    return web.json_response({"ok": True, "user_id": user_id, "username": username})
+
+
+# ============================================================
+# USER PROFILE & SETTINGS
+# ============================================================
+
+async def handle_profile_page(request):
+    """Serve profile.html (auth required)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        raise web.HTTPFound("/login")
+
+    prof_file = os.path.join(os.path.dirname(__file__) or ".", "profile.html")
+    if not os.path.exists(prof_file):
+        return web.Response(text="Profile page not found", status=500)
+    with open(prof_file, "r") as f:
+        html = f.read()
+    return web.Response(text=html, content_type="text/html")
+
+
+async def handle_user_profile_get(request):
+    """GET /api/user/profile - return user profile + settings."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    user = _db.get_user(session["user_id"])
+    if not user:
+        return web.json_response({"error": "User not found"}, status=404)
+
+    settings = _db.get_user_settings(session["user_id"]) or {}
+
+    return web.json_response({
+        "ok": True,
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "email": user.get("email"),
+            "display_name": user.get("display_name"),
+            "phone": user.get("phone"),
+            "bio": user.get("bio"),
+            "role": user["role"],
+            "created_at": user.get("created_at"),
+            "last_login": user.get("last_login"),
+        },
+        "settings": {
+            "max_paper_trades_per_day": settings.get("max_paper_trades_per_day", 3),
+            "default_lots": settings.get("default_lots", 1),
+            "default_capital": settings.get("default_capital", 50000),
+            "auto_exit_enabled": bool(settings.get("auto_exit_enabled", 1)),
+            "auto_trail_sl": bool(settings.get("auto_trail_sl", 1)),
+        },
+        "auto_settings": {
+            "auto_trade_enabled": bool(settings.get("auto_trade_enabled", 0)),
+            "auto_trade_max_positions": settings.get("auto_trade_max_positions", 2),
+            "auto_trade_max_capital": settings.get("auto_trade_max_capital", 50000),
+            "preferred_sectors": settings.get("preferred_sectors", []),
+        },
+    })
+
+
+async def handle_user_profile_post(request):
+    """POST /api/user/profile - update display name, phone, bio."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    # Only allow safe profile fields
+    allowed = {}
+    if "display_name" in data:
+        dn = str(data["display_name"]).strip()
+        if dn and len(dn) <= 50:
+            allowed["display_name"] = dn
+    if "phone" in data:
+        ph = str(data["phone"]).strip()[:20]
+        allowed["phone"] = ph
+    if "bio" in data:
+        bio = str(data["bio"]).strip()[:500]
+        allowed["bio"] = bio
+    if "email" in data:
+        em = str(data["email"]).strip().lower()
+        if em and re.match(r'^[^@]+@[^@]+\.[^@]+$', em):
+            allowed["email"] = em
+
+    if not allowed:
+        return web.json_response({"error": "No valid fields to update"}, status=400)
+
+    _db.update_user_profile(session["user_id"], **allowed)
+    log.info(f"Profile updated: {session['username']} fields={list(allowed.keys())}")
+    return web.json_response({"ok": True, "updated": list(allowed.keys())})
+
+
+async def handle_user_settings_post(request):
+    """POST /api/user/settings - update trading settings."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    updates = {}
+    if "max_paper_trades_per_day" in data:
+        v = int(data["max_paper_trades_per_day"])
+        updates["max_paper_trades_per_day"] = max(1, min(20, v))
+    if "default_lots" in data:
+        v = int(data["default_lots"])
+        updates["default_lots"] = max(1, min(50, v))
+    if "default_capital" in data:
+        v = float(data["default_capital"])
+        updates["default_capital"] = max(10000, min(10000000, v))
+    if "auto_exit_enabled" in data:
+        updates["auto_exit_enabled"] = 1 if data["auto_exit_enabled"] else 0
+    if "auto_trail_sl" in data:
+        updates["auto_trail_sl"] = 1 if data["auto_trail_sl"] else 0
+
+    if not updates:
+        return web.json_response({"error": "No valid settings to update"}, status=400)
+
+    _db.update_user_settings(session["user_id"], **updates)
+    log.info(f"Settings updated: {session['username']} {updates}")
+    return web.json_response({"ok": True, "updated": list(updates.keys())})
+
+
+async def handle_user_auto_settings_post(request):
+    """POST /api/user/auto-settings - update auto-trade settings."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    updates = {}
+    if "auto_trade_enabled" in data:
+        updates["auto_trade_enabled"] = 1 if data["auto_trade_enabled"] else 0
+    if "auto_trade_max_positions" in data:
+        v = int(data["auto_trade_max_positions"])
+        updates["auto_trade_max_positions"] = max(1, min(10, v))
+    if "auto_trade_max_capital" in data:
+        v = float(data["auto_trade_max_capital"])
+        updates["auto_trade_max_capital"] = max(10000, min(10000000, v))
+    if "preferred_sectors" in data:
+        if isinstance(data["preferred_sectors"], list):
+            updates["preferred_sectors"] = data["preferred_sectors"]
+
+    if not updates:
+        return web.json_response({"error": "No valid settings to update"}, status=400)
+
+    _db.update_user_settings(session["user_id"], **updates)
+    log.info(f"Auto-settings updated: {session['username']} {updates}")
+    return web.json_response({"ok": True, "updated": list(updates.keys())})
+
+
+async def handle_user_change_password(request):
+    """POST /api/user/change-password - change user password."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    current_pw = data.get("current_password", "")
+    new_pw = data.get("new_password", "")
+    confirm_pw = data.get("confirm_password", "")
+
+    if not current_pw or not new_pw:
+        return web.json_response({"error": "Current and new passwords required"}, status=400)
+    if len(new_pw) < 6:
+        return web.json_response({"error": "New password must be at least 6 characters"}, status=400)
+    if new_pw != confirm_pw:
+        return web.json_response({"error": "New passwords do not match"}, status=400)
+
+    ok, msg = _db.change_password(session["user_id"], current_pw, new_pw)
+    if not ok:
+        return web.json_response({"error": msg}, status=400)
+
+    log.info(f"Password changed: {session['username']}")
+    return web.json_response({"ok": True, "message": "Password changed successfully"})
+
+
+async def handle_user_stats(request):
+    """GET /api/user/stats - trade performance stats."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    # Overall stats
+    stats_all = _db.get_trade_stats(session["user_id"])
+    # Last 7 days
+    stats_week = _db.get_trade_stats(session["user_id"], days=7)
+    # Last 30 days
+    stats_month = _db.get_trade_stats(session["user_id"], days=30)
+    # Trades today count
+    today_count = _db.count_user_trades_today(session["user_id"])
+
+    return web.json_response({
+        "ok": True,
+        "all_time": stats_all,
+        "last_7_days": stats_week,
+        "last_30_days": stats_month,
+        "trades_today": today_count,
+    })
+
+
+async def handle_user_logout_all(request):
+    """POST /api/user/logout-all - destroy all sessions for this user."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    _db.delete_user_sessions(session["user_id"])
+    log.info(f"Logout all devices: {session['username']}")
+
+    resp = web.json_response({"ok": True, "message": "All sessions terminated"})
+    resp.del_cookie(SESSION_COOKIE, path="/")
+    return resp
+
+
+# ============================================================
+# PAPER TRADES API
+# ============================================================
+
+async def handle_paper_trades_list(request):
+    """GET /api/user/trades - list user's paper trades."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    status = request.query.get("status")
+    trade_type = request.query.get("type")
+    limit = min(int(request.query.get("limit", 50)), 200)
+    offset = int(request.query.get("offset", 0))
+
+    trades = _db.get_paper_trades(
+        session["user_id"], status=status, trade_type=trade_type,
+        limit=limit, offset=offset,
+    )
+    return web.json_response({"ok": True, "trades": trades, "count": len(trades)})
+
+
+async def handle_paper_trade_create(request):
+    """POST /api/user/trades - create a new paper trade."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    symbol = data.get("symbol", "").strip().upper()
+    direction = data.get("direction", "").strip().upper()
+
+    if not symbol or direction not in ("BULLISH", "BEARISH", "CE", "PE"):
+        return web.json_response({"error": "symbol and direction (BULLISH/BEARISH/CE/PE) required"}, status=400)
+
+    # Check daily limit
+    settings = _db.get_user_settings(session["user_id"]) or {}
+    max_trades = settings.get("max_paper_trades_per_day", 3)
+    today_count = _db.count_user_trades_today(session["user_id"])
+    if today_count >= max_trades:
+        return web.json_response({"error": f"Daily trade limit reached ({max_trades})"}, status=429)
+
+    trade_id = _db.create_paper_trade(
+        user_id=session["user_id"],
+        symbol=symbol,
+        direction=direction,
+        trade_type=data.get("trade_type", "manual"),
+        strike=data.get("strike"),
+        expiry=data.get("expiry"),
+        entry_premium=data.get("entry_premium"),
+        lots=data.get("lots", settings.get("default_lots", 1)),
+        lot_size=data.get("lot_size"),
+        sl_premium=data.get("sl_premium"),
+        sl_spot=data.get("sl_spot"),
+        t1_premium=data.get("t1_premium"),
+        t2_premium=data.get("t2_premium"),
+        status=data.get("status", "PENDING"),
+        entry_reason=data.get("entry_reason"),
+    )
+
+    log.info(f"Paper trade created: {session['username']} {symbol} {direction} (id={trade_id})")
+    return web.json_response({"ok": True, "trade_id": trade_id})
+
+
+async def handle_paper_trade_update(request):
+    """POST /api/user/trades/{id} - update a paper trade (status, exit, PnL)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    trade_id = int(request.match_info["id"])
+
+    # Verify ownership
+    trade = _db.get_paper_trade(trade_id, user_id=session["user_id"])
+    if not trade:
+        return web.json_response({"error": "Trade not found"}, status=404)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    _db.update_paper_trade(trade_id, user_id=session["user_id"], **data)
+    log.info(f"Paper trade updated: {session['username']} trade_id={trade_id} fields={list(data.keys())}")
+    return web.json_response({"ok": True, "trade_id": trade_id})
 
 
 # ============================================================
@@ -532,7 +910,7 @@ async def handle_ai_settings_post(request):
     with open(CONFIG_FILE, "w") as f:
         json.dump(_config, f, indent=2)
 
-    log.info(f"AI settings updated by {session['user']}: {', '.join(updated)}")
+    log.info(f"AI settings updated by {session['username']}: {', '.join(updated)}")
     return web.json_response({"ok": True, "updated": updated})
 
 
@@ -592,6 +970,22 @@ async def handle_ai_test(request):
 
 
 # ============================================================
+# ADMIN: USER MANAGEMENT
+# ============================================================
+
+async def handle_admin_users(request):
+    """GET /api/admin/users - list all users (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    users = _db.list_users(include_inactive=True)
+    stats = _db.get_platform_stats()
+    return web.json_response({"ok": True, "users": users, "stats": stats})
+
+
+# ============================================================
 # REVERSE PROXY
 # ============================================================
 
@@ -606,9 +1000,9 @@ async def proxy_websocket(request):
 
     backend_url = f"ws://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
 
-    async with ClientSession() as session:
+    async with ClientSession() as cs_session:
         try:
-            async with session.ws_connect(backend_url) as ws_backend:
+            async with cs_session.ws_connect(backend_url) as ws_backend:
                 async def forward_to_client():
                     async for msg in ws_backend:
                         if msg.type == WSMsgType.TEXT:
@@ -649,7 +1043,7 @@ async def proxy_websocket(request):
 async def proxy_http(request):
     """Proxy HTTP requests to backend with role-based access control."""
     path = request.path
-    public_paths = {"/login", "/api/auth/login", "/api/auth/verify", "/api/auth/logout"}
+    public_paths = {"/login", "/register", "/api/auth/login", "/api/auth/register", "/api/auth/verify", "/api/auth/logout"}
 
     if path not in public_paths:
         token = get_session_from_request(request)
@@ -661,7 +1055,7 @@ async def proxy_http(request):
 
         # Logged in but accessing admin-only page as regular user -> 403
         if is_admin_path(path) and session["role"] != "admin":
-            log.warning(f"Access denied: {session['user']} ({session['role']}) tried {path}")
+            log.warning(f"Access denied: {session['username']} ({session['role']}) tried {path}")
             return web.Response(
                 text="<html><body style='background:#09090b;color:#fafafa;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'>"
                      "<div style='text-align:center'>"
@@ -685,9 +1079,9 @@ async def proxy_http(request):
 
     body = await request.read() if request.can_read_body else None
 
-    async with ClientSession() as session:
+    async with ClientSession() as cs_session:
         try:
-            async with session.request(
+            async with cs_session.request(
                 request.method, backend_url,
                 headers=headers,
                 data=body,
@@ -718,10 +1112,16 @@ async def proxy_http(request):
 # ============================================================
 
 async def session_cleanup_task(app):
-    """Periodic session cleanup."""
+    """Periodic session cleanup via DB."""
     while True:
         await asyncio.sleep(300)
-        cleanup_sessions()
+        if _db:
+            try:
+                n = _db.cleanup_expired_sessions()
+                if n:
+                    log.info(f"Cleaned up {n} expired sessions")
+            except Exception as e:
+                log.warning(f"Session cleanup error: {e}")
 
 
 async def on_startup(app):
@@ -731,6 +1131,8 @@ async def on_startup(app):
 
 async def on_shutdown(app):
     app["cleanup_task"].cancel()
+    if _db:
+        _db.close()
     log.info("Auth proxy shutting down")
 
 
@@ -745,11 +1147,33 @@ def create_app():
     app.router.add_get("/api/auth/verify", handle_verify_api)
     app.router.add_get("/api/auth/logout", handle_logout_api)
 
+    # Registration
+    app.router.add_get("/register", handle_register_page)
+    app.router.add_post("/api/auth/register", handle_register_api)
+
+    # User profile & settings
+    app.router.add_get("/profile", handle_profile_page)
+    app.router.add_get("/api/user/profile", handle_user_profile_get)
+    app.router.add_post("/api/user/profile", handle_user_profile_post)
+    app.router.add_post("/api/user/settings", handle_user_settings_post)
+    app.router.add_post("/api/user/auto-settings", handle_user_auto_settings_post)
+    app.router.add_post("/api/user/change-password", handle_user_change_password)
+    app.router.add_get("/api/user/stats", handle_user_stats)
+    app.router.add_post("/api/user/logout-all", handle_user_logout_all)
+
+    # Paper trades API
+    app.router.add_get("/api/user/trades", handle_paper_trades_list)
+    app.router.add_post("/api/user/trades", handle_paper_trade_create)
+    app.router.add_post("/api/user/trades/{id}", handle_paper_trade_update)
+
     # AI Chat routes (handled directly, not proxied)
     app.router.add_post("/api/chat", handle_chat_api)
     app.router.add_get("/api/admin/ai-settings", handle_ai_settings_get)
     app.router.add_post("/api/admin/ai-settings", handle_ai_settings_post)
     app.router.add_post("/api/admin/ai-test", handle_ai_test)
+
+    # Admin user management
+    app.router.add_get("/api/admin/users", handle_admin_users)
 
     # WebSocket proxy
     app.router.add_get("/ws", proxy_websocket)
