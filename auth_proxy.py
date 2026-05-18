@@ -1835,20 +1835,76 @@ async def nifty_meta_timer(app):
         await asyncio.sleep(30)
 
 
+# Cache of latest WS init state — populated by _enrich_ws_message(), served by /api/state
+_ws_state_cache: dict = {"stocks": {}, "meta": {}, "ts": 0}
+
+
 def _enrich_ws_message(raw: str) -> str:
     """Inject _nifty_meta into WebSocket init/chain messages before forwarding."""
-    if not _nifty_meta:
-        return raw
+    global _ws_state_cache
     try:
         msg = json.loads(raw)
-        if msg.get("type") in ("init", "chain"):
+        msg_type = msg.get("type")
+
+        if msg_type in ("init", "chain") and _nifty_meta:
             meta = msg.get("meta") or {}
             meta.update(_nifty_meta)
             msg["meta"] = meta
+
+        # Cache init payload so /api/state can serve it as REST fallback
+        if msg_type == "init":
+            _ws_state_cache = {
+                "stocks": msg.get("stocks") or msg.get("d") or {},
+                "meta": msg.get("meta") or {},
+                "ts": time.time(),
+            }
+            log.info("WS init cached: %d stocks", len(_ws_state_cache["stocks"]))
+
+        if msg_type in ("init", "chain") and _nifty_meta:
             return json.dumps(msg, separators=(",", ":"))
     except Exception:
         pass
     return raw
+
+
+async def handle_state(request):
+    """GET /api/state — REST fallback for pages that need stock state without WS.
+
+    Returns the last WS init payload cached by the proxy.  If no cache yet,
+    tries to proxy through to the backend's /api/state (if it exists).
+    """
+    token_req = get_session_from_request(request)
+    if not validate_session(token_req):
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    # Serve from cache if fresh (< 120 s old)
+    if _ws_state_cache["ts"] and (time.time() - _ws_state_cache["ts"]) < 120:
+        return web.json_response({
+            "type": "init",
+            "stocks": _ws_state_cache["stocks"],
+            "meta": _ws_state_cache["meta"],
+        })
+
+    # Cache empty or stale — try backend proxy
+    import aiohttp as _aio
+    try:
+        async with ClientSession() as cs:
+            async with cs.get(
+                f"http://{BACKEND_HOST}:{BACKEND_PORT}/api/state",
+                timeout=_aio.ClientTimeout(total=5),
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    return web.json_response(data)
+                log.warning("/api/state backend returned %s", resp.status)
+    except Exception as e:
+        log.warning("/api/state backend proxy failed: %s", e)
+
+    # Nothing available
+    return web.json_response(
+        {"error": "No state available yet — WS may not have connected", "stocks": {}},
+        status=503,
+    )
 
 
 # ============================================================
@@ -2180,6 +2236,9 @@ def create_app():
 
     # Market data (dashboard metrics strip)
     app.router.add_get("/api/market-data", handle_market_data)
+
+    # Stock state REST fallback (sectors page, dashboard fallback)
+    app.router.add_get("/api/state", handle_state)
 
     # AI Chat
     app.router.add_post("/api/chat", handle_chat_api)

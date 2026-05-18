@@ -2215,39 +2215,56 @@ function scheduleTickUpdate() {
 // ===============================================
 // WEBSOCKET
 // ===============================================
+var gotInitData = false;   // true once handleInit populates stocks
+var wsOpenedOnce = false;  // true once WS onopen fires at least once
+var restFallbackDone = false; // prevent duplicate REST fetches
+
 function connectWS() {
  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
 
- const proto = window.location.protocol === "https:" ? "wss" : "ws";
- const url = proto + "://" + window.location.host + "/ws";
+ var proto = window.location.protocol === "https:" ? "wss" : "ws";
+ var url = proto + "://" + window.location.host + "/ws";
  setConnStatus("reconnecting");
+ console.log("[sectors] WS connecting to", url);
 
  try {
  ws = new WebSocket(url);
  } catch (e) {
- console.error("WS create error:", e);
+ console.error("[sectors] WS create error:", e);
  scheduleReconnect();
  return;
  }
 
  ws.onopen = function() {
+ wsOpenedOnce = true;
  setConnStatus("connected");
  reconnectDelay = 3000;
  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+ console.log("[sectors] WS connected");
  };
 
  ws.onmessage = function(evt) {
- let msg;
+ var msg;
  try { msg = JSON.parse(evt.data); } catch (e) { return; }
+ if (!gotInitData && msg.type === "init") {
+   console.log("[sectors] WS init received, stocks:", Object.keys(msg.stocks || msg.d || {}).length);
+ }
  handleMessage(msg);
  };
 
- ws.onclose = function() {
+ ws.onclose = function(evt) {
+ console.warn("[sectors] WS closed, code:", evt.code, "reason:", evt.reason);
  setConnStatus("disconnected");
+ // If WS closes before we got data, try REST immediately
+ if (!gotInitData && !restFallbackDone) {
+   fetchStateREST();
+ }
  scheduleReconnect();
  };
 
- ws.onerror = function() {};
+ ws.onerror = function(evt) {
+ console.error("[sectors] WS error event", evt);
+ };
 }
 
 function scheduleReconnect() {
@@ -2270,21 +2287,22 @@ function handleMessage(msg) {
 }
 
 function handleInit(msg) {
- const d = msg.stocks || msg.d || {};
+ var d = msg.stocks || msg.d || {};
  stocks = {};
  // Reset caches
- for (const k of Object.keys(kanbanCards)) delete kanbanCards[k];
- for (const k of Object.keys(sidebarCache)) delete sidebarCache[k];
+ for (var k of Object.keys(kanbanCards)) delete kanbanCards[k];
+ for (var k2 of Object.keys(sidebarCache)) delete sidebarCache[k2];
 
- for (const sym of Object.keys(d)) {
- stocks[sym] = { ...d[sym] };
+ for (var sym of Object.keys(d)) {
+ stocks[sym] = Object.assign({}, d[sym]);
  }
+ gotInitData = Object.keys(stocks).length > 0;
  fullRender();
 }
 
 function handleTick(msg) {
- const d = msg.d || {};
- for (const sym of Object.keys(d)) {
+ var d = msg.d || {};
+ for (var sym of Object.keys(d)) {
  if (!stocks[sym]) continue;
  if (d[sym].ltp != null) stocks[sym].ltp = d[sym].ltp;
  if (d[sym].chg_pct != null) stocks[sym].chg_pct = d[sym].chg_pct;
@@ -2301,10 +2319,10 @@ function handleTick(msg) {
 }
 
 function handleOhlc(msg) {
- const d = msg.d || {};
- for (const sym of Object.keys(d)) {
+ var d = msg.d || {};
+ for (var sym of Object.keys(d)) {
  if (!stocks[sym]) continue;
- const upd = d[sym];
+ var upd = d[sym];
  if (upd.open != null) stocks[sym].open = upd.open;
  if (upd.high != null) stocks[sym].high = upd.high;
  if (upd.low != null) stocks[sym].low = upd.low;
@@ -2314,10 +2332,10 @@ function handleOhlc(msg) {
 }
 
 function handleChain(msg) {
- const d = msg.d || {};
- for (const sym of Object.keys(d)) {
+ var d = msg.d || {};
+ for (var sym of Object.keys(d)) {
  if (!stocks[sym]) continue;
- const upd = d[sym];
+ var upd = d[sym];
  if (upd.pcr != null) stocks[sym].pcr = upd.pcr;
  if (upd.pcr_sig != null) stocks[sym].pcr_sig = upd.pcr_sig;
  if (upd.buildup != null) stocks[sym].buildup = upd.buildup;
@@ -2336,36 +2354,76 @@ function handleChain(msg) {
 }
 
 // ===============================================
+// REST FALLBACK
+// ===============================================
+function fetchStateREST() {
+ if (restFallbackDone || gotInitData) return;
+ restFallbackDone = true;
+ console.log("[sectors] REST fallback: fetching /api/state");
+
+ var loading = document.getElementById("loadingState");
+ if (loading) {
+   var loadSub = loading.querySelector(".loading-sub");
+   if (loadSub) loadSub.textContent = "WebSocket unavailable — trying REST API...";
+ }
+
+ fetch("/api/state", { credentials: "same-origin" })
+   .then(function(r) {
+     // Guard against auth redirect (302 → login page HTML)
+     var ct = (r.headers.get("content-type") || "");
+     if (!r.ok) throw new Error("HTTP " + r.status);
+     if (ct.indexOf("json") === -1) throw new Error("Not JSON (got " + ct + ") — possible auth redirect");
+     return r.json();
+   })
+   .then(function(d) {
+     console.log("[sectors] REST fallback got data, keys:", Object.keys(d));
+     var s = d.stocks || d.d || {};
+     stocks = {};
+     for (var sym in s) { stocks[sym] = s[sym]; }
+     if (Object.keys(stocks).length > 0) {
+       gotInitData = true;
+       fullRender();
+     } else {
+       showSectorError("No stock data available. The server may still be starting up or markets are closed.");
+     }
+   })
+   .catch(function(e) {
+     console.error("[sectors] REST fallback failed:", e.message);
+     showSectorError("Cannot load stock data. WebSocket and REST both failed.\n" + e.message);
+   });
+}
+
+// ===============================================
 // BOOT
 // ===============================================
 connectWS();
 
-// Fallback: if WS doesn't deliver data within 6s, fetch from REST API
+// Fallback: if WS doesn't deliver data within 4s, try REST
+setTimeout(function() {
+ if (!gotInitData) {
+   fetchStateREST();
+ }
+}, 4000);
+
+// Hard timeout: after 10s, force-show error if still loading
 setTimeout(function() {
  var loading = document.getElementById("loadingState");
- if (!loading || loading.style.display === "none") return;
- console.log("Sectors fallback: loading from /api/state");
- fetch("/api/state")
-   .then(function(r) { return r.json(); })
-   .then(function(d) {
-     try {
-       var s = d.stocks || {};
-       stocks = {};
-       for (var sym in s) { stocks[sym] = s[sym]; }
-       fullRender();
-     } catch(e) { console.error("Sectors fallback render:", e); }
-   })
-   .catch(function(e) {
-     console.error("Sectors API fetch:", e);
-     // Even if fetch fails, hide loading to show empty state
-     if (loading) loading.style.display = "none";
-   });
- // Hide loading overlay unconditionally after attempt
- setTimeout(function() {
-   var l2 = document.getElementById("loadingState");
-   if (l2) l2.style.display = "none";
- }, 3000);
-}, 6000);
+ if (loading && loading.style.display !== "none" && !gotInitData) {
+   showSectorError("Connection timed out. Both WebSocket and REST API failed to deliver data.");
+ }
+}, 10000);
+
+function showSectorError(msg) {
+ var loading = document.getElementById("loadingState");
+ if (!loading) return;
+ loading.innerHTML = '<div style="text-align:center;padding:40px 20px;">' +
+   '<div style="font-size:24px;margin-bottom:12px;color:var(--red)">&#x26A0;</div>' +
+   '<div style="font-size:14px;font-weight:600;color:var(--text-bright);margin-bottom:8px;">Connection Failed</div>' +
+   '<div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;white-space:pre-line;">' + msg + '</div>' +
+   '<div style="font-size:11px;color:var(--text-vdim);">Check: <code>systemctl status auth_proxy</code> and <code>systemctl status ws_server</code></div>' +
+   '<button onclick="location.reload()" style="margin-top:14px;padding:8px 20px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:12px;">Retry</button>' +
+   '</div>';
+}
 </script>
 <div class="compliance-bar">
   Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
