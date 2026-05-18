@@ -52,7 +52,7 @@ except ImportError:
     SECURITY_AVAILABLE = False
 
 try:
-    from chat_analysis import run_analysis, get_upstox_token
+    from chat_analysis import run_analysis, get_upstox_token, fetch_option_chain, fetch_quote, _headers as upstox_headers, INDEX_KEYS
     ANALYSIS_AVAILABLE = True
 except ImportError:
     ANALYSIS_AVAILABLE = False
@@ -919,6 +919,146 @@ async def handle_paper_trade_update(request):
 
 
 # ============================================================
+# LIVE MARKET DATA API (for dashboard metrics strip)
+# ============================================================
+
+_market_data_cache = {"data": None, "ts": 0}
+MARKET_DATA_CACHE_TTL = 10  # seconds — avoid hammering Upstox on every page load
+
+
+async def handle_market_data(request):
+    """GET /api/market-data - fetch live NIFTY market metrics for dashboard strip.
+
+    Returns meta object matching dashboard's updateMetricsStrip() expectations:
+      meta.nifty       = {ltp, chg_pct}
+      meta.nifty_fut   = {basis}
+      meta.vix         = {ltp, chg_pct}
+      meta.nifty_pcr   = float
+      meta.max_pain    = float
+      meta.sentiment   = int (0-100, simplified)
+    """
+    token_req = get_session_from_request(request)
+    session_data = validate_session(token_req)
+    if not session_data:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    # Return cached result if fresh
+    now = time.time()
+    if _market_data_cache["data"] and (now - _market_data_cache["ts"]) < MARKET_DATA_CACHE_TTL:
+        return web.json_response(_market_data_cache["data"])
+
+    if not ANALYSIS_AVAILABLE:
+        return web.json_response({"error": "Analysis module not available"}, status=503)
+
+    upstox_token = get_upstox_token()
+    if not upstox_token:
+        return web.json_response({"error": "Upstox token not configured"}, status=503)
+
+    import aiohttp as _aio
+    meta = {}
+
+    try:
+        async with ClientSession() as cs:
+            # --- 1) NIFTY 50 + India VIX quotes (single API call) ---
+            h = upstox_headers(upstox_token)
+            keys = "NSE_INDEX|Nifty 50,NSE_INDEX|India VIX"
+            q_url = f"https://api.upstox.com/v2/market-quote/quotes"
+            async with cs.get(q_url, headers=h,
+                              params={"instrument_key": keys},
+                              timeout=_aio.ClientTimeout(total=15)) as resp:
+                if resp.status == 401:
+                    return web.json_response(
+                        {"error": "Upstox token expired — refresh it", "code": "TOKEN_EXPIRED"},
+                        status=401,
+                    )
+                if resp.status == 200:
+                    qdata = (await resp.json()).get("data", {})
+
+                    # NIFTY 50
+                    nq = qdata.get("NSE_INDEX:Nifty 50", {})
+                    if nq:
+                        ltp = nq.get("last_price", 0)
+                        ohlc = nq.get("ohlc", {})
+                        close_px = ohlc.get("close", 0) or nq.get("close_price", 0) or 0
+                        chg_pct = round((ltp - close_px) / close_px * 100, 2) if close_px else 0
+                        meta["nifty"] = {"ltp": ltp, "chg_pct": chg_pct}
+
+                    # India VIX
+                    vq = qdata.get("NSE_INDEX:India VIX", {})
+                    if vq:
+                        vltp = vq.get("last_price", 0)
+                        vohlc = vq.get("ohlc", {})
+                        vclose = vohlc.get("close", 0) or vq.get("close_price", 0) or 0
+                        vchg = round((vltp - vclose) / vclose * 100, 2) if vclose else 0
+                        meta["vix"] = {"ltp": vltp, "chg_pct": vchg}
+
+            # --- 2) NIFTY option chain → PCR, max pain, ATM IV, synthetic futures ---
+            chain = await fetch_option_chain(cs, "NIFTY", upstox_token)
+            if chain and chain.get("ok"):
+                meta["nifty_pcr"] = chain.get("pcr")
+                meta["max_pain"] = chain.get("max_pain")
+                meta["atm_iv"] = chain.get("atm_iv")
+                meta["atm_strike"] = chain.get("atm_strike")
+                meta["expiry"] = chain.get("expiry")
+
+                # Synthetic futures basis (ATM CE - ATM PE + ATM Strike - Spot)
+                atm_ce = chain.get("atm_ce", 0) or 0
+                atm_pe = chain.get("atm_pe", 0) or 0
+                atm_strike = chain.get("atm_strike", 0) or 0
+                spot = chain.get("spot", 0) or meta.get("nifty", {}).get("ltp", 0) or 0
+                synth_fut = atm_ce - atm_pe + atm_strike
+                basis = round(synth_fut - spot, 2) if spot else 0
+                meta["nifty_fut"] = {"price": round(synth_fut, 2), "basis": basis}
+
+                # --- 3) Simplified sentiment score ---
+                # Composite of PCR, max pain distance, basis direction
+                score = 50  # neutral baseline
+                pcr = chain.get("pcr", 1.0) or 1.0
+                max_pain = chain.get("max_pain", 0) or 0
+                mp_dist_pct = chain.get("max_pain_dist_pct", 0) or 0
+
+                # PCR component: 0.8-1.2 = neutral, >1.2 = bullish, <0.8 = bearish
+                if pcr > 1.3:
+                    score += 15
+                elif pcr > 1.1:
+                    score += 8
+                elif pcr < 0.7:
+                    score -= 15
+                elif pcr < 0.9:
+                    score -= 8
+
+                # Max pain: spot below max pain = bullish gravity, above = bearish
+                if mp_dist_pct < -1.5:
+                    score += 10  # spot well below max pain → bullish pull
+                elif mp_dist_pct < -0.5:
+                    score += 5
+                elif mp_dist_pct > 1.5:
+                    score -= 10
+                elif mp_dist_pct > 0.5:
+                    score -= 5
+
+                # Basis: positive = mild bullish, negative = bearish
+                if basis > 30:
+                    score += 5
+                elif basis < -10:
+                    score -= 5
+
+                meta["sentiment"] = max(0, min(100, score))
+
+    except asyncio.TimeoutError:
+        log.error("Market data: Upstox API timeout")
+        return web.json_response({"error": "Upstox API timeout"}, status=504)
+    except Exception as e:
+        log.error(f"Market data error: {e}", exc_info=True)
+        return web.json_response({"error": str(e)}, status=500)
+
+    result = {"ok": True, "meta": meta, "ts": int(time.time())}
+    _market_data_cache["data"] = result
+    _market_data_cache["ts"] = time.time()
+    return web.json_response(result)
+
+
+# ============================================================
 # AI CHAT (Multi-Provider: Perplexity + NVIDIA NIM)
 # ============================================================
 
@@ -1583,11 +1723,140 @@ async def handle_auto_trade_status(request):
 
 
 # ============================================================
+# NIFTY MARKET DATA — background fetcher + WS injection
+# ============================================================
+
+_nifty_meta = {}  # Shared cache: background task writes, WS proxy reads
+
+
+async def _fetch_nifty_meta():
+    """Fetch NIFTY spot, VIX, PCR, max pain, futures basis from Upstox.
+    Stores result in _nifty_meta dict. Called by background timer."""
+    global _nifty_meta
+    if not ANALYSIS_AVAILABLE:
+        return
+
+    upstox_token = get_upstox_token()
+    if not upstox_token:
+        return
+
+    try:
+        h = upstox_headers(upstox_token)
+        meta = {}
+
+        async with ClientSession() as cs:
+            # 1) NIFTY 50 + India VIX quotes
+            q_url = "https://api.upstox.com/v2/market-quote/quotes"
+            keys = "NSE_INDEX|Nifty 50,NSE_INDEX|India VIX"
+            try:
+                async with cs.get(q_url, headers=h, params={"instrument_key": keys},
+                                  timeout=15) as resp:
+                    if resp.status == 200:
+                        qdata = (await resp.json()).get("data", {})
+                        nq = qdata.get("NSE_INDEX:Nifty 50", {})
+                        if nq:
+                            ltp = nq.get("last_price", 0)
+                            ohlc = nq.get("ohlc", {})
+                            close_px = ohlc.get("close", 0) or 0
+                            chg = round((ltp - close_px) / close_px * 100, 2) if close_px else 0
+                            meta["nifty"] = {"ltp": ltp, "chg_pct": chg}
+
+                        vq = qdata.get("NSE_INDEX:India VIX", {})
+                        if vq:
+                            vltp = vq.get("last_price", 0)
+                            vohlc = vq.get("ohlc", {})
+                            vc = vohlc.get("close", 0) or 0
+                            vchg = round((vltp - vc) / vc * 100, 2) if vc else 0
+                            meta["vix"] = {"ltp": vltp, "chg_pct": vchg}
+                    elif resp.status == 401:
+                        log.warning("Nifty meta: Upstox token expired")
+                        return
+            except Exception as e:
+                log.warning("Nifty meta quotes error: %s", e)
+
+            # 2) NIFTY option chain → PCR, max pain, ATM IV, synthetic futures
+            try:
+                chain = await fetch_option_chain(cs, "NIFTY", upstox_token)
+                if chain and chain.get("ok"):
+                    meta["nifty_pcr"] = chain.get("pcr")
+                    meta["max_pain"] = chain.get("max_pain")
+                    meta["atm_iv"] = chain.get("atm_iv")
+
+                    # Synthetic futures basis
+                    atm_ce = chain.get("atm_ce", 0) or 0
+                    atm_pe = chain.get("atm_pe", 0) or 0
+                    atm_strike = chain.get("atm_strike", 0) or 0
+                    spot = chain.get("spot", 0) or meta.get("nifty", {}).get("ltp", 0) or 0
+                    synth_fut = atm_ce - atm_pe + atm_strike
+                    basis = round(synth_fut - spot, 2) if spot else 0
+                    meta["nifty_fut"] = {"price": round(synth_fut, 2), "basis": basis}
+
+                    # Simplified sentiment
+                    score = 50
+                    pcr = chain.get("pcr", 1.0) or 1.0
+                    mp_dist = chain.get("max_pain_dist_pct", 0) or 0
+                    if pcr > 1.3: score += 15
+                    elif pcr > 1.1: score += 8
+                    elif pcr < 0.7: score -= 15
+                    elif pcr < 0.9: score -= 8
+                    if mp_dist < -1.5: score += 10
+                    elif mp_dist < -0.5: score += 5
+                    elif mp_dist > 1.5: score -= 10
+                    elif mp_dist > 0.5: score -= 5
+                    if basis > 30: score += 5
+                    elif basis < -10: score -= 5
+                    meta["sentiment"] = max(0, min(100, score))
+            except Exception as e:
+                log.warning("Nifty meta chain error: %s", e)
+
+        if meta:
+            _nifty_meta = meta
+            log.info("Nifty meta refreshed: spot=%s vix=%s pcr=%s mp=%s",
+                     meta.get("nifty", {}).get("ltp"),
+                     meta.get("vix", {}).get("ltp"),
+                     meta.get("nifty_pcr"),
+                     meta.get("max_pain"))
+
+    except Exception as e:
+        log.error("Nifty meta fetch error: %s", e)
+
+
+async def nifty_meta_timer(app):
+    """Background task: refresh NIFTY meta every 30 seconds during market hours."""
+    await asyncio.sleep(5)  # let startup finish
+    log.info("Nifty meta timer started (every 30s)")
+    while True:
+        try:
+            await _fetch_nifty_meta()
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            log.error("Nifty meta timer error: %s", e)
+        await asyncio.sleep(30)
+
+
+def _enrich_ws_message(raw: str) -> str:
+    """Inject _nifty_meta into WebSocket init/chain messages before forwarding."""
+    if not _nifty_meta:
+        return raw
+    try:
+        msg = json.loads(raw)
+        if msg.get("type") in ("init", "chain"):
+            meta = msg.get("meta") or {}
+            meta.update(_nifty_meta)
+            msg["meta"] = meta
+            return json.dumps(msg, separators=(",", ":"))
+    except Exception:
+        pass
+    return raw
+
+
+# ============================================================
 # REVERSE PROXY
 # ============================================================
 
 async def proxy_websocket(request):
-    """Proxy WebSocket connections to backend."""
+    """Proxy WebSocket connections to backend, enriching with NIFTY meta."""
     token = get_session_from_request(request)
     if not validate_session(token):
         return web.Response(text="Unauthorized", status=401)
@@ -1603,7 +1872,8 @@ async def proxy_websocket(request):
                 async def forward_to_client():
                     async for msg in ws_backend:
                         if msg.type == WSMsgType.TEXT:
-                            await ws_client.send_str(msg.data)
+                            # Enrich init/chain messages with NIFTY meta
+                            await ws_client.send_str(_enrich_ws_message(msg.data))
                         elif msg.type == WSMsgType.BINARY:
                             await ws_client.send_bytes(msg.data)
                         elif msg.type == WSMsgType.CLOSE:
@@ -1640,6 +1910,11 @@ async def proxy_websocket(request):
 async def proxy_http(request):
     """Proxy HTTP requests to backend with role-based access control."""
     path = request.path
+
+    # --- Direct-handled endpoints (bypass proxy to backend) ---
+    if path == "/api/market-data" and request.method == "GET":
+        return await handle_market_data(request)
+
     public_paths = {"/login", "/register", "/api/auth/login", "/api/auth/register", "/api/auth/verify", "/api/auth/logout"}
 
     if path not in public_paths:
@@ -1839,12 +2114,14 @@ async def auto_scan_timer(app):
 async def on_startup(app):
     app["cleanup_task"] = asyncio.create_task(session_cleanup_task(app))
     app["auto_scan_task"] = asyncio.create_task(auto_scan_timer(app))
+    app["nifty_meta_task"] = asyncio.create_task(nifty_meta_timer(app))
     log.info(f"Auth proxy started on :{PROXY_PORT}, backend at {BACKEND_HOST}:{BACKEND_PORT}")
     if SECURITY_AVAILABLE:
         log.info("Security: rate limiting, brute force guard, CSRF, security headers — ALL ACTIVE")
     else:
         log.warning("Security: DEGRADED — security.py not found")
     log.info("Auto-scan timer: ACTIVE (every 5 min during market hours)")
+    log.info("Nifty meta timer: ACTIVE (every 30s → NIFTY/VIX/PCR/MaxPain for dashboard strip)")
     tg_token = TELEGRAM_BOT_TOKEN or (_config or {}).get("telegram_bot_token", "")
     if tg_token:
         log.info("Telegram alerts: ACTIVE (chat_id=%s)", TELEGRAM_CHAT_ID)
@@ -1856,6 +2133,8 @@ async def on_shutdown(app):
     app["cleanup_task"].cancel()
     if "auto_scan_task" in app:
         app["auto_scan_task"].cancel()
+    if "nifty_meta_task" in app:
+        app["nifty_meta_task"].cancel()
     if _db:
         _db.close()
     log.info("Auth proxy shutting down")
@@ -1898,6 +2177,9 @@ def create_app():
     app.router.add_get("/api/user/trades", handle_paper_trades_list)
     app.router.add_post("/api/user/trades", handle_paper_trade_create)
     app.router.add_post("/api/user/trades/{id}", handle_paper_trade_update)
+
+    # Market data (dashboard metrics strip)
+    app.router.add_get("/api/market-data", handle_market_data)
 
     # AI Chat
     app.router.add_post("/api/chat", handle_chat_api)

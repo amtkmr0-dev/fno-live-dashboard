@@ -2983,35 +2983,35 @@ thead th.col-sym::after {
 <div class="metrics-strip" id="metricsStrip">
   <div class="metric-card mc-glow">
     <div class="mc-label">NIFTY Spot</div>
-    <div class="mc-val" id="msNiftySpot">23,643.5</div>
+    <div class="mc-val" id="msNiftySpot">--</div>
   </div>
   <div class="metric-card">
     <div class="mc-label">NIFTY Fut Basis</div>
-    <div class="mc-val" id="msNiftyFut">+12.3 <span class="mc-chg" style="color:var(--text-dim)">pts</span></div>
+    <div class="mc-val" id="msNiftyFut">--</div>
   </div>
   <div class="metric-card">
     <div class="mc-label">India VIX</div>
-    <div class="mc-val" id="msVix">18.79</div>
+    <div class="mc-val" id="msVix">--</div>
   </div>
   <div class="metric-card">
     <div class="mc-label">NIFTY PCR</div>
-    <div class="mc-val" id="msPcr">0.944 <span class="mc-chg" style="color:var(--green-text)">Balanced</span></div>
+    <div class="mc-val" id="msPcr">--</div>
   </div>
   <div class="metric-card">
     <div class="mc-label">Max Pain</div>
-    <div class="mc-val" id="msMaxPain">23,750</div>
+    <div class="mc-val" id="msMaxPain">--</div>
   </div>
   <div class="metric-card mc-glow">
     <div class="mc-label">Sentiment</div>
-    <div class="mc-val" id="msSentiment">52<span style="font-size:11px;color:var(--text-dim)">/100</span></div>
+    <div class="mc-val" id="msSentiment">--</div>
   </div>
   <div class="metric-card">
     <div class="mc-label">Trade Ready</div>
-    <div class="mc-val" id="msTradeReady" style="color:var(--gold)">3/5</div>
+    <div class="mc-val" id="msTradeReady" style="color:var(--gold)">--</div>
   </div>
   <div class="metric-card">
     <div class="mc-label">Breadth</div>
-    <div class="mc-val" id="msBreadth">58%</div>
+    <div class="mc-val" id="msBreadth">--</div>
   </div>
 </div>
 
@@ -3771,7 +3771,9 @@ function handleMessage(msg) {
   switch (msg.type) {
     case 'init':
       stocks = msg.stocks || {};
-      meta = msg.meta || {};
+      // Merge incoming meta — preserve any fields already set by fetchMarketData()
+      var initMeta = msg.meta || {};
+      Object.keys(initMeta).forEach(function(k) { meta[k] = initMeta[k]; });
       buildTable();
       document.getElementById('loadingOverlay').classList.add('hide');
       lastTick = lastOhlc = lastChain = Date.now();
@@ -4804,7 +4806,7 @@ setTimeout(function() {
   fetch('/api/state')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      try { stocks = d.stocks || {}; meta = d.meta || {}; buildTable(); } catch(e) { console.error('buildTable:', e); }
+      try { stocks = d.stocks || {}; var sMeta = d.meta || {}; Object.keys(sMeta).forEach(function(k) { meta[k] = sMeta[k]; }); buildTable(); } catch(e) { console.error('buildTable:', e); }
     })
     .catch(function(e) { console.error('API fetch:', e); });
   // Hide overlay unconditionally
@@ -4813,6 +4815,49 @@ setTimeout(function() {
   ol.style.pointerEvents = 'none';
   ol.style.display = 'none';
 }, 6000);
+
+// === Live Market Data Fetcher (NIFTY Spot, VIX, PCR, Max Pain, Futures, Sentiment) ===
+// Calls /api/market-data which fetches real data from Upstox API server-side
+var _marketDataInterval = null;
+
+function fetchMarketData() {
+  fetch('/api/market-data')
+    .then(function(r) {
+      if (r.status === 401) {
+        console.warn('Market data: auth failed or Upstox token expired');
+        return null;
+      }
+      return r.json();
+    })
+    .then(function(d) {
+      if (!d || !d.ok || !d.meta) return;
+      // Merge market data into global meta (additive, don't wipe existing WS fields)
+      var m = d.meta;
+      if (m.nifty) meta.nifty = m.nifty;
+      if (m.nifty_fut) meta.nifty_fut = m.nifty_fut;
+      if (m.vix) meta.vix = m.vix;
+      if (m.nifty_pcr != null) meta.nifty_pcr = m.nifty_pcr;
+      if (m.max_pain != null) meta.max_pain = m.max_pain;
+      if (m.sentiment != null) meta.sentiment = m.sentiment;
+      if (m.atm_iv != null) meta.atm_iv = m.atm_iv;
+      if (m.atm_strike != null) meta.atm_strike = m.atm_strike;
+      if (m.expiry) meta.expiry = m.expiry;
+      // Also set NIFTY in stocks for the spot display
+      if (m.nifty && m.nifty.ltp) {
+        if (!stocks['NIFTY 50']) stocks['NIFTY 50'] = {};
+        stocks['NIFTY 50'].ltp = m.nifty.ltp;
+        stocks['NIFTY 50'].chg_pct = m.nifty.chg_pct;
+      }
+      updateMetricsStrip();
+      console.log('Market data refreshed:', Object.keys(m).join(', '));
+    })
+    .catch(function(e) { console.warn('Market data fetch:', e); });
+}
+
+// Fetch immediately on page load, then every 30 seconds
+fetchMarketData();
+_marketDataInterval = setInterval(fetchMarketData, 30000);
+
 </script>
 <script>
 // === TradingView Widget Chart ===
