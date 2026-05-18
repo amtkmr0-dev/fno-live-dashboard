@@ -182,27 +182,29 @@ a:hover { text-decoration: underline; }
   align-items: center;
   gap: 2px;
   flex: 1;
-  justify-content: center;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
 }
 .q-nav-links a {
-  padding: 5px 13px;
-  border-radius: 999px;
-  color: var(--text-dim);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  transition: all 0.15s ease;
+  padding: 6px 14px;
+  color: #c4c4cc;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s;
   white-space: nowrap;
   text-decoration: none;
+  border-radius: 6px;
 }
 .q-nav-links a:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+  color: #ffffff;
+  background: rgba(255,255,255,0.05);
   text-decoration: none;
 }
 .q-nav-links a.active {
-  color: var(--text-bright);
-  background: var(--blue-soft);
-  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
+  color: #ffffff;
+  font-weight: 600;
+  background: rgba(255,255,255,0.08);
 }
 .q-nav-status {
   display: flex;
@@ -667,27 +669,50 @@ a:hover { text-decoration: underline; }
   .q-stats-row { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Logout button in nav */
-.q-nav-logout {
-  margin-left: 8px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  text-decoration: none;
-  white-space: nowrap;
+/* User dropdown (matching dashboard) */
+.user-dropdown { position: relative; margin-left: 8px; flex-shrink: 0; }
+.user-avatar-btn {
+  display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px;
+  border-radius: 8px; border: 1px solid var(--border); background: transparent;
+  cursor: pointer; transition: all 0.15s; color: var(--text-dim); font-family: inherit;
 }
-.q-nav-logout:hover {
-  color: var(--red);
-  border-color: var(--red);
-  background: rgba(239,68,68,0.08);
+.user-avatar-btn:hover { border-color: var(--border-light); background: rgba(255,255,255,0.03); color: var(--text); }
+.user-avatar-btn.open { background: rgba(59,130,246,0.1); border-color: var(--blue); color: var(--text-bright); }
+.ua-circle {
+  width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--blue), #06b6d4);
 }
+.ua-name { font-size: 12px; font-weight: 500; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ua-chevron { transition: transform 0.2s; flex-shrink: 0; }
+.user-avatar-btn.open .ua-chevron { transform: rotate(180deg); }
+.user-menu {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 240px;
+  background: rgba(24,24,27,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+  z-index: 200; overflow: hidden;
+}
+.user-menu.show { display: block; }
+.user-menu.animate { opacity: 1; transform: translateY(0); }
+.user-menu-header { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.user-menu-header-top { display: flex; align-items: center; gap: 10px; }
+.user-menu-header-avatar {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--blue), #06b6d4); flex-shrink: 0;
+}
+.user-menu-header-info { overflow: hidden; }
+.user-menu-header-name { font-size: 13px; font-weight: 600; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-menu-header-email { font-size: 10px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-menu-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: background 0.12s; text-decoration: none;
+}
+.user-menu-item:hover { background: rgba(255,255,255,0.04); color: var(--text-bright); text-decoration: none; }
+.user-menu-item svg { width: 15px; height: 15px; opacity: 0.5; flex-shrink: 0; }
+.user-menu-sep { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+.user-menu-item.logout-item:hover { color: var(--red-text); background: rgba(239,68,68,0.06); }
 
 /* Compliance bar */
 .compliance-bar {
@@ -787,6 +812,18 @@ body {
   width: 18px;
   text-align: center;
 }
+.sector-item .s-badge {
+  font-size: 8px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #09090b;
+  padding: 2px 5px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+  min-width: 22px;
+  text-align: center;
+}
 .sector-item .sector-name,
 .sector-item .s-name {
   flex: 1;
@@ -848,7 +885,12 @@ body {
   background: var(--surface);
   flex-wrap: wrap;
 }
-.sector-header .sh-emoji { font-size: 20px; }
+.sector-header .sh-emoji {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
 .sector-header h2 {
   font-size: 18px;
   font-weight: var(--fw-bold);
@@ -954,12 +996,25 @@ body {
 .bar-row:hover { background: var(--surface-hover); }
 .bar-row.active { background: var(--surface-active); }
 .bar-label {
-  width: 72px;
+  width: 90px;
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.bar-badge {
+  font-size: 7px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #09090b;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
   flex-shrink: 0;
 }
 .bar-track {
@@ -1229,6 +1284,7 @@ body {
   .sector-item .s-chg, .sector-item .sector-chg { display: none; }
   .sector-item .s-emoji,
   .sector-item .sector-emoji { font-size: 16px; width: auto; }
+  .sector-item .s-badge { font-size: 7px; padding: 2px 4px; }
   .sector-item { justify-content: center; padding: 10px 6px; }
 }
 
@@ -1254,7 +1310,7 @@ body {
 </head>
 <body>
 <script>
-// Auth gate: verify session, enforce role-based nav visibility
+// Auth gate + user dropdown population
 (function(){
   fetch('/api/auth/verify',{credentials:'same-origin'})
     .then(function(r){if(!r.ok)throw r;return r.json()})
@@ -1262,17 +1318,49 @@ body {
       if(!d.ok){window.location.href='/login';return}
       window.__quantra_role=d.role;
       window.__quantra_user=d.user;
+      // Hide admin-only links for non-admin
       if(d.role!=='admin'&&d.admin_paths){
         var links=document.querySelectorAll('.q-nav-links a');
         links.forEach(function(a){
           var href=a.getAttribute('href');
-          if(d.admin_paths.indexOf(href)!==-1){
-            a.style.display='none';
-          }
+          if(d.admin_paths.indexOf(href)!==-1) a.style.display='none';
         });
+        // Also hide admin menu item in dropdown
+        var adminLink=document.querySelector('.user-menu-item[href="/admin"]');
+        if(adminLink) adminLink.style.display='none';
       }
+      // Populate user dropdown
+      var uname = d.user || 'User';
+      var parts = uname.split(/[._@]/);
+      var initials = parts.length >= 2 ? (parts[0][0]+parts[1][0]).toUpperCase() : uname.substring(0,2).toUpperCase();
+      var displayName = parts.length >= 2 ? parts[0].charAt(0).toUpperCase()+parts[0].slice(1)+' '+parts[1].charAt(0).toUpperCase()+parts[1].slice(1) : uname;
+      var el=document.getElementById;
+      document.getElementById('userAvatarInitials').textContent = initials;
+      document.getElementById('userAvatarText').textContent = displayName;
+      document.getElementById('menuHeaderInitials').textContent = initials;
+      document.getElementById('menuDisplayName').textContent = displayName;
+      document.getElementById('menuEmail').textContent = d.email || d.user || '';
     })
     .catch(function(){window.location.href='/login'});
+
+  // User dropdown toggle (JS-only, no CSS :focus-within)
+  var btn=document.getElementById('userAvatarBtn');
+  var menu=document.getElementById('userMenu');
+  if(btn&&menu){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var open=menu.classList.toggle('show');
+      btn.classList.toggle('open',open);
+      if(open){menu.classList.remove('animate');requestAnimationFrame(function(){requestAnimationFrame(function(){menu.classList.add('animate')})});}
+      else{menu.classList.remove('animate');}
+    });
+    document.addEventListener('click',function(e){
+      if(!menu.contains(e.target)&&!btn.contains(e.target)){menu.classList.remove('show','animate');btn.classList.remove('open');}
+    });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){menu.classList.remove('show','animate');btn.classList.remove('open');}
+    });
+  }
 })();
 </script>
 
@@ -1299,17 +1387,35 @@ body {
     <a href="/rsi">RSI Scanner</a>
     <a href="/rsi-analysis">Stock Analysis</a>
     <a href="/divergence">Divergence</a>
-    <a href="/profile">Profile</a>
-    <a href="/admin">Admin</a>
   </div>
   <div class="q-nav-status">
     <span class="pulse-dot" id="pulseDot"></span>
-    <span class="pulse-dot" id="logoPulse" style="display:none"></span>
     <span class="conn-dot off" id="connDot"></span>
     <span id="connText">Connecting</span>
     <span id="updateTime"></span>
   </div>
-  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
+  <div class="user-dropdown" id="userDropdown">
+    <button class="user-avatar-btn" id="userAvatarBtn" title="Account" type="button">
+      <span class="ua-circle" id="userAvatarInitials">?</span>
+      <span class="ua-name" id="userAvatarText">Account</span>
+      <svg class="ua-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="user-menu" id="userMenu">
+      <div class="user-menu-header">
+        <div class="user-menu-header-top">
+          <div class="user-menu-header-avatar" id="menuHeaderInitials">?</div>
+          <div class="user-menu-header-info">
+            <div class="user-menu-header-name" id="menuDisplayName">User</div>
+            <div class="user-menu-header-email" id="menuEmail"></div>
+          </div>
+        </div>
+      </div>
+      <a class="user-menu-item" href="/profile"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7.5" cy="5" r="3"/><path d="M2 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg>Profile</a>
+      <a class="user-menu-item" href="/admin"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M7.5 5v3l2 1.5"/></svg>Admin</a>
+      <div class="user-menu-sep"></div>
+      <a class="user-menu-item logout-item" href="/api/auth/logout"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5.5 2H3a1 1 0 00-1 1v9a1 1 0 001 1h2.5M10 10.5l3-3-3-3M5.5 7.5H13"/></svg>Log Out</a>
+    </div>
+  </div>
 </nav>
 
 <!-- Main Layout -->
@@ -1416,21 +1522,21 @@ const BLACKLIST_SET = new Set([
 ]);
 
 const SECTOR_META = {
- IT: { text: "#5B8DEF", emoji: "\uD83D\uDCBB" },
- BANK: { text: "#00BCD4", emoji: "\uD83C\uDFE6" },
- PSU_BANK: { text: "#26A69A", emoji: "\uD83C\uDFDB\uFE0F" },
- FIN: { text: "#CE93D8", emoji: "\uD83D\uDCB0" },
- AUTO: { text: "#FFB74D", emoji: "\uD83D\uDE97" },
- METAL: { text: "#BDBDBD", emoji: "\u2699\uFE0F" },
- PHARMA: { text: "#81C784", emoji: "\uD83D\uDC8A" },
- FMCG: { text: "#FFF176", emoji: "\uD83D\uDED2" },
- ENERGY: { text: "#EF9A9A", emoji: "\u26A1" },
- REALTY: { text: "#BCAAA4", emoji: "\uD83C\uDFD7\uFE0F" },
- INFRA: { text: "#90A4AE", emoji: "\uD83C\uDFED" },
- CONSUMER: { text: "#F48FB1", emoji: "\uD83C\uDFE0" },
- HEALTH: { text: "#80CBC4", emoji: "\uD83C\uDFE5" },
- MEDIA: { text: "#B39DDB", emoji: "\uD83D\uDCFA" },
- INSURANCE: { text: "#FFE082", emoji: "\uD83D\uDEE1\uFE0F" },
+ IT: { text: "#5B8DEF", abbr: "IT" },
+ BANK: { text: "#00BCD4", abbr: "BK" },
+ PSU_BANK: { text: "#26A69A", abbr: "PB" },
+ FIN: { text: "#CE93D8", abbr: "FN" },
+ AUTO: { text: "#FFB74D", abbr: "AU" },
+ METAL: { text: "#BDBDBD", abbr: "MT" },
+ PHARMA: { text: "#81C784", abbr: "PH" },
+ FMCG: { text: "#FFF176", abbr: "FM" },
+ ENERGY: { text: "#EF9A9A", abbr: "EN" },
+ REALTY: { text: "#BCAAA4", abbr: "RE" },
+ INFRA: { text: "#90A4AE", abbr: "IF" },
+ CONSUMER: { text: "#F48FB1", abbr: "CN" },
+ HEALTH: { text: "#80CBC4", abbr: "HL" },
+ MEDIA: { text: "#B39DDB", abbr: "MD" },
+ INSURANCE: { text: "#FFE082", abbr: "IN" },
 };
 
 // ===============================================
@@ -1493,7 +1599,7 @@ function timeStr() {
  return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 }
 function getMeta(sec) {
- return SECTOR_META[sec] || { text: "var(--text)", emoji: "\uD83D\uDCCA" };
+ return SECTOR_META[sec] || { text: "var(--text)", abbr: "--" };
 }
 
 // ===============================================
@@ -1550,7 +1656,7 @@ function renderSidebar() {
  item.className = "sector-item" + (sec === activeSector ? " active" : "");
  item.dataset.sector = sec;
  item.innerHTML =
- '<span class="s-emoji">' + meta.emoji + '</span>' +
+ '<span class="s-badge" style="background:' + meta.text + '">' + meta.abbr + '</span>' +
  '<span class="s-name" style="color:' + meta.text + '">' + sec.replace("_", " ") + '</span>' +
  '<span class="s-bar"><span class="s-bar-fill" style="width:' + bullRatio + '%;background:' +
  (bullRatio >55 ? 'var(--green)' : bullRatio < 45 ? 'var(--red)' : 'var(--yellow)') + '"></span></span>' +
@@ -1644,7 +1750,15 @@ function renderSectorHeader() {
  const sig = sectorSignal(avg);
 
  document.getElementById("sectorHeader").style.display = "";
- document.getElementById("shEmoji").textContent = meta.emoji;
+ var shEmojiEl = document.getElementById("shEmoji");
+ shEmojiEl.textContent = meta.abbr;
+ shEmojiEl.style.background = meta.text;
+ shEmojiEl.style.color = '#09090b';
+ shEmojiEl.style.borderRadius = '8px';
+ shEmojiEl.style.padding = '4px 10px';
+ shEmojiEl.style.fontSize = '14px';
+ shEmojiEl.style.fontWeight = '800';
+ shEmojiEl.style.fontFamily = 'var(--font-mono)';
  const nameEl = document.getElementById("shName");
  nameEl.textContent = sec.replace("_", " ");
  nameEl.style.color = meta.text;
@@ -1981,7 +2095,7 @@ function renderBarChart() {
  row.onclick = function() { selectSector(sec); };
 
  row.innerHTML =
- '<span class="bar-label" style="color:' + meta.text + '">' + meta.emoji + ' ' + sec.replace("_"," ") + '</span>' +
+ '<span class="bar-label" style="color:' + meta.text + '"><span class="bar-badge" style="background:' + meta.text + '">' + meta.abbr + '</span> ' + sec.replace("_"," ") + '</span>' +
  '<div class="bar-track">' +
  '<div class="bar-center"></div>' +
  '<div class="bar-fill ' + (isPos ? "pos" : "neg") + '" style="width:' + widthPct + '%"></div>' +
