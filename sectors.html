@@ -2339,6 +2339,33 @@ function handleChain(msg) {
 // BOOT
 // ===============================================
 connectWS();
+
+// Fallback: if WS doesn't deliver data within 6s, fetch from REST API
+setTimeout(function() {
+ var loading = document.getElementById("loadingState");
+ if (!loading || loading.style.display === "none") return;
+ console.log("Sectors fallback: loading from /api/state");
+ fetch("/api/state")
+   .then(function(r) { return r.json(); })
+   .then(function(d) {
+     try {
+       var s = d.stocks || {};
+       stocks = {};
+       for (var sym in s) { stocks[sym] = s[sym]; }
+       fullRender();
+     } catch(e) { console.error("Sectors fallback render:", e); }
+   })
+   .catch(function(e) {
+     console.error("Sectors API fetch:", e);
+     // Even if fetch fails, hide loading to show empty state
+     if (loading) loading.style.display = "none";
+   });
+ // Hide loading overlay unconditionally after attempt
+ setTimeout(function() {
+   var l2 = document.getElementById("loadingState");
+   if (l2) l2.style.display = "none";
+ }, 3000);
+}, 6000);
 </script>
 <div class="compliance-bar">
   Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
