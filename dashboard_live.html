@@ -4016,7 +4016,7 @@ function renderAnalysisPanel() {
         <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u2197</a>
       </div>
       <div class="tv-chart-wrap" id="tvChartWrap">
-        <iframe id="tvChartFrame" src="https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart" allowtransparency="true" allow="autoplay"></iframe>
+        <iframe id="tvChartFrame" src="https://s.tradingview.com/embed-widget/advanced-chart/?symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&theme=dark&style=1&timezone=Asia%2FKolkata&hide_side_toolbar=true&allow_symbol_change=false&save_image=false&hide_volume=false&support_host=https%3A%2F%2Fwww.tradingview.com" allowtransparency="true" allow="autoplay" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
       </div>
     </div>
 
@@ -4145,7 +4145,7 @@ function renderChartOnlyPanel() {
         <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u2197</a>
       </div>
       <div class="tv-chart-wrap" id="tvChartWrap">
-        <iframe id="tvChartFrame" src="https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart" allowtransparency="true" allow="autoplay"></iframe>
+        <iframe id="tvChartFrame" src="https://s.tradingview.com/embed-widget/advanced-chart/?symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&theme=dark&style=1&timezone=Asia%2FKolkata&hide_side_toolbar=true&allow_symbol_change=false&save_image=false&hide_volume=false&support_host=https%3A%2F%2Fwww.tradingview.com" allowtransparency="true" allow="autoplay" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
       </div>
     </div>
 
@@ -4823,14 +4823,12 @@ function switchChartTf(sym, interval, btn) {
 
   const frame = document.getElementById('tvChartFrame');
   if (!frame) return;
-  const url = 'https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A'
+  const url = 'https://s.tradingview.com/embed-widget/advanced-chart/?symbol=NSE%3A'
     + encodeURIComponent(sym)
     + '&interval=' + interval
-    + '&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722'
-    + '&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata'
-    + '&studies_overrides=%7B%7D&overrides=%7B%7D'
-    + '&enabled_features=%5B%5D&disabled_features=%5B%5D'
-    + '&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart';
+    + '&theme=dark&style=1&timezone=Asia%2FKolkata'
+    + '&hide_side_toolbar=true&allow_symbol_change=false&save_image=false'
+    + '&hide_volume=false&support_host=https%3A%2F%2Fwww.tradingview.com';
   frame.src = url;
 }
 </script>
