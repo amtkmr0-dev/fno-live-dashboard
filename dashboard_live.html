@@ -1040,17 +1040,19 @@ body {
 .btn-clear:hover { color: #f87171; border-color: #f87171; }
 .btn-export { color: var(--text-dim); }
 .btn-export:hover { color: #34d399; border-color: #34d399; }
-#exportCount:not(:empty)::before { content:'('; }
-#exportCount:not(:empty)::after { content:')'; }
-#exportCount { color: var(--gold); font-size: 10px; }
 .export-wrap { display: inline-block; }
-.export-menu { position:absolute; top:100%; right:0; margin-top:4px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:4px 0; z-index:999; min-width:140px; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
-.export-menu button { display:block; width:100%; text-align:left; padding:6px 14px; background:none; border:none; color:var(--text); font-size:12px; cursor:pointer; }
-.export-menu button:hover { background:rgba(255,255,255,0.06); }
-.w-chk { width:28px; min-width:28px; max-width:28px; text-align:center; padding:0 4px !important; }
-.w-chk input[type="checkbox"] { width:13px; height:13px; cursor:pointer; accent-color:var(--blue); }
-tr.row-selected { background: rgba(59,130,246,0.08) !important; }
-tr.row-selected:hover { background: rgba(59,130,246,0.12) !important; }
+.export-panel { position:absolute; top:100%; right:0; margin-top:4px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:0; z-index:999; min-width:220px; max-height:420px; box-shadow:0 8px 24px rgba(0,0,0,0.5); display:none; }
+.export-panel-head { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--border); }
+.export-panel-head span { font-size:11px; font-weight:600; color:var(--text-bright); letter-spacing:0.5px; text-transform:uppercase; }
+.export-panel-head label { font-size:10px; color:var(--text-dim); cursor:pointer; display:flex; align-items:center; gap:4px; }
+.export-panel-body { max-height:280px; overflow-y:auto; padding:6px 0; }
+.export-grp-label { font-size:9px; font-weight:700; color:var(--text-vdim); text-transform:uppercase; letter-spacing:0.8px; padding:6px 12px 2px; }
+.export-col-item { display:flex; align-items:center; gap:6px; padding:3px 12px; cursor:pointer; font-size:11px; color:var(--text); }
+.export-col-item:hover { background:rgba(255,255,255,0.04); }
+.export-col-item input[type="checkbox"] { width:12px; height:12px; accent-color:var(--blue); cursor:pointer; flex-shrink:0; }
+.export-panel-foot { display:flex; gap:6px; padding:8px 12px; border-top:1px solid var(--border); }
+.export-panel-foot button { flex:1; padding:6px 0; border-radius:5px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:11px; cursor:pointer; font-weight:500; }
+.export-panel-foot button:hover { border-color:var(--blue); color:var(--blue); }
 .btn-n50 { color: var(--text-dim); }
 .btn-n50.active { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.08); }
 .btn-poised { color: var(--gold); border-color: var(--gold); }
@@ -3086,13 +3088,10 @@ thead th.col-sym::after {
       <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg> Clear
     </button>
     <div class="export-wrap" style="position:relative">
-      <button class="btn-toggle btn-export" id="exportBtn" onclick="toggleExportMenu()" title="Export selected or visible rows">
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v8M3 6l3 3 3-3M1 11h10"/></svg> Export <span id="exportCount"></span>
+      <button class="btn-toggle btn-export" id="exportBtn" onclick="toggleExportPanel()" title="Export visible rows — pick columns">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v8M3 6l3 3 3-3M1 11h10"/></svg> Export
       </button>
-      <div class="export-menu" id="exportMenu" style="display:none">
-        <button onclick="exportData('csv')">Download CSV</button>
-        <button onclick="exportData('json')">Download JSON</button>
-      </div>
+      <div class="export-panel" id="exportPanel"></div>
     </div>
   </div>
 </div>
@@ -3111,7 +3110,6 @@ thead th.col-sym::after {
 <table>
 <thead>
 <tr class="col-group-row col-group-header">
-  <th class="w-chk"></th>
   <th colspan="8"></th>
   <th colspan="5" class="g-pricedetail">Price Detail</th>
   <th colspan="2" class="g-vol">Volume</th>
@@ -3119,7 +3117,6 @@ thead th.col-sym::after {
   <th colspan="6" class="g-opt">Options</th>
 </tr>
 <tr id="headerRow">
-  <th class="w-chk"><input type="checkbox" id="selectAll" title="Select all visible rows" onclick="toggleSelectAll(this)"></th>
   <!-- Always visible -->
   <th class="col-score w-score" data-key="score">Score</th>
   <th class="col-sym w-sym" data-key="symbol">Symbol</th>
@@ -3247,7 +3244,36 @@ let symbolOrder = [];  // sorted symbols for rendering
 let rowElements = {};  // symbol \u2192 <tr> element
 let cellMap = {};      // "SYM:field" \u2192 <td> element
 let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false };
-var selectedRows = new Set();
+// Export column selection (default: all)
+var exportColumnDefs = [
+  { group: 'Core', cols: [
+    { key: 'symbol', label: 'Symbol' }, { key: 'sector', label: 'Sector' },
+    { key: 'score', label: 'Score' }, { key: 'ltp', label: 'LTP' },
+    { key: 'chg_pct', label: 'Chg%' }, { key: 'signal', label: 'Signal' },
+    { key: 'buildup', label: 'Buildup' }, { key: 'prem_ok', label: 'Prem OK' },
+    { key: 'is_n50', label: 'N50' }
+  ]},
+  { group: 'Price Detail', cols: [
+    { key: 'gap_pct', label: 'Gap%' }, { key: 'open', label: 'Open' },
+    { key: 'high', label: 'High' }, { key: 'low', label: 'Low' },
+    { key: 'range_pct', label: 'Range%' }
+  ]},
+  { group: 'Volume', cols: [
+    { key: 'volume', label: 'Volume' }, { key: 'vol_surge', label: 'Surge' }
+  ]},
+  { group: 'OI', cols: [
+    { key: 'pcr', label: 'PCR' }, { key: 'ce_oi_chg', label: 'CE OI Chg' },
+    { key: 'pe_oi_chg', label: 'PE OI Chg' }, { key: 'net_oi', label: 'Net OI' }
+  ]},
+  { group: 'Options', cols: [
+    { key: 'atm_iv', label: 'IV%' }, { key: 'max_pain', label: 'MaxPain' },
+    { key: 'mp_dist', label: 'MP Dist%' }, { key: 'atm_ce', label: 'CE Prem' },
+    { key: 'atm_pe', label: 'PE Prem' }, { key: 'lot', label: 'Lot' }
+  ]}
+];
+var exportSelectedCols = new Set();
+// Initialize: all columns selected
+exportColumnDefs.forEach(function(g) { g.cols.forEach(function(c) { exportSelectedCols.add(c.key); }); });
 let colGroups = { pricedetail: false, vol: false, oi: false, opt: false };
 let wsConn = null;
 let reconnectDelay = 3000;
@@ -3353,18 +3379,6 @@ function buildTable() {
       if (e.target.closest('.tv-link')) return;
       openAnalysis(sym);
     });
-
-    // Checkbox cell
-    const chkTd = document.createElement('td');
-    chkTd.className = 'w-chk';
-    const chk = document.createElement('input');
-    chk.type = 'checkbox';
-    chk.dataset.sym = sym;
-    chk.checked = selectedRows.has(sym);
-    chk.onclick = function(e) { e.stopPropagation(); toggleRowSelect(sym, this.checked); };
-    chkTd.appendChild(chk);
-    tr.appendChild(chkTd);
-    if (selectedRows.has(sym)) tr.classList.add('row-selected');
 
     const fields = [
       // Always visible
@@ -3644,98 +3658,128 @@ function updateFooterFilter() {
   if (sbFilter) sbFilter.textContent = parts.length ? parts.join(' | ') : 'All';
 }
 
-// === Row Selection + Export ===
-function toggleRowSelect(sym, checked) {
-  if (checked) selectedRows.add(sym);
-  else selectedRows.delete(sym);
-  var tr = rowElements[sym];
-  if (tr) tr.classList.toggle('row-selected', checked);
-  updateExportCount();
-  // Update select-all checkbox state
-  var sa = document.getElementById('selectAll');
-  if (sa) {
-    var visibleSyms = symbolOrder.filter(function(s) { return rowElements[s] && !rowElements[s].classList.contains('hidden'); });
-    var allChecked = visibleSyms.length > 0 && visibleSyms.every(function(s) { return selectedRows.has(s); });
-    sa.checked = allChecked;
-    sa.indeterminate = !allChecked && visibleSyms.some(function(s) { return selectedRows.has(s); });
-  }
-}
+// === Column-picker Export ===
+function buildExportPanel() {
+  var panel = document.getElementById('exportPanel');
+  if (!panel) return;
+  var allCount = 0;
+  exportColumnDefs.forEach(function(g) { allCount += g.cols.length; });
 
-function toggleSelectAll(cb) {
-  var visibleSyms = symbolOrder.filter(function(s) { return rowElements[s] && !rowElements[s].classList.contains('hidden'); });
-  visibleSyms.forEach(function(s) {
-    if (cb.checked) selectedRows.add(s);
-    else selectedRows.delete(s);
-    var tr = rowElements[s];
-    if (tr) {
-      tr.classList.toggle('row-selected', cb.checked);
-      var chk = tr.querySelector('input[type="checkbox"]');
-      if (chk) chk.checked = cb.checked;
-    }
+  var html = '<div class="export-panel-head"><span>Export Columns</span>';
+  html += '<label><input type="checkbox" id="expSelectAll" onchange="toggleAllExportCols(this.checked)"' + (exportSelectedCols.size === allCount ? ' checked' : '') + '> All</label></div>';
+  html += '<div class="export-panel-body">';
+  exportColumnDefs.forEach(function(g) {
+    html += '<div class="export-grp-label">' + g.group + '</div>';
+    g.cols.forEach(function(c) {
+      html += '<label class="export-col-item"><input type="checkbox" data-exp-key="' + c.key + '"' + (exportSelectedCols.has(c.key) ? ' checked' : '') + ' onchange="toggleExportCol(\'' + c.key + '\', this.checked)"> ' + c.label + '</label>';
+    });
   });
-  updateExportCount();
+  html += '</div>';
+  html += '<div class="export-panel-foot">';
+  html += '<button onclick="exportData(\'csv\')">CSV</button>';
+  html += '<button onclick="exportData(\'json\')">JSON</button>';
+  html += '</div>';
+  panel.innerHTML = html;
 }
+buildExportPanel();
 
-function updateExportCount() {
-  var el = document.getElementById('exportCount');
-  if (el) el.textContent = selectedRows.size > 0 ? selectedRows.size : '';
+function toggleExportPanel() {
+  var panel = document.getElementById('exportPanel');
+  if (!panel) return;
+  var show = panel.style.display === 'none' || !panel.style.display;
+  panel.style.display = show ? 'block' : 'none';
 }
-
-function toggleExportMenu() {
-  var menu = document.getElementById('exportMenu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-// Close export menu on outside click
+// Close panel on outside click
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.export-wrap')) {
-    var menu = document.getElementById('exportMenu');
-    if (menu) menu.style.display = 'none';
+    var panel = document.getElementById('exportPanel');
+    if (panel) panel.style.display = 'none';
   }
 });
 
-function getExportRows() {
-  // If rows are selected, export those; otherwise export all visible
-  var syms;
-  if (selectedRows.size > 0) {
-    syms = symbolOrder.filter(function(s) { return selectedRows.has(s); });
-  } else {
-    syms = symbolOrder.filter(function(s) { return rowElements[s] && !rowElements[s].classList.contains('hidden'); });
+function toggleExportCol(key, checked) {
+  if (checked) exportSelectedCols.add(key);
+  else exportSelectedCols.delete(key);
+  syncSelectAllCheckbox();
+}
+
+function toggleAllExportCols(checked) {
+  exportColumnDefs.forEach(function(g) {
+    g.cols.forEach(function(c) {
+      if (checked) exportSelectedCols.add(c.key);
+      else exportSelectedCols.delete(c.key);
+    });
+  });
+  // Update individual checkboxes
+  var cbs = document.querySelectorAll('#exportPanel input[data-exp-key]');
+  cbs.forEach(function(cb) { cb.checked = checked; });
+}
+
+function syncSelectAllCheckbox() {
+  var allCount = 0;
+  exportColumnDefs.forEach(function(g) { allCount += g.cols.length; });
+  var sa = document.getElementById('expSelectAll');
+  if (sa) {
+    sa.checked = exportSelectedCols.size === allCount;
+    sa.indeterminate = exportSelectedCols.size > 0 && exportSelectedCols.size < allCount;
   }
+}
+
+// Map column keys to stock data fields
+var colFieldMap = {
+  symbol: function(d, sym) { return sym; },
+  sector: function(d) { return d.sector || ''; },
+  score: function(d) { return d.score || 0; },
+  ltp: function(d) { return d.ltp || 0; },
+  chg_pct: function(d) { return d.chg_pct || 0; },
+  signal: function(d) { return d.pcr_sig || ''; },
+  buildup: function(d) { return d.buildup || ''; },
+  prem_ok: function(d) { return d.prem_ok ? true : false; },
+  is_n50: function(d) { return d.is_n50 ? true : false; },
+  gap_pct: function(d) { return d.gap_pct || 0; },
+  open: function(d) { return d.open || 0; },
+  high: function(d) { return d.high || 0; },
+  low: function(d) { return d.low || 0; },
+  range_pct: function(d) { return d.range_pct || 0; },
+  volume: function(d) { return d.vol || 0; },
+  vol_surge: function(d) { return d.vol_surge || 0; },
+  pcr: function(d) { return d.pcr || 0; },
+  ce_oi_chg: function(d) { return d.ce_oi_chg || 0; },
+  pe_oi_chg: function(d) { return d.pe_oi_chg || 0; },
+  net_oi: function(d) { return d.net_oi || 0; },
+  atm_iv: function(d) { return d.atm_iv || 0; },
+  max_pain: function(d) { return d.max_pain || 0; },
+  mp_dist: function(d) { return d.mp_dist || 0; },
+  atm_ce: function(d) { return d.atm_ce || 0; },
+  atm_pe: function(d) { return d.atm_pe || 0; },
+  lot: function(d) { return d.lot || 0; }
+};
+
+function getExportRows() {
+  // Export all visible rows, only selected columns
+  var syms = symbolOrder.filter(function(s) { return rowElements[s] && !rowElements[s].classList.contains('hidden'); });
+  var activeCols = [];
+  exportColumnDefs.forEach(function(g) {
+    g.cols.forEach(function(c) {
+      if (exportSelectedCols.has(c.key)) activeCols.push(c.key);
+    });
+  });
+  if (activeCols.length === 0) return [];
+
   return syms.map(function(sym) {
     var d = stocks[sym];
     if (!d) return null;
-    return {
-      symbol: sym,
-      sector: d.sector || '',
-      ltp: d.ltp || 0,
-      chg_pct: d.chg_pct || 0,
-      score: d.score || 0,
-      signal: d.pcr_sig || '',
-      buildup: d.buildup || '',
-      gap_pct: d.gap_pct || 0,
-      open: d.open || 0,
-      high: d.high || 0,
-      low: d.low || 0,
-      range_pct: d.range_pct || 0,
-      volume: d.vol || 0,
-      vol_surge: d.vol_surge || 0,
-      pcr: d.pcr || 0,
-      ce_oi_chg: d.ce_oi_chg || 0,
-      pe_oi_chg: d.pe_oi_chg || 0,
-      net_oi: d.net_oi || 0,
-      atm_iv: d.atm_iv || 0,
-      max_pain: d.max_pain || 0,
-      mp_dist: d.mp_dist || 0,
-      atm_ce: d.atm_ce || 0,
-      atm_pe: d.atm_pe || 0,
-      lot: d.lot || 0,
-      prem_ok: d.prem_ok ? true : false,
-      is_n50: d.is_n50 ? true : false
-    };
+    var row = {};
+    activeCols.forEach(function(k) {
+      var fn = colFieldMap[k];
+      row[k] = fn ? fn(d, sym) : '';
+    });
+    return row;
   }).filter(Boolean);
 }
 
 function exportData(format) {
+  if (exportSelectedCols.size === 0) { showToast('No columns selected for export', 'warn'); return; }
   var rows = getExportRows();
   if (rows.length === 0) { showToast('No rows to export', 'warn'); return; }
   var filename, content, mime;
@@ -3762,8 +3806,8 @@ function exportData(format) {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
-  document.getElementById('exportMenu').style.display = 'none';
-  showToast('Exported ' + rows.length + ' rows as ' + format.toUpperCase(), 'info');
+  document.getElementById('exportPanel').style.display = 'none';
+  showToast('Exported ' + rows.length + ' rows x ' + exportSelectedCols.size + ' cols as ' + format.toUpperCase(), 'info');
 }
 
 // === Clear All Filters ===
@@ -3775,11 +3819,9 @@ function clearAllFilters() {
   document.getElementById('buildupFilter').value = '';
   document.getElementById('n50Btn').classList.remove('active');
   document.getElementById('poisedBtn').classList.remove('active');
-  // Clear selections
-  selectedRows.clear();
-  var sa = document.getElementById('selectAll');
-  if (sa) { sa.checked = false; sa.indeterminate = false; }
-  updateExportCount();
+  // Reset export columns to all selected
+  exportColumnDefs.forEach(function(g) { g.cols.forEach(function(c) { exportSelectedCols.add(c.key); }); });
+  buildExportPanel();
   applyFilters();
   saveFilterState();
   showToast('All filters cleared', 'info');
