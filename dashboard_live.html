@@ -1036,6 +1036,21 @@ body {
 }
 .btn-toggle:hover { color: var(--text); border-color: var(--border-light); }
 .btn-toggle.active { background: rgba(59,130,246,0.1); border-color: var(--blue); color: var(--blue); }
+.btn-clear { color: var(--text-dim); }
+.btn-clear:hover { color: #f87171; border-color: #f87171; }
+.btn-export { color: var(--text-dim); }
+.btn-export:hover { color: #34d399; border-color: #34d399; }
+#exportCount:not(:empty)::before { content:'('; }
+#exportCount:not(:empty)::after { content:')'; }
+#exportCount { color: var(--gold); font-size: 10px; }
+.export-wrap { display: inline-block; }
+.export-menu { position:absolute; top:100%; right:0; margin-top:4px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:4px 0; z-index:999; min-width:140px; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+.export-menu button { display:block; width:100%; text-align:left; padding:6px 14px; background:none; border:none; color:var(--text); font-size:12px; cursor:pointer; }
+.export-menu button:hover { background:rgba(255,255,255,0.06); }
+.w-chk { width:28px; min-width:28px; max-width:28px; text-align:center; padding:0 4px !important; }
+.w-chk input[type="checkbox"] { width:13px; height:13px; cursor:pointer; accent-color:var(--blue); }
+tr.row-selected { background: rgba(59,130,246,0.08) !important; }
+tr.row-selected:hover { background: rgba(59,130,246,0.12) !important; }
 .btn-n50 { color: var(--text-dim); }
 .btn-n50.active { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.08); }
 .btn-poised { color: var(--gold); border-color: var(--gold); }
@@ -3066,6 +3081,19 @@ thead th.col-sym::after {
       <button class="btn-toggle" onclick="setViewMode('full')" title="Show all columns">Full</button>
     </div>
     <button class="btn-toggle" id="heatToggle" onclick="toggleHeatmap()">Heatmap</button>
+    <span style="border-left:1px solid var(--border);height:18px;margin:0 6px;opacity:0.4"></span>
+    <button class="btn-toggle btn-clear" id="clearAllBtn" onclick="clearAllFilters()" title="Clear all filters">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg> Clear
+    </button>
+    <div class="export-wrap" style="position:relative">
+      <button class="btn-toggle btn-export" id="exportBtn" onclick="toggleExportMenu()" title="Export selected or visible rows">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v8M3 6l3 3 3-3M1 11h10"/></svg> Export <span id="exportCount"></span>
+      </button>
+      <div class="export-menu" id="exportMenu" style="display:none">
+        <button onclick="exportData('csv')">Download CSV</button>
+        <button onclick="exportData('json')">Download JSON</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3083,6 +3111,7 @@ thead th.col-sym::after {
 <table>
 <thead>
 <tr class="col-group-row col-group-header">
+  <th class="w-chk"></th>
   <th colspan="8"></th>
   <th colspan="5" class="g-pricedetail">Price Detail</th>
   <th colspan="2" class="g-vol">Volume</th>
@@ -3090,6 +3119,7 @@ thead th.col-sym::after {
   <th colspan="6" class="g-opt">Options</th>
 </tr>
 <tr id="headerRow">
+  <th class="w-chk"><input type="checkbox" id="selectAll" title="Select all visible rows" onclick="toggleSelectAll(this)"></th>
   <!-- Always visible -->
   <th class="col-score w-score" data-key="score">Score</th>
   <th class="col-sym w-sym" data-key="symbol">Symbol</th>
@@ -3217,6 +3247,7 @@ let symbolOrder = [];  // sorted symbols for rendering
 let rowElements = {};  // symbol \u2192 <tr> element
 let cellMap = {};      // "SYM:field" \u2192 <td> element
 let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false };
+var selectedRows = new Set();
 let colGroups = { pricedetail: false, vol: false, oi: false, opt: false };
 let wsConn = null;
 let reconnectDelay = 3000;
@@ -3322,6 +3353,18 @@ function buildTable() {
       if (e.target.closest('.tv-link')) return;
       openAnalysis(sym);
     });
+
+    // Checkbox cell
+    const chkTd = document.createElement('td');
+    chkTd.className = 'w-chk';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.dataset.sym = sym;
+    chk.checked = selectedRows.has(sym);
+    chk.onclick = function(e) { e.stopPropagation(); toggleRowSelect(sym, this.checked); };
+    chkTd.appendChild(chk);
+    tr.appendChild(chkTd);
+    if (selectedRows.has(sym)) tr.classList.add('row-selected');
 
     const fields = [
       // Always visible
@@ -3454,7 +3497,7 @@ function poisedScore(d) {
 function togglePoised() {
   filters.poised = !filters.poised;
   document.getElementById('poisedBtn').classList.toggle('active', filters.poised);
-  applyFilters();
+  applyFilters(); saveFilterState();
 }
 
 function renderTopPicks() {
@@ -3534,30 +3577,31 @@ document.getElementById('headerRow').addEventListener('click', function(e) {
   document.querySelectorAll('#headerRow th').forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
   th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
   buildTable();
+  saveFilterState();
 });
 
 // === Filtering ===
 document.getElementById('searchBox').addEventListener('input', function() {
   filters.search = this.value.toUpperCase();
-  applyFilters();
+  applyFilters(); saveFilterState();
 });
 document.getElementById('sectorFilter').addEventListener('change', function() {
   filters.sector = this.value;
-  applyFilters();
+  applyFilters(); saveFilterState();
 });
 document.getElementById('signalFilter').addEventListener('change', function() {
   filters.signal = this.value;
-  applyFilters();
+  applyFilters(); saveFilterState();
 });
 document.getElementById('buildupFilter').addEventListener('change', function() {
   filters.buildup = this.value;
-  applyFilters();
+  applyFilters(); saveFilterState();
 });
 
 function toggleN50() {
   filters.n50 = !filters.n50;
   document.getElementById('n50Btn').classList.toggle('active', filters.n50);
-  applyFilters();
+  applyFilters(); saveFilterState();
 }
 
 function applyFilters() {
@@ -3600,12 +3644,202 @@ function updateFooterFilter() {
   if (sbFilter) sbFilter.textContent = parts.length ? parts.join(' | ') : 'All';
 }
 
+// === Row Selection + Export ===
+function toggleRowSelect(sym, checked) {
+  if (checked) selectedRows.add(sym);
+  else selectedRows.delete(sym);
+  var tr = rowElements[sym];
+  if (tr) tr.classList.toggle('row-selected', checked);
+  updateExportCount();
+  // Update select-all checkbox state
+  var sa = document.getElementById('selectAll');
+  if (sa) {
+    var visibleSyms = symbolOrder.filter(function(s) { return rowElements[s] && !rowElements[s].classList.contains('hidden'); });
+    var allChecked = visibleSyms.length > 0 && visibleSyms.every(function(s) { return selectedRows.has(s); });
+    sa.checked = allChecked;
+    sa.indeterminate = !allChecked && visibleSyms.some(function(s) { return selectedRows.has(s); });
+  }
+}
+
+function toggleSelectAll(cb) {
+  var visibleSyms = symbolOrder.filter(function(s) { return rowElements[s] && !rowElements[s].classList.contains('hidden'); });
+  visibleSyms.forEach(function(s) {
+    if (cb.checked) selectedRows.add(s);
+    else selectedRows.delete(s);
+    var tr = rowElements[s];
+    if (tr) {
+      tr.classList.toggle('row-selected', cb.checked);
+      var chk = tr.querySelector('input[type="checkbox"]');
+      if (chk) chk.checked = cb.checked;
+    }
+  });
+  updateExportCount();
+}
+
+function updateExportCount() {
+  var el = document.getElementById('exportCount');
+  if (el) el.textContent = selectedRows.size > 0 ? selectedRows.size : '';
+}
+
+function toggleExportMenu() {
+  var menu = document.getElementById('exportMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+// Close export menu on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.export-wrap')) {
+    var menu = document.getElementById('exportMenu');
+    if (menu) menu.style.display = 'none';
+  }
+});
+
+function getExportRows() {
+  // If rows are selected, export those; otherwise export all visible
+  var syms;
+  if (selectedRows.size > 0) {
+    syms = symbolOrder.filter(function(s) { return selectedRows.has(s); });
+  } else {
+    syms = symbolOrder.filter(function(s) { return rowElements[s] && !rowElements[s].classList.contains('hidden'); });
+  }
+  return syms.map(function(sym) {
+    var d = stocks[sym];
+    if (!d) return null;
+    return {
+      symbol: sym,
+      sector: d.sector || '',
+      ltp: d.ltp || 0,
+      chg_pct: d.chg_pct || 0,
+      score: d.score || 0,
+      signal: d.pcr_sig || '',
+      buildup: d.buildup || '',
+      gap_pct: d.gap_pct || 0,
+      open: d.open || 0,
+      high: d.high || 0,
+      low: d.low || 0,
+      range_pct: d.range_pct || 0,
+      volume: d.vol || 0,
+      vol_surge: d.vol_surge || 0,
+      pcr: d.pcr || 0,
+      ce_oi_chg: d.ce_oi_chg || 0,
+      pe_oi_chg: d.pe_oi_chg || 0,
+      net_oi: d.net_oi || 0,
+      atm_iv: d.atm_iv || 0,
+      max_pain: d.max_pain || 0,
+      mp_dist: d.mp_dist || 0,
+      atm_ce: d.atm_ce || 0,
+      atm_pe: d.atm_pe || 0,
+      lot: d.lot || 0,
+      prem_ok: d.prem_ok ? true : false,
+      is_n50: d.is_n50 ? true : false
+    };
+  }).filter(Boolean);
+}
+
+function exportData(format) {
+  var rows = getExportRows();
+  if (rows.length === 0) { showToast('No rows to export', 'warn'); return; }
+  var filename, content, mime;
+  if (format === 'csv') {
+    var headers = Object.keys(rows[0]);
+    var csvLines = [headers.join(',')];
+    rows.forEach(function(r) {
+      csvLines.push(headers.map(function(h) {
+        var v = r[h];
+        return typeof v === 'string' && v.includes(',') ? '"' + v + '"' : v;
+      }).join(','));
+    });
+    content = csvLines.join('\n');
+    mime = 'text/csv';
+    filename = 'quantra_export_' + new Date().toISOString().slice(0,10) + '.csv';
+  } else {
+    content = JSON.stringify(rows, null, 2);
+    mime = 'application/json';
+    filename = 'quantra_export_' + new Date().toISOString().slice(0,10) + '.json';
+  }
+  var blob = new Blob([content], { type: mime });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  document.getElementById('exportMenu').style.display = 'none';
+  showToast('Exported ' + rows.length + ' rows as ' + format.toUpperCase(), 'info');
+}
+
+// === Clear All Filters ===
+function clearAllFilters() {
+  filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false };
+  document.getElementById('searchBox').value = '';
+  document.getElementById('sectorFilter').value = '';
+  document.getElementById('signalFilter').value = '';
+  document.getElementById('buildupFilter').value = '';
+  document.getElementById('n50Btn').classList.remove('active');
+  document.getElementById('poisedBtn').classList.remove('active');
+  // Clear selections
+  selectedRows.clear();
+  var sa = document.getElementById('selectAll');
+  if (sa) { sa.checked = false; sa.indeterminate = false; }
+  updateExportCount();
+  applyFilters();
+  saveFilterState();
+  showToast('All filters cleared', 'info');
+}
+
+// === Filter Persistence (localStorage) ===
+function saveFilterState() {
+  try {
+    var state = {
+      filters: filters,
+      sortKey: sortKey,
+      sortAsc: sortAsc,
+      colGroups: colGroups,
+      heatmapVisible: heatmapVisible,
+      _ts: Date.now()
+    };
+    localStorage.setItem('quantra_filter_state', JSON.stringify(state));
+  } catch(e) { /* ignore */ }
+}
+
+function restoreFilterState() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('quantra_filter_state'));
+    if (!saved || !saved._ts) return false;
+    // Only restore if saved within last 24 hours
+    if (Date.now() - saved._ts > 86400000) return false;
+    if (saved.filters) {
+      filters = saved.filters;
+      document.getElementById('searchBox').value = filters.search || '';
+      document.getElementById('sectorFilter').value = filters.sector || '';
+      document.getElementById('signalFilter').value = filters.signal || '';
+      document.getElementById('buildupFilter').value = filters.buildup || '';
+      document.getElementById('n50Btn').classList.toggle('active', !!filters.n50);
+      document.getElementById('poisedBtn').classList.toggle('active', !!filters.poised);
+    }
+    if (saved.sortKey) { sortKey = saved.sortKey; sortAsc = !!saved.sortAsc; }
+    if (saved.colGroups) { colGroups = saved.colGroups; applyColVisibility(); }
+    if (saved.heatmapVisible != null) {
+      heatmapVisible = saved.heatmapVisible;
+      document.getElementById('heatmapBar').classList.toggle('collapsed', !heatmapVisible);
+      document.getElementById('heatToggle').classList.toggle('active', heatmapVisible);
+    }
+    // Restore sort indicator on header
+    if (saved.sortKey) {
+      document.querySelectorAll('#headerRow th').forEach(function(h) {
+        h.classList.remove('sort-asc', 'sort-desc');
+        if (h.dataset.key === sortKey) h.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+      });
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
 // === Column Visibility ===
 function toggleColGroup(group) {
   colGroups[group] = !colGroups[group];
   const btn = document.querySelector(`.col-toggles [data-group="${group}"]`);
   if (btn) btn.classList.toggle('active', colGroups[group]);
   applyColVisibility();
+  saveFilterState();
 }
 
 function applyColVisibility() {
@@ -3630,6 +3864,7 @@ function setViewMode(mode) {
     btn.classList.toggle('active', colGroups[btn.dataset.group]);
   });
   applyColVisibility();
+  saveFilterState();
 }
 
 // === Heatmap ===
@@ -3638,6 +3873,7 @@ function toggleHeatmap() {
   document.getElementById('heatmapBar').classList.toggle('collapsed', !heatmapVisible);
   document.getElementById('heatToggle').classList.toggle('active', heatmapVisible);
   if (heatmapVisible) renderHeatmap();
+  saveFilterState();
 }
 
 function renderHeatmap() {
@@ -3680,6 +3916,7 @@ function renderHeatmap() {
       document.getElementById('sectorFilter').value = sec;
       filters.sector = sec;
       applyFilters();
+      saveFilterState();
     };
     bar.appendChild(cell);
   }
@@ -4795,6 +5032,9 @@ function updateStatusBar() {
   const poisedCount = Object.keys(stocks).filter(s => isPoised(stocks[s])).length;
   document.getElementById('sbStockCount').textContent = visible + '/' + total + ' stocks · ' + poisedCount + ' trade ready';
 }
+
+// Restore filter state from previous session before connecting
+restoreFilterState();
 
 connectWS();
 
