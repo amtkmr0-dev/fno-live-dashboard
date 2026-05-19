@@ -3689,19 +3689,13 @@ function toggleExportPanel() {
   var show = panel.style.display === 'none' || !panel.style.display;
   if (show) {
     panel.style.display = 'block';
-    // Position fixed relative to the Export button
     var btn = document.getElementById('exportBtn');
     if (btn) {
       var r = btn.getBoundingClientRect();
-      var ph = panel.offsetHeight;
-      // Place above the button, right-aligned
+      // Open downward, right-aligned with button
+      panel.style.top = (r.bottom + 4) + 'px';
       panel.style.right = (window.innerWidth - r.right) + 'px';
-      panel.style.bottom = (window.innerHeight - r.top + 6) + 'px';
-      // If panel goes off-screen top, flip to below
-      if (r.top - ph - 6 < 0) {
-        panel.style.bottom = 'auto';
-        panel.style.top = (r.bottom + 6) + 'px';
-      }
+      panel.style.bottom = 'auto';
     }
   } else {
     panel.style.display = 'none';
