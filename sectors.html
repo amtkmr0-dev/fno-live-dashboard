@@ -2029,30 +2029,30 @@ function updateBottomBar() {
 // CONNECTION STATUS
 // ===============================================
 function setConnStatus(state) {
- const dot = document.getElementById("connDot");
- const text = document.getElementById("connText");
- const pulse = document.getElementById("logoPulse");
- const fDot = document.getElementById("footerDot");
- const fStatus = document.getElementById("footerStatus");
+ var dot = document.getElementById("connDot");
+ var text = document.getElementById("connText");
+ var pulse = document.getElementById("logoPulse");
+ var fDot = document.getElementById("footerDot");
+ var fStatus = document.getElementById("footerStatus");
 
  if (state === "connected") {
- dot.className = "conn-dot on";
- text.textContent = "Connected";
- pulse.className = "pulse-dot";
- fDot.className = "bb-dot";
- fStatus.textContent = "Connected";
+ if (dot) dot.className = "conn-dot on";
+ if (text) text.textContent = "Connected";
+ if (pulse) pulse.className = "pulse-dot";
+ if (fDot) fDot.className = "bb-dot";
+ if (fStatus) fStatus.textContent = "Connected";
  } else if (state === "reconnecting") {
- dot.className = "conn-dot warn";
- text.textContent = "Reconnecting...";
- pulse.className = "pulse-dot warn";
- fDot.className = "bb-dot off";
- fStatus.textContent = "Reconnecting...";
+ if (dot) dot.className = "conn-dot warn";
+ if (text) text.textContent = "Reconnecting...";
+ if (pulse) pulse.className = "pulse-dot warn";
+ if (fDot) fDot.className = "bb-dot off";
+ if (fStatus) fStatus.textContent = "Reconnecting...";
  } else {
- dot.className = "conn-dot off";
- text.textContent = "Disconnected";
- pulse.className = "pulse-dot off";
- fDot.className = "bb-dot off";
- fStatus.textContent = "Disconnected";
+ if (dot) dot.className = "conn-dot off";
+ if (text) text.textContent = "Disconnected";
+ if (pulse) pulse.className = "pulse-dot off";
+ if (fDot) fDot.className = "bb-dot off";
+ if (fStatus) fStatus.textContent = "Disconnected";
  }
 }
 
