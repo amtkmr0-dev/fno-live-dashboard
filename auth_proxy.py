@@ -1993,6 +1993,27 @@ async def proxy_http(request):
                 status=403
             )
 
+    # --- Serve known HTML pages directly from disk (bypass backend) ---
+    _STATIC_PAGE_MAP = {
+        "/": "dashboard_live.html",
+        "/sectors": "sectors.html",
+        "/admin": "admin.html",
+        "/paper-trades": "paper_trades.html",
+        "/paper": "paper.html",
+        "/rsi": "rsi.html",
+        "/rsi-analysis": "rsi-analysis.html",
+        "/divergence": "divergence.html",
+        "/profile": "profile.html",
+        "/disclaimer": "disclaimer.html",
+        "/terms": "terms.html",
+        "/privacy": "privacy.html",
+    }
+    if request.method == "GET" and path in _STATIC_PAGE_MAP:
+        html_file = os.path.join(os.path.dirname(__file__) or ".", _STATIC_PAGE_MAP[path])
+        if os.path.exists(html_file):
+            with open(html_file, "r", encoding="utf-8") as _f:
+                return web.Response(text=_f.read(), content_type="text/html")
+
     backend_url = f"http://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
 
     headers = {}
