@@ -52,7 +52,7 @@ except ImportError:
     SECURITY_AVAILABLE = False
 
 try:
-    from chat_analysis import run_analysis, get_upstox_token, fetch_option_chain, fetch_quote, _headers as upstox_headers, INDEX_KEYS
+    from chat_analysis import run_analysis, get_upstox_token, fetch_option_chain, fetch_quote, fetch_candles, resolve_instrument_key, _headers as upstox_headers, INDEX_KEYS
     ANALYSIS_AVAILABLE = True
 except ImportError:
     ANALYSIS_AVAILABLE = False
@@ -67,7 +67,7 @@ BACKEND_PORT = 8081
 CONFIG_FILE = "auth_config.json"
 SESSION_COOKIE = "quantra_session"
 SESSION_MAX_AGE = 86400  # 24 hours
-DEFAULT_ADMIN_PATHS = ["/admin", "/divergence"]
+DEFAULT_ADMIN_PATHS = ["/admin"]
 MAX_REQUEST_SIZE = 100 * 1024       # 100KB default
 MAX_CHAT_REQUEST_SIZE = 500 * 1024  # 500KB for chat (includes context)
 MAX_CONCURRENT_SESSIONS = 5         # per user
@@ -121,7 +121,7 @@ def load_config():
     if SECURITY_AVAILABLE:
         _rate_limiter = RateLimiter()
         _rate_limiter.configure("login", max_requests=5, window_seconds=900)     # 5 per 15m
-        _rate_limiter.configure("register", max_requests=3, window_seconds=3600)  # 3 per hour
+        _rate_limiter.configure("register", max_requests=10, window_seconds=3600)  # 10 per hour
         _rate_limiter.configure("api", max_requests=120, window_seconds=60)       # 120 per min
         _rate_limiter.configure("chat", max_requests=20, window_seconds=60)       # 20 per min
         _rate_limiter.configure("password", max_requests=3, window_seconds=900)   # 3 per 15m
@@ -480,16 +480,6 @@ async def handle_paper_page(request):
 async def handle_rsi_page(request):
     """Serve rsi.html (auth required)."""
     return await _serve_auth_page(request, "rsi.html")
-
-
-async def handle_rsi_analysis_page(request):
-    """Serve rsi-analysis.html (auth required)."""
-    return await _serve_auth_page(request, "rsi-analysis.html")
-
-
-async def handle_divergence_page(request):
-    """Serve divergence.html (auth required)."""
-    return await _serve_auth_page(request, "divergence.html")
 
 
 async def handle_register_api(request):
@@ -1116,6 +1106,84 @@ async def handle_market_data(request):
     _market_data_cache["data"] = result
     _market_data_cache["ts"] = time.time()
     return web.json_response(result)
+
+
+# ============================================================
+# CANDLE DATA (RSI scanner page)
+# ============================================================
+
+# Per-symbol candle cache: { "RELIANCE:5minute": { "data": [...], "ts": float } }
+_candle_cache = {}
+CANDLE_CACHE_TTL = 60  # seconds — candles don't change fast
+
+
+async def handle_candles(request):
+    """GET /api/candles?symbol=RELIANCE&interval=5minute
+
+    Returns { "candles": [ { "close": float, "open": float, ... }, ... ] }
+    Used by rsi.html to compute RSI client-side.
+    """
+    token_req = get_session_from_request(request)
+    session_data = validate_session(token_req)
+    if not session_data:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    symbol = request.query.get("symbol", "").strip().upper()
+    interval = request.query.get("interval", "5minute").strip()
+
+    if not symbol:
+        return web.json_response({"error": "Missing symbol parameter"}, status=400)
+
+    # Validate interval
+    valid_intervals = {"1minute", "5minute", "15minute", "30minute"}
+    if interval not in valid_intervals:
+        return web.json_response(
+            {"error": f"Invalid interval. Must be one of: {', '.join(sorted(valid_intervals))}"},
+            status=400,
+        )
+
+    if not ANALYSIS_AVAILABLE:
+        return web.json_response({"error": "Analysis module not available"}, status=503)
+
+    upstox_token = get_upstox_token()
+    if not upstox_token:
+        return web.json_response({"error": "Upstox token not configured"}, status=503)
+
+    # Check cache
+    cache_key = f"{symbol}:{interval}"
+    now = time.time()
+    if cache_key in _candle_cache and (now - _candle_cache[cache_key]["ts"]) < CANDLE_CACHE_TTL:
+        return web.json_response({"candles": _candle_cache[cache_key]["data"]})
+
+    try:
+        async with ClientSession() as cs:
+            # Resolve symbol → Upstox instrument_key (e.g. "NSE_EQ|INE002A01018")
+            eq_key, _ = await resolve_instrument_key(cs, symbol)
+            if not eq_key:
+                return web.json_response(
+                    {"error": f"Could not resolve instrument key for {symbol}"},
+                    status=404,
+                )
+
+            candles = await fetch_candles(cs, eq_key, interval, upstox_token)
+
+            if not candles:
+                return web.json_response(
+                    {"error": f"No candle data returned for {symbol} @ {interval}"},
+                    status=404,
+                )
+
+            # Cache it
+            _candle_cache[cache_key] = {"data": candles, "ts": now}
+
+            return web.json_response({"candles": candles})
+
+    except asyncio.TimeoutError:
+        log.error(f"Candles: Upstox API timeout for {symbol}")
+        return web.json_response({"error": "Upstox API timeout"}, status=504)
+    except Exception as e:
+        log.error(f"Candles error for {symbol}: {e}", exc_info=True)
+        return web.json_response({"error": str(e)}, status=500)
 
 
 # ============================================================
@@ -2061,8 +2129,6 @@ async def proxy_http(request):
         "/paper-trades": "paper_trades.html",
         "/paper": "paper.html",
         "/rsi": "rsi.html",
-        "/rsi-analysis": "rsi-analysis.html",
-        "/divergence": "divergence.html",
         "/profile": "profile.html",
         "/disclaimer": "disclaimer.html",
         "/terms": "terms.html",
@@ -2307,8 +2373,6 @@ def create_app():
     app.router.add_get("/paper-trades", handle_paper_trades_page)
     app.router.add_get("/paper", handle_paper_page)
     app.router.add_get("/rsi", handle_rsi_page)
-    app.router.add_get("/rsi-analysis", handle_rsi_analysis_page)
-    app.router.add_get("/divergence", handle_divergence_page)
 
     # User profile & settings
     app.router.add_get("/profile", handle_profile_page)
@@ -2327,6 +2391,9 @@ def create_app():
 
     # Market data (dashboard metrics strip)
     app.router.add_get("/api/market-data", handle_market_data)
+
+    # Candle data (RSI scanner page)
+    app.router.add_get("/api/candles", handle_candles)
 
     # Stock state REST fallback (sectors page, dashboard fallback)
     app.router.add_get("/api/state", handle_state)

@@ -980,8 +980,6 @@ td.rsi.loading { color: var(--text-dim); font-weight: var(--fw-normal); font-sty
     <a href="/paper">Paper Trades</a>
     <a href="/sectors">Sectors</a>
     <a href="/rsi" class="active">RSI Scanner</a>
-    <a href="/rsi-analysis">Stock Analysis</a>
-    <a href="/divergence">Divergence</a>
     <a href="/profile">Profile</a>
     <a href="/admin">Admin</a>
   </div>
@@ -1242,7 +1240,7 @@ function renderTable() {
  const rsi15Val = r.rsi_15m != null ? r.rsi_15m.toFixed(1) : '...';
  const scoreColor = r.score >= 65 ? 'var(--green)' : r.score >= 40 ? 'var(--yellow)' : 'var(--red)';
  return `<tr>
- <td class="symbol"><a href="/rsi-analysis#${r.symbol}" target="_blank">${r.symbol}</a></td>
+ <td class="symbol">${r.symbol}</td>
  <td><span class="sector-pill">${r.sector || '--'}</span></td>
  <td class="ltp">${r.ltp ? r.ltp.toFixed(2) : '--'}</td>
  <td class="chg ${chgCls}">${r.chg_pct ? (r.chg_pct >0 ? '+' : '') + r.chg_pct.toFixed(2) + '%' : '--'}</td>

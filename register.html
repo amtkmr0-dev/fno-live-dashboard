@@ -1359,9 +1359,10 @@ input:-webkit-autofill:focus {
 
     /* Build payload — omit email key entirely if empty */
     var payload = {
-      username:     usernameEl.value.trim(),
-      password:     passwordEl.value,
-      display_name: displayNameEl.value.trim()
+      username:         usernameEl.value.trim(),
+      password:         passwordEl.value,
+      confirm_password: confirmPwEl.value,
+      display_name:     displayNameEl.value.trim()
     };
     var emailVal = emailEl.value.trim();
     if (emailVal) { payload.email = emailVal; }
