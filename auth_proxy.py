@@ -1187,6 +1187,115 @@ async def handle_candles(request):
 
 
 # ============================================================
+# OI TIME-SERIES API + PAGE
+# ============================================================
+
+async def handle_oi_timeseries_page(request):
+    """GET /oi-timeseries — serve oi-timeseries.html (auth-gated)."""
+    return await _serve_auth_page(request, "oi-timeseries.html")
+
+
+async def handle_oi_timeseries_api(request):
+    """GET /api/oi-timeseries?symbol=NIFTY
+
+    Returns the accumulated OI snapshot list for the current trading day.
+    For non-NIFTY symbols a background poller is started automatically on
+    first call, subject to the _OI_MAX_STOCK_SUBS concurrency limit.
+    """
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    symbol = request.query.get("symbol", "NIFTY").strip().upper()
+
+    _oi_reset_if_new_day()
+
+    # Start a poller for non-NIFTY symbols the first time they are requested
+    if symbol != "NIFTY":
+        task = _oi_stock_tasks.get(symbol)
+        if task is None or task.done():
+            active = {s: t for s, t in _oi_stock_tasks.items() if not t.done()}
+            if len(active) >= _OI_MAX_STOCK_SUBS:
+                return web.json_response(
+                    {
+                        "error": (
+                            f"Max {_OI_MAX_STOCK_SUBS} concurrent stock subscriptions reached. "
+                            f"Active: {', '.join(active.keys())}"
+                        ),
+                        "active_subs": list(active.keys()),
+                    },
+                    status=429,
+                )
+            _oi_stock_tasks[symbol] = asyncio.create_task(_oi_stock_poller(symbol))
+            log.info("OI: started subscription for %s", symbol)
+
+    snapshots = _oi_timeseries.get(symbol, [])
+    active_subs = [s for s, t in _oi_stock_tasks.items() if not t.done()]
+
+    return web.json_response(
+        {
+            "symbol": symbol,
+            "date": str(_oi_today_date) if _oi_today_date else None,
+            "count": len(snapshots),
+            "snapshots": snapshots,
+            "active_subs": active_subs,
+            "is_tracking": symbol == "NIFTY" or symbol in active_subs,
+        }
+    )
+
+
+async def handle_oi_unsubscribe_api(request):
+    """POST /api/oi-timeseries/unsubscribe?symbol=RELIANCE
+
+    Stop the background poller for a stock.  Accumulated snapshots are
+    preserved in memory until the next daily reset.
+    """
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    symbol = request.query.get("symbol", "").strip().upper()
+    if not symbol:
+        return web.json_response({"error": "symbol parameter is required"}, status=400)
+    if symbol == "NIFTY":
+        return web.json_response(
+            {"error": "Cannot unsubscribe NIFTY — it is always tracked"},
+            status=400,
+        )
+
+    task = _oi_stock_tasks.pop(symbol, None)
+    if task is not None:
+        task.cancel()
+        log.info("OI: unsubscribed %s", symbol)
+        return web.json_response({"success": True, "symbol": symbol})
+
+    return web.json_response({"success": True, "symbol": symbol})
+
+
+async def handle_oi_active_subs_api(request):
+    """GET /api/oi-timeseries/active — list active OI subscriptions."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    active = {}
+    for sym, task in _oi_stock_tasks.items():
+        if not task.done():
+            active[sym] = {"snapshots": len(_oi_timeseries.get(sym, []))}
+
+    return web.json_response(
+        {
+            "nifty_snapshots": len(_oi_timeseries.get("NIFTY", [])),
+            "stock_subs": active,
+            "max_subs": _OI_MAX_STOCK_SUBS,
+        }
+    )
+
+
+# ============================================================
 # AI CHAT (Multi-Provider: Perplexity + NVIDIA NIM)
 # ============================================================
 
@@ -1857,6 +1966,154 @@ async def handle_auto_trade_status(request):
 _nifty_meta = {}  # Shared cache: background task writes, WS proxy reads
 
 
+# ============================================================
+# OI TIME-SERIES ACCUMULATOR
+# ============================================================
+
+import datetime as _dt
+
+_oi_timeseries = {}      # symbol -> [{"ts": "HH:MM:SS", "ltp": float, "total_oi": int, ...}]
+_oi_last_snap_ts = {}    # symbol -> float (unix timestamp of last snapshot)
+_oi_stock_tasks = {}     # symbol -> asyncio.Task for stock OI polling
+_oi_today_date = None    # tracks current IST date; triggers daily reset
+_OI_SNAP_INTERVAL = 180  # seconds between snapshots (3 minutes)
+_OI_MAX_STOCK_SUBS = 5   # maximum concurrent stock subscriptions
+_OI_MARKET_OPEN = (9, 15)
+_OI_MARKET_CLOSE = (15, 30)
+
+
+def _oi_is_market_hours():
+    """Return True if current IST time is within market hours (09:15 – 15:30)."""
+    try:
+        import pytz
+        ist = pytz.timezone("Asia/Kolkata")
+        now = _dt.datetime.now(ist)
+    except ImportError:
+        now = _dt.datetime.utcnow() + _dt.timedelta(hours=5, minutes=30)
+    t = now.time()
+    return _dt.time(*_OI_MARKET_OPEN) <= t <= _dt.time(*_OI_MARKET_CLOSE)
+
+
+def _oi_reset_if_new_day():
+    """Clear all accumulated OI data when the IST calendar date changes."""
+    global _oi_today_date
+    try:
+        import pytz
+        ist = pytz.timezone("Asia/Kolkata")
+        today = _dt.datetime.now(ist).date()
+    except ImportError:
+        today = (_dt.datetime.utcnow() + _dt.timedelta(hours=5, minutes=30)).date()
+
+    if _oi_today_date != today:
+        _oi_today_date = today
+        _oi_timeseries.clear()
+        _oi_last_snap_ts.clear()
+        for sym, task in list(_oi_stock_tasks.items()):
+            task.cancel()
+        _oi_stock_tasks.clear()
+        log.info("OI timeseries: reset for new day %s", today)
+
+
+def _oi_should_snapshot(symbol):
+    """Return True if at least _OI_SNAP_INTERVAL seconds have elapsed since
+    the last snapshot for *symbol*."""
+    import time as _time
+    now = _time.time()
+    last = _oi_last_snap_ts.get(symbol, 0)
+    return (now - last) >= _OI_SNAP_INTERVAL
+
+
+def _oi_record_snapshot(symbol, ltp, total_ce_oi, total_pe_oi,
+                        net_ce_oi_chg, net_pe_oi_chg, pcr, atm_iv=None):
+    """Append one OI snapshot for *symbol* if market is open and the
+    3-minute interval has been respected."""
+    import time as _time
+
+    _oi_reset_if_new_day()
+
+    if not _oi_is_market_hours():
+        return
+    if not _oi_should_snapshot(symbol):
+        return
+
+    try:
+        import pytz
+        ist = pytz.timezone("Asia/Kolkata")
+        now_ist = _dt.datetime.now(ist)
+    except ImportError:
+        now_ist = _dt.datetime.utcnow() + _dt.timedelta(hours=5, minutes=30)
+
+    total_oi = (total_ce_oi or 0) + (total_pe_oi or 0)
+
+    prev_total = 0
+    if _oi_timeseries.get(symbol):
+        prev_total = _oi_timeseries[symbol][-1].get("total_oi", 0)
+
+    snap = {
+        "ts": now_ist.strftime("%H:%M:%S"),
+        "ltp": round(ltp, 2) if ltp else 0,
+        "total_oi": total_oi,
+        "call_oi": total_ce_oi or 0,
+        "put_oi": total_pe_oi or 0,
+        "oi_chg": total_oi - prev_total,
+        "call_oi_chg": net_ce_oi_chg or 0,
+        "put_oi_chg": net_pe_oi_chg or 0,
+        "pcr": round(pcr, 3) if pcr else 0,
+    }
+    if atm_iv is not None:
+        snap["atm_iv"] = round(atm_iv, 2)
+
+    _oi_timeseries.setdefault(symbol, []).append(snap)
+    _oi_last_snap_ts[symbol] = _time.time()
+    log.info(
+        "OI snapshot: %s #%d ltp=%.2f total_oi=%d oi_chg=%+d",
+        symbol, len(_oi_timeseries[symbol]),
+        snap["ltp"], total_oi, snap["oi_chg"],
+    )
+
+
+async def _oi_stock_poller(symbol):
+    """Background task: poll option-chain OI for a single F&O stock
+    every _OI_SNAP_INTERVAL seconds."""
+    log.info("OI stock poller started: %s", symbol)
+    while True:
+        try:
+            if not _oi_is_market_hours():
+                await asyncio.sleep(60)
+                continue
+
+            _oi_reset_if_new_day()
+
+            upstox_token = get_upstox_token()
+            if not upstox_token:
+                await asyncio.sleep(60)
+                continue
+
+            async with ClientSession() as cs:
+                chain = await fetch_option_chain(cs, symbol, upstox_token)
+                if chain and chain.get("ok"):
+                    _oi_record_snapshot(
+                        symbol,
+                        ltp=chain.get("spot", 0),
+                        total_ce_oi=chain.get("total_ce_oi", 0),
+                        total_pe_oi=chain.get("total_pe_oi", 0),
+                        net_ce_oi_chg=chain.get("net_ce_oi_chg", 0),
+                        net_pe_oi_chg=chain.get("net_pe_oi_chg", 0),
+                        pcr=chain.get("pcr", 0),
+                        atm_iv=chain.get("atm_iv"),
+                    )
+                else:
+                    log.warning("OI stock poller %s: chain fetch failed", symbol)
+
+        except asyncio.CancelledError:
+            log.info("OI stock poller stopped: %s", symbol)
+            return
+        except Exception as e:
+            log.error("OI stock poller %s error: %s", symbol, e)
+
+        await asyncio.sleep(_OI_SNAP_INTERVAL)
+
+
 async def _fetch_nifty_meta():
     """Fetch NIFTY spot, VIX, PCR, max pain, futures basis from Upstox.
     Stores result in _nifty_meta dict. Called by background timer."""
@@ -1934,6 +2191,19 @@ async def _fetch_nifty_meta():
                     if basis > 30: score += 5
                     elif basis < -10: score -= 5
                     meta["sentiment"] = max(0, min(100, score))
+
+                    # Record OI time-series snapshot for NIFTY
+                    # (_oi_record_snapshot internally enforces the 3-min interval)
+                    _oi_record_snapshot(
+                        "NIFTY",
+                        ltp=meta.get("nifty", {}).get("ltp", 0),
+                        total_ce_oi=chain.get("total_ce_oi", 0),
+                        total_pe_oi=chain.get("total_pe_oi", 0),
+                        net_ce_oi_chg=chain.get("net_ce_oi_chg", 0),
+                        net_pe_oi_chg=chain.get("net_pe_oi_chg", 0),
+                        pcr=chain.get("pcr", 0),
+                        atm_iv=chain.get("atm_iv"),
+                    )
             except Exception as e:
                 log.warning("Nifty meta chain error: %s", e)
 
@@ -2394,6 +2664,12 @@ def create_app():
 
     # Candle data (RSI scanner page)
     app.router.add_get("/api/candles", handle_candles)
+
+    # OI Time-Series
+    app.router.add_get("/oi-timeseries", handle_oi_timeseries_page)
+    app.router.add_get("/api/oi-timeseries", handle_oi_timeseries_api)
+    app.router.add_post("/api/oi-timeseries/unsubscribe", handle_oi_unsubscribe_api)
+    app.router.add_get("/api/oi-timeseries/active", handle_oi_active_subs_api)
 
     # Stock state REST fallback (sectors page, dashboard fallback)
     app.router.add_get("/api/state", handle_state)

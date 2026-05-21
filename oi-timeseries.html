@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<!-- OI_TIMESERIES_V1_20260521 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OI Time-Series &mdash; Quantra Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style id="theme-css">
+/* ============================================================
+   Quantra Terminal - Shared Design System
+   Theme: Obsidian Premium — modern fintech dark
+   Density: Balanced (B)
+   ============================================================ */
+
+/* --- Design Tokens --- */
+:root {
+  /* Backgrounds */
+  --bg:            #09090b;
+  --surface:       #18181b;
+  --surface-alt:   #1c1c20;
+  --surface-hover: #27272a;
+  --surface-active:#2e2e33;
+  --bg-elevated:   #27272a;
+
+  /* Borders */
+  --border:        #2e2e35;
+  --border-light:  #3f3f46;
+  --border-focus:  #3b82f6;
+
+  /* Text */
+  --text:          #e4e4e7;
+  --text-dim:      #71717a;
+  --text-vdim:     #52525b;
+  --text-bright:   #fafafa;
+
+  /* Accent */
+  --blue:          #3b82f6;
+  --blue-soft:     rgba(59,130,246,0.12);
+  --blue-hover:    #2563eb;
+
+  /* Semantic Colors */
+  --green:         #10b981;
+  --green-soft:    rgba(16,185,129,0.12);
+  --green-text:    #34d399;
+  --red:           #ef4444;
+  --red-soft:      rgba(239,68,68,0.12);
+  --red-text:      #f87171;
+  --gold:          #f59e0b;
+  --gold-soft:     rgba(245,158,11,0.1);
+  --orange:        #f97316;
+  --orange-soft:   rgba(249,115,22,0.1);
+  --purple:        #a855f7;
+  --purple-soft:   rgba(168,85,247,0.1);
+  --cyan:          #06b6d4;
+  --cyan-soft:     rgba(6,182,212,0.1);
+  --yellow:        #eab308;
+
+  /* Layout */
+  --nav-height:    48px;
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.6);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.8);
+
+  /* Typography */
+  --font-sans:     'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --fs-xs:         11px;
+  --fs-sm:         12px;
+  --fs-base:       13px;
+  --fs-md:         14px;
+  --fs-lg:         16px;
+  --fs-xl:         20px;
+  --fs-2xl:        24px;
+  --fs-3xl:        32px;
+  --fw-normal:     400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+}
+
+/* --- Reset --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
+
+/* ============================================================
+   NAVIGATION BAR
+   ============================================================ */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  background: linear-gradient(180deg, rgba(24,24,27,0.95) 0%, rgba(18,18,20,0.98) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(59,130,246,0.08), 0 4px 16px rgba(0,0,0,0.3);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.q-nav::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(6,182,212,0.2) 70%, transparent 100%);
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-brand:hover { text-decoration: none; }
+.q-nav-brand img, .q-nav-brand .brand-png { display: none; }
+.q-nav-brand .brand-icon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--blue), #06b6d4);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+.q-nav-brand .brand-text {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.q-nav-brand .brand-tag {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-left: -2px;
+}
+.q-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+.q-nav-links a {
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-links a:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+  text-decoration: none;
+}
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--blue-soft);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
+}
+.q-nav-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  white-space: nowrap;
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+.conn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.conn-dot.on  { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+.conn-dot.off { background: var(--red); }
+.conn-dot.reconn { background: var(--orange); }
+
+.pulse-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: q-pulse 2s infinite;
+  flex-shrink: 0;
+}
+.pulse-dot.off  { background: var(--red); animation: none; }
+.pulse-dot.warn { background: var(--gold); animation: q-pulse 1s infinite; }
+
+@keyframes q-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  50%      { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+}
+
+/* ============================================================
+   COMMON COMPONENTS
+   ============================================================ */
+
+.q-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.q-card:hover {
+  border-color: var(--border-light);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), var(--shadow-sm);
+}
+.q-card-header {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.q-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.q-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  transition: border-color 0.15s;
+}
+.q-stat-card:hover { border-color: var(--border-light); }
+.q-stat-label {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.q-stat-value {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  line-height: 1.2;
+  font-family: var(--font-mono);
+}
+.q-stat-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.q-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.q-btn-primary {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+  box-shadow: 0 1px 8px rgba(59,130,246,0.35);
+}
+.q-btn-primary:hover {
+  background: var(--blue-hover);
+  box-shadow: 0 2px 12px rgba(59,130,246,0.45);
+}
+.q-btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+.q-btn-ghost:hover { color: var(--text); border-color: var(--border-light); }
+.q-btn-ghost.active { color: var(--blue); border-color: var(--blue); background: var(--blue-soft); }
+.q-btn-sm { padding: 4px 10px; font-size: var(--fs-xs); }
+.q-btn-danger { background: transparent; color: var(--red-text); border-color: rgba(239,68,68,0.3); }
+.q-btn-danger:hover { background: var(--red-soft); border-color: var(--red); }
+
+.q-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 7px 10px;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.q-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.q-input::placeholder { color: var(--text-vdim); }
+
+.q-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 28px 6px 10px;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2371717a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.q-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+/* Badges */
+.q-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1.4;
+}
+.q-badge-green  { background: var(--green-soft); color: var(--green-text); }
+.q-badge-red    { background: var(--red-soft); color: var(--red-text); }
+.q-badge-blue   { background: var(--blue-soft); color: var(--blue); }
+.q-badge-gold   { background: var(--gold-soft); color: var(--gold); }
+.q-badge-orange { background: var(--orange-soft); color: var(--orange); }
+.q-badge-cyan   { background: var(--cyan-soft); color: var(--cyan); }
+.q-badge-dim    { background: rgba(113,113,122,0.1); color: var(--text-dim); }
+
+/* Toast */
+.q-toast {
+  position: fixed;
+  top: 58px;
+  right: 16px;
+  z-index: 9999;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-bright);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s ease;
+  max-width: 320px;
+}
+.q-toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.q-toast.success { border-left: 3px solid var(--green); }
+.q-toast.error   { border-left: 3px solid var(--red); }
+.q-toast.warning { border-left: 3px solid var(--gold); }
+.q-toast.info    { border-left: 3px solid var(--blue); }
+
+/* Footer */
+.q-footer {
+  height: 28px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+/* Utility */
+.text-green  { color: var(--green) !important; }
+.text-red    { color: var(--red) !important; }
+.text-blue   { color: var(--blue) !important; }
+.text-gold   { color: var(--gold) !important; }
+.text-cyan   { color: var(--cyan) !important; }
+.text-dim    { color: var(--text-dim) !important; }
+.text-bright { color: var(--text-bright) !important; }
+.val-pos  { color: var(--green-text); }
+.val-neg  { color: var(--red-text); }
+.val-zero { color: var(--text-dim); }
+.mono { font-family: var(--font-mono) !important; }
+.hidden { display: none !important; }
+
+@keyframes q-flash-green { 0% { background: rgba(16,185,129,0.18); } 100% { background: transparent; } }
+@keyframes q-flash-blue  { 0% { background: rgba(59,130,246,0.15); } 100% { background: transparent; } }
+.flash-new   { animation: q-flash-blue 1.2s ease-out; }
+
+/* Toggle */
+.q-toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--border-light);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: none;
+  outline: none;
+  flex-shrink: 0;
+}
+.q-toggle::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.q-toggle:checked { background: var(--blue); }
+.q-toggle:checked::before { transform: translateX(16px); }
+
+/* Logout */
+.q-nav-logout {
+  margin-left: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.q-nav-logout:hover {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(239,68,68,0.08);
+  text-decoration: none;
+}
+
+/* Compliance */
+.compliance-bar {
+  text-align: center;
+  padding: 10px 24px;
+  font-size: 9px;
+  line-height: 1.6;
+  color: #3f3f46;
+  border-top: 1px solid rgba(255,255,255,0.03);
+  background: var(--bg);
+}
+.compliance-bar a { color: #52525b; text-decoration: none; }
+.compliance-bar a:hover { color: #71717a; text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .q-nav { padding: 0 10px; gap: 8px; }
+  .q-nav-links a { padding: 5px 9px; font-size: var(--fs-xs); }
+}
+</style>
+
+<style>
+/* ============================================================
+   OI TIME-SERIES PAGE STYLES
+   ============================================================ */
+
+/* --- Page Header Strip --- */
+.page-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.page-header-left { display: flex; flex-direction: column; gap: 2px; }
+.page-title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+.page-subtitle {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.3px;
+}
+.status-badge.tracking {
+  background: var(--green-soft);
+  color: var(--green-text);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+.status-badge.waiting {
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+.status-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.status-badge.tracking .dot {
+  animation: q-pulse 2s infinite;
+}
+
+/* --- Controls Row --- */
+.controls-row {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.symbol-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.symbol-select-wrap label {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.add-stock-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.add-stock-input {
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: width 0.2s ease, opacity 0.2s ease;
+  pointer-events: none;
+}
+.add-stock-input.open {
+  width: 140px;
+  opacity: 1;
+  pointer-events: auto;
+}
+.auto-refresh-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.auto-refresh-wrap label {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.refresh-countdown {
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  font-family: var(--font-mono);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* --- Active Subscriptions Strip --- */
+.subs-strip {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 38px;
+}
+.subs-label {
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+.sub-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: var(--fs-xs);
+  color: var(--text);
+  font-weight: var(--fw-medium);
+  transition: border-color 0.15s;
+}
+.sub-chip.active-sym {
+  border-color: rgba(59,130,246,0.4);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.sub-chip .chip-sym { font-family: var(--font-mono); font-weight: var(--fw-semibold); }
+.sub-chip .chip-count {
+  font-size: 10px;
+  color: var(--text-vdim);
+  font-family: var(--font-mono);
+}
+.sub-chip .chip-remove {
+  width: 14px; height: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.0);
+  color: var(--text-vdim);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  font-family: inherit;
+}
+.sub-chip .chip-remove:hover { background: var(--red-soft); color: var(--red-text); }
+.slot-indicator {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+/* --- Stats Summary Cards --- */
+.stats-section {
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.oi-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  transition: border-color 0.15s;
+}
+.oi-stat-card:hover { border-color: var(--border-light); }
+.oi-stat-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+.oi-stat-value {
+  font-size: 18px;
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  font-family: var(--font-mono);
+  line-height: 1.15;
+}
+.oi-stat-sub {
+  font-size: 10px;
+  color: var(--text-vdim);
+  margin-top: 2px;
+  font-family: var(--font-mono);
+}
+
+/* --- Snapshot count bar --- */
+.table-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.snapshot-count {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+.snapshot-count strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.last-update-time {
+  font-size: var(--fs-xs);
+  color: var(--text-vdim);
+  font-family: var(--font-mono);
+}
+
+/* --- OI Table --- */
+.oi-table-wrap {
+  flex: 1;
+  overflow: auto;
+  background: var(--surface);
+  border-top: none;
+}
+.oi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  min-width: 820px;
+}
+.oi-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.oi-table thead th {
+  background: linear-gradient(180deg, #1f1f24 0%, #1a1a1e 100%);
+  color: var(--text-dim);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 9px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 1px 0 var(--border), 0 0 20px rgba(59,130,246,0.04), inset 0 -1px 0 rgba(59,130,246,0.08);
+}
+.oi-table thead th:first-child { text-align: left; padding-left: 20px; }
+.oi-table thead th:nth-child(2) { text-align: left; }
+
+/* Glow effect on header */
+.oi-table thead tr::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,0.25) 40%, rgba(6,182,212,0.15) 60%, transparent);
+  pointer-events: none;
+}
+.oi-table thead tr { position: relative; }
+
+.oi-table tbody tr {
+  border-bottom: 1px solid rgba(46,46,53,0.5);
+  transition: background 0.1s;
+}
+.oi-table tbody tr:nth-child(even) { background: rgba(24,24,27,0.4); }
+.oi-table tbody tr:hover { background: rgba(39,39,42,0.7) !important; }
+.oi-table tbody tr.row-new { animation: q-flash-blue 1.4s ease-out; }
+
+.oi-table tbody td {
+  padding: 7px 12px;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+.oi-table tbody td:first-child {
+  text-align: left;
+  padding-left: 20px;
+  font-family: var(--font-mono);
+}
+.oi-table tbody td:nth-child(2) { text-align: left; font-family: var(--font-mono); }
+
+/* Time cell */
+.td-time { color: var(--text-dim); }
+.td-time span.time-main { color: var(--text); font-weight: var(--fw-medium); }
+.td-time span.time-date { font-size: 10px; color: var(--text-vdim); display: block; }
+
+/* LTP cell */
+.td-ltp { color: var(--text-bright); font-weight: var(--fw-semibold); }
+
+/* OI cells */
+.td-oi { color: var(--text); }
+.td-call-oi { color: var(--red-text); }
+.td-put-oi  { color: var(--green-text); }
+
+/* OI Change cells */
+.chg-pos { color: var(--green-text); }
+.chg-neg { color: var(--red-text); }
+.chg-zero { color: var(--text-vdim); }
+.chg-arrow { font-size: 10px; margin-right: 2px; }
+
+/* PCR cell */
+.td-pcr { font-weight: var(--fw-semibold); }
+.pcr-bull { color: var(--green-text); }
+.pcr-bear { color: var(--red-text); }
+.pcr-neut { color: var(--gold); }
+
+/* --- Empty / No-data State --- */
+.oi-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 14px;
+}
+.oi-empty-icon {
+  width: 56px; height: 56px;
+  border-radius: var(--radius-xl);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--text-vdim);
+}
+.oi-empty-title {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--text-dim);
+}
+.oi-empty-sub {
+  font-size: var(--fs-sm);
+  color: var(--text-vdim);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+/* --- Loading spinner (inline) --- */
+.oi-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  gap: 12px;
+  color: var(--text-vdim);
+  font-size: var(--fs-sm);
+}
+.oi-spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border-light);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: q-spin 0.75s linear infinite;
+}
+@keyframes q-spin { to { transform: rotate(360deg); } }
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .page-header { padding: 12px 14px; }
+  .controls-row { padding: 8px 14px; }
+  .subs-strip { padding: 6px 14px; }
+  .stats-section { padding: 10px 14px; grid-template-columns: repeat(2, 1fr); }
+  .table-header-bar { padding: 6px 14px; }
+  .oi-table thead th, .oi-table tbody td { padding: 6px 8px; font-size: 11px; }
+  .oi-table thead th:first-child, .oi-table tbody td:first-child { padding-left: 12px; }
+}
+@media (max-width: 600px) {
+  .q-nav-links { display: none; }
+  .page-title { font-size: var(--fs-lg); }
+  .stats-section { grid-template-columns: repeat(2, 1fr); }
+  .auto-refresh-wrap { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION BAR
+     ============================================================ -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand">
+    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="navLogoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#3b82f6"/>
+          <stop offset="1" stop-color="#06b6d4"/>
+        </linearGradient>
+      </defs>
+      <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#navLogoGrad)" stroke-width="3.5" fill="none"/>
+      <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
+      <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#navLogoGrad)" opacity="0.85"/>
+      <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
+      <line x1="18" y1="28" x2="46" y2="20" stroke="url(#navLogoGrad)" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    </svg>
+    <div style="display:flex;flex-direction:column;line-height:1;">
+      <span class="brand-text">QUANTRA</span>
+    </div>
+  </a>
+
+  <div class="q-nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/paper">Paper Trades</a>
+    <a href="/sectors">Sectors</a>
+    <a href="/rsi">RSI Scanner</a>
+    <a href="/oi-timeseries" class="active">OI Time-Series</a>
+    <a href="/profile">Profile</a>
+    <a href="/admin">Admin</a>
+  </div>
+
+  <div class="q-nav-status">
+    <span class="pulse-dot" id="pulseDot"></span>
+    <span id="connText" style="font-size:11px;">Live</span>
+    <span id="updateTime" style="font-size:11px;">--:--:--</span>
+  </div>
+  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
+</nav>
+
+<!-- ============================================================
+     PAGE HEADER
+     ============================================================ -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-title">OI Time-Series</div>
+    <div class="page-subtitle">Live Open Interest snapshots &mdash; captured every 3 minutes during market hours</div>
+  </div>
+  <div class="page-header-right">
+    <span class="status-badge waiting" id="statusBadge">
+      <span class="dot"></span>
+      <span id="statusText">Waiting for market hours</span>
+    </span>
+  </div>
+</div>
+
+<!-- ============================================================
+     CONTROLS ROW
+     ============================================================ -->
+<div class="controls-row">
+  <div class="symbol-select-wrap">
+    <label for="symbolSelect">Symbol</label>
+    <select class="q-select" id="symbolSelect" style="min-width:140px;font-family:var(--font-mono);font-weight:600;">
+      <option value="NIFTY">NIFTY</option>
+      <option value="BANKNIFTY">BANKNIFTY</option>
+      <option value="FINNIFTY">FINNIFTY</option>
+    </select>
+  </div>
+
+  <div class="add-stock-wrap">
+    <button class="q-btn q-btn-ghost q-btn-sm" id="addStockBtn" onclick="toggleAddStock()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Add Stock
+    </button>
+    <input
+      type="text"
+      class="q-input add-stock-input"
+      id="addStockInput"
+      placeholder="e.g. RELIANCE"
+      style="text-transform:uppercase;font-family:var(--font-mono);"
+      onkeydown="handleAddStockKey(event)"
+    >
+    <button class="q-btn q-btn-primary q-btn-sm hidden" id="addStockConfirmBtn" onclick="confirmAddStock()">Add</button>
+    <button class="q-btn q-btn-ghost q-btn-sm hidden" id="addStockCancelBtn" onclick="cancelAddStock()">Cancel</button>
+  </div>
+
+  <div class="auto-refresh-wrap">
+    <label for="autoRefreshToggle">Auto-refresh</label>
+    <input type="checkbox" class="q-toggle" id="autoRefreshToggle" checked>
+    <span class="refresh-countdown" id="refreshCountdown">30s</span>
+    <button class="q-btn q-btn-ghost q-btn-sm" id="manualRefreshBtn" onclick="fetchCurrentSymbol(true)">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="refreshIcon"><path d="M10 6A4 4 0 1 1 6 2a4 4 0 0 1 3.46 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 2v2.5H7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ACTIVE SUBSCRIPTIONS STRIP
+     ============================================================ -->
+<div class="subs-strip">
+  <span class="subs-label">Tracking</span>
+  <div id="subChipsContainer">
+    <!-- chips rendered by JS -->
+    <span class="q-badge q-badge-dim" id="noSubsMsg">No active subscriptions</span>
+  </div>
+  <span class="slot-indicator" id="slotIndicator">0/5 slots</span>
+</div>
+
+<!-- ============================================================
+     LIVE STATS CARDS
+     ============================================================ -->
+<div class="stats-section">
+  <div class="oi-stat-card">
+    <div class="oi-stat-label">LTP</div>
+    <div class="oi-stat-value" id="statLtp">&mdash;</div>
+    <div class="oi-stat-sub" id="statLtpSub">Last traded price</div>
+  </div>
+  <div class="oi-stat-card">
+    <div class="oi-stat-label">Total OI</div>
+    <div class="oi-stat-value" id="statTotalOi">&mdash;</div>
+    <div class="oi-stat-sub" id="statTotalOiSub">Calls + Puts combined</div>
+  </div>
+  <div class="oi-stat-card">
+    <div class="oi-stat-label">Call OI</div>
+    <div class="oi-stat-value text-red" id="statCallOi">&mdash;</div>
+    <div class="oi-stat-sub" id="statCallOiSub">Open Interest (calls)</div>
+  </div>
+  <div class="oi-stat-card">
+    <div class="oi-stat-label">Put OI</div>
+    <div class="oi-stat-value text-green" id="statPutOi">&mdash;</div>
+    <div class="oi-stat-sub" id="statPutOiSub">Open Interest (puts)</div>
+  </div>
+  <div class="oi-stat-card">
+    <div class="oi-stat-label">PCR</div>
+    <div class="oi-stat-value" id="statPcr">&mdash;</div>
+    <div class="oi-stat-sub" id="statPcrSub">Put-Call Ratio</div>
+  </div>
+  <div class="oi-stat-card">
+    <div class="oi-stat-label">ATM IV</div>
+    <div class="oi-stat-value text-gold" id="statAtmIv">&mdash;</div>
+    <div class="oi-stat-sub" id="statAtmIvSub">At-the-money IV</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TABLE HEADER BAR
+     ============================================================ -->
+<div class="table-header-bar">
+  <span class="snapshot-count" id="snapshotCount">
+    <strong>0</strong> snapshots today
+  </span>
+  <div class="table-toolbar">
+    <span class="last-update-time" id="lastUpdateLabel">Last update: &mdash;</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN TABLE
+     ============================================================ -->
+<div class="oi-table-wrap" id="tableWrap">
+  <div class="oi-loading" id="loadingState">
+    <div class="oi-spinner"></div>
+    <span>Loading OI data&hellip;</span>
+  </div>
+
+  <div class="oi-empty-state hidden" id="emptyState">
+    <div class="oi-empty-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="9" y1="3" x2="9" y2="21"/>
+      </svg>
+    </div>
+    <div class="oi-empty-title" id="emptyTitle">No snapshots yet</div>
+    <div class="oi-empty-sub" id="emptySubtitle">
+      OI snapshots are captured every 3 minutes during market hours (09:15 &ndash; 15:30 IST).
+      Data will appear here once tracking begins.
+    </div>
+  </div>
+
+  <table class="oi-table hidden" id="oiTable">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>LTP</th>
+        <th>Total OI</th>
+        <th>Call OI</th>
+        <th>Put OI</th>
+        <th>OI Chg</th>
+        <th>Call OI Chg</th>
+        <th>Put OI Chg</th>
+        <th>PCR</th>
+      </tr>
+    </thead>
+    <tbody id="oiTableBody">
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="q-footer">
+  <span>QUANTRA Terminal &mdash; OI Time-Series</span>
+  <span id="footerTime"></span>
+</footer>
+
+<div class="compliance-bar">
+  Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
+  &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a>
+</div>
+
+<!-- ============================================================
+     TOAST
+     ============================================================ -->
+<div class="q-toast" id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+'use strict';
+
+/* ---- State ---- */
+var state = {
+  currentSymbol: 'NIFTY',
+  subscriptions: {},   // { symbol: { count, active } }
+  snapshots: [],       // array of snapshot rows, newest first
+  autoRefresh: true,
+  refreshTimer: null,
+  countdownVal: 30,
+  countdownTimer: null,
+  isLoading: false,
+  isAddStockOpen: false,
+  maxSlots: 5,
+};
+
+/* ---- Number Formatting ---- */
+function formatOI(val) {
+  if (val === null || val === undefined || isNaN(val)) return '&mdash;';
+  var abs = Math.abs(val);
+  if (abs >= 10000000) return (val / 10000000).toFixed(2) + 'Cr';
+  if (abs >= 100000)   return (val / 100000).toFixed(2) + 'L';
+  if (abs >= 1000)     return (val / 1000).toFixed(1) + 'K';
+  return val.toLocaleString('en-IN');
+}
+
+function formatOIChange(val) {
+  if (val === null || val === undefined || isNaN(val)) return '&mdash;';
+  var prefix = val > 0 ? '+' : '';
+  return prefix + formatOI(val);
+}
+
+function formatPrice(val) {
+  if (val === null || val === undefined || isNaN(val)) return '&mdash;';
+  return val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatPCR(val) {
+  if (val === null || val === undefined || isNaN(val)) return '&mdash;';
+  return val.toFixed(2);
+}
+
+function formatIV(val) {
+  if (val === null || val === undefined || isNaN(val)) return '&mdash;';
+  return val.toFixed(1) + '%';
+}
+
+function formatTime(ts) {
+  // ts can be ISO string or epoch ms
+  var d = (typeof ts === 'number') ? new Date(ts) : new Date(ts);
+  if (isNaN(d.getTime())) return { main: ts, date: '' };
+  var hh = String(d.getHours()).padStart(2, '0');
+  var mm = String(d.getMinutes()).padStart(2, '0');
+  var ss = String(d.getSeconds()).padStart(2, '0');
+  var dd = d.getDate();
+  var mo = d.toLocaleString('en-IN', { month: 'short' });
+  return { main: hh + ':' + mm + ':' + ss, date: dd + ' ' + mo };
+}
+
+/* ---- DOM helpers ---- */
+function el(id) { return document.getElementById(id); }
+
+function showToast(msg, type) {
+  var t = el('toast');
+  t.className = 'q-toast ' + (type || 'info');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3200);
+}
+
+function setLoading(loading) {
+  state.isLoading = loading;
+  el('loadingState').classList.toggle('hidden', !loading);
+  if (loading) {
+    el('emptyState').classList.add('hidden');
+    el('oiTable').classList.add('hidden');
+  }
+  // Spin the refresh icon
+  var icon = el('refreshIcon');
+  if (icon) {
+    if (loading) icon.style.animation = 'q-spin 0.75s linear infinite';
+    else icon.style.animation = '';
+  }
+}
+
+/* ---- Market Status ---- */
+function checkMarketStatus() {
+  var now = new Date();
+  var h = now.getHours();
+  var m = now.getMinutes();
+  var mins = h * 60 + m;
+  var open  = 9 * 60 + 15;
+  var close = 15 * 60 + 30;
+  var day   = now.getDay(); // 0=Sun, 6=Sat
+  var isWeekend = (day === 0 || day === 6);
+  var isMarketHours = !isWeekend && mins >= open && mins < close;
+  var badge = el('statusBadge');
+  var txt   = el('statusText');
+  var pulse = el('pulseDot');
+  if (isMarketHours) {
+    badge.className = 'status-badge tracking';
+    txt.textContent = 'Tracking';
+    pulse.className = 'pulse-dot';
+    el('connText').textContent = 'Live';
+  } else {
+    badge.className = 'status-badge waiting';
+    txt.textContent = 'Waiting for market hours';
+    pulse.className = 'pulse-dot warn';
+    el('connText').textContent = 'Closed';
+  }
+}
+
+/* ---- Auto-refresh countdown ---- */
+function startCountdown() {
+  clearInterval(state.countdownTimer);
+  state.countdownVal = 30;
+  updateCountdownDisplay();
+  state.countdownTimer = setInterval(function() {
+    state.countdownVal--;
+    if (state.countdownVal <= 0) {
+      state.countdownVal = 30;
+      if (state.autoRefresh) fetchCurrentSymbol(false);
+    }
+    updateCountdownDisplay();
+  }, 1000);
+}
+
+function updateCountdownDisplay() {
+  var cd = el('refreshCountdown');
+  if (cd) cd.textContent = state.countdownVal + 's';
+}
+
+function stopCountdown() {
+  clearInterval(state.countdownTimer);
+  var cd = el('refreshCountdown');
+  if (cd) cd.textContent = '&mdash;';
+}
+
+/* ---- Subscriptions UI ---- */
+function renderSubChips() {
+  var container = el('subChipsContainer');
+  var noMsg     = el('noSubsMsg');
+  var slotInd   = el('slotIndicator');
+  var syms = Object.keys(state.subscriptions);
+
+  if (syms.length === 0) {
+    container.innerHTML = '';
+    container.appendChild(noMsg);
+    noMsg.classList.remove('hidden');
+    slotInd.textContent = '0/' + state.maxSlots + ' slots';
+    return;
+  }
+  noMsg.classList.add('hidden');
+
+  // Count non-index slots
+  var stockSlots = syms.filter(function(s) {
+    return !['NIFTY','BANKNIFTY','FINNIFTY','SENSEX'].includes(s);
+  }).length;
+
+  slotInd.textContent = stockSlots + '/' + state.maxSlots + ' slots';
+
+  var html = '';
+  syms.forEach(function(sym) {
+    var info  = state.subscriptions[sym];
+    var isAct = (sym === state.currentSymbol);
+    var isIdx = ['NIFTY','BANKNIFTY','FINNIFTY','SENSEX'].includes(sym);
+    html += '<span class="sub-chip' + (isAct ? ' active-sym' : '') + '" data-sym="' + sym + '">';
+    html += '<span class="chip-sym">' + sym + '</span>';
+    html += '<span class="chip-count">(' + (info.count || 0) + ')</span>';
+    if (!isIdx) {
+      html += '<button class="chip-remove" onclick="unsubscribe(\'' + sym + '\')" title="Unsubscribe">&times;</button>';
+    }
+    html += '</span>';
+  });
+  container.innerHTML = html;
+
+  // Click chip to switch symbol
+  container.querySelectorAll('.sub-chip').forEach(function(chip) {
+    chip.addEventListener('click', function(e) {
+      if (e.target.classList.contains('chip-remove')) return;
+      var sym = chip.dataset.sym;
+      if (sym && sym !== state.currentSymbol) switchSymbol(sym);
+    });
+  });
+}
+
+function updateSymbolDropdown(newSym) {
+  var sel = el('symbolSelect');
+  var exists = false;
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === newSym) { exists = true; break; }
+  }
+  if (!exists) {
+    var opt = document.createElement('option');
+    opt.value = newSym;
+    opt.textContent = newSym;
+    sel.appendChild(opt);
+  }
+  sel.value = newSym;
+}
+
+/* ---- Table Rendering ---- */
+function renderTable(rows, isRefresh) {
+  var tbody   = el('oiTableBody');
+  var table   = el('oiTable');
+  var empty   = el('emptyState');
+  var countEl = el('snapshotCount');
+
+  setLoading(false);
+
+  if (!rows || rows.length === 0) {
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    el('emptyTitle').textContent = 'No snapshots yet';
+    el('emptySubtitle').textContent =
+      'OI snapshots are captured every 3 minutes during market hours (09:15–15:30 IST). ' +
+      'Data will appear here once tracking begins.';
+    countEl.innerHTML = '<strong>0</strong> snapshots today';
+    clearStatCards();
+    return;
+  }
+
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  countEl.innerHTML = '<strong>' + rows.length + '</strong> snapshot' + (rows.length !== 1 ? 's' : '') + ' today';
+
+  // Build rows HTML — newest first (API should return newest first; we sort just in case)
+  var sorted = rows.slice().sort(function(a, b) {
+    return new Date(b.timestamp || b.time || 0) - new Date(a.timestamp || a.time || 0);
+  });
+
+  // Identify new rows on refresh
+  var prevTop = state.snapshots.length > 0 ? (state.snapshots[0].timestamp || state.snapshots[0].time) : null;
+  state.snapshots = sorted;
+
+  var html = '';
+  sorted.forEach(function(row, idx) {
+    var isNew = isRefresh && prevTop && (new Date(row.timestamp || row.time) > new Date(prevTop));
+    var ts  = formatTime(row.timestamp || row.time);
+    var ltp = formatPrice(row.ltp || row.last_price);
+    var tot = formatOI(row.total_oi);
+    var cal = formatOI(row.call_oi);
+    var put = formatOI(row.put_oi);
+    var oiChg  = row.oi_change !== undefined ? row.oi_change : null;
+    var calChg = row.call_oi_change !== undefined ? row.call_oi_change : null;
+    var putChg = row.put_oi_change !== undefined ? row.put_oi_change : null;
+    var pcr    = row.pcr !== undefined ? row.pcr : null;
+
+    var oiChgCls  = oiChg  === null ? '' : (oiChg  > 0 ? 'chg-pos' : oiChg  < 0 ? 'chg-neg' : 'chg-zero');
+    var calChgCls = calChg === null ? '' : (calChg > 0 ? 'chg-pos' : calChg < 0 ? 'chg-neg' : 'chg-zero');
+    var putChgCls = putChg === null ? '' : (putChg > 0 ? 'chg-pos' : putChg < 0 ? 'chg-neg' : 'chg-zero');
+
+    var oiChgArrow  = oiChg  > 0 ? '&#9650;' : oiChg  < 0 ? '&#9660;' : '';
+    var calChgArrow = calChg > 0 ? '&#9650;' : calChg < 0 ? '&#9660;' : '';
+    var putChgArrow = putChg > 0 ? '&#9650;' : putChg < 0 ? '&#9660;' : '';
+
+    var pcrVal  = formatPCR(pcr);
+    var pcrCls  = pcr === null ? '' : (pcr > 1.2 ? 'pcr-bull' : pcr < 0.8 ? 'pcr-bear' : 'pcr-neut');
+
+    html += '<tr' + (isNew ? ' class="row-new"' : '') + '>';
+    html += '<td class="td-time"><span class="time-main">' + ts.main + '</span><span class="time-date">' + ts.date + '</span></td>';
+    html += '<td class="td-ltp">' + ltp + '</td>';
+    html += '<td class="td-oi">'  + tot + '</td>';
+    html += '<td class="td-call-oi">' + cal + '</td>';
+    html += '<td class="td-put-oi">'  + put + '</td>';
+    html += '<td class="' + oiChgCls  + '"><span class="chg-arrow">' + oiChgArrow  + '</span>' + formatOIChange(oiChg)  + '</td>';
+    html += '<td class="' + calChgCls + '"><span class="chg-arrow">' + calChgArrow + '</span>' + formatOIChange(calChg) + '</td>';
+    html += '<td class="' + putChgCls + '"><span class="chg-arrow">' + putChgArrow + '</span>' + formatOIChange(putChg) + '</td>';
+    html += '<td class="td-pcr ' + pcrCls + '">' + pcrVal + '</td>';
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+
+  // Update stats from latest row
+  if (sorted.length > 0) updateStatCards(sorted[0]);
+  updateLastUpdateLabel();
+}
+
+function clearStatCards() {
+  ['statLtp','statTotalOi','statCallOi','statPutOi','statPcr','statAtmIv'].forEach(function(id) {
+    el(id).innerHTML = '&mdash;';
+  });
+  ['statLtpSub','statTotalOiSub','statCallOiSub','statPutOiSub','statPcrSub','statAtmIvSub'].forEach(function(id) {
+    el(id).textContent = '';
+  });
+}
+
+function updateStatCards(row) {
+  if (!row) return;
+  el('statLtp').textContent     = formatPrice(row.ltp || row.last_price);
+  el('statTotalOi').textContent = formatOI(row.total_oi);
+  el('statCallOi').textContent  = formatOI(row.call_oi);
+  el('statPutOi').textContent   = formatOI(row.put_oi);
+
+  var pcr = row.pcr;
+  var pcrEl = el('statPcr');
+  pcrEl.textContent = formatPCR(pcr);
+  pcrEl.className = 'oi-stat-value ' + (pcr > 1.2 ? 'text-green' : pcr < 0.8 ? 'text-red' : 'text-gold');
+
+  var iv = row.atm_iv || row.iv;
+  el('statAtmIv').textContent = formatIV(iv);
+
+  // Change sub-labels to show delta from prev row
+  if (state.snapshots.length > 1) {
+    var prev = state.snapshots[1];
+    var ltpDelta = ((row.ltp || row.last_price) - (prev.ltp || prev.last_price));
+    var ltpPct   = prev.ltp ? (ltpDelta / prev.ltp * 100) : 0;
+    var sign     = ltpDelta >= 0 ? '+' : '';
+    el('statLtpSub').textContent = sign + ltpDelta.toFixed(1) + ' (' + sign + ltpPct.toFixed(2) + '%) vs prev';
+    el('statTotalOiSub').textContent = 'Chg: ' + formatOIChange(row.oi_change);
+    el('statCallOiSub').textContent  = 'Chg: ' + formatOIChange(row.call_oi_change);
+    el('statPutOiSub').textContent   = 'Chg: ' + formatOIChange(row.put_oi_change);
+    el('statPcrSub').textContent     = pcr > 1.2 ? 'Bullish bias' : pcr < 0.8 ? 'Bearish bias' : 'Neutral';
+    el('statAtmIvSub').textContent   = 'At-the-money IV';
+  }
+}
+
+function updateLastUpdateLabel() {
+  var now = new Date();
+  var hh  = String(now.getHours()).padStart(2,'0');
+  var mm  = String(now.getMinutes()).padStart(2,'0');
+  var ss  = String(now.getSeconds()).padStart(2,'0');
+  el('lastUpdateLabel').textContent = 'Last update: ' + hh + ':' + mm + ':' + ss;
+  el('updateTime').textContent      = hh + ':' + mm + ':' + ss;
+}
+
+/* ---- API Calls ---- */
+function fetchCurrentSymbol(isManual) {
+  if (state.isLoading) return;
+  var sym = state.currentSymbol;
+  if (!isManual) setLoading(false); // silent refresh
+  if (isManual)  setLoading(true);
+
+  fetch('/api/oi-timeseries?symbol=' + encodeURIComponent(sym))
+    .then(function(res) {
+      if (res.status === 429) { showToast('Max subscriptions reached (5 stocks)', 'error'); throw new Error('429'); }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      var rows = Array.isArray(data) ? data : (data.rows || data.data || data.snapshots || []);
+      renderTable(rows, !isManual);
+
+      // Track subscription
+      if (!state.subscriptions[sym]) {
+        state.subscriptions[sym] = { count: rows.length };
+        renderSubChips();
+        if (sym !== 'NIFTY' && sym !== 'BANKNIFTY' && sym !== 'FINNIFTY') {
+          showToast('Subscription started: ' + sym, 'success');
+        }
+      } else {
+        state.subscriptions[sym].count = rows.length;
+        renderSubChips();
+      }
+      setLoading(false);
+    })
+    .catch(function(err) {
+      if (err.message !== '429') {
+        setLoading(false);
+        if (isManual) showToast('Failed to load OI data: ' + err.message, 'error');
+        // Show empty state if no data
+        if (state.snapshots.length === 0) {
+          el('loadingState').classList.add('hidden');
+          el('emptyState').classList.remove('hidden');
+          el('oiTable').classList.add('hidden');
+        }
+      }
+    });
+}
+
+function fetchActiveSubscriptions() {
+  fetch('/api/oi-timeseries/active')
+    .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(function(data) {
+      // Expected: { subscriptions: [{symbol, snapshot_count}], max_slots: 5 }
+      var subs = data.subscriptions || data || [];
+      if (Array.isArray(subs)) {
+        subs.forEach(function(s) {
+          var sym = s.symbol || s;
+          state.subscriptions[sym] = { count: s.snapshot_count || s.count || 0 };
+          // Add to dropdown if not present
+          updateSymbolDropdown(sym);
+        });
+      }
+      if (data.max_slots) state.maxSlots = data.max_slots;
+      renderSubChips();
+    })
+    .catch(function() {
+      // Silently fail — subscriptions panel will just show current symbol
+    });
+}
+
+/* ---- Symbol switching ---- */
+function switchSymbol(sym) {
+  sym = sym.toUpperCase().trim();
+  if (!sym) return;
+  state.currentSymbol = sym;
+  state.snapshots     = [];
+  updateSymbolDropdown(sym);
+  clearStatCards();
+  el('loadingState').classList.remove('hidden');
+  el('emptyState').classList.add('hidden');
+  el('oiTable').classList.add('hidden');
+  fetchCurrentSymbol(true);
+  renderSubChips();
+  startCountdown();
+}
+
+/* ---- Add Stock ---- */
+function toggleAddStock() {
+  state.isAddStockOpen = !state.isAddStockOpen;
+  var inp  = el('addStockInput');
+  var conf = el('addStockConfirmBtn');
+  var canc = el('addStockCancelBtn');
+  var btn  = el('addStockBtn');
+  inp.classList.toggle('open', state.isAddStockOpen);
+  conf.classList.toggle('hidden', !state.isAddStockOpen);
+  canc.classList.toggle('hidden', !state.isAddStockOpen);
+  if (state.isAddStockOpen) { inp.value = ''; inp.focus(); btn.textContent = ''; }
+  else { btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add Stock'; }
+}
+
+function cancelAddStock() {
+  state.isAddStockOpen = true;
+  toggleAddStock();
+}
+
+function confirmAddStock() {
+  var val = el('addStockInput').value.toUpperCase().trim().replace(/[^A-Z0-9&-]/g,'');
+  if (!val) { el('addStockInput').focus(); return; }
+  var stockCount = Object.keys(state.subscriptions).filter(function(s) {
+    return !['NIFTY','BANKNIFTY','FINNIFTY','SENSEX'].includes(s);
+  }).length;
+  if (stockCount >= state.maxSlots) {
+    showToast('Max ' + state.maxSlots + ' stock slots used. Unsubscribe one first.', 'error');
+    return;
+  }
+  cancelAddStock();
+  switchSymbol(val);
+}
+
+function handleAddStockKey(e) {
+  if (e.key === 'Enter') confirmAddStock();
+  if (e.key === 'Escape') cancelAddStock();
+  el('addStockInput').value = el('addStockInput').value.toUpperCase();
+}
+
+/* ---- Unsubscribe ---- */
+function unsubscribe(sym) {
+  if (!sym || ['NIFTY','BANKNIFTY','FINNIFTY','SENSEX'].includes(sym)) return;
+  fetch('/api/oi-timeseries/unsubscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ symbol: sym })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function() {
+    delete state.subscriptions[sym];
+    // Remove from dropdown
+    var sel = el('symbolSelect');
+    for (var i = sel.options.length - 1; i >= 0; i--) {
+      if (sel.options[i].value === sym) { sel.remove(i); break; }
+    }
+    if (state.currentSymbol === sym) switchSymbol('NIFTY');
+    else renderSubChips();
+    showToast('Unsubscribed: ' + sym, 'info');
+  })
+  .catch(function() {
+    // Optimistic: remove locally even if request failed
+    delete state.subscriptions[sym];
+    renderSubChips();
+    showToast('Unsubscribed: ' + sym, 'info');
+  });
+}
+
+/* ---- Clock tick ---- */
+function tickClock() {
+  var now = new Date();
+  var hh  = String(now.getHours()).padStart(2,'0');
+  var mm  = String(now.getMinutes()).padStart(2,'0');
+  var ss  = String(now.getSeconds()).padStart(2,'0');
+  el('footerTime').textContent = hh + ':' + mm + ':' + ss + ' IST';
+  if (ss === '00') checkMarketStatus();
+}
+
+/* ---- Wire up UI events ---- */
+el('symbolSelect').addEventListener('change', function() {
+  switchSymbol(this.value);
+});
+
+el('autoRefreshToggle').addEventListener('change', function() {
+  state.autoRefresh = this.checked;
+  if (state.autoRefresh) startCountdown();
+  else stopCountdown();
+});
+
+/* ---- Bootstrap ---- */
+function init() {
+  checkMarketStatus();
+  fetchActiveSubscriptions();
+  fetchCurrentSymbol(true);
+
+  // Default: add NIFTY subscription marker
+  state.subscriptions['NIFTY'] = { count: 0 };
+  renderSubChips();
+
+  if (state.autoRefresh) startCountdown();
+  setInterval(tickClock, 1000);
+  tickClock();
+}
+
+// Stagger init slightly to let auth cookie settle
+setTimeout(init, 120);
+</script>
+</body>
+</html>
