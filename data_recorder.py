@@ -913,6 +913,7 @@ logging.Formatter.converter = custom_time
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
+if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "stats"
 
     if cmd == "init":
