@@ -1,6 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="bloomberg-pro">
 <head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quantra Terminal - Sectors</title>
@@ -107,7 +113,7 @@ a:hover { text-decoration: underline; }
    NAVIGATION BAR
    ============================================================ */
 .q-nav {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   height: var(--nav-height);
   background: linear-gradient(180deg, rgba(24,24,27,0.95) 0%, rgba(18,18,20,0.98) 100%);
@@ -132,7 +138,7 @@ a:hover { text-decoration: underline; }
   background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(6,182,212,0.2) 70%, transparent 100%);
 }
 .q-nav-brand {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 10px;
   font-weight: var(--fw-bold);
@@ -151,7 +157,7 @@ a:hover { text-decoration: underline; }
   height: 28px;
   background: linear-gradient(135deg, var(--blue), #06b6d4);
   border-radius: 7px;
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   justify-content: center;
   font-size: 14px;
@@ -178,7 +184,7 @@ a:hover { text-decoration: underline; }
   margin-left: -2px;
 }
 .q-nav-links {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 2px;
   flex: 1;
@@ -205,7 +211,7 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
 }
 .q-nav-status {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 10px;
   font-size: var(--fs-xs);
@@ -262,7 +268,7 @@ a:hover { text-decoration: underline; }
   font-weight: var(--fw-semibold);
   color: var(--text-bright);
   margin-bottom: 12px;
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 8px;
 }
@@ -467,7 +473,7 @@ a:hover { text-decoration: underline; }
   inset: 0;
   background: linear-gradient(135deg, var(--bg) 0%, #0d0d10 50%, var(--bg) 100%);
   z-index: 9998;
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -505,7 +511,7 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: center;
 }
-.q-modal-overlay.open { display: flex; }
+.q-modal-overlay.open { display: flex; gap: 15px; }
 .q-modal {
   background: var(--surface);
   border: 1px solid var(--border-light);
@@ -527,7 +533,7 @@ a:hover { text-decoration: underline; }
   height: 28px;
   background: var(--surface);
   border-top: 1px solid var(--border);
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
@@ -580,7 +586,7 @@ a:hover { text-decoration: underline; }
 
 /* --- Tabs --- */
 .q-tabs {
-  display: flex;
+  display: flex; gap: 15px;
   gap: 2px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 12px;
@@ -708,17 +714,22 @@ a:hover { text-decoration: underline; }
   text-decoration: underline;
 }
 </style>
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+<link rel="stylesheet" href="/static/css/themes.css">
+
 <style>
 /* -- Page-level overrides -- */
 html, body { height: 100%; overflow: hidden; }
 body {
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
 }
 
 /* -- Main Layout -- */
 .main-layout {
-  display: flex;
+  display: flex; gap: 15px;
   flex: 1;
   overflow: hidden;
 }
@@ -729,7 +740,7 @@ body {
   min-width: 230px;
   background: var(--surface-alt);
   border-right: 1px solid var(--border);
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
   overflow: hidden;
 }
@@ -767,7 +778,7 @@ body {
   padding: 4px 0;
 }
 .sector-item {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   padding: 10px 14px;
   cursor: pointer;
@@ -792,9 +803,8 @@ body {
   flex: 1;
   font-size: 12.5px;
   font-weight: var(--fw-medium);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.2;
 }
 .sector-item .sector-mini-bar,
 .sector-item .s-bar {
@@ -831,7 +841,7 @@ body {
 /* -- Content Area -- */
 .content {
   flex: 1;
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
@@ -841,7 +851,7 @@ body {
 .sector-header {
   padding: 14px 20px 12px;
   border-bottom: 1px solid var(--border);
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 14px;
   flex-shrink: 0;
@@ -860,7 +870,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .sector-header .sh-stats {
-  display: flex;
+  display: flex; gap: 15px;
   gap: 18px;
   margin-left: 16px;
   font-size: var(--fs-sm);
@@ -914,7 +924,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.6px;
   margin-bottom: 8px;
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 8px;
 }
@@ -938,12 +948,12 @@ body {
   background: rgba(255,255,255,0.04);
 }
 .barchart-grid {
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
   gap: 4px;
 }
 .bar-row {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 6px;
   cursor: pointer;
@@ -1000,7 +1010,7 @@ body {
 /* -- Kanban Area -- */
 .kanban-area {
   flex: 1;
-  display: flex;
+  display: flex; gap: 15px;
   gap: 8px;
   padding: 12px 14px;
   overflow-x: auto;
@@ -1011,7 +1021,7 @@ body {
   flex: 1;
   min-width: 155px;
   max-width: 280px;
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
   background: var(--surface);
   border-radius: var(--radius-lg);
@@ -1025,7 +1035,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--border);
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
@@ -1058,7 +1068,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 6px;
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
   gap: 5px;
 }
@@ -1085,13 +1095,13 @@ body {
   transform: translateY(-1px);
 }
 .stock-card .sc-top {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
 }
 .stock-card .sc-sym-wrap {
-  display: flex;
+  display: flex; gap: 15px;
   align-items: center;
   gap: 4px;
   min-width: 0;
@@ -1129,7 +1139,7 @@ body {
 .sc-chg.zero { background: rgba(255,255,255,0.05); color: var(--text-dim); }
 
 .stock-card .sc-row {
-  display: flex;
+  display: flex; gap: 15px;
   justify-content: space-between;
   font-size: 11.5px;
   color: var(--text-dim);
@@ -1141,7 +1151,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .stock-card .sc-tags {
-  display: flex;
+  display: flex; gap: 15px;
   gap: 4px;
   margin-top: 6px;
   flex-wrap: wrap;
@@ -1196,7 +1206,7 @@ body {
 
 /* -- Loading State -- */
 .loading-state {
-  display: flex;
+  display: flex; gap: 15px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -1251,6 +1261,11 @@ body {
   text-decoration: underline;
 }
 </style>
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+<link rel="stylesheet" href="/static/css/themes.css">
+
 </head>
 <body>
 <script>
@@ -1279,37 +1294,124 @@ body {
 
 <!-- Navigation Bar -->
 <nav class="q-nav">
-  <a href="/" class="q-nav-brand">
-    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="navLogoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
-      <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#navLogoGrad)" stroke-width="3.5" fill="none"/>
-      <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#navLogoGrad)" opacity="0.85"/>
-      <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <line x1="18" y1="28" x2="46" y2="20" stroke="url(#navLogoGrad)" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-    </svg>
-    <div style="display:flex;flex-direction:column;line-height:1;">
-      <span class="brand-text">QUANTRA</span>
-    </div>
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
   </a>
+
   <div class="q-nav-links">
-    <a href="/">Dashboard</a>
-    <a href="/paper">Paper Trades</a>
-    <a href="/sectors" class="active">Sectors</a>
-    <a href="/rsi">RSI Scanner</a>
-    <a href="/rsi-analysis">Stock Analysis</a>
-    <a href="/divergence">Divergence</a>
-    <a href="/profile">Profile</a>
-    <a href="/admin">Admin</a>
+    <a href="/" id="nav-dashboard">Dashboard</a>
+    <a href="/sectors" id="nav-sectors" class="active">Sectors</a>
+    <a href="/nifty" id="nav-nifty">Nifty 50</a>
   </div>
-  <div class="q-nav-status">
-    <span class="pulse-dot" id="pulseDot"></span>
-    <span class="pulse-dot" id="logoPulse" style="display:none"></span>
-    <span class="conn-dot off" id="connDot"></span>
-    <span id="connText">Connecting</span>
-    <span id="updateTime"></span>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/advanced-analytics" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Advanced Desk</span>
+        </a>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
   </div>
-  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
 </nav>
 
 <!-- Main Layout -->
@@ -1607,25 +1709,90 @@ document.getElementById("sectorSearch").addEventListener("input", function() {
  }
 });
 
+
 // ===============================================
+// User Profile Load
+function populateUserInfo(username, role) {
+  if (!username) return;
+  var initials = username.substring(0, 2).toUpperCase();
+  var el1 = document.getElementById('userInitials'); if(el1) el1.textContent = initials;
+  var el2 = document.getElementById('userInitials2'); if(el2) el2.textContent = initials;
+  var el3 = document.getElementById('userName'); if(el3) el3.textContent = username;
+  var el4 = document.getElementById('userName2'); if(el4) el4.textContent = username;
+  var roleText = role === 'admin' ? 'Administrator' : 'Member';
+  var elRole = document.getElementById('userRole'); if(elRole) elRole.textContent = roleText;
+  var adminLink = document.getElementById('userMenuAdmin');
+  if (adminLink && role === 'admin') adminLink.style.display = '';
+}
+
+fetch('/api/auth/verify', {credentials:'same-origin'})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if(d && d.user){
+      window.currentUser = { user: d.user, role: d.role, plan: d.plan, theme: d.theme };
+      if (d.theme) localStorage.setItem('quantra-theme', d.theme);
+      populateUserInfo(d.user, d.role);
+      
+      if(d.role!=='admin'&&d.admin_paths){
+        var links=document.querySelectorAll('.q-nav-links a');
+        links.forEach(function(a){
+          var href=a.getAttribute('href');
+          if(d.admin_paths.indexOf(href)!==-1){
+            a.style.display='none';
+          }
+        });
+      }
+    }
+  }).catch(function(e){});
+
+// ===============================================
+// User dropdown toggle
+function toggleUserMenu() {
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userMenuBtn');
+  
+  if (menu.style.display === 'none' || menu.style.display === '') {
+    menu.style.display = 'block';
+    btn.classList.add('open');
+  } else {
+    menu.style.display = 'none';
+    btn.classList.remove('open');
+  }
+}
+
 // SELECT SECTOR
 // ===============================================
 function selectSector(sec) {
- if (activeSector === sec) return;
- activeSector = sec;
+  if (activeSector === sec) {
+    activeSector = null; // Toggle off
+  } else {
+    activeSector = sec;
+  }
 
- // Update sidebar active state
- for (const s of Object.keys(sidebarCache)) {
- sidebarCache[s].el.classList.toggle("active", s === sec);
- }
+  for (const s of Object.keys(sidebarCache)) {
+    sidebarCache[s].el.classList.toggle("active", s === activeSector);
+  }
 
- // Update bar chart active state
- for (const s of Object.keys(barRowCache)) {
- barRowCache[s].rowEl.classList.toggle("active", s === sec);
- }
+  for (const s of Object.keys(barRowCache)) {
+    barRowCache[s].rowEl.classList.toggle("active", s === activeSector);
+  }
 
- renderSectorHeader();
- renderKanban();
+  renderSectorHeader();
+  renderKanban();
+
+  const kanban = document.getElementById("kanbanArea");
+  const header = document.getElementById("sectorHeader");
+  const barchart = document.querySelector(".barchart-area");
+  
+  if (activeSector) {
+    kanban.style.display = "flex";
+    header.style.display = "flex";
+    if (barchart) barchart.style.display = "none";
+  } else {
+    kanban.style.display = "none";
+    header.style.display = "none";
+    if (barchart) barchart.style.display = "block";
+  }
 }
 
 // ===============================================
@@ -1916,7 +2083,7 @@ function updateBottomBar() {
 function setConnStatus(state) {
  const dot = document.getElementById("connDot");
  const text = document.getElementById("connText");
- const pulse = document.getElementById("logoPulse");
+ const pulse = document.getElementById("pulseDot");
  const fDot = document.getElementById("footerDot");
  const fStatus = document.getElementById("footerStatus");
 
@@ -2058,10 +2225,8 @@ function fullRender() {
  buildSectors();
  const sorted = sortedSectorKeys();
 
- // Default to first (best-performing) sector
- if (!activeSector || !sectors[activeSector]) {
- activeSector = sorted.length >0 ? sorted[0] : null;
- }
+ // Do NOT auto-select the first sector initially
+ // Let the user click to open kanban
 
  renderSidebar();
  renderBarChart();

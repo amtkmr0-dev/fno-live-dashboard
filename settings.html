@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="bloomberg-pro">
+<head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Quantra Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Obsidian Glassmorphic Theme System ── */
+:root {
+  --bg: #050508;
+  --surface: rgba(18, 18, 28, 0.45);
+  --surface-alt: rgba(26, 26, 38, 0.7);
+  --surface-hover: rgba(38, 38, 56, 0.6);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --border-focus: #3b82f6;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-vdim: #64748b;
+  --text-bright: #f8fafc;
+  
+  --accent: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.35);
+  --accent-soft: rgba(59, 130, 246, 0.08);
+  --accent-hover: #2563eb;
+  
+  --green: #10b981;
+  --green-soft: rgba(16, 185, 129, 0.08);
+  
+  --red: #f43f5e;
+  --red-soft: rgba(244, 63, 94, 0.08);
+  
+  --gold: #eab308;
+  --gold-soft: rgba(234, 179, 8, 0.08);
+  
+  --orange: #f97316;
+  --orange-soft: rgba(249, 115, 22, 0.1);
+  
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --nav-h: 52px;
+  --sidebar-w: 240px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+a { color: var(--accent); text-decoration: none; transition: var(--transition); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 99px; }
+
+/* ── Nav Bar ── */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-h);
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text-bright);
+  letter-spacing: 1px;
+}
+.q-nav-brand svg {
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.4));
+}
+.q-nav-links { display: flex; gap: 4px; }
+.q-nav-links a {
+  padding: 6px 14px;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.q-nav-links a:hover {
+  color: var(--text-bright);
+  background: rgba(255, 255, 255, 0.03);
+}
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+}
+.q-nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.q-nav-user { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); }
+.q-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+/* ── Layout ── */
+.settings-layout { display: flex; height: calc(100vh - var(--nav-h)); overflow: hidden; }
+
+/* ── Sidebar ── */
+.settings-sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: rgba(10, 10, 15, 0.4);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px 0;
+}
+.sidebar-section-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-vdim);
+  padding: 12px 20px 6px;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+  user-select: none;
+}
+.sidebar-item:hover {
+  color: var(--text-bright);
+  background: rgba(255, 255, 255, 0.02);
+}
+.sidebar-item.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-left-color: var(--accent);
+  box-shadow: inset 1px 0 0 rgba(59, 130, 246, 0.1);
+}
+.sidebar-item .si-ico {
+  font-size: 15px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.sidebar-divider { height: 1px; background: var(--border); margin: 12px 20px; }
+
+/* ── Main Content Area ── */
+.settings-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 36px 40px 60px;
+  max-width: 820px;
+}
+
+/* ── Section Header ── */
+.settings-section { display: none; }
+.settings-section.active { display: block; }
+.section-title { font-size: 20px; font-weight: 800; color: var(--text-bright); margin-bottom: 6px; letter-spacing: -0.3px; }
+.section-sub { font-size: 12.5px; color: var(--text-dim); margin-bottom: 28px; }
+
+/* ── Card/Setting Groups ── */
+.setting-group {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+.sg-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.01);
+}
+.sg-title { font-size: 13.5px; font-weight: 700; color: var(--text-bright); }
+.sg-desc { font-size: 11.5px; color: var(--text-dim); margin-top: 3px; }
+
+/* Setting Row */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  position: relative;
+}
+.setting-row:last-child { border-bottom: none; }
+.sr-left { flex: 1; min-width: 0; }
+.sr-label { font-size: 13px; font-weight: 600; color: var(--text-bright); }
+.sr-desc { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; line-height: 1.5; }
+.sr-control { flex-shrink: 0; }
+
+/* ── Custom Glass Lock Overlays ── */
+.pro-lock-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(5, 5, 8, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--r-lg);
+  border: 1px dashed rgba(234, 179, 8, 0.25);
+  padding: 24px;
+  text-align: center;
+  box-shadow: inset 0 0 30px rgba(234, 179, 8, 0.05);
+}
+.pro-lock-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 12px var(--gold));
+}
+.pro-lock-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+  letter-spacing: -0.2px;
+}
+.pro-lock-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  max-width: 320px;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+/* ── Interactive Controls ── */
+.q-input {
+  background: rgba(10, 10, 15, 0.6);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 12.5px;
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition);
+  width: 100%;
+}
+.q-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 16px var(--accent-glow);
+  background: rgba(10, 10, 15, 0.85);
+}
+.q-input-sm { width: 120px; text-align: center; }
+.q-input-md { width: 180px; }
+
+.q-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid transparent;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.q-btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+}
+.q-btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+}
+.q-btn-primary:active { transform: translateY(0); }
+.q-btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+.q-btn-ghost:hover {
+  color: var(--text-bright);
+  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.02);
+}
+.q-btn-danger {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.2);
+}
+.q-btn-danger:hover {
+  background: #e11d48;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.35);
+}
+.q-btn-danger:active { transform: translateY(0); }
+.q-btn-sm { padding: 6px 12px; font-size: 11px; }
+
+/* Translucent Toggle Switches */
+.q-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.q-toggle input { display: none; }
+.q-toggle .track {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  transition: var(--transition);
+}
+.q-toggle .thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.q-toggle input:checked + .track {
+  background: var(--green-soft);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.q-toggle input:checked ~ .thumb {
+  transform: translateX(20px);
+  background: var(--green);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.save-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.01);
+}
+.save-msg { font-size: 11.5px; font-weight: 600; }
+
+/* ── Interactive Column Picker ── */
+.col-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+  padding: 20px 22px;
+}
+.col-pick-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: rgba(10, 10, 15, 0.4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+.col-pick-item:hover {
+  border-color: var(--border-hover);
+  background: rgba(10, 10, 15, 0.65);
+}
+.col-pick-item.on {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: var(--accent-soft);
+}
+.col-pick-item input[type=checkbox] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.col-pick-name { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+.col-pick-key {
+  font-size: 9.5px;
+  color: var(--text-vdim);
+  font-family: var(--font-mono);
+  margin-left: auto;
+}
+.col-pick-item.on .col-pick-name { color: var(--text-bright); }
+
+.col-presets { display: flex; gap: 8px; padding: 20px 22px 0; }
+.col-preset-btn {
+  background: rgba(10, 10, 15, 0.4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition);
+}
+.col-preset-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ── Preferred Sectors Grid ── */
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  padding: 20px 22px;
+}
+.sector-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(10, 10, 15, 0.4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  transition: var(--transition);
+  user-select: none;
+}
+.sector-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text-bright);
+}
+.sector-chip.on {
+  border-color: rgba(59, 130, 246, 0.35);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+}
+.sector-chip input { display: none; }
+
+/* ── Toast Notifications ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(15, 15, 23, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-bright);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  max-width: 380px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.ok { border-left: 4px solid var(--green); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.15); }
+.toast.err { border-left: 4px solid var(--red); box-shadow: 0 10px 40px rgba(244, 63, 94, 0.15); }
+.toast.warn { border-left: 4px solid var(--orange); box-shadow: 0 10px 40px rgba(249, 115, 22, 0.15); }
+
+.compliance-bar {
+  text-align: center;
+  padding: 12px 20px;
+  font-size: 10px;
+  color: var(--text-vdim);
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+}
+
+/* ── Mobile Responsiveness ── */
+@media(max-width: 768px) {
+  .settings-layout {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .settings-sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    white-space: nowrap;
+  }
+  .sidebar-section-label { display: none; }
+  .sidebar-item { padding: 8px 12px; border-left: none; border-bottom: 3px solid transparent; }
+  .sidebar-item.active { border-left: none; border-bottom-color: var(--accent); box-shadow: inset 0 -1px 0 rgba(59, 130, 246, 0.1); }
+  .sidebar-divider { display: none; }
+  .settings-main { padding: 20px; }
+  .setting-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .sr-control, .q-input { width: 100%; }
+}
+</style>
+
+
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+
+  <link rel="stylesheet" href="/static/css/themes.css">
+</head>
+<body>
+<!-- Auth handled by nav-common.js -->
+
+<div class="toast" id="toast"></div>
+
+<!-- Navigation Header -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
+  </a>
+
+  <div class="q-nav-links">
+    <a href="/" id="nav-dashboard">Dashboard</a>
+    <a href="/sectors" id="nav-sectors">Sectors</a>
+    <a href="/nifty" id="nav-nifty">Nifty 50</a>
+</div>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/advanced-analytics" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Advanced Desk</span>
+        </a>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="settings-layout">
+  <!-- Left Glassmorphic Sidebar -->
+  <aside class="settings-sidebar">
+    <div class="sidebar-section-label">Preferences</div>
+    <div class="sidebar-item active" data-section="display" onclick="switchSection('display')">
+      <span class="si-ico">&#9783;</span> Display columns
+    </div>
+    <div class="sidebar-item" data-section="trading" onclick="switchSection('trading')">
+      <span class="si-ico">&#128200;</span> Trading default
+    </div>
+    <div class="sidebar-item" data-section="autotrade" onclick="switchSection('autotrade')">
+      <span class="si-ico">&#129302;</span> Auto-Trade options
+    </div>
+    <div class="sidebar-item" data-section="notifications" onclick="switchSection('notifications')">
+      <span class="si-ico">&#128276;</span> Notifications channels
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-label">Account</div>
+    <div class="sidebar-item" data-section="billing" onclick="switchSection('billing')">
+      <span class="si-ico">💳</span> Billing & Plan
+    </div>
+    <div class="sidebar-item" data-section="security" onclick="switchSection('security')">
+      <span class="si-ico">&#128274;</span> Security passwords
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="window.location.href='/profile'" style="margin-top:4px;">
+      <span class="si-ico">&#128100;</span> Back to Profile
+    </div>
+  </aside>
+
+  <!-- Main Content Panel -->
+  <main class="settings-main">
+    
+    <!-- ══ 1. DISPLAY PREFERENCES ══ -->
+    <div class="settings-section active" id="sec-display">
+      <div class="section-title">Display Preferences</div>
+      <div class="section-sub">Customize NIFTY F&O live dashboard grid headers. Changes save to your cloud account instantly.</div>
+
+      <div class="setting-group">
+        <div class="sg-header">
+          <div class="sg-title">Active Dashboard Columns</div>
+          <div class="sg-desc">Toggle columns to show on your dashboard. Symbol is pinned as default core columns.</div>
+        </div>
+        <div class="col-presets">
+          <button class="col-preset-btn" onclick="applyPreset('compact')">Compact</button>
+          <button class="col-preset-btn" onclick="applyPreset('standard')">Standard</button>
+          <button class="col-preset-btn" onclick="applyPreset('full')">Full detail</button>
+          <button class="col-preset-btn" onclick="applyPreset('reset')" style="margin-left:auto;color:var(--text-vdim);">Reset columns</button>
+        </div>
+        <div class="col-picker-grid" id="colPickerGrid"><!-- Dynamic --></div>
+        <div class="save-bar">
+          <button class="q-btn q-btn-primary" onclick="saveColumnConfig()">Save columns</button>
+          <span class="save-msg" id="col-save-msg"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ 2. TRADING DEFAULTS ══ -->
+    <div class="settings-section" id="sec-trading">
+      <div class="section-title">Trading defaults</div>
+      <div class="section-sub">Manage default sizes, maximum allocations, and automated triggers.</div>
+
+      <div class="setting-group">
+        <div class="sg-header"><div class="sg-title">Paper Risk Controls</div></div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Max daily paper trades</div>
+            <div class="sr-desc">Stops new manual trade execution when limits are reached.</div>
+          </div>
+          <div class="sr-control"><input class="q-input q-input-sm" type="number" id="ts-max-trades" min="1" max="10" value="2"></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Default lots count</div>
+            <div class="sr-desc">Quantity of lot sizes for trade entries.</div>
+          </div>
+          <div class="sr-control"><input class="q-input q-input-sm" type="number" id="ts-lots" min="1" max="20" value="1"></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Allocated Capital (₹)</div>
+            <div class="sr-desc">Assigned capital value used to track profits and commissions.</div>
+          </div>
+          <div class="sr-control"><input class="q-input q-input-md" type="number" id="ts-capital" min="1000" step="1000" placeholder="100000"></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Auto-exit on target/stop-loss</div>
+            <div class="sr-desc">Instantly close open paper contracts if stop-loss or Target 2 boundaries are reached.</div>
+          </div>
+          <div class="sr-control"><label class="q-toggle"><input type="checkbox" id="ts-auto-exit"><span class="track"></span><span class="thumb"></span></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Trail Stop-Loss to Breakeven</div>
+            <div class="sr-desc">Automatically locks SL to entry premium values when Target 1 is reached.</div>
+          </div>
+          <div class="sr-control"><label class="q-toggle"><input type="checkbox" id="ts-trail-sl"><span class="track"></span><span class="thumb"></span></label></div>
+        </div>
+        <div class="save-bar">
+          <button class="q-btn q-btn-primary" onclick="saveTradingSettings()">Save trading settings</button>
+          <span class="save-msg" id="ts-save-msg"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 3. AUTO-TRADING OPTIONS ══ -->
+    <div class="settings-section" id="sec-autotrade">
+      <div class="section-title">Auto-Trade options</div>
+      <div class="section-sub">Configure algorithmic automated paper entry scanners. Scans NSE options lists on 5-minute intervals.</div>
+
+      <div class="setting-group" id="sec-autotrade-group">
+        <div class="sg-header"><div class="sg-title">Scanner controls</div></div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Activate auto-trade engine</div>
+            <div class="sr-desc" style="color:var(--orange);font-weight:600;">⚠️ Triggers fully automated server trade execution. Understand indicators before launching.</div>
+          </div>
+          <div class="sr-control"><label class="q-toggle"><input type="checkbox" id="at-enabled"><span class="track"></span><span class="thumb"></span></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Max concurrent auto trades</div>
+            <div class="sr-desc">Maximum number of automated open trades allowed.</div>
+          </div>
+          <div class="sr-control"><input class="q-input q-input-sm" type="number" id="at-max-pos" min="1" max="5" value="2"></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Max assigned capital (₹)</div>
+            <div class="sr-desc">Stops automated scanner once utilized capital meets this ceiling.</div>
+          </div>
+          <div class="sr-control"><input class="q-input q-input-md" type="number" id="at-max-cap" min="10000" step="10000" placeholder="200000"></div>
+        </div>
+      </div>
+
+      <div class="setting-group" id="sec-autotrade-sectors">
+        <div class="sg-header">
+          <div class="sg-title">Priority sector filters</div>
+          <div class="sg-desc">Priority sectors Nifty FNO scanner targets. Leave all blank to search entire indexes.</div>
+        </div>
+        <div class="sector-grid" id="sectorGrid"><!-- Dynamic --></div>
+        <div class="save-bar">
+          <button class="q-btn q-btn-primary" onclick="saveAutoSettings()">Save auto-trade settings</button>
+          <span class="save-msg" id="at-save-msg"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4. NOTIFICATIONS CHANNELS ══ -->
+    <div class="settings-section" id="sec-notifications">
+      <div class="section-title">Notifications channels</div>
+      <div class="section-sub">Receive instant alerts for entries, exits, target hits, or stop-loss hits.</div>
+
+      <div class="setting-group" id="sec-notifications-group">
+        <div class="sg-header"><div class="sg-title">Alert routes</div></div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Enable email alerts</div>
+            <div class="sr-desc">Sends structured trade execution logs to verified email.</div>
+          </div>
+          <div class="sr-control"><label class="q-toggle"><input type="checkbox" id="notif-email"><span class="track"></span><span class="thumb"></span></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Enable Telegram channel broadcasts</div>
+            <div class="sr-desc">Broadcasts alerts directly to configured Telegram channels.</div>
+          </div>
+          <div class="sr-control"><label class="q-toggle"><input type="checkbox" id="notif-tg"><span class="track"></span><span class="thumb"></span></label></div>
+        </div>
+        <div class="setting-row" id="tg-chat-row">
+          <div class="sr-left">
+            <div class="sr-label">Telegram chat / group ID</div>
+            <div class="sr-desc">Retrieve from Telegram @userinfobot to fetch active routing numbers.</div>
+          </div>
+          <div class="sr-control"><input class="q-input q-input-md" type="text" id="notif-tg-id" placeholder="e.g. 1713719957"></div>
+        </div>
+        <div class="save-bar">
+          <button class="q-btn q-btn-primary" onclick="saveNotifSettings()">Save channels</button>
+          <span class="save-msg" id="notif-save-msg"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 5. SECURITY PASSWORDS ══ -->
+    <div class="settings-section" id="sec-security">
+      <div class="section-title">Security & Sessions</div>
+      <div class="section-sub">Secure credentials and manage active server login connections.</div>
+
+      <div class="setting-group">
+        <div class="sg-header"><div class="sg-title">Update Password</div></div>
+        <div class="setting-row">
+          <div class="sr-left"><div class="sr-label">Current password</div></div>
+          <div class="sr-control"><input class="q-input q-input-md" type="password" id="sec-cur-pw" placeholder="Current password" autocomplete="current-password"></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">New secure password</div>
+            <div class="sr-desc">Must be at least 8 characters long.</div>
+          </div>
+          <div class="sr-control"><input class="q-input q-input-md" type="password" id="sec-new-pw" placeholder="New password" autocomplete="new-password"></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-left"><div class="sr-label">Confirm password</div></div>
+          <div class="sr-control"><input class="q-input q-input-md" type="password" id="sec-conf-pw" placeholder="Confirm password" autocomplete="new-password"></div>
+        </div>
+        <div class="save-bar">
+          <button class="q-btn q-btn-primary" onclick="changePassword()">Change Password</button>
+          <span class="save-msg" id="sec-pw-msg"></span>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <div class="sg-header"><div class="sg-title">Platform Connections</div></div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label">Active logged sessions</div>
+            <div class="sr-desc" id="sec-sessions-desc">Checking details…</div>
+          </div>
+          <div class="sr-control">
+            <button class="q-btn q-btn-danger q-btn-sm" onclick="logoutAll()">Disconnect all other devices</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 6. BILLING PLAN ══ -->
+    <div class="settings-section" id="sec-billing">
+      <div class="section-title">Billing & Plan</div>
+      <div class="section-sub">Upgrade accounts or manage active premium memberships.</div>
+
+      <div class="setting-group" id="billing-status-card">
+        <div class="sg-header"><div class="sg-title">Active Account Status</div></div>
+        <div class="setting-row">
+          <div class="sr-left">
+            <div class="sr-label" id="billing-plan-label">Free Membership</div>
+            <div class="sr-desc" id="billing-plan-desc">Paper trading features and core scanning logs active.</div>
+          </div>
+          <div class="sr-control">
+            <span id="billing-plan-badge" style="display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(255,255,255,0.03);color:var(--text-dim);border:1px solid var(--border);">FREE</span>
+          </div>
+        </div>
+        <div class="setting-row" id="billing-expires-row" style="display:none;">
+          <div class="sr-left"><div class="sr-label">Active expires on</div></div>
+          <div class="sr-control">
+            <span id="billing-expires" style="font-size:12.5px;color:var(--green);font-weight:700;font-family:var(--font-mono);">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-group" id="billing-upgrade-card" style="display:none;">
+        <div class="sg-header">
+          <div class="sg-title">Unlock Quantra Pro</div>
+          <div class="sg-desc">Unlock full automated trading engines, unlimited AI bots, and dynamic dashboard configurations.</div>
+        </div>
+        <div style="padding: 24px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+            <div style="background:rgba(10, 10, 15, 0.4);border:1px solid var(--border);border-radius:10px;padding:20px;">
+              <div style="font-size:10px;color:var(--text-vdim);font-weight:800;letter-spacing:1px;margin-bottom:12px;text-transform:uppercase;">FREE TIER</div>
+              <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:8px;">✓ Manual paper trades</div>
+              <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:8px;">✓ Core OI scanners</div>
+              <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:8px;">✓ Standard chartings</div>
+              <div style="font-size:12.5px;color:var(--text-vdim);margin-bottom:8px;text-decoration:line-through;">✗ Algorithmic engines</div>
+              <div style="font-size:12.5px;color:var(--text-vdim);text-decoration:line-through;">✗ AI market analysis</div>
+            </div>
+            <div style="background:var(--accent-soft);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:20px;box-shadow:inset 0 0 20px rgba(59,130,246,0.05);">
+              <div style="font-size:10px;color:var(--accent);font-weight:800;letter-spacing:1px;margin-bottom:12px;text-transform:uppercase;">PRO MEMBERSHIP — ₹999/mo</div>
+              <div style="font-size:12.5px;color:var(--text-bright);margin-bottom:8px;font-weight:600;">✓ Includes all Free features</div>
+              <div style="font-size:12.5px;color:var(--accent);margin-bottom:8px;font-weight:700;">✓ Auto-trading signal engine</div>
+              <div style="font-size:12.5px;color:var(--text-bright);margin-bottom:8px;">✓ Unlimited AI copilot prompts</div>
+              <div style="font-size:12.5px;color:var(--text-bright);margin-bottom:8px;">✓ Instant Telegram alerts</div>
+              <div style="font-size:12.5px;color:var(--text-bright);font-weight:600;">✓ Custom column configurations</div>
+            </div>
+          </div>
+          
+          <button class="q-btn q-btn-primary" onclick="startCheckout()" style="width:100%;padding:12px;font-size:13px;font-weight:800;justify-content:center;">
+            💳 Upgrade to Quantra Pro — ₹999/month
+          </button>
+          <div style="text-align:center;font-size:10.5px;color:var(--text-vdim);margin-top:12px;font-weight:500;">Secure, instant checkout powered by Razorpay. Cancel anytime.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="compliance-bar">For educational paper-trading purposes only — not investment advice. &nbsp;·&nbsp; <a href="/terms" style="color:var(--text-vdim);">Terms</a> &nbsp;·&nbsp; <a href="/privacy" style="color:var(--text-vdim);">Privacy</a></div>
+
+<script>
+// ── UI Helpers ──
+function toggleUserMenu() {
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userMenuBtn');
+  if (menu.style.display === 'block') {
+    menu.style.display = 'none';
+    btn.classList.remove('active');
+  } else {
+    menu.style.display = 'block';
+    btn.classList.add('active');
+  }
+}
+
+// Close user menu when clicking outside
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userMenuBtn');
+  if (menu && btn && menu.style.display === 'block') {
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.style.display = 'none';
+      btn.classList.remove('active');
+    }
+  }
+});
+
+function populateUserInfo(username, role) {
+  if (!username) return;
+  var initials = username.substring(0, 2).toUpperCase();
+  document.getElementById('userInitials').textContent = initials;
+  document.getElementById('userInitials2').textContent = initials;
+  document.getElementById('userName').textContent = username;
+  document.getElementById('userName2').textContent = username;
+  document.getElementById('userRole').textContent = role === 'admin' ? 'Administrator' : 'Member';
+  var adminLink = document.getElementById('userMenuAdmin');
+  if (adminLink) adminLink.style.display = role === 'admin' ? 'block' : 'none';
+}
+
+// ── Core Settings Load ──
+function loadSettings(){
+  fetch('/api/auth/me')
+    .then(r => r.json())
+    .then(d => {
+      if (!d.ok) { window.location.href='/login'; return; }
+      window.__user = d.user;
+      populateUserInfo(d.user, d.role);
+    }).catch(console.error);
+
+  // Load plan and enforce premium layouts
+  fetch('/api/billing/status', {credentials: 'same-origin'})
+    .then(r => r.json())
+    .then(d => {
+      if (!d.ok) return;
+      _billingData = d;
+      var isPro = d.plan === 'pro';
+      
+      // Auto-trade section block for free tier
+      var secAuto = document.getElementById('sec-autotrade-group');
+      var secSectors = document.getElementById('sec-autotrade-sectors');
+      if (!isPro) {
+        if (!document.getElementById('autotrade-lock')) {
+          var overlay = document.createElement('div');
+          overlay.className = 'pro-lock-overlay';
+          overlay.id = 'autotrade-lock';
+          overlay.innerHTML = `
+            <div class="pro-lock-icon">🔒</div>
+            <div class="pro-lock-title">Quantra Pro Feature</div>
+            <div class="pro-lock-desc">Automated algorithmic auto-trading is a premium membership feature. Upgrade your plan to enable automatic order processing systems.</div>
+            <button class="q-btn q-btn-primary q-btn-sm" onclick="switchSection('billing')">💳 Upgrade to Pro</button>
+          `;
+          secAuto.style.position = 'relative';
+          secAuto.appendChild(overlay);
+          var overlay2 = overlay.cloneNode(true);
+          secSectors.style.position = 'relative';
+          secSectors.appendChild(overlay2);
+        }
+      } else {
+        var overlay = document.getElementById('autotrade-lock');
+        if (overlay) overlay.remove();
+      }
+
+      // Notifications section block for free tier
+      var secNotif = document.getElementById('sec-notifications-group');
+      if (!isPro) {
+        if (!document.getElementById('notif-lock')) {
+          var overlay = document.createElement('div');
+          overlay.className = 'pro-lock-overlay';
+          overlay.id = 'notif-lock';
+          overlay.innerHTML = `
+            <div class="pro-lock-icon">🔒</div>
+            <div class="pro-lock-title">Quantra Pro Feature</div>
+            <div class="pro-lock-desc">Telegram trading alerts channel routing is a premium membership feature. Upgrade your plan to receive instant trade notifications.</div>
+            <button class="q-btn q-btn-primary q-btn-sm" onclick="switchSection('billing')">💳 Upgrade to Pro</button>
+          `;
+          secNotif.style.position = 'relative';
+          secNotif.appendChild(overlay);
+        }
+      } else {
+        var overlay = document.getElementById('notif-lock');
+        if (overlay) overlay.remove();
+      }
+    }).catch(() => {});
+
+  fetch('/api/user/profile',{credentials:'same-origin'})
+    .then(r=>r.json())
+    .then(d=>{
+      if(!d.ok)return;
+      var s=d.settings||{};
+      var at=d.auto_settings||{};
+      // Trading
+      if(s.max_paper_trades_per_day) document.getElementById('ts-max-trades').value=s.max_paper_trades_per_day;
+      if(s.default_lots) document.getElementById('ts-lots').value=s.default_lots;
+      if(s.default_capital) document.getElementById('ts-capital').value=s.default_capital;
+      document.getElementById('ts-auto-exit').checked=s.auto_exit_enabled!==false;
+      document.getElementById('ts-trail-sl').checked=s.auto_trail_sl!==false;
+
+      // Auto-trade
+      document.getElementById('at-enabled').checked=!!at.auto_trade_enabled;
+      if(at.auto_trade_max_positions) document.getElementById('at-max-pos').value=at.auto_trade_max_positions;
+      if(at.auto_trade_max_capital) document.getElementById('at-max-cap').value=at.auto_trade_max_capital;
+      _selSectors=at.preferred_sectors||[];
+      // Notifications
+      document.getElementById('notif-email').checked=!!s.notification_email;
+      document.getElementById('notif-tg').checked=!!s.notification_telegram;
+      if(s.telegram_chat_id) document.getElementById('notif-tg-id').value=s.telegram_chat_id;
+      document.getElementById('tg-chat-row').style.display=s.notification_telegram?'flex':'none';
+      // Sessions
+      var sessCount=d.sessions||1;
+      document.getElementById('sec-sessions-desc').textContent=sessCount+' active session'+(sessCount!==1?'s':'')+' active on this account.';
+    }).catch(()=>{});
+
+  // Column picker configs
+  fetch('/api/user/column-config',{credentials:'same-origin'})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.config&&Array.isArray(d.config.visible)){
+        _visible=new Set(d.config.visible);
+      }
+      buildColPicker();
+    }).catch(()=>buildColPicker());
+}
+
+
+
+// ── Helpers ──
+function getCsrf(){var m=document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);return m?m[1]:'';}
+var _toastT=null;
+function toast(msg,kind){var el=document.getElementById('toast');el.textContent=msg;el.className='toast show '+(kind||'');if(_toastT)clearTimeout(_toastT);_toastT=setTimeout(()=>el.classList.remove('show'),4000);}
+function setMsg(id,msg,color){var el=document.getElementById(id);if(!el)return;el.textContent=msg;el.style.color=color||'var(--text-dim)';setTimeout(()=>{if(el.textContent===msg)el.textContent='';},4000);}
+function post(url,body){return fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':getCsrf()},credentials:'same-origin',body:JSON.stringify(body)}).then(r=>r.json());}
+
+// ── Section Switch ──
+function switchSection(id){
+  document.querySelectorAll('.settings-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  
+  var activeSec = document.getElementById('sec-'+id);
+  var activeBtn = document.querySelector('[data-section="'+id+'"]');
+  if (activeSec) activeSec.classList.add('active');
+  if (activeBtn) activeBtn.classList.add('active');
+  
+  window.location.hash = id;
+
+  if(id==='display'&&!_colsBuilt) buildColPicker();
+  if(id==='autotrade'&&!_sectorsBuilt) buildSectorGrid();
+  if(id==='billing') { loadRazorpaySDK(() => loadBillingStatus()); }
+}
+
+// ── Column picker preset definitions ──
+var COL_DEFS = [
+  {key:'symbol',  label:'Symbol',    group:'Core',    locked:true},
+  {key:'sector',  label:'Sector',    group:'Core'},
+  {key:'ltp',     label:'LTP',       group:'Core'},
+  {key:'chg_pct', label:'Chg %',     group:'Core'},
+  {key:'signal',  label:'Signal',    group:'Core'},
+  {key:'buildup', label:'Buildup',   group:'Core'},
+  {key:'score',   label:'Score',     group:'Core'},
+  {key:'prem',    label:'Prem ✓',    group:'Core'},
+  {key:'gap_pct', label:'Gap %',     group:'Price Detail'},
+  {key:'open',    label:'Open',      group:'Price Detail'},
+  {key:'high',    label:'High',      group:'Price Detail'},
+  {key:'low',     label:'Low',       group:'Price Detail'},
+  {key:'range_pct',label:'Range %',  group:'Price Detail'},
+  {key:'volume',  label:'Volume',    group:'Volume'},
+  {key:'vol_surge',label:'Surge',    group:'Volume'},
+  {key:'pcr',     label:'PCR',       group:'OI Detail'},
+  {key:'ce_oi_chg',label:'CE OI Chg',group:'OI Detail'},
+  {key:'pe_oi_chg',label:'PE OI Chg',group:'OI Detail'},
+  {key:'net_oi',  label:'Net OI',    group:'OI Detail'},
+  {key:'atm_iv',  label:'IV %',      group:'Options'},
+  {key:'max_pain',label:'Max Pain',  group:'Options'},
+  {key:'mp_dist', label:'MP Dist %', group:'Options'},
+  {key:'atm_ce',  label:'CE Prem',   group:'Options'},
+  {key:'atm_pe',  label:'PE Prem',   group:'Options'},
+  {key:'lot',     label:'Lot',       group:'Options'},
+];
+
+var PRESETS = {
+  compact:  ['symbol','sector','ltp','chg_pct','signal','buildup','vol_surge','pcr'],
+  standard: ['symbol','sector','ltp','chg_pct','signal','buildup','vol_surge','pcr','ce_oi_chg','pe_oi_chg','atm_iv','atm_ce'],
+  full:     COL_DEFS.map(c=>c.key),
+};
+
+var _visible = new Set(PRESETS.standard);
+var _colsBuilt = false;
+
+function buildColPicker(){
+  _colsBuilt = true;
+  var grid = document.getElementById('colPickerGrid');
+  grid.innerHTML = '';
+  COL_DEFS.forEach(function(c){
+    var on = _visible.has(c.key);
+    var item = document.createElement('label');
+    item.className = 'col-pick-item' + (on?' on':'');
+    item.dataset.key = c.key;
+    item.innerHTML = '<input type="checkbox"'+(on?' checked':'')+(c.locked?' disabled':'')+' data-key="'+c.key+'"><span class="col-pick-name">'+c.label+'</span><span class="col-pick-key">'+c.key+'</span>';
+    item.querySelector('input').addEventListener('change', function(){
+      if(this.checked){_visible.add(c.key);item.classList.add('on');}
+      else{_visible.delete(c.key);item.classList.remove('on');}
+    });
+    grid.appendChild(item);
+  });
+}
+
+function applyPreset(name){
+  if(name==='reset') name='standard';
+  var keys = PRESETS[name] || PRESETS.standard;
+  _visible = new Set(keys);
+  buildColPicker();
+}
+
+function saveColumnConfig(){
+  var visible = Array.from(_visible);
+  post('/api/user/column-config',{visible:visible,order:visible})
+    .then(d=>{
+      if(d.ok){toast('Column preferences saved successfully ✓','ok');setMsg('col-save-msg','Saved ✓','var(--green)');}
+      else{toast(d.error||'Failed to save columns','err');}
+    }).catch(()=>toast('Network error','err'));
+}
+
+// ── Save Trading defaults ──
+function saveTradingSettings(){
+  var payload={
+    max_paper_trades_per_day:parseInt(document.getElementById('ts-max-trades').value)||2,
+    default_lots:parseInt(document.getElementById('ts-lots').value)||1,
+    default_capital:parseFloat(document.getElementById('ts-capital').value)||0,
+    auto_exit_enabled:document.getElementById('ts-auto-exit').checked,
+    auto_trail_sl:document.getElementById('ts-trail-sl').checked,
+  };
+  post('/api/user/settings',payload)
+    .then(d=>{if(d.ok){toast('Trading defaults saved successfully ✓','ok');setMsg('ts-save-msg','Saved ✓','var(--green)');}else toast(d.error||'Failed to save','err');})
+    .catch(()=>toast('Network error','err'));
+}
+
+// ── Sector configurations ──
+var SECTORS=['BANK','IT','AUTO','PHARMA','METAL','ENERGY','FMCG','REALTY','INFRA','FIN','CONSUMER','HEALTH'];
+var _selSectors=[];
+var _sectorsBuilt=false;
+
+function buildSectorGrid(){
+  _sectorsBuilt=true;
+  var grid=document.getElementById('sectorGrid');
+  grid.innerHTML='';
+  SECTORS.forEach(function(s){
+    var on=_selSectors.indexOf(s)!==-1;
+    var chip=document.createElement('label');
+    chip.className='sector-chip'+(on?' on':'');
+    chip.dataset.sector=s;
+    chip.innerHTML='<input type="checkbox"'+(on?' checked':'')+'> '+s;
+    chip.addEventListener('click',function(e){
+      e.preventDefault();
+      var sec=this.dataset.sector;
+      var idx=_selSectors.indexOf(sec);
+      if(idx===-1){_selSectors.push(sec);this.classList.add('on');}
+      else{_selSectors.splice(idx,1);this.classList.remove('on');}
+    });
+    grid.appendChild(chip);
+  });
+}
+
+function saveAutoSettings(){
+  var payload={
+    auto_trade_enabled:document.getElementById('at-enabled').checked,
+    auto_trade_max_positions:parseInt(document.getElementById('at-max-pos').value)||2,
+    auto_trade_max_capital:parseFloat(document.getElementById('at-max-cap').value)||0,
+    preferred_sectors:_selSectors.slice(),
+  };
+  post('/api/user/auto-settings',payload)
+    .then(d=>{if(d.ok){toast('Auto-trade options saved successfully ✓','ok');setMsg('at-save-msg','Saved ✓','var(--green)');}else toast(d.error||'Failed to save','err');})
+    .catch(()=>toast('Network error','err'));
+}
+
+// ── Alert Notifications ──
+document.getElementById('notif-tg').addEventListener('change',function(){
+  document.getElementById('tg-chat-row').style.display=this.checked?'flex':'none';
+});
+
+function saveNotifSettings(){
+  var payload={
+    notification_email:document.getElementById('notif-email').checked,
+    notification_telegram:document.getElementById('notif-tg').checked,
+    telegram_chat_id:document.getElementById('notif-tg-id').value.trim(),
+  };
+  post('/api/user/settings',payload)
+    .then(d=>{if(d.ok){toast('Notifications routing saved ✓','ok');setMsg('notif-save-msg','Saved ✓','var(--green)');}else toast(d.error||'Failed to save','err');})
+    .catch(()=>toast('Network error','err'));
+}
+
+// ── Security Password updates ──
+function changePassword(){
+  var cur=document.getElementById('sec-cur-pw').value;
+  var nw=document.getElementById('sec-new-pw').value;
+  var conf=document.getElementById('sec-conf-pw').value;
+  if(!cur){setMsg('sec-pw-msg','Enter current password','var(--red)');return;}
+  if(!nw||nw.length<8){setMsg('sec-pw-msg','New password must be 8+ chars','var(--red)');return;}
+  if(nw!==conf){setMsg('sec-pw-msg','Passwords do not match','var(--red)');return;}
+  post('/api/user/change-password',{current_password:cur,new_password:nw,confirm_password:conf})
+    .then(d=>{
+      if(d.ok){toast('Security credentials updated ✓','ok');setMsg('sec-pw-msg','Changed ✓','var(--green)');['sec-cur-pw','sec-new-pw','sec-conf-pw'].forEach(id=>document.getElementById(id).value='');}
+      else{toast(d.error||'Failed to update credentials','err');setMsg('sec-pw-msg',d.error||'Failed','var(--red)');}
+    }).catch(()=>toast('Network error','err'));
+}
+
+function logoutAll(){
+  if(!confirm('Disconnect all active user sessions? You will need to log in again.'))return;
+  post('/api/user/logout-all',{})
+    .then(d=>{if(d.ok)window.location.href='/login';else toast(d.error||'Failed','err');})
+    .catch(()=>toast('Network error','err'));
+}
+
+// ── Billing Status and Razorpay Gateway integration ──
+var _billingData = {};
+
+function loadBillingStatus() {
+  fetch('/api/billing/status', {credentials: 'same-origin'})
+    .then(r => r.json())
+    .then(d => {
+      if (!d.ok) return;
+      _billingData = d;
+      var isPro = d.plan === 'pro';
+      var badge = document.getElementById('billing-plan-badge');
+      var label = document.getElementById('billing-plan-label');
+      var desc = document.getElementById('billing-plan-desc');
+      var upgradeCard = document.getElementById('billing-upgrade-card');
+      var expiresRow = document.getElementById('billing-expires-row');
+
+      if (isPro) {
+        badge.textContent = 'PRO';
+        badge.style.background = 'rgba(234,179,8,0.12)';
+        badge.style.color = '#eab308';
+        badge.style.border = '1px solid rgba(234,179,8,0.3)';
+        label.textContent = 'Quantra Pro Active';
+        desc.textContent = 'Full unlocked access to auto-trading, alerts, custom defaults, and premium scans.';
+        if (upgradeCard) upgradeCard.style.display = 'none';
+        if (d.subscription_expires_at) {
+          expiresRow.style.display = 'flex';
+          document.getElementById('billing-expires').textContent =
+            new Date(d.subscription_expires_at).toLocaleDateString('en-IN', {day: 'numeric', month: 'long', year: 'numeric'});
+        }
+      } else {
+        badge.textContent = 'FREE';
+        badge.style.background = 'rgba(255,255,255,0.03)';
+        badge.style.color = 'var(--text-dim)';
+        badge.style.border = '1px solid var(--border)';
+        label.textContent = 'Free Membership';
+        desc.textContent = 'Core manual paper trading and basic market scanning.';
+        if (upgradeCard) upgradeCard.style.display = 'block';
+        expiresRow.style.display = 'none';
+      }
+    }).catch(() => {});
+}
+
+function startCheckout() {
+  if (!_billingData.razorpay_key) {
+    toast('Checkout system not configured. Contact admin.', 'warn');
+    return;
+  }
+  post('/api/billing/create-order', {})
+    .then(d => {
+      if (!d.ok) { toast(d.error || 'Failed to create order', 'err'); return; }
+      var options = {
+        key: _billingData.razorpay_key,
+        amount: d.amount,
+        currency: d.currency,
+        name: 'Quantra Terminal',
+        description: 'Pro Membership — ₹999/month',
+        order_id: d.order_id,
+        handler: function(response) {
+          post('/api/billing/verify-payment', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          }).then(vd => {
+            if (vd.ok) {
+              toast('🎉 Upgraded to Quantra Pro successfully!', 'ok');
+              setTimeout(() => {
+                loadBillingStatus();
+                loadSettings();
+              }, 1200);
+            } else {
+              toast(vd.error || 'Verification failed', 'err');
+            }
+          });
+        },
+        prefill: { name: window.__user || '' },
+        theme: { color: '#3b82f6', background_color: '#050508' },
+      };
+      var rzp = new Razorpay(options);
+      rzp.open();
+    })
+    .catch(() => toast('Network error during checkout', 'err'));
+}
+
+function loadRazorpaySDK(callback) {
+  if (window.Razorpay) { callback(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  s.onload = callback;
+  document.head.appendChild(s);
+}
+
+// ── Startup Section Router ──
+document.addEventListener('DOMContentLoaded', () => {
+  var hash = window.location.hash.substring(1);
+  var params = new URLSearchParams(window.location.search);
+  var sec = hash || params.get('section') || 'display';
+  
+  if (['display', 'trading', 'autotrade', 'notifications', 'billing', 'security'].includes(sec)) {
+    switchSection(sec);
+  } else {
+    switchSection('display');
+  }
+  loadSettings();
+});
+</script>
+<script src="/static/js/nav-common.js"></script>
+</body>
+</html>

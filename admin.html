@@ -1,712 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="bloomberg-pro">
 <head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin &mdash; Quantra Terminal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style id="theme-css">
-/* ============================================================
-   Quantra Terminal - Shared Design System
-   Theme: Obsidian Premium — modern fintech dark
-   Density: Balanced (B)
-   ============================================================ */
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+<link rel="stylesheet" href="/static/css/themes.css">
 
-/* --- Design Tokens --- */
-:root {
-  /* Backgrounds */
-  --bg:            #09090b;
-  --surface:       #18181b;
-  --surface-alt:   #1c1c20;
-  --surface-hover: #27272a;
-  --surface-active:#2e2e33;
-  --bg-elevated:   #27272a;
-
-  /* Borders */
-  --border:        #2e2e35;
-  --border-light:  #3f3f46;
-  --border-focus:  #3b82f6;
-
-  /* Text */
-  --text:          #e4e4e7;
-  --text-dim:      #71717a;
-  --text-vdim:     #52525b;
-  --text-bright:   #fafafa;
-
-  /* Accent */
-  --blue:          #3b82f6;
-  --blue-soft:     rgba(59,130,246,0.12);
-  --blue-hover:    #2563eb;
-
-  /* Semantic Colors */
-  --green:         #10b981;
-  --green-soft:    rgba(16,185,129,0.12);
-  --green-text:    #34d399;
-  --red:           #ef4444;
-  --red-soft:      rgba(239,68,68,0.12);
-  --red-text:      #f87171;
-  --gold:          #f59e0b;
-  --gold-soft:     rgba(245,158,11,0.1);
-  --orange:        #f97316;
-  --orange-soft:   rgba(249,115,22,0.1);
-  --purple:        #a855f7;
-  --purple-soft:   rgba(168,85,247,0.1);
-  --cyan:          #06b6d4;
-  --cyan-soft:     rgba(6,182,212,0.1);
-  --yellow:        #eab308;
-
-  /* Layout */
-  --nav-height:    48px;
-  --radius-sm:     4px;
-  --radius-md:     8px;
-  --radius-lg:     12px;
-  --radius-xl:     16px;
-  --shadow-sm:     0 1px 4px rgba(0,0,0,0.6);
-  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
-  --shadow-lg:     0 8px 32px rgba(0,0,0,0.8);
-
-  /* Typography */
-  --font-sans:     'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono:     'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
-  --fs-xs:         11px;
-  --fs-sm:         12px;
-  --fs-base:       13px;
-  --fs-md:         14px;
-  --fs-lg:         16px;
-  --fs-xl:         20px;
-  --fs-2xl:        24px;
-  --fs-3xl:        32px;
-  --fw-normal:     400;
-  --fw-medium:     500;
-  --fw-semibold:   600;
-  --fw-bold:       700;
-}
-
-/* --- Reset --- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-body {
-  font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--text);
-  font-size: var(--fs-base);
-  line-height: 1.5;
-  min-height: 100vh;
-}
-a { color: var(--blue); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* --- Scrollbar --- */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; border-radius: 4px; }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
-
-/* ============================================================
-   NAVIGATION BAR
-   ============================================================ */
-.q-nav {
-  display: flex;
-  align-items: center;
-  height: var(--nav-height);
-  background: linear-gradient(180deg, rgba(24,24,27,0.95) 0%, rgba(18,18,20,0.98) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(59,130,246,0.08), 0 4px 16px rgba(0,0,0,0.3);
-  padding: 0 16px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  flex-shrink: 0;
-  gap: 16px;
-}
-.q-nav::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(6,182,212,0.2) 70%, transparent 100%);
-}
-.q-nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-lg);
-  color: var(--text-bright);
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  text-decoration: none;
-}
-.q-nav-brand:hover { text-decoration: none; }
-.q-nav-brand img, .q-nav-brand .brand-png {
-  display: none; /* Hide old PNG logo */
-}
-.q-nav-brand .brand-icon {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, var(--blue), #06b6d4);
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 800;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
-}
-.q-nav-brand .brand-text {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 2.5px;
-  background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.q-nav-brand .brand-tag {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  opacity: 0.6;
-  margin-left: -2px;
-}
-.q-nav-links {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex: 1;
-  justify-content: center;
-}
-.q-nav-links a {
-  padding: 5px 13px;
-  border-radius: 999px;
-  color: var(--text-dim);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  text-decoration: none;
-}
-.q-nav-links a:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  text-decoration: none;
-}
-.q-nav-links a.active {
-  color: var(--text-bright);
-  background: var(--blue-soft);
-  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
-}
-.q-nav-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--fs-xs);
-  color: var(--text-dim);
-  white-space: nowrap;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-/* Connection indicators */
-.conn-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.conn-dot.on  { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
-.conn-dot.off { background: var(--red); }
-.conn-dot.reconn { background: var(--orange); }
-
-.pulse-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: q-pulse 2s infinite;
-  flex-shrink: 0;
-}
-.pulse-dot.off  { background: var(--red); animation: none; }
-.pulse-dot.warn { background: var(--orange); animation: q-pulse 1s infinite; }
-
-@keyframes q-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
-  50%      { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16,185,129,0); }
-}
-
-/* ============================================================
-   COMMON COMPONENTS
-   ============================================================ */
-
-/* --- Cards --- */
-.q-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.q-card:hover {
-  border-color: var(--border-light);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), var(--shadow-sm);
-}
-.q-card-header {
-  font-size: var(--fs-md);
-  font-weight: var(--fw-semibold);
-  color: var(--text-bright);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* --- Stat Cards (summary bars) --- */
-.q-stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.q-stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  transition: border-color 0.15s;
-}
-.q-stat-card:hover { border-color: var(--border-light); }
-.q-stat-label {
-  font-size: var(--fs-xs);
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-.q-stat-value {
-  font-size: var(--fs-xl);
-  font-weight: var(--fw-bold);
-  color: var(--text-bright);
-  line-height: 1.2;
-}
-.q-stat-sub {
-  font-size: var(--fs-xs);
-  color: var(--text-dim);
-  margin-top: 2px;
-}
-
-/* --- Buttons --- */
-.q-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
-  white-space: nowrap;
-  font-family: inherit;
-}
-.q-btn-primary {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue);
-  box-shadow: 0 1px 8px rgba(59,130,246,0.35);
-}
-.q-btn-primary:hover {
-  background: var(--blue-hover);
-  box-shadow: 0 2px 12px rgba(59,130,246,0.45);
-}
-.q-btn-ghost {
-  background: transparent;
-  color: var(--text-dim);
-  border-color: var(--border);
-}
-.q-btn-ghost:hover { color: var(--text); border-color: var(--border-light); }
-.q-btn-ghost.active { color: var(--blue); border-color: var(--blue); background: var(--blue-soft); }
-.q-btn-sm { padding: 4px 10px; font-size: var(--fs-xs); }
-.q-btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
-.q-btn-danger:hover { background: #dc2626; }
-.q-btn-success { background: var(--green); color: #fff; border-color: var(--green); }
-.q-btn-success:hover { background: #059669; }
-
-/* --- Inputs --- */
-.q-input {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 7px 10px;
-  color: var(--text);
-  font-size: var(--fs-sm);
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.q-input:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-}
-.q-input::placeholder { color: var(--text-vdim); }
-
-.q-select {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 6px 10px;
-  color: var(--text);
-  font-size: var(--fs-sm);
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.q-select:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-}
-
-/* --- Tables --- */
-.q-table-wrap {
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-}
-.q-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--fs-sm);
-}
-.q-table thead th {
-  position: sticky;
-  top: 0;
-  background: linear-gradient(180deg, var(--bg-elevated) 0%, rgba(39,39,42,0.92) 100%);
-  color: var(--text-dim);
-  font-weight: var(--fw-semibold);
-  font-size: var(--fs-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 8px 10px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
-  backdrop-filter: blur(4px);
-}
-.q-table thead th:hover { color: var(--text); }
-.q-table thead th.sorted { color: var(--blue); }
-.q-table tbody tr {
-  border-bottom: 1px solid rgba(46,46,53,0.6);
-  transition: background 0.1s;
-}
-.q-table tbody tr:hover { background: rgba(39,39,42,0.6); }
-.q-table tbody td {
-  padding: 7px 10px;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
-/* --- Badges / Pills --- */
-.q-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 9px;
-  border-radius: 999px;
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  line-height: 1.4;
-}
-.q-badge-green  { background: var(--green-soft); color: var(--green-text); }
-.q-badge-red    { background: var(--red-soft); color: var(--red-text); }
-.q-badge-blue   { background: var(--blue-soft); color: var(--blue); }
-.q-badge-gold   { background: var(--gold-soft); color: var(--gold); }
-.q-badge-orange { background: var(--orange-soft); color: var(--orange); }
-.q-badge-purple { background: var(--purple-soft); color: var(--purple); }
-.q-badge-cyan   { background: var(--cyan-soft); color: var(--cyan); }
-.q-badge-dim    { background: rgba(113,113,122,0.1); color: var(--text-dim); }
-
-/* --- Toast --- */
-.q-toast {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 9999;
-  padding: 10px 18px;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  color: var(--text-bright);
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-20px);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-.q-toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
-.q-toast.success { border-left: 3px solid var(--green); }
-.q-toast.error   { border-left: 3px solid var(--red); }
-.q-toast.warning { border-left: 3px solid var(--orange); }
-.q-toast.info    { border-left: 3px solid var(--blue); }
-
-/* --- Loading Overlay --- */
-.q-loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, var(--bg) 0%, #0d0d10 50%, var(--bg) 100%);
-  z-index: 9998;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  transition: opacity 0.4s ease;
-}
-.q-loading-overlay.hide {
-  opacity: 0;
-  pointer-events: none;
-  display: none;
-}
-.q-spinner {
-  width: 40px; height: 40px;
-  border: 2px solid var(--border-light);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: q-spin 0.75s linear infinite;
-  box-shadow: 0 0 16px rgba(59,130,246,0.2);
-}
-@keyframes q-spin { to { transform: rotate(360deg); } }
-.q-loading-text {
-  font-size: var(--fs-sm);
-  color: var(--text-dim);
-  letter-spacing: 0.3px;
-}
-
-/* --- Modal / Overlay --- */
-.q-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(4px);
-  z-index: 500;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.q-modal-overlay.open { display: flex; }
-.q-modal {
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  max-width: 480px;
-  width: 90%;
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.04) inset;
-}
-.q-modal-title {
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-bold);
-  color: var(--text-bright);
-  margin-bottom: 12px;
-}
-
-/* --- Footer --- */
-.q-footer {
-  height: 28px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  font-size: var(--fs-xs);
-  color: var(--text-vdim);
-  flex-shrink: 0;
-}
-
-/* ============================================================
-   UTILITY CLASSES
-   ============================================================ */
-.text-green  { color: var(--green) !important; }
-.text-red    { color: var(--red) !important; }
-.text-blue   { color: var(--blue) !important; }
-.text-gold   { color: var(--gold) !important; }
-.text-orange { color: var(--orange) !important; }
-.text-purple { color: var(--purple) !important; }
-.text-cyan   { color: var(--cyan) !important; }
-.text-dim    { color: var(--text-dim) !important; }
-.text-vdim   { color: var(--text-vdim) !important; }
-.text-bright { color: var(--text-bright) !important; }
-
-.bg-green-soft  { background: var(--green-soft) !important; }
-.bg-red-soft    { background: var(--red-soft) !important; }
-
-.fw-medium   { font-weight: var(--fw-medium) !important; }
-.fw-semibold { font-weight: var(--fw-semibold) !important; }
-.fw-bold     { font-weight: var(--fw-bold) !important; }
-
-.fs-xs  { font-size: var(--fs-xs) !important; }
-.fs-sm  { font-size: var(--fs-sm) !important; }
-.fs-md  { font-size: var(--fs-md) !important; }
-.fs-lg  { font-size: var(--fs-lg) !important; }
-.fs-xl  { font-size: var(--fs-xl) !important; }
-
-.mono { font-family: var(--font-mono) !important; }
-
-.hidden { display: none !important; }
-
-/* Positive / Negative value coloring */
-.val-pos { color: var(--green-text); }
-.val-neg { color: var(--red-text); }
-.val-zero { color: var(--text-dim); }
-
-/* Flash animations for live price updates */
-@keyframes q-flash-green { 0% { background: var(--green-soft); } 100% { background: transparent; } }
-@keyframes q-flash-red   { 0% { background: var(--red-soft); } 100% { background: transparent; } }
-.flash-up   { animation: q-flash-green 0.6s ease-out; }
-.flash-down { animation: q-flash-red 0.6s ease-out; }
-
-/* --- Tabs --- */
-.q-tabs {
-  display: flex;
-  gap: 2px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 12px;
-}
-.q-tab {
-  padding: 8px 16px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  color: var(--text-dim);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s;
-  background: none;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  font-family: inherit;
-}
-.q-tab:hover { color: var(--text); }
-.q-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-.q-tab .count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--blue-soft);
-  border-radius: 9px;
-  font-size: 10px;
-  font-weight: var(--fw-bold);
-  margin-left: 6px;
-  color: var(--blue);
-}
-
-/* --- Toggle Switch --- */
-.q-toggle {
-  position: relative;
-  width: 36px;
-  height: 20px;
-  appearance: none;
-  -webkit-appearance: none;
-  background: var(--border-light);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-  border: none;
-  outline: none;
-}
-.q-toggle::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.2s;
-}
-.q-toggle:checked { background: var(--blue); }
-.q-toggle:checked::before { transform: translateX(16px); }
-
-/* --- Progress bar --- */
-.q-progress {
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.q-progress-fill {
-  height: 100%;
-  background: var(--blue);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 768px) {
-  .q-nav { padding: 0 10px; gap: 8px; }
-  .q-nav-links a { padding: 5px 9px; font-size: var(--fs-xs); }
-  .q-stats-row { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* Logout button in nav */
-.q-nav-logout {
-  margin-left: 8px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.q-nav-logout:hover {
-  color: var(--red);
-  border-color: var(--red);
-  background: rgba(239,68,68,0.08);
-}
-
-/* Compliance bar */
-.compliance-bar {
-  text-align: center;
-  padding: 10px 24px;
-  font-size: 9px;
-  line-height: 1.6;
-  color: #3f3f46;
-  border-top: 1px solid rgba(255,255,255,0.03);
-  background: var(--bg);
-}
-.compliance-bar a {
-  color: #52525b;
-  text-decoration: none;
-}
-.compliance-bar a:hover {
-  color: #71717a;
-  text-decoration: underline;
-}
-</style>
 <style>
 /* === Admin Layout === */
 .admin-main {
@@ -969,9 +278,24 @@ a:hover { text-decoration: underline; }
   text-decoration: underline;
 }
 </style>
+  <link rel="stylesheet" href="/static/css/themes.css">
 </head>
 <body>
 <script>
+// User dropdown toggle
+function toggleUserMenu() {
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userMenuBtn');
+  
+  if (menu.style.display === 'none' || menu.style.display === '') {
+    menu.style.display = 'block';
+    btn.classList.add('open');
+  } else {
+    menu.style.display = 'none';
+    btn.classList.remove('open');
+  }
+}
+
 // Auth gate: verify session, enforce role-based nav visibility
 (function(){
   fetch('/api/auth/verify',{credentials:'same-origin'})
@@ -999,30 +323,124 @@ a:hover { text-decoration: underline; }
 
 <!-- Navigation Bar -->
 <nav class="q-nav">
-  <a href="/" class="q-nav-brand">
-    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="navLogoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
-      <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#navLogoGrad)" stroke-width="3.5" fill="none"/>
-      <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#navLogoGrad)" opacity="0.85"/>
-      <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <line x1="18" y1="28" x2="46" y2="20" stroke="url(#navLogoGrad)" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-    </svg>
-    <div style="display:flex;flex-direction:column;line-height:1;">
-      <span class="brand-text">QUANTRA</span>
-    </div>
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
   </a>
+
   <div class="q-nav-links">
-    <a href="/">Dashboard</a>
-    <a href="/paper">Paper Trades</a>
-    <a href="/sectors">Sectors</a>
-    <a href="/rsi">RSI Scanner</a>
-    <a href="/rsi-analysis">Stock Analysis</a>
-    <a href="/divergence">Divergence</a>
-    <a href="/profile">Profile</a>
-    <a href="/admin" class="active">Admin</a>
+    <a href="/" id="nav-dashboard">Dashboard</a>
+    <a href="/sectors" id="nav-sectors">Sectors</a>
+    <a href="/nifty" id="nav-nifty">Nifty 50</a>
   </div>
-  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/advanced-analytics" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Advanced Desk</span>
+        </a>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <main class="admin-main">
@@ -1038,7 +456,10 @@ a:hover { text-decoration: underline; }
       <div class="token-row">
         <textarea class="token-input" id="tokenInput" rows="2"
           placeholder="Paste your Upstox JWT here (eyJ...)"></textarea>
-        <button class="q-btn q-btn-primary" id="tokenBtn" onclick="updateToken()">Update Token</button>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="q-btn q-btn-primary" id="tokenBtn" onclick="updateToken()">Update Token</button>
+          <button class="q-btn" onclick="testBroker('upstox')" style="background:var(--surface);border:1px solid var(--border);">Test Upstox</button>
+        </div>
       </div>
       <div class="token-info">
         Current: <code id="tokenPreview">&mdash;</code> &middot;
@@ -1047,6 +468,42 @@ a:hover { text-decoration: underline; }
         Tokens expire daily ~03:30 IST. Get new one from
         <a href="https://account.upstox.com/developer/apps" target="_blank" style="color:var(--blue)">account.upstox.com</a>.
         Token is saved to <code>config.env</code> and the admin data store &mdash; persists across restarts.
+      </div>
+    </div>
+  </div>
+
+  <!-- Fyers Token & Settings -->
+  <div class="card" id="fyersTokenCard">
+    <div class="card-header">
+      <span class="ch-icon">⚡</span>
+      <h2>Fyers Token & Settings</h2>
+      <span class="ch-badge" id="fyersTokenBadge">CHECKING...</span>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Fyers App ID</label>
+          <input type="text" class="q-input" id="fyersAppIdInput" placeholder="Enter App ID" style="margin-top:4px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;width:100%;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Fyers Redirect URI</label>
+          <input type="text" class="q-input" id="fyersRedirectInput" placeholder="Enter Redirect URI" style="margin-top:4px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;width:100%;box-sizing:border-box">
+        </div>
+      </div>
+      <div class="token-row">
+        <textarea class="token-input" id="fyersTokenInput" rows="2"
+          placeholder="Paste your Fyers access token here..."></textarea>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="q-btn q-btn-primary" id="fyersTokenBtn" onclick="updateFyersToken()">Update Fyers Settings</button>
+          <button class="q-btn" onclick="testBroker('fyers')" style="background:var(--surface);border:1px solid var(--border);">Test Fyers</button>
+        </div>
+      </div>
+      <div class="token-info" style="margin-top:8px">
+        Current: <code id="fyersTokenPreview">&mdash;</code> &middot;
+        Length: <span id="fyersTokenLen">&mdash;</span> chars &middot;
+        Status: <span id="fyersTokenStatus">&mdash;</span><br>
+        <a href="#" id="fyersGenerateLink" target="_blank" style="color:var(--blue);text-decoration:underline;font-weight:bold;display:inline-block;margin:6px 0;">&#x2197; Click here to generate a new Fyers Access Token</a><br>
+        Generate automatically by running Fyers script or paste manually. Saved directly to <code>config.env</code>.
       </div>
     </div>
   </div>
@@ -1150,6 +607,75 @@ a:hover { text-decoration: underline; }
     </div>
   </div>
 
+  <!-- Integrations: Email & Payments -->
+  <div class="card" id="integrationsCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128279;</span>
+      <h2>Integrations</h2>
+      <span class="ch-badge" id="integrationsBadge" style="background:rgba(113,113,122,0.15);color:#71717a">LOADING</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Resend Email -->
+      <div class="ai-provider-section" style="margin-bottom:12px">
+        <h3>
+          <span>&#128231; Resend.com — Email Verification</span>
+          <span class="prov-status" id="resendStatus" style="background:var(--red-soft);color:var(--red-text)">NO KEY</span>
+        </h3>
+        <div class="ai-key-row">
+          <input type="password" class="q-input ai-key-input" id="resendKeyInput" placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          <button class="q-btn q-btn-ghost q-btn-sm" onclick="toggleKeyVis('resendKeyInput',this)" title="Show/Hide">&#128065;</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px">
+          <div style="flex:1;min-width:200px">
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">From Email (Sender)</label>
+            <input type="text" class="q-input" id="resendFromInput" placeholder="noreply@yourdomain.com" style="margin-top:4px">
+          </div>
+          <button class="q-btn q-btn-ghost q-btn-sm" onclick="testResend()" id="testResendBtn" style="align-self:flex-end">&#9889; Test</button>
+        </div>
+      </div>
+
+      <!-- Razorpay -->
+      <div class="ai-provider-section">
+        <h3>
+          <span>&#128179; Razorpay — Payment Gateway</span>
+          <span class="prov-status" id="razorpayStatus" style="background:var(--red-soft);color:var(--red-text)">NO KEY</span>
+        </h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Key ID (Public)</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" class="q-input" id="razorpayKeyIdInput" placeholder="rzp_test_xxxxxxxx or rzp_live_xxxxxxxx" autocomplete="off">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Key Secret (Private)</label>
+            <div style="display:flex;gap:6px">
+              <input type="password" class="q-input" id="razorpaySecretInput" placeholder="••••••••••••••••••••" autocomplete="off">
+              <button class="q-btn q-btn-ghost q-btn-sm" onclick="toggleKeyVis('razorpaySecretInput',this)" title="Show/Hide">&#128065;</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Webhook Secret <span style="font-weight:400;text-transform:none;color:var(--text-vdim)">(optional — for auto-renewals)</span></label>
+          <div style="display:flex;gap:6px">
+            <input type="password" class="q-input" id="razorpayWebhookInput" placeholder="whsec_xxxxxxxx" autocomplete="off" style="max-width:320px">
+            <button class="q-btn q-btn-ghost q-btn-sm" onclick="toggleKeyVis('razorpayWebhookInput',this)" title="Show/Hide">&#128065;</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+        <button class="q-btn q-btn-success" onclick="saveIntegrations()">Save Integrations</button>
+        <span id="intSaveStatus" style="font-size:var(--fs-xs);color:var(--text-dim);align-self:center"></span>
+      </div>
+      <div class="token-info" style="margin-top:10px">
+        Get Resend keys at <a href="https://resend.com/api-keys" target="_blank" style="color:var(--blue)">resend.com/api-keys</a> (free, 3k emails/mo) &middot;
+        Get Razorpay keys at <a href="https://dashboard.razorpay.com/app/keys" target="_blank" style="color:var(--blue)">dashboard.razorpay.com</a> (use Test mode first)
+      </div>
+    </div>
+  </div>
+
   <!-- Server Status -->
   <div class="card">
     <div class="card-header">
@@ -1169,6 +695,8 @@ a:hover { text-decoration: underline; }
         <div class="stat-item"><div class="si-label">Open Trades</div><div class="si-val" id="sOpenTrades">&mdash;</div></div>
         <div class="stat-item"><div class="si-label">Closed Trades</div><div class="si-val" id="sClosedTrades">&mdash;</div></div>
       </div>
+      
+
     </div>
   </div>
 
@@ -1433,6 +961,20 @@ a:hover { text-decoration: underline; }
 </style>
 
 <script>
+// User dropdown toggle
+function toggleUserMenu() {
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userMenuBtn');
+  
+  if (menu.style.display === 'none' || menu.style.display === '') {
+    menu.style.display = 'block';
+    btn.classList.add('open');
+  } else {
+    menu.style.display = 'none';
+    btn.classList.remove('open');
+  }
+}
+
 function getCsrfToken() {
   var match = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
   return match ? match[1] : '';
@@ -1465,6 +1007,30 @@ async function loadStatus() {
  tokenBadge.textContent = s.token_expired ? 'EXPIRED' : (s.token_length >20 ? 'ACTIVE' : 'MISSING');
  tokenBadge.className = 'ch-badge ' + (tokenOk ? 'badge-ok' : s.token_length >20 ? 'badge-warn' : 'badge-err');
 
+ // Fyers status loading
+ document.getElementById('fyersAppIdInput').value = s.fyers_app_id || '';
+ document.getElementById('fyersRedirectInput').value = s.fyers_redirect_uri || '';
+ 
+ // Dynamically update the generate link
+ const updateFyersLink = () => {
+   const appId = document.getElementById('fyersAppIdInput').value;
+   const redir = document.getElementById('fyersRedirectInput').value;
+   const link = `https://api-t1.fyers.in/api/v3/generate-authcode?client_id=${appId}&redirect_uri=${redir}&response_type=code&state=sample_state`;
+   document.getElementById('fyersGenerateLink').href = link;
+ };
+ document.getElementById('fyersAppIdInput').addEventListener('input', updateFyersLink);
+ document.getElementById('fyersRedirectInput').addEventListener('input', updateFyersLink);
+ updateFyersLink();
+
+ document.getElementById('fyersTokenPreview').textContent = s.fyers_token_preview || '';
+ document.getElementById('fyersTokenLen').textContent = s.fyers_token_length || '0';
+ const fyersOk = s.fyers_token_length > 20;
+ const fyersBadge = document.getElementById('fyersTokenBadge');
+ document.getElementById('fyersTokenStatus').textContent = fyersOk ? 'ACTIVE' : 'NOT SET';
+ document.getElementById('fyersTokenStatus').style.color = fyersOk ? 'var(--green)' : 'var(--red)';
+ fyersBadge.textContent = fyersOk ? 'ACTIVE' : 'MISSING';
+ fyersBadge.className = 'ch-badge ' + (fyersOk ? 'badge-ok' : 'badge-err');
+
  // Server badge
  const sb = document.getElementById('serverBadge');
  if (s.polling_active) { sb.textContent = 'RUNNING'; sb.className = 'ch-badge badge-ok'; }
@@ -1477,12 +1043,36 @@ async function loadStatus() {
  document.getElementById('ptOpen').textContent = s.paper_trades_open;
  document.getElementById('ptClosed').textContent = s.paper_trades_closed;
  document.getElementById('ptDataDir').textContent = s.data_dir || '';
+
+
  } catch (e) {
  document.getElementById('serverStatus').textContent = 'Error: ' + e.message;
  }
 }
 
+
+
 // ----- Token -----
+
+async function testBroker(broker) {
+  showToast(`Testing ${broker} token...`, 'info');
+  try {
+    const resp = await fetch('/api/admin/test-broker', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+      body: JSON.stringify({ broker })
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast(data.msg, 'success');
+    } else {
+      showToast(data.msg || `Failed to test ${broker}`, 'error');
+    }
+  } catch (err) {
+    showToast(`Network error testing ${broker}`, 'error');
+  }
+}
+
 async function updateToken() {
  const token = document.getElementById('tokenInput').value.trim();
  if (!token) { showToast('Paste a token first', 'error'); return; }
@@ -1512,6 +1102,37 @@ async function updateToken() {
  btn.disabled = false;
  btn.textContent = 'Update Token';
  }
+}
+
+async function updateFyersToken() {
+  const token = document.getElementById('fyersTokenInput').value.trim();
+  const app_id = document.getElementById('fyersAppIdInput').value.trim();
+  const redirect_uri = document.getElementById('fyersRedirectInput').value.trim();
+
+  const btn = document.getElementById('fyersTokenBtn');
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  try {
+    const resp = await fetch('/api/admin/fyers-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+      body: JSON.stringify({ token, app_id, redirect_uri }),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Fyers settings updated successfully!', 'success');
+      document.getElementById('fyersTokenInput').value = '';
+      loadStatus();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown error'), 'error');
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Update Fyers Settings';
+  }
 }
 
 // ----- Settings -----
@@ -1784,6 +1405,104 @@ async function testProvider(pid) {
 }
 const AI_NAMES = { perplexity: 'Perplexity', nvidia: 'NVIDIA NIM' };
 
+// ----- Integrations (Resend + Razorpay) -----
+async function loadIntegrations() {
+  try {
+    const resp = await fetch('/api/admin/integrations');
+    if (resp.status === 403) return;
+    const data = await resp.json();
+    const badge = document.getElementById('integrationsBadge');
+    let allSet = true;
+
+    // Resend
+    const rStatus = document.getElementById('resendStatus');
+    if (data.resend && data.resend.has_key) {
+      rStatus.textContent = 'KEY SET'; rStatus.style.background = 'var(--green-soft)'; rStatus.style.color = 'var(--green-text)';
+      if (data.resend.key_masked) document.getElementById('resendKeyInput').placeholder = data.resend.key_masked;
+    } else {
+      rStatus.textContent = 'NO KEY'; rStatus.style.background = 'var(--red-soft)'; rStatus.style.color = 'var(--red-text)';
+      allSet = false;
+    }
+    if (data.resend && data.resend.from_email) document.getElementById('resendFromInput').value = data.resend.from_email;
+
+    // Razorpay
+    const rzStatus = document.getElementById('razorpayStatus');
+    if (data.razorpay && data.razorpay.has_key_id && data.razorpay.has_secret) {
+      rzStatus.textContent = data.razorpay.mode === 'live' ? 'LIVE' : 'TEST';
+      rzStatus.style.background = data.razorpay.mode === 'live' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)';
+      rzStatus.style.color = data.razorpay.mode === 'live' ? 'var(--green)' : 'var(--orange)';
+      if (data.razorpay.key_id_masked) document.getElementById('razorpayKeyIdInput').placeholder = data.razorpay.key_id_masked;
+    } else {
+      rzStatus.textContent = 'NO KEY'; rzStatus.style.background = 'var(--red-soft)'; rzStatus.style.color = 'var(--red-text)';
+      allSet = false;
+    }
+
+    badge.textContent = allSet ? 'CONFIGURED' : 'PARTIAL';
+    badge.style.background = allSet ? 'var(--green-soft)' : 'rgba(245,158,11,0.15)';
+    badge.style.color = allSet ? 'var(--green)' : 'var(--orange)';
+  } catch (e) { console.error('loadIntegrations:', e); }
+}
+
+async function saveIntegrations() {
+  const payload = {};
+  const rKey = document.getElementById('resendKeyInput').value.trim();
+  const rFrom = document.getElementById('resendFromInput').value.trim();
+  const rzKeyId = document.getElementById('razorpayKeyIdInput').value.trim();
+  const rzSecret = document.getElementById('razorpaySecretInput').value.trim();
+  const rzWebhook = document.getElementById('razorpayWebhookInput').value.trim();
+
+  if (rKey) payload.resend_api_key = rKey;
+  if (rFrom) payload.resend_from = rFrom;
+  if (rzKeyId) payload.razorpay_key_id = rzKeyId;
+  if (rzSecret) payload.razorpay_key_secret = rzSecret;
+  if (rzWebhook) payload.razorpay_webhook_secret = rzWebhook;
+
+  if (!Object.keys(payload).length) { showToast('Nothing to save', 'error'); return; }
+
+  const statusEl = document.getElementById('intSaveStatus');
+  statusEl.textContent = 'Saving...';
+  try {
+    const resp = await fetch('/api/admin/integrations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Integrations saved: ' + data.updated.join(', '), 'success');
+      statusEl.textContent = 'Saved!'; statusEl.style.color = 'var(--green)';
+      // Clear secret fields after save
+      if (rKey) document.getElementById('resendKeyInput').value = '';
+      if (rzSecret) document.getElementById('razorpaySecretInput').value = '';
+      if (rzWebhook) document.getElementById('razorpayWebhookInput').value = '';
+      loadIntegrations();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown'), 'error');
+      statusEl.textContent = 'Failed'; statusEl.style.color = 'var(--red)';
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+    statusEl.textContent = '';
+  }
+  setTimeout(() => { statusEl.textContent = ''; }, 4000);
+}
+
+async function testResend() {
+  const btn = document.getElementById('testResendBtn');
+  btn.innerHTML = '&#8987; Testing...'; btn.disabled = true;
+  try {
+    const resp = await fetch('/api/admin/test-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+      body: JSON.stringify({}),
+    });
+    const data = await resp.json();
+    if (data.ok) showToast('&#9989; Test email sent to ' + data.sent_to, 'success');
+    else showToast('Email test failed: ' + (data.error || 'Unknown'), 'error');
+  } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  btn.innerHTML = '&#9889; Test'; btn.disabled = false;
+}
+
 // ----- Platform Data (Users, Stats, Audit) -----
 
 var _auditOffset = 0;
@@ -1875,6 +1594,26 @@ async function unlockUser(uid) {
   } catch(e) { showToast('Error: ' + e, 'err'); }
 }
 
+async function toggleUserPro(userId, isPro) {
+  if (!confirm((isPro ? 'Grant' : 'Revoke') + ' PRO subscription for this user?')) return;
+  try {
+    const r = await fetch('/api/admin/upgrade-user', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
+      body: JSON.stringify({user_id: userId, is_pro: isPro})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      alert('Success');
+      loadUsers();
+    } else {
+      alert('Error: ' + (d.error || 'Unknown'));
+    }
+  } catch (e) {
+    alert('Request failed');
+  }
+}
+
 async function deactivateUser(uid, name) {
   if (!confirm('Deactivate user "' + name + '"? They will be unable to log in.')) return;
   try {
@@ -1944,6 +1683,7 @@ function renderAuditLog(events) {
 loadStatus();
 loadSettings();
 loadAiSettings();
+loadIntegrations();
 loadLogs();
 loadPlatformData();
 loadAuditLog();

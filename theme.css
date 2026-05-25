@@ -123,11 +123,7 @@ a:hover { text-decoration: underline; }
   text-decoration: none;
 }
 .q-nav-brand:hover { text-decoration: none; }
-.q-nav-brand img {
-  height: 28px;
-  width: auto;
-  display: block;
-}
+
 .q-nav-brand .brand-icon {
   width: 24px;
   height: 24px;

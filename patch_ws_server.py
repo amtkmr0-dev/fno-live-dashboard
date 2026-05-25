@@ -1,61 +1,57 @@
-#!/usr/bin/env python3
+import sys
+
+with open('ws_server.py', 'r') as f:
+    content = f.read()
+
+# Add the handler function right after handle_api_chain
+if "async def handle_api_advanced_chain" not in content:
+    handler_code = """
+    async def handle_api_advanced_chain(self, request):
+        \"\"\"GET /api/advanced-chain?symbol=XYZ
+        Returns a sorted list of up to 15 strikes (ATM, ATM-7 to ATM+7)
+        with their CE/PE OI, LTP, IV, Volume, derived directly from the cached strike_map.
+        \"\"\"
+        from aiohttp import web
+        symbol = request.query.get("symbol", "").upper().strip()
+        if not symbol:
+            return web.json_response({"error": "symbol query param is required"}, status=400)
+            
+        st = self.state.get(symbol)
+        if not st or "strike_map" not in st or not st.get("atm_strike"):
+            return web.json_response({"error": "Chain data not available yet"}, status=404)
+            
+        atm_strike = float(st["atm_strike"])
+        strike_map = st["strike_map"]
+        
+        all_strikes = sorted([float(k) for k in strike_map.keys()])
+        if not all_strikes:
+            return web.json_response({"error": "No strikes in strike map"}, status=404)
+            
+        atm_idx = min(range(len(all_strikes)), key=lambda i: abs(all_strikes[i] - atm_strike))
+        
+        start_idx = max(0, atm_idx - 7)
+        end_idx = min(len(all_strikes), atm_idx + 8)
+        selected_strikes = all_strikes[start_idx:end_idx]
+        
+        result = []
+        for s in selected_strikes:
+            data = strike_map[str(s)]
+            ce = data.get("CE", {})
+            pe = data.get("PE", {})
+            result.append({
+                "strikePrice": s,
+                "is_atm": (s == all_strikes[atm_idx]),
+                "CE": {"openInterest": ce.get("openInterest", 0), "lastPrice": ce.get("lastPrice", 0), "totalTradedVolume": ce.get("totalTradedVolume", 0), "impliedVolatility": ce.get("impliedVolatility", 0)},
+                "PE": {"openInterest": pe.get("openInterest", 0), "lastPrice": pe.get("lastPrice", 0), "totalTradedVolume": pe.get("totalTradedVolume", 0), "impliedVolatility": pe.get("impliedVolatility", 0)}
+            })
+            
+        return web.json_response({"records": {"data": result}, "timestamp": st.get("timestamp", "")})
 """
-patch_ws_server.py — Add /rsi and /rsi-analysis routes to ws_server.py
-Run this in ~/deploy/ on the GCP server.
-"""
-import re
+    content = content.replace('    async def handle_api_chain(self, request: web.Request) -> web.Response:', handler_code + '\n    async def handle_api_chain(self, request: web.Request) -> web.Response:')
 
-path = "ws_server.py"
-code = open(path).read()
+# Add the route
+if 'app.router.add_get("/api/advanced-chain"' not in content:
+    content = content.replace('app.router.add_get("/api/chain", self.handle_api_chain)', 'app.router.add_get("/api/chain", self.handle_api_chain)\n        app.router.add_get("/api/advanced-chain", self.handle_api_advanced_chain)')
 
-# Check if routes already exist
-if "handle_rsi_page" in code:
-    print("Routes already exist — skipping")
-    exit(0)
-
-# 1. Add handler methods after handle_admin_page
-handler_code = """
-    async def handle_rsi_page(self, request: web.Request) -> web.Response:
-        \"\"\"Serve the RSI Scanner page.\"\"\"
-        html_path = Path(__file__).parent / "rsi.html"
-        if not html_path.exists():
-            return web.json_response({"error": "File not found"})
-        return web.FileResponse(html_path)
-
-    async def handle_rsi_analysis_page(self, request: web.Request) -> web.Response:
-        \"\"\"Serve the RSI Stock Analysis page.\"\"\"
-        html_path = Path(__file__).parent / "rsi-analysis.html"
-        if not html_path.exists():
-            return web.json_response({"error": "File not found"})
-        return web.FileResponse(html_path)
-"""
-
-# Insert after handle_admin_page method
-# Find the end of handle_admin_page (the next method starts with "    async def handle_admin_status")
-marker = "    async def handle_admin_status"
-if marker in code:
-    code = code.replace(marker, handler_code + "\n" + marker)
-    print("✓ Handler methods added")
-else:
-    print("✗ Could not find insertion point for handlers")
-    exit(1)
-
-# 2. Add routes in create_app after sectors route
-route_code = """
-        # RSI pages
-        app.router.add_get("/rsi", self.handle_rsi_page)
-        app.router.add_get("/rsi-analysis", self.handle_rsi_analysis_page)
-"""
-
-# Insert after the sectors route line
-sectors_route = '        app.router.add_get("/sectors", self.handle_sectors_page)'
-if sectors_route in code:
-    code = code.replace(sectors_route, sectors_route + "\n" + route_code)
-    print("✓ Routes added")
-else:
-    print("✗ Could not find sectors route for insertion")
-    exit(1)
-
-# Write back
-open(path, "w").write(code)
-print(f"✓ ws_server.py patched ({len(code)} bytes)")
+with open('ws_server.py', 'w') as f:
+    f.write(content)

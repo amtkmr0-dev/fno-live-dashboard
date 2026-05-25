@@ -1,0 +1,2835 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="bloomberg-pro">
+<head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantra Terminal - Nifty 50 specialized Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Quantra Terminal - Shared Design System
+   Theme: Obsidian Cybernetic Glass — premium fintech dark HUD
+   ============================================================ */
+:root {
+  --bg:            hsl(240, 16%, 2.5%);
+  --bg-darker:     hsl(240, 20%, 1.2%);
+  --surface:       hsla(240, 14%, 6%, 0.65);
+  --surface-alt:   hsla(240, 12%, 4%, 0.45);
+  --surface-hover: hsla(240, 10%, 12%, 0.75);
+  --surface-active:hsla(240, 10%, 16%, 0.85);
+  --border:        hsla(240, 8%, 18%, 0.45);
+  --border-light:  hsla(240, 8%, 28%, 0.6);
+  --border-focus:  hsl(215, 100%, 55%);
+  --border-glow:   rgba(59, 130, 246, 0.15);
+  
+  --text:          hsl(240, 5%, 90%);
+  --text-dim:      hsl(240, 5%, 65%);
+  --text-vdim:     hsl(240, 5%, 45%);
+  --text-bright:   hsl(0, 0%, 100%);
+
+  --blue:          hsl(215, 100%, 55%);
+  --blue-soft:     hsla(215, 100%, 55%, 0.12);
+  --blue-hover:    hsl(215, 100%, 48%);
+  --blue-neon:     0 0 15px rgba(59, 130, 246, 0.5);
+
+  --green:         hsl(150, 85%, 42%);
+  --green-soft:    hsla(150, 85%, 42%, 0.08);
+  --green-text:    hsl(150, 85%, 45%);
+  --green-neon:    0 0 15px rgba(16, 185, 129, 0.5);
+  
+  --red:           hsl(355, 85%, 55%);
+  --red-soft:      hsla(355, 85%, 55%, 0.08);
+  --red-text:      hsl(355, 85%, 60%);
+  --red-neon:      0 0 15px rgba(244, 63, 94, 0.5);
+
+  --gold:          hsl(40, 95%, 50%);
+  --gold-soft:     hsla(40, 95%, 50%, 0.1);
+  --orange:        hsl(25, 95%, 50%);
+  --orange-soft:   hsla(25, 95%, 50%, 0.1);
+  --purple:        hsl(270, 90%, 65%);
+  --purple-soft:   hsla(270, 90%, 65%, 0.1);
+  
+  --nav-height:    48px;
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --shadow-lg:     0 24px 64px rgba(0,0,0,0.85);
+  --font-sans:     'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; font-family: var(--font-sans); background-color: var(--bg); color: var(--text); }
+
+body {
+  display: flex;
+  flex-direction: column;
+  background-image: 
+    radial-gradient(circle at 10% 20%, hsla(180, 100%, 45%, 0.02) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, hsla(215, 100%, 55%, 0.03) 0%, transparent 55%),
+    linear-gradient(hsla(215, 100%, 55%, 0.008) 1px, transparent 1px),
+    linear-gradient(90deg, hsla(215, 100%, 55%, 0.008) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+  position: relative;
+}
+
+/* Holographic Laser Scanline effect */
+body::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0.25) 50%, transparent 100%);
+  animation: scanline 16s linear infinite;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.75;
+}
+@keyframes scanline {
+  0% { transform: translateY(-5vh); }
+  100% { transform: translateY(105vh); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsla(240, 8%, 20%, 0.5); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: hsla(240, 8%, 32%, 0.85); }
+
+/* Navigation Bar */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  background: rgba(8, 8, 12, 0.8);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  gap: 20px;
+}
+.q-nav::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.25) 15%, rgba(6,182,212,0.25) 85%, transparent 100%);
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.q-nav-brand .brand-icon {
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, var(--blue), #06b6d4);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(59,130,246,0.35);
+}
+.q-nav-brand .brand-text {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.q-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+.q-nav-links a {
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.q-nav-links a:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--blue-soft);
+  border-color: rgba(59,130,246,0.4);
+  box-shadow: 0 0 20px rgba(59,130,246,0.15);
+}
+.q-nav-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.conn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+.q-nav-logout {
+  margin-left: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.q-nav-logout:hover {
+  color: var(--red-text);
+  border-color: var(--red);
+  background: rgba(239,68,68,0.08);
+}
+
+/* Page Layout */
+.dashboard-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 16px;
+  gap: 16px;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1.45;
+  gap: 16px;
+  min-width: 0;
+}
+
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Glassmorphism Cards */
+.q-card {
+  background: var(--surface);
+  backdrop-filter: blur(24px) saturate(110%);
+  -webkit-backdrop-filter: blur(24px) saturate(110%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255,255,255,0.03), 
+    0 16px 40px rgba(0,0,0,0.6),
+    0 0 40px rgba(0, 0, 0, 0.4) inset;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Holographic card brackets */
+.q-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 8px; height: 8px;
+  border-top: 1.5px solid rgba(59, 130, 246, 0.3);
+  border-left: 1.5px solid rgba(59, 130, 246, 0.3);
+  pointer-events: none;
+  transition: all 0.3s;
+}
+.q-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 8px; height: 8px;
+  border-bottom: 1.5px solid rgba(59, 130, 246, 0.3);
+  border-right: 1.5px solid rgba(59, 130, 246, 0.3);
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+.q-card:hover {
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255,255,255,0.06), 
+    0 24px 50px rgba(0,0,0,0.75), 
+    0 0 16px rgba(59,130,246,0.05);
+  transform: translateY(-2px);
+}
+.q-card:hover::before {
+  border-top-color: var(--blue);
+  border-left-color: var(--blue);
+  width: 12px; height: 12px;
+}
+.q-card:hover::after {
+  border-bottom-color: var(--blue);
+  border-right-color: var(--blue);
+  width: 12px; height: 12px;
+}
+
+.q-card-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-bright);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Stats Row */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.stat-item {
+  position: relative;
+  background: linear-gradient(135deg, rgba(12, 12, 16, 0.8) 0%, rgba(6, 6, 8, 0.55) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.02), 0 8px 20px rgba(0, 0, 0, 0.35);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.stat-item:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 12px 28px rgba(59, 130, 246, 0.09);
+}
+
+/* Neon left border decoration on hover */
+.stat-item::before {
+  content: '';
+  position: absolute;
+  top: 15%; bottom: 15%;
+  left: 0; width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+  transition: all 0.3s;
+}
+.stat-item:hover::before {
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.stat-value {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--text-bright);
+  line-height: 1.1;
+  background: linear-gradient(135deg, #ffffff 0%, #e4e4e7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-sub {
+  font-size: 11px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+/* Circular Gauge styling */
+.buildup-gauge {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  margin: 4px auto 0 auto;
+}
+.buildup-gauge svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.buildup-gauge circle {
+  fill: none;
+  stroke-width: 3.5;
+}
+.buildup-gauge .bg-ring {
+  stroke: rgba(255, 255, 255, 0.05);
+}
+.buildup-gauge .fill-ring {
+  stroke: var(--text-vdim);
+  stroke-dasharray: 157; /* 2 * PI * r (r=25) */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.8s, stroke 0.5s;
+  stroke-linecap: round;
+}
+.buildup-gauge .gauge-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* PCR Spectrum Bar */
+.pcr-spectrum {
+  position: relative;
+  height: 4px;
+  background: linear-gradient(90deg, var(--red) 0%, rgba(113, 113, 122, 0.3) 50%, var(--green) 100%);
+  border-radius: 2px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  width: 100%;
+}
+.pcr-pointer {
+  position: absolute;
+  top: 50%;
+  left: 50%; /* JS updated */
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1.5px solid var(--blue);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px #ffffff, 0 0 3px var(--blue);
+  transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* TradingView Container */
+.chart-container {
+  flex: 1;
+  background: #09090b;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+  transition: border-color 0.2s;
+}
+.chart-container:hover {
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* Holographic HUD Overlay */
+#chartHudLegend {
+  background: hsla(240, 16%, 3%, 0.9) !important;
+  backdrop-filter: blur(16px) -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-left: 3px solid var(--blue) !important;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.65), inset 0 1px 0 0 rgba(255,255,255,0.05) !important;
+}
+
+/* Open Interest buildup container */
+.oi-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.oi-chart-wrapper {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Signal Badge Styling with Pulse Animations */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.badge-pill {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+.badge-BULLISH { 
+  background: var(--green-soft); 
+  color: var(--green-text); 
+  border: 1px solid rgba(16,185,129,0.25); 
+  animation: pulse-green 2.5s infinite;
+}
+.badge-BEARISH { 
+  background: var(--red-soft); 
+  color: var(--red-text); 
+  border: 1px solid rgba(239,68,68,0.25); 
+  animation: pulse-red 2.5s infinite;
+}
+.badge-NEUTRAL { 
+  background: rgba(113,113,122,0.08); 
+  color: var(--text-dim); 
+  border: 1px solid rgba(113,113,122,0.2); 
+}
+
+/* Dynamic change styling */
+.pos-val { color: var(--green-text) !important; }
+.neg-val { color: var(--red-text) !important; }
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  opacity: 1;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.loading-overlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255,255,255,0.03);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  box-shadow: 0 0 20px rgba(59,130,246,0.3);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* Cache Age Indicator */
+.cache-badge {
+  font-size: 10px;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-family: monospace;
+}
+
+/* Premium Control Switchers */
+.ts-select {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  outline: none;
+}
+.ts-select:hover {
+  color: var(--text-bright);
+  background: rgba(255, 255, 255, 0.04);
+}
+.ts-select.active {
+  background: var(--blue-soft) !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  color: var(--text-bright) !important;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+/* Nifty Historical OI Time-Series Table Styles */
+.ts-table th {
+  padding: 10px 8px !important;
+  font-family: var(--font-sans);
+  font-weight: 700 !important;
+  font-size: 10px !important;
+  color: var(--text-dim) !important;
+  text-transform: uppercase;
+  letter-spacing: 1.2px !important;
+  border-bottom: 2px solid var(--border) !important;
+  background: var(--bg-darker);
+}
+.ts-table td {
+  padding: 10px 8px;
+  vertical-align: middle;
+}
+.ts-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.015);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ts-table tbody tr:hover {
+  background: hsla(240, 10%, 10%, 0.5);
+  box-shadow: inset 3px 0 0 var(--blue);
+  transform: translateX(2px);
+}
+.ts-cell-primary {
+  font-weight: 700;
+  color: var(--text-bright);
+}
+.ts-cell-sub {
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.flash-up {
+  animation: flash-green 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.flash-down {
+  animation: flash-red 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes flash-green {
+  0% { color: var(--green); text-shadow: 0 0 15px var(--green); }
+  50% { color: var(--green); }
+  100% { color: var(--text-bright); text-shadow: none; }
+}
+@keyframes flash-red {
+  0% { color: var(--red); text-shadow: 0 0 15px var(--red); }
+  50% { color: var(--red); }
+  100% { color: var(--text-bright); text-shadow: none; }
+}
+
+/* Double Sided Order Flow delta bar elements */
+.orderflow-bar-container {
+  display: flex;
+  align-items: center;
+  width: 100px;
+  height: 14px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.03);
+  margin: 0 auto;
+  overflow: hidden;
+}
+.orderflow-midline {
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(255,255,255,0.15);
+  z-index: 2;
+}
+.orderflow-fill {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  transition: width 0.4s ease;
+}
+.orderflow-fill-pe {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.6) 100%);
+  left: 50%;
+}
+.orderflow-fill-ce {
+  background: linear-gradient(-90deg, rgba(244, 63, 94, 0.15) 0%, rgba(244, 63, 94, 0.6) 100%);
+  right: 50%;
+}
+
+/* Live row dot status blinker */
+.live-row-blinker {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
+  animation: live-blink 1.5s infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+@keyframes live-blink {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; box-shadow: 0 0 12px var(--blue); }
+  100% { opacity: 0.3; }
+}
+</style>
+<script src="/static/js/lightweight-charts.js"></script>
+<script src="/static/js/chart.umd.min.js"></script>
+<script src="/static/js/rendering_core.js?v=100"></script>
+
+
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+
+  <link rel="stylesheet" href="/static/css/themes.css">
+</head>
+<body>
+
+<!-- Global Loader -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">AGGREGATING NIFTY 50 LIVE DERIVATIVES...</div>
+</div>
+
+<!-- Header / Navigation -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
+  </a>
+
+  <div class="q-nav-links">
+    <a href="/" id="nav-dashboard">Dashboard</a>
+    <a href="/sectors" id="nav-sectors">Sectors</a>
+    <a href="/nifty" id="nav-nifty" class="active">Nifty 50</a>
+  </div>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/advanced-analytics" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Advanced Desk</span>
+        </a>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Container -->
+<div class="dashboard-container">
+  
+  <!-- Left Panel (TradingView + Stats Grid) -->
+  <div class="left-panel">
+    
+    <!-- Real-time Stats Grid -->
+    <div class="stats-grid" style="display: none;">
+      <!-- 1. Spot Price Card -->
+      <div class="stat-item" id="spotStat">
+        <div class="stat-label">
+          <span>Nifty Spot</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--blue);"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+        <span class="stat-value" id="spotPrice">—</span>
+        <div class="stat-sub" id="spotChg">—</div>
+        <!-- Micro Bounds Meter -->
+        <div id="spotRangeContainer" style="display: flex; flex-direction: column; gap: 3px; margin-top: 6px;">
+          <div style="display: flex; justify-content: space-between; font-size: 8px; color: var(--text-vdim); font-family: monospace; font-weight: 700;">
+            <span id="spotLowVal">—</span>
+            <span id="spotHighVal">—</span>
+          </div>
+          <div style="height: 3px; background: rgba(255,255,255,0.05); border-radius: 1.5px; position: relative; width: 100%; overflow: hidden;">
+            <div id="spotRangeFill" style="position: absolute; top: 0; bottom: 0; left: 0; width: 0%; background: linear-gradient(90deg, var(--red) 0%, var(--green) 100%); transition: width 0.4s ease;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Buildup State Card -->
+      <div class="stat-item" id="buildupStat">
+        <div class="stat-label">
+          <span>Buildup State</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--blue);"><circle cx="12" cy="12" r="10"></circle><path d="M16.2 7.8l-2 2-2-2-2 2"></path></svg>
+        </div>
+        <!-- Animated Circular Gauge -->
+        <div class="buildup-gauge">
+          <svg>
+            <circle class="bg-ring" cx="29" cy="29" r="25"></circle>
+            <circle class="fill-ring" id="buildupGaugeFill" cx="29" cy="29" r="25"></circle>
+          </svg>
+          <div class="gauge-text" id="buildupGaugeText" style="color: var(--text-bright);">NEUTRAL</div>
+        </div>
+      </div>
+
+      <!-- 3. Option PCR Card -->
+      <div class="stat-item">
+        <div class="stat-label">
+          <span>Option PCR</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--blue);"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg>
+        </div>
+        <span class="stat-value" id="pcrValue">—</span>
+        <!-- PCR Spectrum Slider -->
+        <div class="pcr-spectrum">
+          <div class="pcr-pointer" id="pcrPointer" style="left: 50%;"></div>
+        </div>
+        <div class="stat-sub" id="pcrSigBadge" style="margin-top: 2px;">—</div>
+      </div>
+
+      <!-- 4. Max Pain Card -->
+      <div class="stat-item">
+        <div class="stat-label">
+          <span>Max Pain</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--blue);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <span class="stat-value" id="maxPainValue">—</span>
+        <span class="stat-sub" style="color: var(--text-vdim);">OI Convergence Target</span>
+      </div>
+
+      <!-- 5. Option Expiry Card -->
+      <div class="stat-item">
+        <div class="stat-label">
+          <span>Option Expiry</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--blue);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        <span class="stat-value" id="expiryValue" style="font-size: 15px; margin-top: 4px; letter-spacing: 0.2px; font-weight: 800;">—</span>
+        <span class="stat-sub" id="atmStrikeValue">ATM Strike: —</span>
+      </div>
+    </div>
+
+    <!-- Chart Control Bar -->
+    <div class="q-card" style="padding: 8px 14px; margin-bottom: -16px; border-bottom-left-radius: 0; border-bottom-right-radius: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(15, 15, 20, 0.65); border-bottom: none; z-index: 10;">
+      <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+        <div style="display: none; gap: 8px; align-items: center;">
+          <span class="stat-label" style="margin-bottom: 0; font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px;">VIEW MODE:</span>
+          <div style="display: flex; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
+            <button id="modeIndexBtn" class="ts-select active" style="background: var(--blue-soft); border: 1px solid rgba(59,130,246,0.3); color: var(--text-bright); border-radius: 4px; padding: 4px 12px; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onclick="setChartMode('index')">Index Price &amp; Vol</button>
+            <button id="modeMultiStrikeBtn" class="ts-select" style="background: transparent; border: 1px solid transparent; color: var(--text-dim); border-radius: 4px; padding: 4px 12px; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onclick="setChartMode('multistrike')">Multi-Strike OI</button>
+            <button id="modeCumOiBtn" class="ts-select" style="background: transparent; border: 1px solid transparent; color: var(--text-dim); border-radius: 4px; padding: 4px 12px; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onclick="setChartMode('cumoi')">Cumulative Trend</button>
+          </div>
+        </div>
+        <!-- Sub-pane Volume vs OI Strength Toggle -->
+        <div id="volumeSubToggle" style="display: flex; align-items: center; gap: 6px;">
+          <span class="stat-label" style="margin-bottom: 0; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px;">LOWER PANEL:</span>
+          <div style="display: flex; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; padding: 1.5px;">
+            <button id="volToggleOiDelta" class="ts-select active" style="background: var(--blue-soft); border: 1px solid rgba(59,130,246,0.3); color: var(--text-bright); border-radius: 3px; padding: 2.5px 8px; font-size: 9px; cursor: pointer; transition: all 0.2s; font-weight: 600;" onclick="toggleLowerPanel('oidelta')">PE-CE Delta</button>
+            <button id="volToggleVolume" class="ts-select" style="background: transparent; border: 1px solid transparent; color: var(--text-dim); border-radius: 3px; padding: 2.5px 8px; font-size: 9px; cursor: pointer; transition: all 0.2s; font-weight: 600;" onclick="toggleLowerPanel('volume')">Volume</button>
+          </div>
+        </div>
+      </div>
+      <!-- Checkbox Strike Selector -->
+      <div id="strikeSelectorContainer" style="display: none; align-items: center; gap: 10px; overflow-x: auto; max-width: 40%; padding-bottom: 2px;">
+        <!-- Checkboxes will be dynamically rendered here -->
+      </div>
+      <!-- Multi-strike Line Mode Sub-toggle -->
+      <div id="multiStrikeSubToggle" style="display: none; align-items: center; gap: 6px; margin-left: auto;">
+        <span class="stat-label" style="margin-bottom: 0; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px;">LINE TYPE:</span>
+        <div style="display: flex; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; padding: 1.5px;">
+          <button id="msToggleAbs" class="ts-select active" style="background: var(--blue-soft); border: 1px solid rgba(59,130,246,0.3); color: var(--text-bright); border-radius: 3px; padding: 2.5px 8px; font-size: 9px; cursor: pointer; transition: all 0.2s; font-weight: 600;" onclick="setMultiStrikeLineMode('absolute')">Absolute</button>
+          <button id="msToggleChg" class="ts-select" style="background: transparent; border: 1px solid transparent; color: var(--text-dim); border-radius: 3px; padding: 2.5px 8px; font-size: 9px; cursor: pointer; transition: all 0.2s; font-weight: 600;" onclick="setMultiStrikeLineMode('change')">OI Change</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Price Chart -->
+    <div class="chart-container" id="tvChartContainer" style="position: relative; display: flex; flex-direction: column; background: #09090b; gap: 4px; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;">
+      <!-- Interactive HUD Legend Overlay -->
+      <div id="chartHudLegend" style="position: absolute; top: 12px; left: 12px; z-index: 20; pointer-events: none; font-family: var(--font-sans); font-size: 11px; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; display: flex; flex-direction: column; gap: 4px; color: var(--text-dim); transition: opacity 0.2s;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <span style="color: var(--text-bright); font-weight: 700;">NIFTY 50 SPOT</span>
+          <span id="hudOhlc" style="letter-spacing: 0.2px;">O: <span class="val">—</span> H: <span class="val">—</span> L: <span class="val">—</span> C: <span class="val">—</span> V: <span class="val">—</span></span>
+        </div>
+        <div id="hudOiDetails" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 3px; font-weight: 500;">
+          <!-- Dynamic details based on mode will render here -->
+        </div>
+      </div>
+      <div id="priceChartContainer" style="flex: 1; min-height: 0; width: 100%;"></div>
+      <div id="oiChartContainer" style="display: none; flex: 1; min-height: 0; width: 100%; border-top: 1px solid var(--border);"></div>
+    </div>
+    
+  </div>
+  
+  <!-- Right Panel (OI Buildup Horizontal Chart + Time-Series Table) -->
+  <div class="right-panel">
+    
+    <!-- Open Interest Card -->
+    <div id="oiBuildupCard" class="q-card oi-container" style="flex: 0 0 280px; overflow: hidden; transition: flex 0.3s ease, min-height 0.3s ease;">
+      <div class="q-card-title" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button onclick="toggleCard('oiBuildupCard')" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px; color: var(--blue); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(59,130,246,0.2);">
+            <svg id="icon-oiBuildupCard" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <span style="font-size: 13px; font-weight: 700; background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NIFTY OI BUILDUP</span>
+          <span style="font-size: 9px; padding: 2px 6px; border-radius: 4px; background: rgba(59,130,246,0.1); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); margin-left: 6px; font-family: monospace;">[Active Filter: ATM &plusmn;10]</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; padding: 2px;">
+            <button id="oiToggleTotal" class="ts-select active" style="background: var(--blue-soft); border: 1px solid rgba(59,130,246,0.3); color: var(--text-bright); border-radius: 3px; padding: 2px 8px; font-size: 10px; cursor: pointer; transition: all 0.2s; font-weight: 600;" onclick="setOiBuildupMode('total')">Total OI</button>
+            <button id="oiToggleChange" class="ts-select" style="background: transparent; border: 1px solid transparent; color: var(--text-dim); border-radius: 3px; padding: 2px 8px; font-size: 10px; cursor: pointer; transition: all 0.2s; font-weight: 600;" onclick="setOiBuildupMode('change')">OI Change</button>
+          </div>
+          <span class="cache-badge" id="cacheBadge">CACHE AGE: 0.0s</span>
+        </div>
+      </div>
+      <div id="content-oiBuildupCard" class="oi-chart-wrapper" style="transition: opacity 0.3s ease;">
+        <canvas id="oiChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Nifty OI Moneyness Card -->
+    <details class="q-card" id="oiMoneynessCard" style="flex: 0 0 auto; display: flex; flex-direction: column; padding-bottom: 0;">
+      <summary class="q-card-title" style="margin-bottom: 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none;">
+        <span style="font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">OI MONEYNESS</span>
+        <span class="cache-badge" style="font-size: 8px; color: var(--blue); border-color: rgba(59,130,246,0.2);">SHOW DETAILS</span>
+      </summary>
+      <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; justify-content: center; margin-top: 12px; margin-bottom: 12px;">
+        
+        <!-- 1. ATM Bucket -->
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
+            <span style="color: var(--text-dim);">ATM Strike (<span id="monAtmStrike">—</span>)</span>
+            <span id="monAtmLabel" style="font-size: 9px; color: var(--text-dim);">Balanced Writing</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="monAtmCe" style="font-size: 10px; color: var(--red-text); font-family: monospace; font-weight: 700; width: 50px; text-align: left;">—</span>
+            <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.02); border-radius: 4px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.03);">
+              <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.2); z-index: 2;"></div>
+              <div id="monAtmCeBar" style="position: absolute; right: 50%; top: 0; bottom: 0; width: 0%; background: linear-gradient(-90deg, rgba(244, 63, 94, 0.15) 0%, rgba(244, 63, 94, 0.7) 100%); transition: width 0.4s ease;"></div>
+              <div id="monAtmPeBar" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.7) 100%); transition: width 0.4s ease;"></div>
+            </div>
+            <span id="monAtmPe" style="font-size: 10px; color: var(--green-text); font-family: monospace; font-weight: 700; width: 50px; text-align: right;">—</span>
+          </div>
+        </div>
+
+        <!-- 2. Near OTM Bucket -->
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
+            <span style="color: var(--text-dim);">Near OTM (1-Step ±50)</span>
+            <span id="monNearLabel" style="font-size: 9px; color: var(--text-dim);">Balanced Sell</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="monNearCe" style="font-size: 10px; color: var(--red-text); font-family: monospace; font-weight: 700; width: 50px; text-align: left;">—</span>
+            <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.02); border-radius: 4px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.03);">
+              <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.2); z-index: 2;"></div>
+              <div id="monNearCeBar" style="position: absolute; right: 50%; top: 0; bottom: 0; width: 0%; background: linear-gradient(-90deg, rgba(244, 63, 94, 0.15) 0%, rgba(244, 63, 94, 0.7) 100%); transition: width 0.4s ease;"></div>
+              <div id="monNearPeBar" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.7) 100%); transition: width 0.4s ease;"></div>
+            </div>
+            <span id="monNearPe" style="font-size: 10px; color: var(--green-text); font-family: monospace; font-weight: 700; width: 50px; text-align: right;">—</span>
+          </div>
+        </div>
+
+        <!-- 3. Deep OTM Bucket -->
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
+            <span style="color: var(--text-dim);">Deep OTM (>= ±100)</span>
+            <span id="monDeepLabel" style="font-size: 9px; color: var(--text-dim);">Balanced convex bets</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="monDeepCe" style="font-size: 10px; color: var(--red-text); font-family: monospace; font-weight: 700; width: 50px; text-align: left;">—</span>
+            <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.02); border-radius: 4px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.03);">
+              <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.2); z-index: 2;"></div>
+              <div id="monDeepCeBar" style="position: absolute; right: 50%; top: 0; bottom: 0; width: 0%; background: linear-gradient(-90deg, rgba(244, 63, 94, 0.15) 0%, rgba(244, 63, 94, 0.7) 100%); transition: width 0.4s ease;"></div>
+              <div id="monDeepPeBar" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.7) 100%); transition: width 0.4s ease;"></div>
+            </div>
+            <span id="monDeepPe" style="font-size: 10px; color: var(--green-text); font-family: monospace; font-weight: 700; width: 50px; text-align: right;">—</span>
+          </div>
+        </div>
+
+      </div>
+    </details>
+    
+    <!-- Nifty OI Time-Series Card -->
+    <div id="tsCard" class="q-card ts-container" style="flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; transition: flex 0.3s ease, min-height 0.3s ease;">
+      <div class="q-card-title" style="margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button onclick="toggleCard('tsCard')" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px; color: var(--blue); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(59,130,246,0.2);">
+            <svg id="icon-tsCard" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <span style="font-size: 13px; font-weight: 700; background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NIFTY HISTORICAL OI TIME-SERIES</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="intervalSelect" class="ts-select" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-dim); border-radius: 4px; padding: 2px 6px; font-size: 11px; outline: none; cursor: pointer;">
+            <option value="1minute">1 Minute</option>
+            <option value="3minute">3 Minutes</option>
+            <option value="5minute" selected>5 Minutes</option>
+            <option value="15minute">15 Minutes</option>
+            <option value="30minute">30 Minutes</option>
+          </select>
+          <span class="cache-badge" id="tsCountBadge">ROWS: 0</span>
+        </div>
+      </div>
+      <div id="content-tsCard" class="table-wrapper" style="flex: 1; overflow-y: auto; margin-right: -6px; padding-right: 6px; transition: opacity 0.3s ease;">
+        <table class="ts-table" style="width: 100%; border-collapse: collapse; text-align: right; font-size: 12px; font-family: var(--font-sans);">
+          <thead style="position: sticky; top: 0; background: var(--bg-darker); z-index: 10; box-shadow: 0 1px 0 var(--border);">
+            <tr>
+              <th style="text-align: left; padding: 10px 6px; color: var(--text-dim); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border);">Time</th>
+              <th style="padding: 10px 6px; color: var(--text-dim); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border);">LTP</th>
+              <th style="padding: 10px 6px; color: var(--text-dim); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border);">Total OI</th>
+              <th style="padding: 10px 6px; color: var(--text-dim); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border);">Call OI (CE)</th>
+              <th style="padding: 10px 6px; color: var(--text-dim); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border);">Put OI (PE)</th>
+              <th style="text-align: center; padding: 10px 6px; color: var(--text-dim); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border); width: 130px;">Order Flow (PE vs CE)</th>
+            </tr>
+          </thead>
+          <tbody id="tsTableBody">
+            <!-- Dynamic rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+
+</div>
+
+<script>
+let barChartInstance = null; // Chart.js horizontal bar chart
+let currentSymbol = 'NIFTY';
+let currentExpiry = '';
+
+let priceChartInstance = null;
+let oiLightweightChartInstance = null; // Rename to avoid clash with Chart.js instance
+let candleSeries = null;
+let volumeSeries = null;
+let oiDeltaSeries = null;
+let peChgSeries = null;
+let ceChgSeries = null;
+let isSyncingRange = false;
+let isSyncingCrosshair = false;
+let lastCandlesArray = [];
+let priceChartResizeObserver = null;
+let oiChartResizeObserver = null;
+let initialChartZoomSet = false;
+
+// Option Reference Lines
+let atmPriceLine = null;
+let callWallPriceLine = null;
+let putWallPriceLine = null;
+
+// Option Dashboard State
+let chartMode = 'index'; // 'index' | 'multistrike' | 'cumoi'
+let oiBuildupMode = 'total'; // 'total' | 'change'
+let multiStrikeLineMode = 'absolute'; // 'absolute' | 'change'
+let showOiDelta = true;
+let showVolume = false;
+let currentATMStrike = 0;
+let availableStrikes = []; // parsed from the latest options chain
+let checkedStrikes = {}; // e.g. { "23700": { ce: true, pe: true } }
+let strikeSeriesList = {}; // maps key to LineSeries objects
+let cumPeSeries = null;
+let cumCeSeries = null;
+let lastOiTimeseriesData = [];
+let lastMultiStrikeData = [];
+
+
+function toggleCard(cardId) {
+  const card = document.getElementById(cardId);
+  const content = document.getElementById(`content-${cardId}`);
+  const icon = document.getElementById(`icon-${cardId}`);
+  
+  const isCollapsed = card.getAttribute('data-collapsed') === 'true';
+  
+  if (isCollapsed) {
+    // Expand
+    card.setAttribute('data-collapsed', 'false');
+    card.style.flex = cardId === 'oiBuildupCard' ? '0 0 280px' : '1';
+    card.style.minHeight = '0'; // Restore min-height logic
+    content.style.display = '';
+    setTimeout(() => { content.style.opacity = '1'; }, 10);
+    icon.style.transform = 'rotate(0deg)';
+  } else {
+    // Collapse
+    card.setAttribute('data-collapsed', 'true');
+    card.style.flex = '0 0 auto';
+    card.style.minHeight = '42px';
+    content.style.opacity = '0';
+    setTimeout(() => { content.style.display = 'none'; }, 300);
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+function setChartMode(mode) {
+  chartMode = mode;
+  
+  // Update button active state
+  document.getElementById('modeIndexBtn').className = 'ts-select' + (mode === 'index' ? ' active' : '');
+  document.getElementById('modeMultiStrikeBtn').className = 'ts-select' + (mode === 'multistrike' ? ' active' : '');
+  document.getElementById('modeCumOiBtn').className = 'ts-select' + (mode === 'cumoi' ? ' active' : '');
+  
+  // Set button background styles
+  document.getElementById('modeIndexBtn').style.background = mode === 'index' ? 'var(--blue-soft)' : 'transparent';
+  document.getElementById('modeIndexBtn').style.borderColor = mode === 'index' ? 'rgba(59,130,246,0.3)' : 'transparent';
+  document.getElementById('modeIndexBtn').style.color = mode === 'index' ? 'var(--text-bright)' : 'var(--text-dim)';
+  
+  document.getElementById('modeMultiStrikeBtn').style.background = mode === 'multistrike' ? 'var(--blue-soft)' : 'transparent';
+  document.getElementById('modeMultiStrikeBtn').style.borderColor = mode === 'multistrike' ? 'rgba(59,130,246,0.3)' : 'transparent';
+  document.getElementById('modeMultiStrikeBtn').style.color = mode === 'multistrike' ? 'var(--text-bright)' : 'var(--text-dim)';
+  
+  document.getElementById('modeCumOiBtn').style.background = mode === 'cumoi' ? 'var(--blue-soft)' : 'transparent';
+  document.getElementById('modeCumOiBtn').style.borderColor = mode === 'cumoi' ? 'rgba(59,130,246,0.3)' : 'transparent';
+  document.getElementById('modeCumOiBtn').style.color = mode === 'cumoi' ? 'var(--text-bright)' : 'var(--text-dim)';
+
+  // Toggle Strike Selector and Line Type visibility
+  document.getElementById('strikeSelectorContainer').style.display = mode === 'multistrike' ? 'flex' : 'none';
+  document.getElementById('multiStrikeSubToggle').style.display = mode === 'multistrike' ? 'flex' : 'none';
+  
+  // Update active series options
+  updateSeriesVisibility();
+  
+  // Fetch new data right away
+  updateChartData();
+}
+
+function setMultiStrikeLineMode(mode) {
+  multiStrikeLineMode = mode;
+  
+  document.getElementById('msToggleAbs').className = 'ts-select' + (mode === 'absolute' ? ' active' : '');
+  document.getElementById('msToggleChg').className = 'ts-select' + (mode === 'change' ? ' active' : '');
+  
+  document.getElementById('msToggleAbs').style.background = mode === 'absolute' ? 'var(--blue-soft)' : 'transparent';
+  document.getElementById('msToggleAbs').style.borderColor = mode === 'absolute' ? 'rgba(59,130,246,0.3)' : 'transparent';
+  document.getElementById('msToggleAbs').style.color = mode === 'absolute' ? 'var(--text-bright)' : 'var(--text-dim)';
+  
+  document.getElementById('msToggleChg').style.background = mode === 'change' ? 'var(--blue-soft)' : 'transparent';
+  document.getElementById('msToggleChg').style.borderColor = mode === 'change' ? 'rgba(59,130,246,0.3)' : 'transparent';
+  document.getElementById('msToggleChg').style.color = mode === 'change' ? 'var(--text-bright)' : 'var(--text-dim)';
+  
+  updateChartData();
+}
+
+function setOiBuildupMode(mode) {
+  oiBuildupMode = mode;
+  
+  document.getElementById('oiToggleTotal').className = 'ts-select' + (mode === 'total' ? ' active' : '');
+  document.getElementById('oiToggleChange').className = 'ts-select' + (mode === 'change' ? ' active' : '');
+  
+  document.getElementById('oiToggleTotal').style.background = mode === 'total' ? 'var(--blue-soft)' : 'transparent';
+  document.getElementById('oiToggleTotal').style.borderColor = mode === 'total' ? 'rgba(59,130,246,0.3)' : 'transparent';
+  document.getElementById('oiToggleTotal').style.color = mode === 'total' ? 'var(--text-bright)' : 'var(--text-dim)';
+  
+  document.getElementById('oiToggleChange').style.background = mode === 'change' ? 'var(--blue-soft)' : 'transparent';
+  document.getElementById('oiToggleChange').style.borderColor = mode === 'change' ? 'rgba(59,130,246,0.3)' : 'transparent';
+  document.getElementById('oiToggleChange').style.color = mode === 'change' ? 'var(--text-bright)' : 'var(--text-dim)';
+  
+  // Request fresh Nifty live data to update the Chart.js horizontal bar chart immediately
+  updateNiftyData();
+}
+
+function toggleLowerPanel(mode) {
+  if (mode === 'oidelta') showOiDelta = !showOiDelta;
+  if (mode === 'volume') showVolume = !showVolume;
+  
+  const oidBtn = document.getElementById('volToggleOiDelta');
+  oidBtn.className = 'ts-select' + (showOiDelta ? ' active' : '');
+  oidBtn.style.background = showOiDelta ? 'var(--blue-soft)' : 'transparent';
+  oidBtn.style.borderColor = showOiDelta ? 'rgba(59,130,246,0.3)' : 'transparent';
+  oidBtn.style.color = showOiDelta ? 'var(--text-bright)' : 'var(--text-dim)';
+  
+  const volBtn = document.getElementById('volToggleVolume');
+  volBtn.className = 'ts-select' + (showVolume ? ' active' : '');
+  volBtn.style.background = showVolume ? 'var(--blue-soft)' : 'transparent';
+  volBtn.style.borderColor = showVolume ? 'rgba(59,130,246,0.3)' : 'transparent';
+  volBtn.style.color = showVolume ? 'var(--text-bright)' : 'var(--text-dim)';
+
+  if (oiDeltaSeries) oiDeltaSeries.applyOptions({ visible: showOiDelta });
+  if (volumeSeries) volumeSeries.applyOptions({ visible: showVolume });
+  
+  updateChartData();
+}
+
+
+function updateSeriesVisibility() {
+  if (!oiLightweightChartInstance) return;
+  
+  const isIndex = chartMode === 'index';
+  if (peChgSeries) peChgSeries.applyOptions({ visible: isIndex });
+  if (ceChgSeries) ceChgSeries.applyOptions({ visible: isIndex });
+  
+  const isCum = chartMode === 'cumoi';
+  if (cumPeSeries) cumPeSeries.applyOptions({ visible: isCum });
+  if (cumCeSeries) cumCeSeries.applyOptions({ visible: isCum });
+  
+  const isMulti = chartMode === 'multistrike';
+  Object.keys(strikeSeriesList).forEach(key => {
+    const parts = key.split('_');
+    const strike = parts[0];
+    const type = parts[1];
+    const isChecked = checkedStrikes[strike] && checkedStrikes[strike][type];
+    strikeSeriesList[key].applyOptions({ visible: isMulti && isChecked });
+  });
+}
+
+function getStrikeColor(strike, type) {
+  const diff = parseFloat(strike) - parseFloat(currentATMStrike);
+  const isCE = type === 'ce';
+  
+  if (diff === 0) {
+    return isCE ? 'rgb(239, 68, 68)' : 'rgb(16, 185, 129)'; // ATM: Red, Green
+  } else if (diff === 50) {
+    return isCE ? 'rgb(244, 63, 94)' : 'rgb(20, 184, 166)'; // Rose, Teal
+  } else if (diff === -50) {
+    return isCE ? 'rgb(249, 115, 22)' : 'rgb(59, 130, 246)'; // Orange, Blue
+  } else if (diff === 100) {
+    return isCE ? 'rgb(217, 70, 239)' : 'rgb(168, 85, 247)'; // Fuchsia, Purple
+  } else if (diff === -100) {
+    return isCE ? 'rgb(234, 179, 8)' : 'rgb(132, 204, 22)'; // Yellow, Lime
+  } else if (diff > 0) {
+    return isCE ? 'rgba(239, 68, 68, 0.55)' : 'rgba(16, 185, 129, 0.55)';
+  } else {
+    return isCE ? 'rgba(249, 115, 22, 0.55)' : 'rgba(59, 130, 246, 0.55)';
+  }
+}
+
+function getOrCreateStrikeSeries(strike, type) {
+  const key = `${strike}_${type}`;
+  if (strikeSeriesList[key]) {
+    return strikeSeriesList[key];
+  }
+  
+  const color = getStrikeColor(strike, type);
+  const title = `${strike} ${type.toUpperCase()}`;
+  
+  const series = oiLightweightChartInstance.addSeries(LightweightCharts.LineSeries, {
+    color: color,
+    lineWidth: 2,
+    title: title,
+    priceFormat: {
+      type: 'custom',
+      formatter: (val) => formatCompactNumber(val)
+    },
+    priceScaleId: 'oi-change-scale',
+  });
+  
+  strikeSeriesList[key] = series;
+  return series;
+}
+
+function renderStrikeSelector(atmStrike) {
+  if (!atmStrike) return;
+  atmStrike = parseFloat(atmStrike);
+  
+  const container = document.getElementById('strikeSelectorContainer');
+  if (container.children.length > 0 && currentATMStrike === atmStrike) return;
+  
+  currentATMStrike = atmStrike;
+  
+  // List nearest 5 strikes (ATM-100, ATM-50, ATM, ATM+50, ATM+100)
+  const strikes = [atmStrike - 100, atmStrike - 50, atmStrike, atmStrike + 50, atmStrike + 100];
+  availableStrikes = strikes;
+  
+  container.innerHTML = '';
+  
+  strikes.forEach(s => {
+    // Initialize default selections (ATM CE/PE and ATM-50 PE, ATM+50 CE)
+    if (checkedStrikes[s] === undefined) {
+      checkedStrikes[s] = {
+        ce: s === atmStrike || s === atmStrike + 50,
+        pe: s === atmStrike || s === atmStrike - 50
+      };
+    }
+    
+    // Create element
+    const strikeDiv = document.createElement('div');
+    strikeDiv.style.display = 'flex';
+    strikeDiv.style.alignItems = 'center';
+    strikeDiv.style.gap = '4px';
+    strikeDiv.style.background = 'rgba(255,255,255,0.03)';
+    strikeDiv.style.padding = '3px 8px';
+    strikeDiv.style.borderRadius = '4px';
+    strikeDiv.style.border = '1px solid var(--border)';
+    strikeDiv.style.fontSize = '10px';
+    strikeDiv.style.whiteSpace = 'nowrap';
+    
+    const labelText = s === atmStrike ? `*${s} (ATM)` : `${s}`;
+    
+    strikeDiv.innerHTML = `
+      <span style="font-weight: 600; color: ${s === atmStrike ? 'var(--text-bright)' : 'var(--text-dim)'}; margin-right: 4px;">${labelText}</span>
+      <label style="display: flex; align-items: center; gap: 2px; cursor: pointer; color: rgb(239, 68, 68);">
+        <input type="checkbox" id="chk_${s}_ce" ${checkedStrikes[s].ce ? 'checked' : ''} onchange="toggleStrikeCheckbox(${s}, 'ce')">
+        CE
+      </label>
+      <label style="display: flex; align-items: center; gap: 2px; cursor: pointer; color: rgb(16, 185, 129); margin-left: 4px;">
+        <input type="checkbox" id="chk_${s}_pe" ${checkedStrikes[s].pe ? 'checked' : ''} onchange="toggleStrikeCheckbox(${s}, 'pe')">
+        PE
+      </label>
+    `;
+    container.appendChild(strikeDiv);
+  });
+}
+
+function toggleStrikeCheckbox(strike, type) {
+  if (!checkedStrikes[strike]) {
+    checkedStrikes[strike] = { ce: false, pe: false };
+  }
+  
+  const chk = document.getElementById(`chk_${strike}_${type}`);
+  checkedStrikes[strike][type] = chk ? chk.checked : false;
+  
+  updateSeriesVisibility();
+  updateChartData();
+}
+
+function getCandleForTime(time) {
+  if (!lastCandlesArray || lastCandlesArray.length === 0) return null;
+  const timeVal = (typeof time === 'object' && time !== null) ? (time.timestamp || time) : time;
+  return lastCandlesArray.find(c => {
+    const cTimeVal = (typeof c.time === 'object' && c.time !== null) ? (c.time.timestamp || c.time) : c.time;
+    return cTimeVal === timeVal;
+  });
+}
+
+// 1. Initialize standalone local Lightweight Charts (Dual-Pane)
+function initLocalChart() {
+  if (typeof LightweightCharts === 'undefined') {
+    console.warn('LightweightCharts not loaded');
+    return;
+  }
+  try {
+    const priceContainer = document.getElementById('priceChartContainer');
+    const oiContainer = document.getElementById('oiChartContainer');
+    if (!priceContainer || !oiContainer) return;
+    
+    // Clear any previous chart instances
+    priceContainer.innerHTML = '';
+    oiContainer.innerHTML = '';
+    
+    // Clean up observers if they exist
+    if (priceChartResizeObserver) priceChartResizeObserver.disconnect();
+    if (oiChartResizeObserver) oiChartResizeObserver.disconnect();
+    
+    // Common theme configuration - Obsidian Cybernetic Glass
+    const themeColors = {
+      bgColor: '#09090b', // Cybernetic black background
+      textColor: '#a1a1aa',
+      gridColor: 'rgba(255, 255, 255, 0.02)', // Subtle dark grid lines
+      upColor: '#10b981', // Vibrant emerald green for bullish
+      downColor: '#f43f5e' // Vibrant rose red for bearish
+    };
+
+    // 1.1 Create Price Chart (Top Pane)
+    priceChartInstance = LightweightCharts.createChart(priceContainer, {
+      layout: {
+        background: { type: 'solid', color: themeColors.bgColor },
+        textColor: themeColors.textColor,
+        fontFamily: 'Outfit, Inter, sans-serif',
+      },
+      grid: {
+        vertLines: { color: themeColors.gridColor, style: 2 },
+        horzLines: { color: themeColors.gridColor, style: 2 },
+      },
+      crosshair: { 
+        mode: 1,
+        vertLine: { color: 'rgba(255, 255, 255, 0.15)', style: 3 },
+        horzLine: { color: 'rgba(255, 255, 255, 0.15)', style: 3 }
+      },
+
+      timeScale: {
+        tickMarkFormatter: function(time, tickMarkType, locale) {
+            // Check if time is a UNIX timestamp
+            if (typeof time === 'number') {
+                const d = new Date(time * 1000);
+                const h = d.getHours().toString().padStart(2, '0');
+                const m = d.getMinutes().toString().padStart(2, '0');
+                return `${h}:${m}`;
+            }
+            // Lightweight charts may pass an object {year, month, day} for daily data
+            if (time.year) {
+                return `${time.year}-${time.month}-${time.day}`;
+            }
+            return String(time);
+        },
+        visible: true,
+        barSpacing: 18, // Increased from 10 to zoom in
+        minBarSpacing: 3,
+        shiftVisibleRangeOnNewBar: true,
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        autoScale: true,
+        scaleMargins: { top: 0.15, bottom: 0.15 },
+      }
+    });
+
+    candleSeries = priceChartInstance.addSeries(LightweightCharts.CandlestickSeries, {
+      upColor: themeColors.upColor,
+      downColor: themeColors.downColor,
+      borderVisible: false,
+      wickUpColor: themeColors.upColor,
+      wickDownColor: themeColors.downColor,
+    });
+
+    volumeSeries = priceChartInstance.addSeries(LightweightCharts.HistogramSeries, {
+      color: 'rgba(59, 130, 246, 0.18)', // Sleek blue
+      priceFormat: { type: 'volume' },
+      priceScaleId: 'vol',
+    });
+    
+    oiDeltaSeries = priceChartInstance.addSeries(LightweightCharts.HistogramSeries, {
+      priceFormat: { type: 'volume' },
+      priceScaleId: 'oid',
+    });
+
+    priceChartInstance.priceScale('vol').applyOptions({
+      scaleMargins: { top: 0.75, bottom: 0 },
+      visible: false,
+    });
+    priceChartInstance.priceScale('oid').applyOptions({
+      scaleMargins: { top: 0.75, bottom: 0 },
+      visible: false,
+    });
+
+    // 1.2 Create OI Chart (Bottom Pane)
+    oiLightweightChartInstance = LightweightCharts.createChart(oiContainer, {
+      layout: {
+        background: { type: 'solid', color: themeColors.bgColor },
+        textColor: themeColors.textColor,
+        fontFamily: 'Outfit, Inter, sans-serif',
+      },
+      grid: {
+        vertLines: { color: themeColors.gridColor, style: 2 },
+        horzLines: { color: themeColors.gridColor, style: 2 },
+      },
+      crosshair: { 
+        mode: 1,
+        vertLine: { color: 'rgba(255, 255, 255, 0.15)', style: 3 },
+        horzLine: { color: 'rgba(255, 255, 255, 0.15)', style: 3 }
+      },
+
+      timeScale: {
+        tickMarkFormatter: function(time, tickMarkType, locale) {
+            // Check if time is a UNIX timestamp
+            if (typeof time === 'number') {
+                const d = new Date(time * 1000);
+                const h = d.getHours().toString().padStart(2, '0');
+                const m = d.getMinutes().toString().padStart(2, '0');
+                return `${h}:${m}`;
+            }
+            // Lightweight charts may pass an object {year, month, day} for daily data
+            if (time.year) {
+                return `${time.year}-${time.month}-${time.day}`;
+            }
+            return String(time);
+        },
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        timeVisible: true,
+        secondsVisible: false,
+        barSpacing: 18, // Increased from 10 to zoom in
+        minBarSpacing: 3,
+        shiftVisibleRangeOnNewBar: true,
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        autoScale: true,
+        scaleMargins: { top: 0.1, bottom: 0.1 },
+      }
+    });
+
+    // 2.1 Pre-create Index mode histograms (green/red)
+    peChgSeries = oiLightweightChartInstance.addSeries(LightweightCharts.HistogramSeries, {
+      color: 'rgba(16, 185, 129, 0.65)',
+      priceFormat: {
+        type: 'custom',
+        formatter: (val) => formatCompactNumber(val)
+      },
+      priceScaleId: 'oi-change-scale',
+    });
+
+    ceChgSeries = oiLightweightChartInstance.addSeries(LightweightCharts.HistogramSeries, {
+      color: 'rgba(244, 63, 94, 0.65)', // Vibrant rose
+      priceFormat: {
+        type: 'custom',
+        formatter: (val) => formatCompactNumber(val)
+      },
+      priceScaleId: 'oi-change-scale',
+    });
+
+    // 2.2 Pre-create Cumulative trend area series with transparent gradients
+    cumPeSeries = oiLightweightChartInstance.addSeries(LightweightCharts.AreaSeries, {
+      lineColor: '#10b981',
+      topColor: 'rgba(16, 185, 129, 0.15)',
+      bottomColor: 'rgba(16, 185, 129, 0.0)',
+      lineWidth: 3,
+      title: 'Cum PE Chg (Bullish)',
+      priceFormat: {
+        type: 'custom',
+        formatter: (val) => formatCompactNumber(val)
+      },
+      priceScaleId: 'oi-change-scale',
+    });
+
+    cumCeSeries = oiLightweightChartInstance.addSeries(LightweightCharts.AreaSeries, {
+      lineColor: '#f43f5e',
+      topColor: 'rgba(244, 63, 94, 0.15)',
+      bottomColor: 'rgba(244, 63, 94, 0.0)',
+      lineWidth: 3,
+      title: 'Cum CE Chg (Bearish)',
+      priceFormat: {
+        type: 'custom',
+        formatter: (val) => formatCompactNumber(val)
+      },
+      priceScaleId: 'oi-change-scale',
+    });
+
+    oiLightweightChartInstance.priceScale('oi-change-scale').applyOptions({
+      scaleMargins: { top: 0.15, bottom: 0.15 },
+      visible: true,
+    });
+
+    // Initial visibility state
+    updateSeriesVisibility();
+
+    // 1.3 Setup Synchronization Range
+    priceChartInstance.timeScale().subscribeVisibleTimeRangeChange(range => {
+      if (isSyncingRange || !range) return;
+      isSyncingRange = true;
+      try { oiLightweightChartInstance.timeScale().setVisibleRange(range); } catch(e) {}
+      isSyncingRange = false;
+    });
+    oiLightweightChartInstance.timeScale().subscribeVisibleTimeRangeChange(range => {
+      if (isSyncingRange || !range) return;
+      isSyncingRange = true;
+      try { priceChartInstance.timeScale().setVisibleRange(range); } catch(e) {}
+      isSyncingRange = false;
+    });
+
+
+
+    // 1.4 Setup Crosshair Synchronization & HUD updates
+    priceChartInstance.subscribeCrosshairMove(param => {
+      if (isSyncingCrosshair) return;
+      isSyncingCrosshair = true;
+      if (param.time) {
+        oiLightweightChartInstance.setCrosshairPosition(0, param.time, peChgSeries);
+        updateHudLegend(param.time);
+      } else {
+        oiLightweightChartInstance.clearCrosshairPosition();
+        updateHudLegend(null);
+      }
+      isSyncingCrosshair = false;
+    });
+
+    oiLightweightChartInstance.subscribeCrosshairMove(param => {
+      if (isSyncingCrosshair) return;
+      isSyncingCrosshair = true;
+      if (param.time) {
+        const c = getCandleForTime(param.time);
+        if (c) {
+          priceChartInstance.setCrosshairPosition(c.close, param.time, candleSeries);
+        } else {
+          priceChartInstance.clearCrosshairPosition();
+        }
+        updateHudLegend(param.time);
+      } else {
+        priceChartInstance.clearCrosshairPosition();
+        updateHudLegend(null);
+      }
+      isSyncingCrosshair = false;
+    });
+
+    // 1.5 Setup Resize Observers
+    priceChartResizeObserver = new ResizeObserver(entries => {
+      if (priceChartInstance && entries[0]) {
+        const { width, height } = entries[0].contentRect;
+        priceChartInstance.resize(width, height);
+      }
+    });
+    priceChartResizeObserver.observe(priceContainer);
+
+    oiChartResizeObserver = new ResizeObserver(entries => {
+      if (oiLightweightChartInstance && entries[0]) {
+        const { width, height } = entries[0].contentRect;
+        oiLightweightChartInstance.resize(width, height);
+      }
+    });
+    oiChartResizeObserver.observe(oiContainer);
+
+  } catch (e) {
+    console.error("Failed to initialize Lightweight Charts:", e);
+    // Display detailed JavaScript error trace inside tvChartContainer for troubleshooting
+    const container = document.getElementById('tvChartContainer');
+    if (container) {
+      container.innerHTML = `
+        <div style="padding: 20px; color: var(--red-text); font-family: monospace; font-size: 11px; background: #09090b; height: 100%; overflow-y: auto;">
+          <strong>JavaScript Initialization Failed:</strong> ${e.message}<br>
+          <pre style="margin-top: 10px; opacity: 0.85;">${e.stack}</pre>
+          <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border);">
+          <strong>Fallback Chart Loading...</strong>
+          <div style="margin-top: 10px; width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <img id="fallbackChartImage" src="/api/nifty/chart.png?interval=5minute" style="width: 100%; height: 100%; object-fit: contain; cursor: pointer;" title="Server-side chart (click to refresh)" onclick="refreshFallbackChart()">
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+// Refresh fallback image chart
+function refreshFallbackChart() {
+  const fallbackImg = document.getElementById('fallbackChartImage');
+  if (fallbackImg) {
+    const intervalSelect = document.getElementById('intervalSelect');
+    const interval = intervalSelect ? intervalSelect.value : '5minute';
+    fallbackImg.src = `/api/nifty/chart.png?interval=${interval}&t=${Date.now()}`;
+  }
+}
+
+// Draw dynamic support/resistance reference lines (ATM, Call Wall, Put Wall)
+function drawReferenceLines(atmStrike, chainSlice) {
+  if (!candleSeries) return;
+  
+  // Remove existing price lines
+  if (atmPriceLine) {
+    try { candleSeries.removePriceLine(atmPriceLine); } catch(e) {}
+    atmPriceLine = null;
+  }
+  if (callWallPriceLine) {
+    try { candleSeries.removePriceLine(callWallPriceLine); } catch(e) {}
+    callWallPriceLine = null;
+  }
+  if (putWallPriceLine) {
+    try { candleSeries.removePriceLine(putWallPriceLine); } catch(e) {}
+    putWallPriceLine = null;
+  }
+  
+  if (!atmStrike) return;
+  atmStrike = parseFloat(atmStrike);
+  
+  // 1. Draw ATM Strike line (Purple)
+  atmPriceLine = candleSeries.createPriceLine({
+    price: atmStrike,
+    color: 'rgba(168, 85, 247, 0.75)',
+    lineWidth: 1.5,
+    lineStyle: 2, // Dashed
+    axisLabelVisible: true,
+    title: 'ATM Strike',
+  });
+  
+  if (!chainSlice || chainSlice.length === 0) return;
+  
+  // 2. Find Call Wall (Highest CE OI) and Put Wall (Highest PE OI)
+  let maxCeStrike = null;
+  let maxCeOi = -1;
+  let maxPeStrike = null;
+  let maxPeOi = -1;
+  
+  chainSlice.forEach(item => {
+    if (item.ce_oi > maxCeOi) {
+      maxCeOi = item.ce_oi;
+      maxCeStrike = item.strike;
+    }
+    if (item.pe_oi > maxPeOi) {
+      maxPeOi = item.pe_oi;
+      maxPeStrike = item.strike;
+    }
+  });
+  
+  // Draw Call Wall Line (Red)
+  if (maxCeStrike) {
+    callWallPriceLine = candleSeries.createPriceLine({
+      price: maxCeStrike,
+      color: 'rgba(244, 63, 94, 0.75)',
+      lineWidth: 1.5,
+      lineStyle: 2, // Dashed
+      axisLabelVisible: true,
+      title: 'Call Wall (Res)',
+    });
+  }
+  
+  // Draw Put Wall Line (Green)
+  if (maxPeStrike) {
+    putWallPriceLine = candleSeries.createPriceLine({
+      price: maxPeStrike,
+      color: 'rgba(16, 185, 129, 0.75)',
+      lineWidth: 1.5,
+      lineStyle: 2, // Dashed
+      axisLabelVisible: true,
+      title: 'Put Wall (Supp)',
+    });
+  }
+}
+
+// Update the Floating HUD Legend overlay
+function updateHudLegend(time) {
+  if (!lastCandlesArray || lastCandlesArray.length === 0) return;
+  
+  let candle = null;
+  if (time) {
+    candle = getCandleForTime(time);
+  }
+  if (!candle) {
+    // Default to the latest candle
+    candle = lastCandlesArray[lastCandlesArray.length - 1];
+  }
+  
+  // 1. Update OHLCV values
+  const hudOhlc = document.getElementById('hudOhlc');
+  if (hudOhlc) {
+    const o = candle.open.toFixed(2);
+    const h = candle.high.toFixed(2);
+    const l = candle.low.toFixed(2);
+    const c = candle.close.toFixed(2);
+    const isUp = candle.close >= candle.open;
+    const colorClass = isUp ? 'pos-val' : 'neg-val';
+    
+    let vSpan = '';
+    if (showOiDelta) {
+      const peChg = candle.pe_oi_chg || 0;
+      const ceChg = candle.ce_oi_chg || 0;
+      const delta = peChg - ceChg;
+      const sign = delta >= 0 ? '+' : '';
+      const deltaClass = delta >= 0 ? 'pos-val' : 'neg-val';
+      vSpan += `OID: <span class="${deltaClass}">${sign}${formatCompactNumber(delta)}</span> `;
+    }
+    if (showVolume) {
+      const v = formatCompactNumber(candle.volume || 0);
+      vSpan += `V: <span style="color: var(--text-bright);">${v}</span>`;
+    }
+    
+    hudOhlc.innerHTML = `
+      O: <span class="${colorClass}">${o}</span> 
+      H: <span class="${colorClass}">${h}</span> 
+      L: <span class="${colorClass}">${l}</span> 
+      C: <span class="${colorClass}">${c}</span> 
+      ${vSpan ? vSpan : ''}
+    `;
+  }
+  
+  // 2. Update Derivatives Details based on mode
+  const hudOiDetails = document.getElementById('hudOiDetails');
+  if (!hudOiDetails) return;
+  
+  if (chartMode === 'index') {
+    const peChg = candle.pe_oi_chg || 0;
+    const ceChg = candle.ce_oi_chg || 0;
+    const netChg = peChg - ceChg;
+    const sign = netChg >= 0 ? '+' : '';
+    const netClass = netChg >= 0 ? 'pos-val' : 'neg-val';
+    const netText = netChg >= 0 ? 'BULLISH' : 'BEARISH';
+    
+    hudOiDetails.innerHTML = `
+      <span>PE Chg: <span class="pos-val">+${formatCompactNumber(peChg)}</span></span>
+      <span>CE Chg: <span class="neg-val">${ceChg >= 0 ? '+' : ''}${formatCompactNumber(ceChg)}</span></span>
+      <span>Net OI Chg: <span class="${netClass}">${sign}${formatCompactNumber(netChg)} (${netText})</span></span>
+    `;
+  } else if (chartMode === 'cumoi') {
+    const peCum = candle.pe_cum || 0;
+    const ceCum = candle.ce_cum || 0;
+    const netCum = peCum - ceCum;
+    const sign = netCum >= 0 ? '+' : '';
+    const netClass = netCum >= 0 ? 'pos-val' : 'neg-val';
+    const netText = netCum >= 0 ? 'BULLISH' : 'BEARISH';
+    
+    hudOiDetails.innerHTML = `
+      <span>Cum PE Chg: <span class="pos-val">${peCum >= 0 ? '+' : ''}${formatCompactNumber(peCum)}</span></span>
+      <span>Cum CE Chg: <span class="neg-val">${ceCum >= 0 ? '+' : ''}${formatCompactNumber(ceCum)}</span></span>
+      <span>Cum Net Chg: <span class="${netClass}">${sign}${formatCompactNumber(netCum)} (${netText})</span></span>
+    `;
+  } else if (chartMode === 'multistrike') {
+    const tVal = (typeof candle.time === 'object' && candle.time !== null) ? candle.time.timestamp : candle.time;
+    
+    let strikeEntry = null;
+    if (lastMultiStrikeData && lastMultiStrikeData.length > 0) {
+      strikeEntry = lastMultiStrikeData.find(item => item.time === tVal);
+      if (!strikeEntry) {
+        let minDiff = Infinity;
+        for (let i = 0; i < lastMultiStrikeData.length; i++) {
+          const item = lastMultiStrikeData[i];
+          const diff = Math.abs(item.time - tVal);
+          if (diff < minDiff) {
+            minDiff = diff;
+            strikeEntry = item;
+          }
+        }
+        if (minDiff > 900) strikeEntry = null;
+      }
+    }
+    
+    let htmlContent = '';
+    const sortedStrikes = [...availableStrikes].sort((a, b) => a - b);
+    let hasAnyChecked = false;
+    
+    sortedStrikes.forEach(s => {
+      const strikeStr = s.toFixed(1);
+      const isCEChecked = checkedStrikes[s] && checkedStrikes[s].ce;
+      const isPEChecked = checkedStrikes[s] && checkedStrikes[s].pe;
+      
+      if (!isCEChecked && !isPEChecked) return;
+      hasAnyChecked = true;
+      
+      let ceVal = '—';
+      let peVal = '—';
+      let initialCe = 0;
+      let initialPe = 0;
+      
+      if (lastMultiStrikeData.length > 0 && lastMultiStrikeData[0].strikes) {
+        const initData = lastMultiStrikeData[0].strikes[strikeStr] || lastMultiStrikeData[0].strikes[s.toString()] || lastMultiStrikeData[0].strikes[parseFloat(s).toString()];
+        if (initData) {
+          initialCe = initData.ce_oi || 0;
+          initialPe = initData.pe_oi || 0;
+        }
+      }
+      
+      if (strikeEntry && strikeEntry.strikes) {
+        const strikeData = strikeEntry.strikes[strikeStr] || strikeEntry.strikes[s.toString()] || strikeEntry.strikes[parseFloat(s).toString()];
+        if (strikeData) {
+          const rawCe = strikeData.ce_oi || 0;
+          const rawPe = strikeData.pe_oi || 0;
+          
+          ceVal = formatCompactNumber(multiStrikeLineMode === 'change' ? (rawCe - initialCe) : rawCe);
+          peVal = formatCompactNumber(multiStrikeLineMode === 'change' ? (rawPe - initialPe) : rawPe);
+        }
+      }
+      
+      const isATM = s === currentATMStrike;
+      const strikeLabel = isATM ? `*${s}` : `${s}`;
+      
+      if (isCEChecked) {
+        const color = getStrikeColor(s, 'ce');
+        htmlContent += `<span style="border-left: 2px solid ${color}; padding-left: 4px; margin-right: 8px;">${strikeLabel} CE: <span style="color: var(--text-bright);">${ceVal}</span></span>`;
+      }
+      if (isPEChecked) {
+        const color = getStrikeColor(s, 'pe');
+        htmlContent += `<span style="border-left: 2px solid ${color}; padding-left: 4px; margin-right: 8px;">${strikeLabel} PE: <span style="color: var(--text-bright);">${peVal}</span></span>`;
+      }
+    });
+    
+    if (!hasAnyChecked) {
+      htmlContent = `<span style="color: var(--text-dim);">No strikes checked. Select CE/PE strikes above.</span>`;
+    }
+    
+    hudOiDetails.innerHTML = htmlContent;
+  }
+}
+
+// Fetch Nifty spot candles and OI time-series data, and draw them
+async function updateChartData() {
+  const fallbackImg = document.getElementById('fallbackChartImage');
+  if (fallbackImg) {
+    refreshFallbackChart();
+    return;
+  }
+
+  try {
+    const intervalSelect = document.getElementById('intervalSelect');
+    const interval = intervalSelect ? intervalSelect.value : '5minute';
+
+    // Parse interval to seconds for options aggregation
+    let intervalSeconds = 300;
+    if (interval === '1minute') intervalSeconds = 60;
+    else if (interval === '3minute') intervalSeconds = 180;
+    else if (interval === '5minute') intervalSeconds = 300;
+    else if (interval === '15minute') intervalSeconds = 900;
+    else if (interval === '30minute') intervalSeconds = 1800;
+
+    // 1. Fetch Nifty Spot Candles
+    const candlesRes = await fetch(`/api/candles?symbol=NIFTY&interval=${interval}`);
+    if (!candlesRes.ok) throw new Error("Failed to fetch candle data");
+    const candlesJson = await candlesRes.json();
+    const candlesData = candlesJson.candles || [];
+
+    // Calculate and update spot price daily range
+    if (candlesData.length > 0) {
+      let dailyMin = Infinity;
+      let dailyMax = -Infinity;
+      candlesData.forEach(c => {
+        if (c.low < dailyMin) dailyMin = c.low;
+        if (c.high > dailyMax) dailyMax = c.high;
+      });
+      
+      const spotLowEl = document.getElementById('spotLowVal');
+      const spotHighEl = document.getElementById('spotHighVal');
+      const spotFillEl = document.getElementById('spotRangeFill');
+      
+      if (spotLowEl && spotHighEl && spotFillEl && dailyMin !== Infinity && dailyMax !== -Infinity) {
+        spotLowEl.innerText = dailyMin.toFixed(1);
+        spotHighEl.innerText = dailyMax.toFixed(1);
+        
+        const spotPriceEl = document.getElementById('spotPrice');
+        if (spotPriceEl) {
+          const currentSpot = parseFloat(spotPriceEl.innerText);
+          if (!isNaN(currentSpot) && (dailyMax - dailyMin) > 0) {
+            const pct = ((currentSpot - dailyMin) / (dailyMax - dailyMin)) * 100;
+            spotFillEl.style.width = Math.min(100, Math.max(0, pct)) + '%';
+          }
+        }
+      }
+    }
+
+    // 2. Fetch Nifty OI Timeseries
+    const tsRes = await fetch('/api/nifty/timeseries');
+    if (!tsRes.ok) throw new Error("Failed to fetch timeseries data");
+    const tsData = await tsRes.json();
+
+    // The timeseries data is newest first, reverse it to chronological order
+    const sortedTs = [...tsData].reverse();
+    lastOiTimeseriesData = sortedTs;
+
+    // 3. Setup datasets based on view mode
+    const mainCandles = [];
+    const volumeData = [];
+    const oiDeltaData = [];
+    const peChgData = [];
+    const ceChgData = [];
+    const cumPeData = [];
+    const cumCeData = [];
+
+    // Find initial values for cumulative changes
+    const initialCeOi = sortedTs[0] ? sortedTs[0].total_ce_oi : 0;
+    const initialPeOi = sortedTs[0] ? sortedTs[0].total_pe_oi : 0;
+
+    // Build helper function to find closest snapshot in sortedTs
+    function findClosestSnap(timestamp) {
+      if (sortedTs.length === 0) return null;
+      let closest = sortedTs[0];
+      let minDiff = Math.abs(Math.floor(new Date(closest.snap_ts).getTime() / 1000) - timestamp);
+      
+      for (let i = 1; i < sortedTs.length; i++) {
+        const snap = sortedTs[i];
+        const snapT = Math.floor(new Date(snap.snap_ts).getTime() / 1000);
+        const diff = Math.abs(snapT - timestamp);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = snap;
+        }
+      }
+      return minDiff < 900 ? closest : null;
+    }
+
+    for (let i = 0; i < candlesData.length; i++) {
+      const c = candlesData[i];
+      const t = c.time;
+
+      let peVal = 0;
+      let ceVal = 0;
+      let peCumVal = 0;
+      let ceCumVal = 0;
+
+      const snapStart = findClosestSnap(t);
+      let snapEnd = findClosestSnap(t + intervalSeconds);
+      if (!snapEnd && i === candlesData.length - 1 && sortedTs.length > 0) {
+        snapEnd = sortedTs[sortedTs.length - 1]; // Use latest available for the forming candle
+      }
+
+      if (snapEnd) {
+        peCumVal = snapEnd.total_pe_oi - initialPeOi;
+        ceCumVal = snapEnd.total_ce_oi - initialCeOi;
+        
+        if (snapStart) {
+          peVal = snapEnd.total_pe_oi - snapStart.total_pe_oi;
+          ceVal = snapEnd.total_ce_oi - snapStart.total_ce_oi;
+        } else {
+          // If no snapStart, delta is 0
+          peVal = 0;
+          ceVal = 0;
+        }
+      }
+
+      mainCandles.push({
+        time: t,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close
+      });
+
+      const delta = peVal - ceVal;
+      let oidColor = delta >= 0 ? 'rgba(16, 185, 129, 0.65)' : 'rgba(239, 68, 68, 0.65)';
+      
+      oiDeltaData.push({
+        time: t,
+        value: delta,
+        color: oidColor
+      });
+      
+      volumeData.push({
+        time: t,
+        value: c.volume || 0,
+        color: c.close >= c.open ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'
+      });
+
+      peChgData.push({ time: t, value: peVal });
+      ceChgData.push({ time: t, value: ceVal });
+      cumPeData.push({ time: t, value: peCumVal });
+      cumCeData.push({ time: t, value: ceCumVal });
+
+      // Store aligned metrics on candle object for crosshair / HUD reference lookup
+      c.pe_oi_chg = peVal;
+      c.ce_oi_chg = ceVal;
+      c.pe_cum = peCumVal;
+      c.ce_cum = ceCumVal;
+    }
+
+    lastCandlesArray = candlesData;
+
+    if (candleSeries && mainCandles.length > 0) {
+      candleSeries.setData(mainCandles);
+    }
+
+    if (volumeSeries && volumeData.length > 0) {
+      volumeSeries.setData(volumeData);
+    }
+    if (oiDeltaSeries && oiDeltaData.length > 0) {
+      oiDeltaSeries.setData(oiDeltaData);
+    }
+
+    if (chartMode === 'index') {
+      if (peChgSeries && peChgData.length > 0) {
+        peChgSeries.setData(peChgData);
+      }
+      if (ceChgSeries && ceChgData.length > 0) {
+        ceChgSeries.setData(ceChgData);
+      }
+    } else if (chartMode === 'cumoi') {
+      if (cumPeSeries && cumPeData.length > 0) {
+        cumPeSeries.setData(cumPeData);
+      }
+      if (cumCeSeries && cumCeData.length > 0) {
+        cumCeSeries.setData(cumCeData);
+      }
+    } else if (chartMode === 'multistrike') {
+      // 4. Fetch Multi-Strike OI Lines
+      if (availableStrikes.length > 0) {
+        const strikesRes = await fetch(`/api/nifty/multi-strike-oi?strikes=${availableStrikes.join(',')}`);
+        if (strikesRes.ok) {
+          const strikesData = await strikesRes.json();
+          lastMultiStrikeData = strikesData;
+          
+          availableStrikes.forEach(s => {
+            const strikeStr = s.toFixed(1);
+            
+            // Get initial values at open
+            let initialCe = 0;
+            let initialPe = 0;
+            if (strikesData.length > 0 && strikesData[0].strikes) {
+              const initData = strikesData[0].strikes[strikeStr] || strikesData[0].strikes[s.toString()] || strikesData[0].strikes[parseFloat(s).toString()];
+              if (initData) {
+                initialCe = initData.ce_oi || 0;
+                initialPe = initData.pe_oi || 0;
+              }
+            }
+            
+            // CE Series
+            if (checkedStrikes[s] && checkedStrikes[s].ce) {
+              const ceSeries = getOrCreateStrikeSeries(s, 'ce');
+              const ceLineData = [];
+              strikesData.forEach(item => {
+                const rawVal = (item.strikes[strikeStr] || item.strikes[s.toString()] || item.strikes[parseFloat(s).toString()])?.ce_oi || 0;
+                const finalVal = multiStrikeLineMode === 'change' ? (rawVal - initialCe) : rawVal;
+                ceLineData.push({ time: item.time, value: finalVal });
+              });
+              if (ceLineData.length > 0) ceSeries.setData(ceLineData);
+            }
+            
+            // PE Series
+            if (checkedStrikes[s] && checkedStrikes[s].pe) {
+              const peSeries = getOrCreateStrikeSeries(s, 'pe');
+              const peLineData = [];
+              strikesData.forEach(item => {
+                const rawVal = (item.strikes[strikeStr] || item.strikes[s.toString()] || item.strikes[parseFloat(s).toString()])?.pe_oi || 0;
+                const finalVal = multiStrikeLineMode === 'change' ? (rawVal - initialPe) : rawVal;
+                peLineData.push({ time: item.time, value: finalVal });
+              });
+              if (peLineData.length > 0) peSeries.setData(peLineData);
+            }
+          });
+        }
+      }
+    }
+    
+    // Zoom in on initial load (last 60 candles)
+    if (!initialChartZoomSet && mainCandles.length > 0) {
+      initialChartZoomSet = true;
+      const totalLen = mainCandles.length;
+      const visibleCount = 60; // Show last 60 candles by default (too far out fix)
+      priceChartInstance.timeScale().setVisibleLogicalRange({
+        from: Math.max(0, totalLen - visibleCount),
+        to: totalLen - 1
+      });
+    }
+
+    
+    // Refresh the HUD legend for the latest candle state
+    updateHudLegend(null);
+    
+  } catch (error) {
+    console.error("Error in updateChartData:", error);
+  }
+}
+
+// standalone Moneyness buckets updater
+function updateOiMoneynessBuckets(chainSlice, atmStrike) {
+  if (!chainSlice || !atmStrike) return;
+  const atm = parseFloat(atmStrike);
+  
+  // Initialize sums
+  let atmCe = 0, atmPe = 0;
+  let nearCe = 0, nearPe = 0;
+  let deepCe = 0, deepPe = 0;
+  
+  chainSlice.forEach(item => {
+    const strike = parseFloat(item.strike);
+    const ceChg = item.ce_oi_chg_intraday || 0;
+    const peChg = item.pe_oi_chg_intraday || 0;
+    
+    if (strike === atm) {
+      atmCe += ceChg;
+      atmPe += peChg;
+    } else if (strike === atm + 50) {
+      nearCe += ceChg;
+    } else if (strike === atm - 50) {
+      nearPe += peChg;
+    } else if (strike >= atm + 100) {
+      deepCe += ceChg;
+    } else if (strike <= atm - 100) {
+      deepPe += peChg;
+    }
+  });
+  
+  const atmStEl = document.getElementById('monAtmStrike');
+  if (atmStEl) atmStEl.innerText = atm.toFixed(0);
+  
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = formatCompactNumber(val);
+  };
+  
+  setVal('monAtmCe', atmCe);
+  setVal('monAtmPe', atmPe);
+  setVal('monNearCe', nearCe);
+  setVal('monNearPe', nearPe);
+  setVal('monDeepCe', deepCe);
+  setVal('monDeepPe', deepPe);
+  
+  // Normalize bars
+  const maxVal = Math.max(
+    1,
+    Math.abs(atmCe), Math.abs(atmPe),
+    Math.abs(nearCe), Math.abs(nearPe),
+    Math.abs(deepCe), Math.abs(deepPe)
+  );
+  
+  const setBar = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = (Math.abs(val) / maxVal * 100) + '%';
+  };
+  
+  setBar('monAtmCeBar', atmCe);
+  setBar('monAtmPeBar', atmPe);
+  setBar('monNearCeBar', nearCe);
+  setBar('monNearPeBar', nearPe);
+  setBar('monDeepCeBar', deepCe);
+  setBar('monDeepPeBar', deepPe);
+  
+  // Custom descriptor tags
+  const setDesc = (id, ce, pe, type) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    
+    const absCe = Math.abs(ce);
+    const absPe = Math.abs(pe);
+    
+    if (absCe === 0 && absPe === 0) {
+      el.innerText = 'Balanced';
+      el.style.color = 'var(--text-dim)';
+      return;
+    }
+    
+    if (type === 'deep') {
+      if (absCe > absPe * 1.15) {
+        el.innerText = 'Call Convex Bets';
+        el.style.color = 'var(--red-text)';
+      } else if (absPe > absCe * 1.15) {
+        el.innerText = 'Put Convex Bets';
+        el.style.color = 'var(--green-text)';
+      } else {
+        el.innerText = 'Balanced Convexity';
+        el.style.color = 'var(--text-dim)';
+      }
+    } else {
+      if (absCe > absPe * 1.15) {
+        el.innerText = 'Call Writing (Income)';
+        el.style.color = 'var(--red-text)';
+      } else if (absPe > absCe * 1.15) {
+        el.innerText = 'Put Writing (Income)';
+        el.style.color = 'var(--green-text)';
+      } else {
+        el.innerText = 'Balanced Writing';
+        el.style.color = 'var(--text-dim)';
+      }
+    }
+  };
+  
+  setDesc('monAtmLabel', atmCe, atmPe, 'atm');
+  setDesc('monNearLabel', nearCe, nearPe, 'near');
+  setDesc('monDeepLabel', deepCe, deepPe, 'deep');
+}
+
+// 2. Fetch and Update Nifty Live Data
+async function updateNiftyData() {
+  try {
+    const response = await fetch('/api/nifty/data');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    // Hide Global Loader on any successful or even partial fetch (if 200 returned)
+    document.getElementById('loadingOverlay').classList.add('hide');
+    
+    // Update Stats Card values with strong null-guards
+    const spotPrice = data.spot_price;
+    const chgPct = data.chg_pct;
+    
+    // Spot Price Ticker
+    const spotEl = document.getElementById('spotPrice');
+    if (spotEl && spotPrice !== undefined && spotPrice !== null) {
+      const prevLtp = parseFloat(spotEl.innerText);
+      spotEl.innerText = spotPrice.toFixed(2);
+      
+      // Apply micro-flash animations on price tick change
+      if (!isNaN(prevLtp)) {
+        spotEl.classList.remove('flash-up', 'flash-down');
+        void spotEl.offsetWidth; // Trigger reflow to restart animation
+        if (spotPrice > prevLtp) {
+          spotEl.classList.add('flash-up');
+        } else if (spotPrice < prevLtp) {
+          spotEl.classList.add('flash-down');
+        }
+      }
+    }
+    
+    // Daily Change Percentage
+    const chgEl = document.getElementById('spotChg');
+    if (chgEl && spotPrice !== undefined && spotPrice !== null && data.prev_close) {
+      const chgVal = (spotPrice - data.prev_close);
+      const sign = chgVal >= 0 ? '+' : '';
+      chgEl.innerText = `${sign}${chgVal.toFixed(2)} (${sign}${chgPct.toFixed(2)}%)`;
+      chgEl.className = 'stat-sub ' + (chgVal >= 0 ? 'pos-val' : 'neg-val');
+    }
+    
+    // Buildup gauge circular status update
+    const gaugeFill = document.getElementById('buildupGaugeFill');
+    const gaugeText = document.getElementById('buildupGaugeText');
+    if (gaugeFill && gaugeText) {
+      const buildupText = data.buildup || 'NEUTRAL';
+      gaugeText.innerText = buildupText.replace('_', ' ');
+      
+      // stroke-dasharray is 157. full filled is 0, empty is 157
+      if (buildupText === 'LONG_BUILD' || buildupText === 'SHORT_COVER') {
+        gaugeFill.style.stroke = 'var(--green)';
+        gaugeFill.style.strokeDashoffset = '0';
+        gaugeFill.style.filter = 'drop-shadow(0 0 4px var(--green))';
+        gaugeText.style.color = 'var(--green-text)';
+      } else if (buildupText === 'SHORT_BUILD' || buildupText === 'LONG_UNWIND') {
+        gaugeFill.style.stroke = 'var(--red)';
+        gaugeFill.style.strokeDashoffset = '0';
+        gaugeFill.style.filter = 'drop-shadow(0 0 4px var(--red))';
+        gaugeText.style.color = 'var(--red-text)';
+      } else {
+        gaugeFill.style.stroke = 'var(--text-vdim)';
+        gaugeFill.style.strokeDashoffset = '90'; // partially empty circle
+        gaugeFill.style.filter = 'none';
+        gaugeText.style.color = 'var(--text-dim)';
+      }
+    }
+    
+    // PCR values & spectrum slider pointer
+    const pcrVal = data.pcr;
+    document.getElementById('pcrValue').innerText = (pcrVal !== undefined && pcrVal !== null) ? pcrVal.toFixed(2) : '—';
+    
+    const pcrPointer = document.getElementById('pcrPointer');
+    if (pcrPointer && pcrVal !== undefined && pcrVal !== null) {
+      // Clamp PCR between 0.4 and 1.6
+      const clampedPcr = Math.min(1.6, Math.max(0.4, pcrVal));
+      const pct = ((clampedPcr - 0.4) / 1.2) * 100;
+      pcrPointer.style.left = pct + '%';
+    }
+
+    const pcrSigBadge = document.getElementById('pcrSigBadge');
+    if (pcrSigBadge) {
+      const pcrSig = data.pcr_sig || 'NEUTRAL';
+      pcrSigBadge.innerText = pcrSig.replace('_', ' ');
+      pcrSigBadge.className = 'stat-sub ' + (pcrSig === 'BULLISH' || pcrSig === 'MILDLY_BULL' ? 'pos-val' : pcrSig === 'BEARISH' || pcrSig === 'MILDLY_BEAR' ? 'neg-val' : 'text-dim');
+    }
+    
+    // Max Pain
+    const maxPain = data.max_pain;
+    document.getElementById('maxPainValue').innerText = (maxPain !== undefined && maxPain !== null) ? maxPain.toFixed(0) : '—';
+    
+    // Expiry & ATM
+    document.getElementById('expiryValue').innerText = formatDateString(data.expiry);
+    document.getElementById('atmStrikeValue').innerText = `ATM Strike: ${data.atm_strike !== undefined ? data.atm_strike : '—'}`;
+    
+    // Cache age
+    const cacheAge = data.cache_age;
+    document.getElementById('cacheBadge').innerText = `CACHE AGE: ${(cacheAge !== undefined && cacheAge !== null) ? cacheAge.toFixed(1) : '0.0'}s`;
+    
+    // Renders the horizontal option chain bar chart
+    if (data.chain) {
+      renderStrikeSelector(data.atm_strike);
+      renderOIChart(data.chain, data.atm_strike);
+      drawReferenceLines(data.atm_strike, data.chain);
+      
+      // Update Moneyness Buckets (convexity vs income bets)
+      updateOiMoneynessBuckets(data.chain, data.atm_strike);
+    }
+    
+  } catch (error) {
+    console.error("Failed fetching live Nifty dashboard data: ", error);
+    document.getElementById('loadingOverlay').classList.add('hide');
+    
+    document.getElementById('connText').innerText = "Reconnecting...";
+    document.getElementById('connText').style.color = "var(--text-dim)";
+  }
+}
+
+// Renders the vertical option interest bar chart (Sensibull Histogram)
+function renderOIChart(chainSlice, atmStrike) {
+  try {
+    if (typeof Chart === 'undefined') {
+      throw new Error("Chart.js library is not loaded");
+    }
+    if (!chainSlice || chainSlice.length === 0) return;
+    
+    // Arrange strikes left-to-right horizontally (ascending order)
+    const sortedChain = [...chainSlice].sort((a, b) => a.strike - b.strike);
+    
+    const labels = sortedChain.map(item => {
+      return item.strike === atmStrike ? `* ${item.strike} (ATM)` : `${item.strike}`;
+    });
+    
+    const isChangeMode = (oiBuildupMode === 'change');
+    const ceData = sortedChain.map(item => isChangeMode ? item.ce_oi_chg_intraday : item.ce_oi);
+    const peData = sortedChain.map(item => isChangeMode ? item.pe_oi_chg_intraday : item.pe_oi);
+    
+    const canvas = document.getElementById('oiChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    // Generate beautiful linear gradients
+    const callGradient = ctx.createLinearGradient(0, 0, 0, 250);
+    callGradient.addColorStop(0, 'rgba(244, 63, 94, 0.65)');   // Rose
+    callGradient.addColorStop(1, 'rgba(244, 63, 94, 0.04)');
+    
+    const putGradient = ctx.createLinearGradient(0, 0, 0, 250);
+    putGradient.addColorStop(0, 'rgba(16, 185, 129, 0.65)');  // Emerald
+    putGradient.addColorStop(1, 'rgba(16, 185, 129, 0.04)');
+    
+    if (barChartInstance) {
+      barChartInstance.data.labels = labels;
+      barChartInstance.data.datasets[0].label = isChangeMode ? 'Call (CE) OI Change' : 'Call (CE) Open Interest';
+      barChartInstance.data.datasets[0].data = ceData;
+      barChartInstance.data.datasets[0].backgroundColor = callGradient;
+      
+      barChartInstance.data.datasets[1].label = isChangeMode ? 'Put (PE) OI Change' : 'Put (PE) Open Interest';
+      barChartInstance.data.datasets[1].data = peData;
+      barChartInstance.data.datasets[1].backgroundColor = putGradient;
+      
+      barChartInstance.update();
+    } else {
+      barChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: isChangeMode ? 'Call (CE) OI Change' : 'Call (CE) Open Interest',
+              data: ceData,
+              backgroundColor: callGradient,
+              hoverBackgroundColor: 'rgba(244, 63, 94, 0.85)',
+              borderColor: 'rgba(244, 63, 94, 0.4)',
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 8
+            },
+            {
+              label: isChangeMode ? 'Put (PE) OI Change' : 'Put (PE) Open Interest',
+              data: peData,
+              backgroundColor: putGradient,
+              hoverBackgroundColor: 'rgba(16, 185, 129, 0.85)',
+              borderColor: 'rgba(16, 185, 129, 0.4)',
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 8
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'x', // Vertical Sensibull-style bars
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: '#a1a1aa',
+                boxWidth: 12,
+                boxHeight: 12,
+                font: {
+                  family: 'Outfit',
+                  size: 11,
+                  weight: '600'
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(8, 8, 12, 0.95)',
+              titleFont: { family: 'Outfit', size: 12, weight: 'bold' },
+              bodyFont: { family: 'Outfit', size: 12 },
+              borderColor: 'rgba(59, 130, 246, 0.25)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: true,
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.raw !== null) {
+                    label += formatCompactNumber(context.raw);
+                  }
+                  return label;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#e4e4e7',
+                font: {
+                  family: 'Outfit',
+                  size: 10,
+                  weight: function(context) {
+                    const label = context.chart.data.labels[context.index];
+                    return label && label.includes('*') ? 'bold' : '500';
+                  }
+                }
+              }
+            },
+            y: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.02)'
+              },
+              ticks: {
+                color: '#71717a',
+                font: { family: 'Outfit', size: 10 },
+                callback: function(value) {
+                  return formatCompactNumber(value);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.error("Failed to render OI Chart:", e);
+    const wrapper = document.querySelector('.oi-chart-wrapper');
+    if (wrapper) {
+      wrapper.innerHTML = 
+        `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:12px;text-align:center;padding:16px;">
+          OI Chart failed to load (offline or script blocked)
+        </div>`;
+    }
+  }
+}
+
+// Formatting helpers
+function formatDateString(str) {
+  if (!str) return '—';
+  try {
+    const date = new Date(str);
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  } catch (e) {
+    return str;
+  }
+}
+
+function formatCompactNumber(number) {
+  if (number === null || number === undefined) return '—';
+  const absNum = Math.abs(number);
+  let formatted = absNum;
+  if (absNum >= 1e7) {
+    formatted = (absNum / 1e7).toFixed(2) + 'Cr';
+  } else if (absNum >= 1e5) {
+    formatted = (absNum / 1e5).toFixed(2) + 'L';
+  } else if (absNum >= 1e3) {
+    formatted = (absNum / 1e3).toFixed(1) + 'K';
+  } else {
+    formatted = absNum.toFixed(0);
+  }
+  return number < 0 ? `-${formatted}` : formatted;
+}
+
+// Fetch and Update Nifty OI Timeseries (Fyers Grid)
+async function updateNiftyTimeseries() {
+  try {
+    const response = await fetch('/api/nifty/timeseries');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    // Dynamically filter timeseries based on selected interval
+    const intervalSelect = document.getElementById('intervalSelect');
+    const intervalVal = intervalSelect ? intervalSelect.value : '5minute';
+    let filterMinutes = 5;
+    if (intervalVal === '1minute') filterMinutes = 1;
+    else if (intervalVal === '3minute') filterMinutes = 3;
+    else if (intervalVal === '5minute') filterMinutes = 5;
+    else if (intervalVal === '15minute') filterMinutes = 15;
+    else if (intervalVal === '30minute') filterMinutes = 30;
+
+    const filteredData = [];
+    for (let i = 0; i < data.length; i++) {
+      const curr = data[i];
+      const dt = new Date(curr.snap_ts);
+      const minutes = dt.getMinutes();
+      if (minutes % filterMinutes === 0) {
+        filteredData.push(curr);
+      }
+    }
+
+    document.getElementById('tsCountBadge').innerText = `ROWS: ${filteredData.length}`;
+    
+    const tbody = document.getElementById('tsTableBody');
+    tbody.innerHTML = '';
+    
+    if (filteredData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 24px;">No timeseries data available today</td></tr>`;
+      return;
+    }
+
+    // Scan for max PE-CE sellers difference to normalize bar widths
+    let maxDiff = 1;
+    filteredData.forEach(item => {
+      const ceVal = item.total_ce_oi || 0;
+      const peVal = item.total_pe_oi || 0;
+      const diff = Math.abs(ceVal - peVal);
+      if (diff > maxDiff) maxDiff = diff;
+    });
+    
+    for (let i = 0; i < filteredData.length; i++) {
+      const curr = filteredData[i];
+      const prev = filteredData[i + 1]; // T-1 filtered row
+      
+      const timeStr = formatIsoTime(curr.snap_ts);
+      
+      // 1. LTP
+      const ltpVal = curr.spot_ltp || 0;
+      let ltpSub = '—';
+      if (prev && prev.spot_ltp) {
+        const diff = ltpVal - prev.spot_ltp;
+        const pct = (diff / prev.spot_ltp) * 100;
+        const sign = diff >= 0 ? '+' : '';
+        const colorClass = diff >= 0 ? 'pos-val' : 'neg-val';
+        ltpSub = `<span class="${colorClass}">${sign}${diff.toFixed(2)} (${sign}${pct.toFixed(2)}%)</span>`;
+      }
+      
+      // 2. Total OI
+      const totalOi = curr.total_oi || 0;
+      let totalOiSub = '—';
+      if (prev && prev.total_oi) {
+        const diff = totalOi - prev.total_oi;
+        const pct = (diff / prev.total_oi) * 100;
+        const sign = diff >= 0 ? '+' : '';
+        const colorClass = diff >= 0 ? 'pos-val' : 'neg-val';
+        totalOiSub = `<span class="${colorClass}">${sign}${formatCompactNumber(diff)} (${sign}${pct.toFixed(2)}%)</span>`;
+      }
+      
+      // 3. Total Call OI
+      const ceOi = curr.total_ce_oi || 0;
+      let ceOiSub = '—';
+      if (prev && prev.total_ce_oi) {
+        const diff = ceOi - prev.total_ce_oi;
+        const pct = (diff / prev.total_ce_oi) * 100;
+        const sign = diff >= 0 ? '+' : '';
+        const colorClass = diff >= 0 ? 'pos-val' : 'neg-val';
+        ceOiSub = `<span class="${colorClass}">${sign}${formatCompactNumber(diff)} (${sign}${pct.toFixed(2)}%)</span>`;
+      }
+      
+      // 4. Total Put OI
+      const peOi = curr.total_pe_oi || 0;
+      let peOiSub = '—';
+      if (prev && prev.total_pe_oi) {
+        const diff = peOi - prev.total_pe_oi;
+        const pct = (diff / prev.total_pe_oi) * 100;
+        const sign = diff >= 0 ? '+' : '';
+        const colorClass = diff >= 0 ? 'pos-val' : 'neg-val';
+        peOiSub = `<span class="${colorClass}">${sign}${formatCompactNumber(diff)} (${sign}${pct.toFixed(2)}%)</span>`;
+      }
+      
+      // 5. Order Flow Strength Delta calculation (Call OI - Put OI)
+      // Positive diffOi means Call sellers (bearish) are stronger, negative means Put sellers (bullish) are stronger
+      const diffOi = ceOi - peOi;
+      const absDiff = Math.abs(diffOi);
+      const barPct = (absDiff / maxDiff) * 50; // Max width is 50% for each side of midline
+      
+      let orderFlowHtml = '';
+      const barStyle = `width: ${barPct.toFixed(1)}%;`;
+      
+      if (diffOi < 0) { // PE > CE -> Put sellers (Bullish) stronger
+        orderFlowHtml = `
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+            <div class="orderflow-bar-container">
+              <div class="orderflow-midline"></div>
+              <div class="orderflow-fill orderflow-fill-pe" style="${barStyle}"></div>
+            </div>
+            <div style="font-size: 9px; font-weight: 700; color: var(--green-text);">PE Stronger (+${formatCompactNumber(-diffOi)})</div>
+          </div>
+        `;
+      } else if (diffOi > 0) { // CE > PE -> Call sellers (Bearish) stronger
+        orderFlowHtml = `
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+            <div class="orderflow-bar-container">
+              <div class="orderflow-midline"></div>
+              <div class="orderflow-fill orderflow-fill-ce" style="${barStyle}"></div>
+            </div>
+            <div style="font-size: 9px; font-weight: 700; color: var(--red-text);">CE Stronger (-${formatCompactNumber(diffOi)})</div>
+          </div>
+        `;
+      } else { // Balanced
+        orderFlowHtml = `
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+            <div class="orderflow-bar-container">
+              <div class="orderflow-midline"></div>
+            </div>
+            <div style="font-size: 9px; font-weight: 700; color: var(--text-dim);">BALANCED</div>
+          </div>
+        `;
+      }
+      
+      // Highlight the active live row with a breathing status dot blinker
+      const isLiveRow = (i === 0);
+      const rowStatusDot = isLiveRow ? `<span class="live-row-blinker" title="Active Live Interval"></span>` : '';
+      const rowSubLabel = isLiveRow ? 'LIVE' : 'Interval';
+      const rowSubColor = isLiveRow ? 'color: var(--blue); font-weight: 700;' : 'color: var(--text-vdim);';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="text-align: left; padding-left: 12px;">
+          <div class="ts-cell-primary" style="color: var(--text-bright); font-weight: 600; font-family: monospace;">${rowStatusDot}${timeStr}</div>
+          <div class="ts-cell-sub" style="${rowSubColor}">${rowSubLabel}</div>
+        </td>
+        <td>
+          <div class="ts-cell-primary" style="font-family: monospace;">${ltpVal.toFixed(2)}</div>
+          <div class="ts-cell-sub">${ltpSub}</div>
+        </td>
+        <td>
+          <div class="ts-cell-primary" style="font-family: monospace;">${formatCompactNumber(totalOi)}</div>
+          <div class="ts-cell-sub">${totalOiSub}</div>
+        </td>
+        <td>
+          <div class="ts-cell-primary" style="font-family: monospace;">${formatCompactNumber(ceOi)}</div>
+          <div class="ts-cell-sub">${ceOiSub}</div>
+        </td>
+        <td>
+          <div class="ts-cell-primary" style="font-family: monospace;">${formatCompactNumber(peOi)}</div>
+          <div class="ts-cell-sub">${peOiSub}</div>
+        </td>
+        <td style="text-align: center; padding-right: 12px; width: 130px;">
+          ${orderFlowHtml}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  } catch (error) {
+    console.error("Failed fetching Nifty timeseries data: ", error);
+  }
+}
+
+function formatIsoTime(isoStr) {
+  if (!isoStr) return '—';
+  try {
+    const parts = isoStr.split('T');
+    if (parts.length === 2) {
+      let t = parts[1];
+      // Strip timezone offset (e.g. +05:30 or Z or -08:00)
+      t = t.split('+')[0].split('-')[0].split('Z')[0];
+      return t;
+    }
+    const date = new Date(isoStr);
+    return date.toTimeString().split(' ')[0];
+  } catch (e) {
+    return isoStr;
+  }
+}
+
+// 4. Initialize and set intervals
+window.addEventListener('DOMContentLoaded', () => {
+  initLocalChart();
+  updateNiftyData();
+  updateNiftyTimeseries();
+  updateChartData();
+  
+  // Real-time stats updates (2 seconds)
+  setInterval(updateNiftyData, 2000);
+  
+  // Historical timeseries updates (10 seconds)
+  setInterval(updateNiftyTimeseries, 10000);
+
+  // Chart data updates (5 seconds)
+  setInterval(updateChartData, 5000);
+
+  // Trigger immediate updates on interval change
+  const intervalSelect = document.getElementById('intervalSelect');
+  if (intervalSelect) {
+    intervalSelect.addEventListener('change', () => {
+      updateChartData();
+      updateNiftyTimeseries();
+    });
+  }
+});
+</script>
+<script src="/static/js/nav-common.js"></script>
+</body>
+</html>

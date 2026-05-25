@@ -31,7 +31,7 @@ from typing import Optional
 
 log = logging.getLogger("quantra.db")
 
-SCHEMA_VERSION = 2  # Bumped: added PBKDF2, lockout, audit table
+SCHEMA_VERSION = 6  # v5: email verification + plan fields; v6: billing
 
 # ============================================================
 # PASSWORD HASHING — PBKDF2-HMAC-SHA256
@@ -104,7 +104,15 @@ CREATE TABLE IF NOT EXISTS users (
     locked_until TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     last_login TEXT,
-    is_active INTEGER NOT NULL DEFAULT 1
+    is_active INTEGER NOT NULL DEFAULT 1,
+    email_verified INTEGER NOT NULL DEFAULT 0,
+    email_otp TEXT,
+    email_otp_expires_at TEXT,
+    plan TEXT NOT NULL DEFAULT 'free',
+    razorpay_customer_id TEXT,
+    razorpay_subscription_id TEXT,
+    subscription_status TEXT NOT NULL DEFAULT 'inactive',
+    subscription_expires_at TEXT
 );
 
 -- User settings (1:1 with users)
@@ -119,9 +127,9 @@ CREATE TABLE IF NOT EXISTS user_settings (
     auto_trade_max_positions INTEGER NOT NULL DEFAULT 2,
     auto_trade_max_capital REAL NOT NULL DEFAULT 50000,
     preferred_sectors TEXT DEFAULT '[]',
-    notification_email INTEGER NOT NULL DEFAULT 0,
     notification_telegram INTEGER NOT NULL DEFAULT 0,
     telegram_chat_id TEXT,
+    theme TEXT DEFAULT 'bloomberg-pro',
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -163,6 +171,8 @@ CREATE TABLE IF NOT EXISTS paper_trades (
     auto_signal_id INTEGER REFERENCES auto_signals(id),
     entered_at TEXT,
     exited_at TEXT,
+    option_type TEXT,
+    spot_at_entry REAL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -212,6 +222,15 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_login_audit_date ON login_audit(created_at);
 CREATE INDEX IF NOT EXISTS idx_login_audit_ip ON login_audit(ip_address);
 CREATE INDEX IF NOT EXISTS idx_login_audit_user ON login_audit(username);
+
+-- Per-user watchlist (server-side, synced across devices)
+CREATE TABLE IF NOT EXISTS user_watchlist (
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    symbol     TEXT NOT NULL COLLATE NOCASE,
+    added_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (user_id, symbol)
+);
+CREATE INDEX IF NOT EXISTS idx_watchlist_user ON user_watchlist(user_id);
 """
 
 
@@ -224,17 +243,19 @@ class DB:
 
     def __init__(self, db_path="quantra.db"):
         self.db_path = db_path
-        self._conn = None
+        import threading
+        self._local = threading.local()
 
     @property
     def conn(self):
-        if self._conn is None:
-            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
-            self._conn.row_factory = sqlite3.Row
-            self._conn.execute("PRAGMA journal_mode=WAL")
-            self._conn.execute("PRAGMA foreign_keys=ON")
-            self._conn.execute("PRAGMA busy_timeout=5000")
-        return self._conn
+        if not hasattr(self._local, 'conn'):
+            conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA foreign_keys=ON")
+            conn.execute("PRAGMA busy_timeout=5000")
+            self._local.conn = conn
+        return self._local.conn
 
     def init(self):
         """Initialize database — create tables, run migrations."""
@@ -261,6 +282,14 @@ class DB:
 
         if current_version < 2:
             self._migrate_v1_to_v2()
+        if current_version < 3:
+            self._migrate_v2_to_v3()
+        if current_version < 4:
+            self._migrate_v3_to_v4()
+        if current_version < 5:
+            self._migrate_v4_to_v5()
+        if current_version < 6:
+            self._migrate_v5_to_v6()
 
     def _migrate_v1_to_v2(self):
         """
@@ -402,6 +431,81 @@ class DB:
         row = self.conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
         return dict(row) if row else None
 
+    def set_email_otp(self, user_id, otp, expires_at):
+        """Store an email OTP for verification."""
+        self.conn.execute(
+            "UPDATE users SET email_otp = ?, email_otp_expires_at = ? WHERE id = ?",
+            (otp, expires_at, user_id),
+        )
+        self.conn.commit()
+
+    def verify_email_otp(self, user_id, otp):
+        """Verify OTP. Returns True on success, False otherwise."""
+        row = self.conn.execute(
+            "SELECT email_otp, email_otp_expires_at FROM users WHERE id = ?",
+            (user_id,)
+        ).fetchone()
+        if not row or not row["email_otp"]:
+            return False, "No OTP found"
+        if row["email_otp"] != otp:
+            return False, "Invalid OTP"
+        from datetime import datetime
+        try:
+            exp = datetime.fromisoformat(row["email_otp_expires_at"])
+        except ValueError:
+            return False, "Invalid expiry date format"
+        if exp < datetime.utcnow():
+            return False, "OTP expired"
+        # Mark verified, clear OTP
+        self.conn.execute(
+            "UPDATE users SET email_verified = 1, email_otp = NULL, email_otp_expires_at = NULL WHERE id = ?",
+            (user_id,)
+        )
+        self.conn.commit()
+        return True, "OK"
+
+    def get_user_plan(self, user_id):
+        """Get the user's current plan: 'free' or 'pro'."""
+        row = self.conn.execute(
+            "SELECT plan, subscription_status, subscription_expires_at FROM users WHERE id = ?",
+            (user_id,)
+        ).fetchone()
+        if not row:
+            return "free"
+        # Check if pro subscription is still active
+        if row["plan"] == "pro" and row["subscription_status"] == "active":
+            if row["subscription_expires_at"]:
+                from datetime import datetime
+                try:
+                    exp = datetime.fromisoformat(row["subscription_expires_at"])
+                except ValueError:
+                    return "free"
+                if exp < datetime.utcnow():
+                    # Expired — downgrade
+                    self.conn.execute(
+                        "UPDATE users SET plan = 'free', subscription_status = 'expired' WHERE id = ?",
+                        (user_id,)
+                    )
+                    self.conn.commit()
+                    return "free"
+            return "pro"
+        return "free"
+
+    def update_subscription(self, user_id, **fields):
+        """Update billing/subscription fields for a user."""
+        allowed = {"plan", "razorpay_customer_id", "razorpay_subscription_id",
+                   "subscription_status", "subscription_expires_at"}
+        updates = {k: v for k, v in fields.items() if k in allowed}
+        if not updates:
+            return False
+        set_clause = ", ".join(f"{k} = ?" for k in updates)
+        self.conn.execute(
+            f"UPDATE users SET {set_clause} WHERE id = ?",
+            list(updates.values()) + [user_id]
+        )
+        self.conn.commit()
+        return True
+
     def get_user_by_username(self, username):
         """Get user by username."""
         row = self.conn.execute(
@@ -489,6 +593,21 @@ class DB:
             return d
         return None
 
+    def get_all_auto_trade_settings(self):
+        """Get settings for all users who have auto-trading enabled."""
+        rows = self.conn.execute(
+            "SELECT * FROM user_settings WHERE auto_trade_enabled = 1"
+        ).fetchall()
+        result = []
+        for row in rows:
+            d = dict(row)
+            try:
+                d["preferred_sectors"] = json.loads(d.get("preferred_sectors") or "[]")
+            except (json.JSONDecodeError, TypeError):
+                d["preferred_sectors"] = []
+            result.append(d)
+        return result
+
     def update_user_settings(self, user_id, **fields):
         """Update user settings."""
         allowed = {
@@ -497,6 +616,7 @@ class DB:
             "auto_trade_enabled", "auto_trade_max_positions", "auto_trade_max_capital",
             "preferred_sectors",
             "notification_email", "notification_telegram", "telegram_chat_id",
+            "column_config", "theme"
         }
         updates = {}
         for k, v in fields.items():
@@ -574,14 +694,14 @@ class DB:
     def count_user_sessions(self, user_id):
         """Count active sessions for a user."""
         return self.conn.execute(
-            "SELECT COUNT(*) FROM sessions WHERE user_id = ? AND expires_at > datetime('now')",
+            "SELECT COUNT(*) FROM sessions WHERE user_id = ? AND datetime(expires_at) > datetime('now')",
             (user_id,),
         ).fetchone()[0]
 
     def cleanup_expired_sessions(self):
         """Remove all expired sessions."""
         n = self.conn.execute(
-            "DELETE FROM sessions WHERE expires_at < datetime('now')"
+            "DELETE FROM sessions WHERE datetime(expires_at) < datetime('now')"
         ).rowcount
         self.conn.commit()
         return n
@@ -609,6 +729,8 @@ class DB:
             "status": kwargs.get("status", "PENDING"),
             "entry_reason": kwargs.get("entry_reason"),
             "auto_signal_id": kwargs.get("auto_signal_id"),
+            "option_type": kwargs.get("option_type"),
+            "spot_at_entry": kwargs.get("spot_at_entry"),
         }
         if kwargs.get("status") == "ENTERED":
             fields["entered_at"] = datetime.utcnow().isoformat()
@@ -646,13 +768,18 @@ class DB:
         row = self.conn.execute(q, params).fetchone()
         return dict(row) if row else None
 
+    def get_all_open_paper_trades(self):
+        """Get all open or pending paper trades across all users (used at WebSocket startup)."""
+        q = "SELECT * FROM paper_trades WHERE status IN ('PENDING', 'ENTERED')"
+        return [dict(r) for r in self.conn.execute(q).fetchall()]
+
     def update_paper_trade(self, trade_id, user_id=None, **fields):
         """Update a paper trade (status, exit, PnL, etc.)."""
         allowed = {
             "status", "entry_premium", "exit_premium", "lots",
             "sl_premium", "sl_spot", "t1_premium", "t2_premium",
             "exit_reason", "pnl", "pnl_pct", "costs_estimated", "net_pnl",
-            "entered_at", "exited_at",
+            "entered_at", "exited_at", "option_type", "spot_at_entry",
         }
         updates = {k: v for k, v in fields.items() if k in allowed}
         if not updates:
@@ -801,18 +928,19 @@ class DB:
             "SELECT COUNT(*) FROM paper_trades WHERE date(created_at) = date('now')"
         ).fetchone()[0]
         active_sessions = self.conn.execute(
-            "SELECT COUNT(*) FROM sessions WHERE expires_at > datetime('now')"
+            "SELECT COUNT(*) FROM sessions WHERE datetime(expires_at) > datetime('now')"
         ).fetchone()[0]
         total_trades = self.conn.execute("SELECT COUNT(*) FROM paper_trades").fetchone()[0]
         auto_trades = self.conn.execute(
             "SELECT COUNT(*) FROM paper_trades WHERE trade_type = 'auto'"
         ).fetchone()[0]
         locked_accounts = self.conn.execute(
-            "SELECT COUNT(*) FROM users WHERE locked_until > datetime('now')"
+            "SELECT COUNT(*) FROM users WHERE datetime(locked_until) > datetime('now')"
         ).fetchone()[0]
         failed_logins_24h = self.conn.execute(
             "SELECT COUNT(*) FROM login_audit WHERE event_type = 'LOGIN_FAILED' AND created_at >= datetime('now', '-1 day')"
         ).fetchone()[0]
+        pro_users = self.conn.execute("SELECT COUNT(*) FROM users WHERE plan = 'pro' AND subscription_status = 'active'").fetchone()[0]
         return {
             "total_users": users,
             "active_sessions": active_sessions,
@@ -821,11 +949,139 @@ class DB:
             "auto_trades": auto_trades,
             "locked_accounts": locked_accounts,
             "failed_logins_24h": failed_logins_24h,
+            "pro_users": pro_users,
         }
 
+    def _migrate_v2_to_v3(self):
+        """v2 → v3: add user_watchlist table."""
+        log.info("Running migration v2 → v3...")
+        try:
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS user_watchlist (
+                    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    symbol     TEXT NOT NULL COLLATE NOCASE,
+                    added_at   TEXT NOT NULL DEFAULT (datetime('now')),
+                    PRIMARY KEY (user_id, symbol)
+                )
+            """)
+            self.conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_watchlist_user ON user_watchlist(user_id)"
+            )
+            # Also add column_config to user_settings if missing
+            cols = {r[1] for r in self.conn.execute("PRAGMA table_info(user_settings)").fetchall()}
+            if "column_config" not in cols:
+                self.conn.execute("ALTER TABLE user_settings ADD COLUMN column_config TEXT")
+                log.info("  Added column_config to user_settings")
+                
+            if "theme" not in cols:
+                self.conn.execute("ALTER TABLE user_settings ADD COLUMN theme TEXT DEFAULT 'bloomberg-pro'")
+                log.info("  Added theme to user_settings")
+            self.conn.commit()
+            log.info("Migration v2 → v3 complete")
+        except Exception as e:
+            log.warning(f"Migration v2→v3 error (may already be applied): {e}")
+
+    def _migrate_v3_to_v4(self):
+        """v3 → v4: Add option_type and spot_at_entry columns to paper_trades."""
+        log.info("Running migration v3 → v4...")
+        try:
+            cols = {r[1] for r in self.conn.execute("PRAGMA table_info(paper_trades)").fetchall()}
+            if "option_type" not in cols:
+                self.conn.execute("ALTER TABLE paper_trades ADD COLUMN option_type TEXT")
+                log.info("  Added option_type column to paper_trades")
+            if "spot_at_entry" not in cols:
+                self.conn.execute("ALTER TABLE paper_trades ADD COLUMN spot_at_entry REAL")
+                log.info("  Added spot_at_entry column to paper_trades")
+            self.conn.commit()
+            log.info("Migration v3 → v4 complete")
+        except Exception as e:
+            log.warning(f"Migration v3→v4 error: {e}")
+
+    def _migrate_v4_to_v5(self):
+        """v4 → v5: Add email verification + plan fields to users."""
+        log.info("Running migration v4 → v5...")
+        try:
+            cols = {r[1] for r in self.conn.execute("PRAGMA table_info(users)").fetchall()}
+            additions = [
+                ("email_verified", "INTEGER NOT NULL DEFAULT 0"),
+                ("email_otp", "TEXT"),
+                ("email_otp_expires_at", "TEXT"),
+                ("plan", "TEXT NOT NULL DEFAULT 'free'"),
+            ]
+            for col, typedef in additions:
+                if col not in cols:
+                    self.conn.execute(f"ALTER TABLE users ADD COLUMN {col} {typedef}")
+                    log.info(f"  Added {col} to users")
+            self.conn.commit()
+            log.info("Migration v4 → v5 complete")
+        except Exception as e:
+            log.warning(f"Migration v4→v5 error: {e}")
+
+    def _migrate_v5_to_v6(self):
+        """v5 → v6: Add Razorpay/subscription fields to users."""
+        log.info("Running migration v5 → v6...")
+        try:
+            cols = {r[1] for r in self.conn.execute("PRAGMA table_info(users)").fetchall()}
+            additions = [
+                ("razorpay_customer_id", "TEXT"),
+                ("razorpay_subscription_id", "TEXT"),
+                ("subscription_status", "TEXT NOT NULL DEFAULT 'inactive'"),
+                ("subscription_expires_at", "TEXT"),
+            ]
+            for col, typedef in additions:
+                if col not in cols:
+                    self.conn.execute(f"ALTER TABLE users ADD COLUMN {col} {typedef}")
+                    log.info(f"  Added {col} to users")
+            self.conn.commit()
+            log.info("Migration v5 → v6 complete")
+        except Exception as e:
+            log.warning(f"Migration v5→v6 error: {e}")
+
     # ============================================================
-    # MIGRATION FROM auth_config.json
+    # WATCHLIST
     # ============================================================
+
+    def get_watchlist(self, user_id):
+        """Return list of symbols in user's watchlist, ordered by added_at desc."""
+        rows = self.conn.execute(
+            "SELECT symbol, added_at FROM user_watchlist WHERE user_id = ? ORDER BY added_at DESC",
+            (user_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    def set_watchlist(self, user_id, symbols):
+        """Replace the user's entire watchlist with the given list of symbols."""
+        symbols = [s.upper().strip() for s in symbols if s and s.strip()][:100]  # max 100
+        with self.conn:
+            self.conn.execute("DELETE FROM user_watchlist WHERE user_id = ?", (user_id,))
+            if symbols:
+                self.conn.executemany(
+                    "INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)",
+                    [(user_id, s) for s in symbols],
+                )
+
+    def add_to_watchlist(self, user_id, symbol):
+        """Add a symbol to the user's watchlist. Idempotent."""
+        symbol = symbol.upper().strip()
+        # Enforce max 100 symbols
+        count = self.conn.execute(
+            "SELECT COUNT(*) FROM user_watchlist WHERE user_id = ?", (user_id,)
+        ).fetchone()[0]
+        if count >= 100:
+            raise ValueError("Watchlist limit reached (100 symbols)")
+        self.conn.execute(
+            "INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)",
+            (user_id, symbol),
+        )
+        self.conn.commit()
+
+    def remove_from_watchlist(self, user_id, symbol):
+        """Remove a symbol from the user's watchlist."""
+        self.conn.execute(
+            "DELETE FROM user_watchlist WHERE user_id = ? AND symbol = ?",
+            (user_id, symbol.upper().strip()),
+        )
+        self.conn.commit()
 
     def migrate_from_json(self, config_path="auth_config.json"):
         """Migrate existing users from auth_config.json into the database."""

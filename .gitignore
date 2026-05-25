@@ -1,0 +1,112 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+quantra.db
+quantra.db-*
+
+# Environment & Config
+.env
+config.env
+auth_config.json
+*.log
+server.log
+audit.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Backups
+*.backup
+*.bak
+*_backup
+*.port_backup
+*.old
+dashboard_minimal_pro.html
+minimal-pro-dashboard-preview.html
+
+# Secrets & Keys
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+
+# OS
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Temporary
+tmp/
+temp/
+*.tmp
+nohup.out
+
+# Runtime
+.auth_proxy.pid
+.ws_server.pid
+*.pid
+
+# Local data caches
+data/
+ui-samples/
+
+# Dev tooling artifacts
+get-pip.py
+
+# Scratch / session-generated docs (kept locally, never shipped)
+THEMES_COMPLETE.md
+VISUAL_GUIDE.md
+SEAMLESS_PAGES_SUMMARY.md
+USER_DROPDOWN_COMPLETE.md
+THEME_VISUAL_GUIDE.md
+THEME_APPLICATION_PLAN.md
+THEME_FIXED.md
+PROGRESS_REPORT.md
+REDESIGN_STATUS.md
+MINIMAL_PRO_APPLIED.md
+FIXES_APPLIED.md
+DIAGNOSTIC_REPORT.md
+QUICK_FIX_GUIDE.md
+SETUP_COMPLETE.md
+DEPLOYMENT_COMPLETE.md
+DEPLOYMENT_READY.md
+README_DEPLOYMENT.md
+UI_SAMPLES_GUIDE.md
+patch*.py
+fix*.py
+scratch*
+test_*.js
+backups/
+backup/

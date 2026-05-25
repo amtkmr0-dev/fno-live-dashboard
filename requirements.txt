@@ -1,0 +1,37 @@
+# FNO Live Dashboard - Python Dependencies
+# Install: pip install -r requirements.txt
+
+# Web Framework
+aiohttp>=3.9.0
+aiohttp-cors>=0.7.0
+
+# Database (SQLite is built-in, but for reference)
+# sqlite3 - built into Python
+
+# Security & Cryptography
+# hashlib, hmac, secrets - built into Python
+
+# HTTP Client (for API calls)
+aiohttp>=3.9.0
+
+# JSON & Data Processing
+# json - built into Python
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Optional: AI Chat Integration
+# Uncomment if using Perplexity/NVIDIA NIM
+# openai>=1.0.0  # For OpenAI-compatible APIs
+
+# Optional: Upstox API
+# requests>=2.31.0  # If using synchronous Upstox calls
+
+# Optional: Telegram Notifications
+# python-telegram-bot>=20.0  # If implementing Telegram alerts
+
+# Development Tools (optional)
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0

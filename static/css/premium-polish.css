@@ -1,0 +1,1092 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Manrope:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+/* ==========================================================================
+   QUANTRA TERMINAL — PREMIUM POLISH LAYER
+   --------------------------------------------------------------------------
+   Augments the existing theme + components with commercialization-grade
+   refinements: subtle gradients, consistent depth, micro-interactions,
+   tighter typography, and balanced rhythm.
+
+   Loaded LAST so it overrides earlier rules where needed. Only adds visual
+   refinements — does not change layout, behavior, or selectors.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Body base — global typography + smooth scroll
+   -------------------------------------------------------------------------- */
+body {
+  font-feature-settings: "ss01" 1, "cv01" 1, "cv11" 1, "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.005em;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text-bright);
+}
+
+/* --------------------------------------------------------------------------
+   2. Top navbar — gradient accent under the brand, subtle glass
+   -------------------------------------------------------------------------- */
+.q-nav {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02), 0 4px 12px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+.q-nav::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent) 18%,
+    var(--accent) 82%,
+    transparent 100%);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.q-nav-brand .brand-text {
+  background: linear-gradient(135deg, var(--accent), var(--cyan, #06b6d4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+}
+
+.q-nav-links a {
+  position: relative;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.q-nav-links a::before {
+  content: "";
+  position: absolute;
+  left: 8px; right: 8px; bottom: -8px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.q-nav-links a:hover::before,
+.q-nav-links a.active::before {
+  transform: scaleX(1);
+}
+.q-nav-links a:hover {
+  color: var(--text-bright);
+}
+
+/* --------------------------------------------------------------------------
+   3. Index ticker bar — premium feel with subtle hover lift
+   -------------------------------------------------------------------------- */
+.idx-ticker-bar {
+  background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 92%, var(--surface) 8%) 100%);
+  position: relative;
+}
+.idx-ticker-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 5% 0%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 25%),
+    radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--cyan, #06b6d4) 6%, transparent) 0%, transparent 30%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+.idx-tile {
+  position: relative;
+  z-index: 1;
+}
+.idx-tile:hover {
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+.idx-label {
+  font-feature-settings: "tnum" 1;
+}
+.idx-val {
+  letter-spacing: -0.01em;
+}
+
+/* --------------------------------------------------------------------------
+   4. Top picks bar — refined cards with directional stroke
+   -------------------------------------------------------------------------- */
+.top-picks-bar {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--surface) 80%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 95%, transparent) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.top-picks-label {
+  background: linear-gradient(90deg, var(--green), color-mix(in srgb, var(--green) 60%, var(--cyan, #06b6d4) 40%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+.pick-card {
+  background:
+    linear-gradient(180deg,
+      rgba(38, 166, 154, 0.08) 0%,
+      rgba(38, 166, 154, 0.03) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.pick-card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--green);
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+.pick-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35),
+              0 0 0 1px color-mix(in srgb, var(--green) 35%, transparent);
+}
+.pick-card:hover::before {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   5. Header controls (search / filters) — inset surfaces
+   -------------------------------------------------------------------------- */
+.header-controls {
+  background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 92%, var(--bg) 8%) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+.search-box,
+.filter-select {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.search-box:hover,
+.filter-select:hover {
+  border-color: var(--border-light);
+}
+.search-box:focus,
+.filter-select:focus {
+  border-color: var(--accent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.btn-toggle {
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.btn-toggle.active {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
+    0 4px 10px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   6. Sector heatmap — softer cells with hover accent
+   -------------------------------------------------------------------------- */
+.heatmap-bar {
+  background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 92%, var(--bg) 8%) 100%);
+}
+.heat-cell {
+  border-radius: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.heat-cell:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   7. Main table — refined density, premium hover, sticky header gloss
+   -------------------------------------------------------------------------- */
+thead th {
+  background: linear-gradient(180deg, var(--bg-elevated, var(--surface)) 0%, color-mix(in srgb, var(--bg-elevated, var(--surface)) 92%, var(--bg) 8%) 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 var(--border), 0 4px 8px -4px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+}
+thead th:hover {
+  background: color-mix(in srgb, var(--bg-elevated, var(--surface)) 80%, var(--accent) 20%);
+}
+
+.col-group-row th {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 95%, transparent) 0%, var(--bg) 100%);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 9px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+tbody tr {
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+tbody tr:hover {
+  background: color-mix(in srgb, var(--surface-hover) 80%, transparent) !important;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+tbody tr.row-poised {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--green) 8%, transparent) 0%,
+    color-mix(in srgb, var(--green) 2%, transparent) 100%) !important;
+}
+tbody tr.row-poised:hover {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--green) 14%, transparent) 0%,
+    color-mix(in srgb, var(--green) 5%, transparent) 100%) !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. Pills (signal / buildup / sector / direction) — softer corners,
+      consistent vertical rhythm, slight glow on strong signals
+   -------------------------------------------------------------------------- */
+.sig-pill,
+.bu-pill,
+.sector-pill,
+.dir-badge,
+.n50-badge,
+.poised-badge {
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  font-feature-settings: "tnum" 1;
+}
+
+.sig-BULLISH,
+.bu-LONG_BUILD {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--green) 25%, transparent),
+              0 0 8px -2px color-mix(in srgb, var(--green) 25%, transparent);
+}
+.sig-BEARISH,
+.bu-SHORT_BUILD {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 25%, transparent),
+              0 0 8px -2px color-mix(in srgb, var(--red) 25%, transparent);
+}
+
+.pick-card .pc-tier.tier-strong {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--green) 30%, transparent),
+              0 0 12px -3px color-mix(in srgb, var(--green) 35%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   9. Score ring — subtle outer halo at high scores
+   -------------------------------------------------------------------------- */
+.score-ring.score-high {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--green) 35%, transparent));
+}
+.score-ring.score-mid {
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--gold, #fbbf24) 30%, transparent));
+}
+
+/* --------------------------------------------------------------------------
+   10. Footer — premium chip styling
+   -------------------------------------------------------------------------- */
+.footer {
+  background: linear-gradient(0deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 92%, var(--bg) 8%) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+.footer-counter {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 95%, transparent) 0%,
+      var(--bg) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.footer-counter .qcc-shown {
+  background: linear-gradient(135deg, var(--accent), var(--cyan, #06b6d4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.footer-export-btn {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 16%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 8%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.18);
+  transition: all 0.18s ease;
+}
+.footer-export-btn:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 28%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 16%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 10px color-mix(in srgb, var(--accent) 25%, transparent);
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   11. Compliance bar — quieter, more typographic
+   -------------------------------------------------------------------------- */
+.compliance-bar {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 95%, transparent) 0%,
+      var(--bg) 100%);
+  letter-spacing: 0.02em;
+  font-feature-settings: "ss01" 1;
+}
+
+/* --------------------------------------------------------------------------
+   12. User dropdown — softer surface, premium divider
+   -------------------------------------------------------------------------- */
+.q-dropdown-menu {
+  background: linear-gradient(180deg,
+    var(--surface) 0%,
+    color-mix(in srgb, var(--surface) 92%, var(--bg) 8%) 100%);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.q-dropdown-item {
+  transition: background 0.15s ease, padding-left 0.2s ease;
+}
+.q-dropdown-item:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding-left: calc(var(--space-4, 16px) + 4px);
+}
+
+/* --------------------------------------------------------------------------
+   13. Modal overlay — premium backdrop
+   -------------------------------------------------------------------------- */
+.q-modal-overlay {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.q-modal {
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   14. Toast — refined slide and accent strip
+   -------------------------------------------------------------------------- */
+.toast {
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 10px 30px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 92%, var(--bg) 8%) 100%);
+}
+
+/* --------------------------------------------------------------------------
+   15. Conviction tier — premium pill treatment
+   -------------------------------------------------------------------------- */
+.conviction-strong,
+.tier-strong {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--green) 22%, transparent) 0%,
+    color-mix(in srgb, var(--green) 14%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--green) 40%, transparent) !important;
+}
+.conviction-watch,
+.tier-watch {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--gold, #fbbf24) 18%, transparent) 0%,
+    color-mix(in srgb, var(--gold, #fbbf24) 10%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--gold, #fbbf24) 35%, transparent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   16. Live pulse refinement — softer, more deliberate
+   -------------------------------------------------------------------------- */
+.pulse-dot {
+  box-shadow: 0 0 0 0 var(--green);
+  animation: q-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes q-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 50%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--green) 0%, transparent);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   17. Connection dot — refined transitions (themes.css owns colors)
+   -------------------------------------------------------------------------- */
+.conn-dot {
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.conn-dot.on {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--green) 25%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   18. Scrollbars — refined, less obtrusive
+   -------------------------------------------------------------------------- */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-vdim);
+  background-clip: content-box;
+}
+
+/* --------------------------------------------------------------------------
+   19. Focus ring (a11y) — visible but on-brand
+   -------------------------------------------------------------------------- */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   20. Subtle entrance animation for first paint
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .q-nav,
+  .idx-ticker-bar,
+  .top-picks-bar,
+  .header-controls {
+    animation: q-slide-down 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  }
+  .idx-ticker-bar { animation-delay: 0.04s; }
+  .top-picks-bar  { animation-delay: 0.08s; }
+  .header-controls { animation-delay: 0.12s; }
+}
+@keyframes q-slide-down {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   21. Reduce visual noise on dense rows — smaller stripes, calmer borders
+   -------------------------------------------------------------------------- */
+tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface) 35%, transparent);
+}
+tbody tr {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+}
+
+
+/* --------------------------------------------------------------------------
+   22. Heatmap strip (toggle + cells) — top-of-page first-class treatment
+   -------------------------------------------------------------------------- */
+.heatmap-strip {
+  background: linear-gradient(180deg,
+    var(--surface) 0%,
+    color-mix(in srgb, var(--surface) 92%, var(--bg) 8%) 100%);
+}
+.heatmap-toggle {
+  position: relative;
+}
+.heatmap-toggle::after {
+  content: "";
+  position: absolute;
+  left: 12px; right: 12px; bottom: 4px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, var(--accent) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.heatmap-toggle:hover::after { opacity: 0.5; }
+.heatmap-bar .heat-cell {
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+
+/* --------------------------------------------------------------------------
+   23. Inline OI Thesis "TV" export split-button (next to dropdown)
+   -------------------------------------------------------------------------- */
+.oi-tv-split {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  margin-left: 4px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.oi-tv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-right: 0;
+  background: var(--bg);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.oi-tv-btn:last-child { border-right: 1px solid var(--border); }
+.oi-tv-btn:hover { background: var(--surface-hover); color: var(--text); transform: translateY(-1px); }
+.oi-tv-btn .oi-tv-ico { font-size: 11px; line-height: 1; }
+.oi-tv-bull { color: color-mix(in srgb, var(--green) 80%, var(--text)); }
+.oi-tv-bull:hover {
+  background: color-mix(in srgb, var(--green) 15%, transparent);
+  color: var(--green);
+}
+.oi-tv-bear { color: color-mix(in srgb, var(--red) 80%, var(--text)); }
+.oi-tv-bear:hover {
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+  color: var(--red);
+}
+.oi-tv-both { color: var(--accent); }
+.oi-tv-both:hover {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent-hover, var(--accent));
+}
+
+/* ==========================================================================
+   24. 8 PREMIUM MOOD THEMES OVERRIDES
+   ========================================================================== */
+
+/* --- 1. OBSIDIAN QUANTUM --- */
+[data-theme="obsidian-quantum"] {
+  --bg: #050508;
+  --surface: #0d0d12;
+  --surface-alt: #14141d;
+  --surface-hover: #1e1e2b;
+  --surface-active: #262638;
+  --bg-elevated: #0d0d12;
+  --border: rgba(255, 255, 255, 0.05);
+  --border-light: rgba(255, 255, 255, 0.09);
+  --border-dark: #050508;
+  --border-focus: #3b82f6;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-vdim: #64748b;
+  --text-bright: #ffffff;
+  --text-muted: #475569;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-soft: rgba(59, 130, 246, 0.12);
+  --green: #10b981;
+  --green-soft: rgba(16, 185, 129, 0.12);
+  --green-text: #34d399;
+  --red: #ef4444;
+  --red-soft: rgba(239, 68, 68, 0.12);
+  --red-text: #f87171;
+  --cyan: #8b5cf6;
+}
+html[data-theme="obsidian-quantum"] body {
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%) !important;
+}
+
+/* --- 2. NEON CYBER --- */
+[data-theme="neon-cyber"] {
+  --bg: #070919;
+  --surface: #0b0e26;
+  --surface-alt: #12173b;
+  --surface-hover: #1d2459;
+  --surface-active: #28317a;
+  --bg-elevated: #0b0e26;
+  --border: rgba(0, 212, 255, 0.35);
+  --border-light: rgba(255, 0, 110, 0.35);
+  --border-dark: #070919;
+  --border-focus: #00d4ff;
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.75);
+  --text-vdim: rgba(0, 212, 255, 0.75);
+  --text-bright: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.45);
+  --accent: #00d4ff;
+  --accent-hover: #ff006e;
+  --accent-soft: rgba(0, 212, 255, 0.15);
+  --green: #00ff88;
+  --green-soft: rgba(0, 255, 136, 0.15);
+  --green-text: #00ff88;
+  --red: #ff006e;
+  --red-soft: rgba(255, 0, 110, 0.15);
+  --red-text: #ff006e;
+  --cyan: #ff006e;
+}
+html[data-theme="neon-cyber"] body {
+  font-family: 'Rajdhani', sans-serif !important;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 212, 255, 0.015) 2px, rgba(0, 212, 255, 0.015) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 212, 255, 0.015) 2px, rgba(0, 212, 255, 0.015) 4px) !important;
+}
+html[data-theme="neon-cyber"] .brand-text,
+html[data-theme="neon-cyber"] h1,
+html[data-theme="neon-cyber"] h2,
+html[data-theme="neon-cyber"] h3,
+html[data-theme="neon-cyber"] th {
+  font-family: 'Orbitron', sans-serif !important;
+}
+html[data-theme="neon-cyber"] td,
+html[data-theme="neon-cyber"] .idx-val {
+  font-family: 'Orbitron', monospace !important;
+}
+html[data-theme="neon-cyber"] tbody tr:hover {
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.25) !important;
+}
+
+/* --- 3. GLASSMORPHISM --- */
+[data-theme="glassmorphism"] {
+  --bg: transparent;
+  --surface: rgba(255, 255, 255, 0.07);
+  --surface-alt: rgba(255, 255, 255, 0.12);
+  --surface-hover: rgba(255, 255, 255, 0.18);
+  --surface-active: rgba(255, 255, 255, 0.24);
+  --bg-elevated: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-light: rgba(255, 255, 255, 0.22);
+  --border-dark: rgba(0, 0, 0, 0.15);
+  --border-focus: #ffffff;
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.8);
+  --text-vdim: rgba(255, 255, 255, 0.6);
+  --text-bright: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --accent: #ffffff;
+  --accent-hover: rgba(255, 255, 255, 0.9);
+  --accent-soft: rgba(255, 255, 255, 0.12);
+  --green: #4ade80;
+  --green-soft: rgba(74, 222, 128, 0.15);
+  --green-text: #4ade80;
+  --red: #f87171;
+  --red-soft: rgba(248, 113, 113, 0.15);
+  --red-text: #f87171;
+  --cyan: rgba(255,255,255,0.7);
+}
+html[data-theme="glassmorphism"] body {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%) !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="glassmorphism"] .q-card,
+html[data-theme="glassmorphism"] .q-nav,
+html[data-theme="glassmorphism"] .idx-ticker-bar,
+html[data-theme="glassmorphism"] .top-picks-bar,
+html[data-theme="glassmorphism"] .header-controls,
+html[data-theme="glassmorphism"] .table-wrap,
+html[data-theme="glassmorphism"] .footer,
+html[data-theme="glassmorphism"] .theme-panel,
+html[data-theme="glassmorphism"] .q-dropdown-menu,
+html[data-theme="glassmorphism"] .analysis-panel {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* --- 4. MINIMAL PRO --- */
+[data-theme="minimal-pro"] {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --surface-hover: #f8fafc;
+  --surface-active: #e2e8f0;
+  --bg-elevated: #ffffff;
+  --border: #cbd5e1;
+  --border-light: #e2e8f0;
+  --border-dark: #cbd5e1;
+  --border-focus: #000000;
+  --text: #0f172a;
+  --text-dim: #334155;
+  --text-vdim: #64748b;
+  --text-bright: #000000;
+  --text-muted: #94a3b8;
+  --accent: #000000;
+  --accent-hover: #334155;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --green: #16a34a;
+  --green-soft: rgba(22, 163, 74, 0.1);
+  --green-text: #16a34a;
+  --red: #dc2626;
+  --red-soft: rgba(220, 38, 38, 0.1);
+  --red-text: #dc2626;
+  --cyan: #475569;
+}
+
+/* --- 5. TERMINAL HACKER --- */
+[data-theme="terminal-hacker"] {
+  --bg: #000000;
+  --surface: #050905;
+  --surface-alt: #0c140c;
+  --surface-hover: #152415;
+  --surface-active: #203520;
+  --bg-elevated: #050905;
+  --border: #00ff00;
+  --border-light: rgba(0, 255, 0, 0.35);
+  --border-dark: #000000;
+  --border-focus: #00ff00;
+  --text: #00ff00;
+  --text-dim: rgba(0, 255, 0, 0.8);
+  --text-vdim: rgba(0, 255, 0, 0.6);
+  --text-bright: #00ff00;
+  --text-muted: rgba(0, 255, 0, 0.4);
+  --accent: #00ff00;
+  --accent-hover: #00ff00;
+  --accent-soft: rgba(0, 255, 0, 0.15);
+  --green: #00ff00;
+  --green-soft: rgba(0, 255, 0, 0.15);
+  --green-text: #00ff00;
+  --red: #ff0000;
+  --red-soft: rgba(255, 0, 0, 0.15);
+  --red-text: #ff3333;
+  --cyan: #00ff00;
+}
+html[data-theme="terminal-hacker"] body {
+  font-family: 'Source Code Pro', monospace !important;
+}
+html[data-theme="terminal-hacker"] * {
+  font-family: 'Source Code Pro', monospace !important;
+}
+html[data-theme="terminal-hacker"] body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.02) 0px, transparent 1px, transparent 2px, rgba(0, 255, 0, 0.02) 3px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* --- 6. GRADIENT LUXURY --- */
+[data-theme="gradient-luxury"] {
+  --bg: #09090f;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-alt: rgba(255, 255, 255, 0.06);
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --surface-active: rgba(255, 255, 255, 0.15);
+  --bg-elevated: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.15);
+  --border-dark: #09090f;
+  --border-focus: #ff0080;
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.75);
+  --text-vdim: rgba(255, 255, 255, 0.55);
+  --text-bright: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.35);
+  --accent: #ff0080;
+  --accent-hover: #ff8c00;
+  --accent-soft: rgba(255, 0, 128, 0.15);
+  --green: #00ff88;
+  --green-soft: rgba(0, 255, 136, 0.15);
+  --green-text: #00ff88;
+  --red: #ff0080;
+  --red-soft: rgba(255, 0, 128, 0.15);
+  --red-text: #ff0080;
+  --cyan: #ff8c00;
+}
+html[data-theme="gradient-luxury"] body {
+  font-family: 'Manrope', sans-serif !important;
+}
+html[data-theme="gradient-luxury"] body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(255, 0, 128, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(0, 128, 255, 0.12) 0%, transparent 40%);
+  animation: luxury-rotate 25s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+@keyframes luxury-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- 7. NEUMORPHISM --- */
+[data-theme="neumorphism"] {
+  --bg: #e0e5ec;
+  --surface: #e0e5ec;
+  --surface-alt: #cbd5e0;
+  --surface-hover: #cbd5e0;
+  --surface-active: #a0aec0;
+  --bg-elevated: #e0e5ec;
+  --border: #cbd5e0;
+  --border-light: #e2e8f0;
+  --border-dark: #cbd5e0;
+  --border-focus: #3182ce;
+  --text: #4a5568;
+  --text-dim: #718096;
+  --text-vdim: #a0aec0;
+  --text-bright: #2d3748;
+  --text-muted: #cbd5e0;
+  --accent: #3182ce;
+  --accent-hover: #4299e1;
+  --accent-soft: rgba(49, 130, 206, 0.08);
+  --green: #48bb78;
+  --green-soft: rgba(72, 187, 120, 0.1);
+  --green-text: #48bb78;
+  --red: #f56565;
+  --red-soft: rgba(245, 101, 101, 0.1);
+  --red-text: #f56565;
+  --cyan: #4a5568;
+}
+html[data-theme="neumorphism"] body {
+  font-family: 'Nunito', sans-serif !important;
+}
+html[data-theme="neumorphism"] .q-card,
+html[data-theme="neumorphism"] .search-box,
+html[data-theme="neumorphism"] .filter-select,
+html[data-theme="neumorphism"] .q-nav,
+html[data-theme="neumorphism"] .idx-ticker-bar,
+html[data-theme="neumorphism"] .table-wrap,
+html[data-theme="neumorphism"] .footer,
+html[data-theme="neumorphism"] .theme-panel,
+html[data-theme="neumorphism"] .q-dropdown-menu,
+html[data-theme="neumorphism"] .analysis-panel {
+  background: #e0e5ec !important;
+  border: none !important;
+  box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.8) !important;
+  border-radius: 12px !important;
+}
+html[data-theme="neumorphism"] .qchip {
+  background: #e0e5ec !important;
+  box-shadow: 3px 3px 6px rgba(163, 177, 198, 0.4), -3px -3px 6px rgba(255, 255, 255, 0.7) !important;
+  border: none !important;
+}
+
+/* --- 8. BLOOMBERG PRO --- */
+:root[data-theme="bloomberg-pro"] {
+  --bg: #000000;
+  --surface: #0b0b0b;
+  --surface-alt: #141414;
+  --surface-hover: #1e1e1e;
+  --surface-active: #2a2a2a;
+  --bg-elevated: #0b0b0b;
+  --border: #333333;
+  --border-light: #222222;
+  --border-dark: #000000;
+  --border-focus: #3b82f6;
+  --text: #e0e0e0;
+  --text-dim: #9e9e9e;
+  --text-vdim: #757575;
+  --text-bright: #ffffff;
+  --text-muted: #424242;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-soft: rgba(59, 130, 246, 0.15);
+  --green: #00ff00;
+  --green-soft: rgba(0, 255, 0, 0.15);
+  --green-text: #00ff00;
+  --red: #ff3333;
+  --red-soft: rgba(255, 51, 51, 0.15);
+  --red-text: #ff3333;
+  --cyan: #3b82f6;
+}
+html[data-theme="bloomberg-pro"] body,
+html[data-theme="bloomberg-pro"] * {
+  font-family: 'IBM Plex Mono', monospace !important;
+}
+html[data-theme="bloomberg-pro"] table,
+html[data-theme="bloomberg-pro"] th,
+html[data-theme="bloomberg-pro"] td {
+  border: 1px solid #333333 !important;
+}
+
+
+
+/* --- Unified User Dropdown Menu --- */
+.q-nav-user-dropdown {
+  position: relative;
+  margin-left: 12px;
+}
+
+.q-nav-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 6px 12px 6px 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.q-nav-user-btn:hover {
+  border-color: var(--blue);
+  background: var(--surface-hover);
+}
+
+.q-nav-user-btn .user-name {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.q-nav-user-btn svg {
+  color: var(--text-dim);
+  transition: transform 0.2s;
+}
+
+.q-nav-user-btn.open svg {
+  transform: rotate(180deg);
+}
+
+.q-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.q-avatar-sm {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+
+.q-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  z-index: 1000;
+  animation: dropdown-in 0.2s ease-out;
+}
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.user-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
+}
+
+.user-menu-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-menu-name {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu-role {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.q-dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.q-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.q-dropdown-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-bright);
+  text-decoration: none;
+}
+
+.q-dropdown-item svg {
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.q-dropdown-item:hover svg {
+  color: var(--blue);
+}
+
+.q-dropdown-item.text-red {
+  color: var(--red);
+}
+
+.q-dropdown-item.text-red:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+
+.q-dropdown-item.text-red svg, .q-dropdown-item.text-red:hover svg {
+  color: var(--red);
+}
+
+/* Unified Brand Logo */
+.q-nav-brand .brand-text {
+  color: var(--text-bright);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}

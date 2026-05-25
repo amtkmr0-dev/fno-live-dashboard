@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantra Terminal - Advanced Desk</title>
+  <!-- Modern Typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Backgrounds & Surfaces */
+      --bg:             hsl(240, 16%, 2.5%);
+      --bg-darker:     hsl(240, 20%, 1.2%);
+      --surface:        hsla(240, 10%, 6%, 0.45);
+      --surface-alt:    hsla(240, 10%, 4%, 0.35);
+      --surface-hover:  hsla(240, 8%, 14%, 0.55);
+      --surface-active: hsla(240, 8%, 18%, 0.65);
+      --border:         hsla(240, 8%, 16%, 0.5);
+      --border-light:   hsla(240, 8%, 25%, 0.7);
+      --border-glow:    hsla(215, 100%, 55%, 0.3);
+      
+      /* Colors */
+      --text:           hsl(0, 0%, 90%);
+      --text-dim:       hsl(240, 5%, 65%);
+      --text-vdim:      hsl(240, 5%, 45%);
+      --text-bright:    hsl(0, 0%, 100%);
+      
+      /* Semantic Colors */
+      --blue:           hsl(215, 100%, 55%);
+      --blue-soft:      hsla(215, 100%, 55%, 0.12);
+      --cyan:           hsl(180, 100%, 45%);
+      --cyan-soft:      hsla(180, 100%, 45%, 0.1);
+      --green:          hsl(150, 85%, 42%);
+      --green-soft:     hsla(150, 85%, 42%, 0.12);
+      --red:            hsl(355, 85%, 55%);
+      --red-soft:       hsla(355, 85%, 55%, 0.12);
+      --gold:           hsl(40, 95%, 50%);
+      --gold-soft:      hsla(40, 95%, 50%, 0.1);
+      --purple:         hsl(270, 90%, 65%);
+      --purple-soft:    hsla(270, 90%, 65%, 0.15);
+      
+      /* Layout & Nav */
+      --nav-height:     48px;
+      --radius-sm:      4px;
+      --radius-md:      8px;
+      --radius-lg:      12px;
+      --radius-xl:      16px;
+      --font-sans:      'Outfit', 'Inter', -apple-system, sans-serif;
+      --font-mono:      SFMono-Regular, Consolas, monospace;
+    }
+
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; -webkit-font-smoothing: antialiased; }
+    
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 20%, hsla(180, 100%, 45%, 0.03) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, hsla(270, 90%, 65%, 0.04) 0%, transparent 55%),
+        linear-gradient(hsla(215, 100%, 55%, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, hsla(215, 100%, 55%, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+      color: var(--text);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: hsla(240, 8%, 20%, 0.8); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: hsla(240, 8%, 30%, 0.8); }
+
+    /* Navigation */
+    .q-nav {
+      display: flex;
+      align-items: center;
+      height: var(--nav-height);
+      background: rgba(9, 9, 11, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 16px;
+    }
+    .q-nav::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.2) 20%, rgba(168,85,247,0.2) 80%, transparent 100%);
+    }
+    .q-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .q-nav-brand svg {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 0 8px var(--blue));
+    }
+    .brand-text {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .brand-tag {
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+    .q-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: center;
+    }
+    .q-nav-links a {
+      padding: 6px 14px;
+      border-radius: 20px;
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+    .q-nav-links a:hover {
+      color: var(--text);
+      background: var(--surface-hover);
+    }
+    .q-nav-links a.active {
+      color: var(--text-bright);
+      background: var(--blue-soft);
+      border-color: rgba(59,130,246,0.3);
+      box-shadow: 0 0 15px rgba(59,130,246,0.15);
+    }
+    .q-nav-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      margin-left: auto;
+    }
+    .conn-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .conn-dot.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .conn-dot.off { background: var(--red); box-shadow: 0 0 8px var(--red); }
+    .conn-dot.warn { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+
+    /* Main Terminal Layout */
+    .terminal-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      padding: 8px;
+      gap: 8px;
+    }
+
+    /* Layout Columns */
+    .col-watchlist {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .col-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      min-width: 0; /* Prevents flex children from stretching outside bounds */
+    }
+    .col-tactical {
+      width: 330px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Glass Panels */
+    .glass-panel {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.01), var(--shadow-sm);
+    }
+    .glass-panel-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-bright);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Left Watchlist Styles */
+    .watchlist-search {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 12px 8px 30px;
+      color: var(--text-bright);
+      font-size: 12px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .search-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 8px rgba(59,130,246,0.25);
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      font-size: 12px;
+      color: var(--text-vdim);
+      pointer-events: none;
+    }
+    .watchlist-items {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .stock-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .stock-row:hover {
+      background: var(--surface-hover);
+    }
+    .stock-row.active {
+      background: var(--blue-soft);
+      border-left: 3px solid var(--blue);
+    }
+    .stock-row-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .stock-row-sym {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .stock-row-sec {
+      font-size: 10px;
+      color: var(--text-vdim);
+      margin-top: 1px;
+    }
+    .stock-row-mid {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin-right: 18px;
+    }
+    .stock-row-price {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .stock-row-chg {
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+    .stock-row-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      min-width: 75px;
+    }
+    .stock-row-flow {
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .stock-row-regime {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 4px;
+      border-radius: 4px;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Flow Badge Colors */
+    .flow-pos { color: var(--green); }
+    .flow-neg { color: var(--red); }
+    .flow-neutral { color: var(--text-dim); }
+
+    /* Regime Badges */
+    .badge-gex-pos { background: var(--green-soft); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+    .badge-gex-neg { background: var(--red-soft); color: var(--red); border: 1px solid rgba(244,63,94,0.2); }
+
+    /* Header Panel */
+    .ticker-summary {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01) 0%, transparent 100%);
+      flex-shrink: 0;
+    }
+    .ticker-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ticker-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--blue);
+    }
+    .ticker-identity {
+      display: flex;
+      flex-direction: column;
+    }
+    .ticker-symbol {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-bright);
+      line-height: 1.1;
+    }
+    .ticker-name {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 3px;
+    }
+    .ticker-header-mid {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .ticker-price-block {
+      display: flex;
+      flex-direction: column;
+    }
+    .ticker-ltp {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--text-bright);
+      line-height: 1.1;
+    }
+    .ticker-chg-block {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .ticker-meta-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .meta-pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .meta-pill span {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* Three-Layer Dashboard Panels */
+    .dashboard-grid-1 {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    /* 3-Layer Score Card */
+    .score-radial-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .score-circle-svg {
+      width: 110px;
+      height: 110px;
+      transform: rotate(-90deg);
+    }
+    .score-circle-bg {
+      fill: none;
+      stroke: hsla(240, 8%, 14%, 0.6);
+      stroke-width: 9;
+    }
+    .score-circle-fill {
+      fill: none;
+      stroke: var(--blue);
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      transition: stroke-dashoffset 1s ease-in-out, stroke 1.2s ease;
+    }
+    .score-center-text {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .score-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-bright);
+      line-height: 1;
+    }
+    .score-label {
+      font-size: 9px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    .score-conviction-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Layer Components list */
+    .layer-components {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 10px;
+      flex: 1;
+    }
+    .layer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.01);
+      border: 1px solid rgba(255,255,255,0.02);
+      border-radius: var(--radius-md);
+    }
+    .layer-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .layer-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .layer-desc {
+      font-size: 9px;
+      color: var(--text-vdim);
+      margin-top: 1px;
+    }
+    .layer-status {
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .layer-score-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--blue);
+      background: var(--blue-soft);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Volume Profile SVG Container */
+    .profile-chart-area {
+      height: 250px;
+      padding: 12px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .profile-chart-svg {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .profile-price-lines {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .price-line-val {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-vdim);
+      border-top: 1px dashed rgba(255,255,255,0.04);
+      width: 100%;
+      padding-top: 2px;
+      padding-left: 8px;
+    }
+    .profile-overlay-levels {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .chart-horizontal-marker {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 12px;
+    }
+    .chart-horizontal-marker::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+    }
+    .marker-label {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 5;
+    }
+
+    /* Specific Overlay Markers */
+    .marker-spot {
+      border-top: 1px solid var(--blue);
+    }
+    .marker-spot::before {
+      border-top: 1px dashed var(--blue);
+      opacity: 0.6;
+    }
+    .marker-spot .marker-label {
+      background: var(--blue);
+      box-shadow: 0 0 10px var(--blue);
+    }
+
+    .marker-zero-gamma {
+      border-top: 1px solid var(--purple);
+    }
+    .marker-zero-gamma::before {
+      border-top: 1px dashed var(--purple);
+      opacity: 0.5;
+    }
+    .marker-zero-gamma .marker-label {
+      background: var(--purple);
+      box-shadow: 0 0 10px var(--purple);
+    }
+
+    .marker-poc {
+      border-top: 1px solid var(--gold);
+    }
+    .marker-poc::before {
+      border-top: 1px dashed var(--gold);
+      opacity: 0.5;
+    }
+    .marker-poc .marker-label {
+      background: var(--gold);
+    }
+
+    .marker-vah {
+      border-top: 1px solid var(--green);
+    }
+    .marker-vah::before {
+      border-top: 1px dashed var(--green);
+      opacity: 0.3;
+    }
+    .marker-vah .marker-label {
+      background: var(--green);
+    }
+
+    .marker-val {
+      border-top: 1px solid var(--red);
+    }
+    .marker-val::before {
+      border-top: 1px dashed var(--red);
+      opacity: 0.3;
+    }
+    .marker-val .marker-label {
+      background: var(--red);
+    }
+
+    /* Detailed Strike Grid Panel */
+    .grid-strike-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 350px;
+    }
+    .grid-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .strike-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 11px;
+    }
+    .strike-table th {
+      position: sticky;
+      top: 0;
+      background: var(--bg-darker);
+      padding: 10px 6px;
+      color: var(--text-dim);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+    .strike-table td {
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+      font-family: var(--font-mono);
+      transition: background 0.15s ease;
+    }
+    .strike-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .strike-table tr.atm-row td {
+      background: var(--gold-soft);
+      border-top: 1px solid rgba(251,191,36,0.15);
+      border-bottom: 1px solid rgba(251,191,36,0.15);
+    }
+    .strike-table tr.atm-row td.strike-cell {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    
+    .strike-cell {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-bright);
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+    
+    .text-left { text-align: left; padding-left: 8px !important; }
+    .text-right { text-align: right; padding-right: 8px !important; }
+
+    /* Tactical Recommender Column */
+    .tactical-engine-card {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01) 0%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+    }
+    .tactical-icon {
+      font-size: 32px;
+      filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));
+    }
+    .tactical-regime-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+    .tactical-regime-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* Ticket Details */
+    .ticket-details {
+      flex: 1;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    .ticket-metric-card {
+      background: rgba(255,255,255,0.01);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+    .ticket-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-vdim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .ticket-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ticket-value-main {
+      font-size: 18px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+    .ticket-subtext {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* Order Button */
+    .btn-action {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-hover) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: auto;
+      flex-shrink: 0;
+    }
+    .btn-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59,130,246,0.45);
+    }
+    .btn-action:active {
+      transform: translateY(0);
+    }
+
+    /* Flash Animations */
+    .flash-green {
+      animation: flash-g 0.6s ease-out;
+    }
+    .flash-red {
+      animation: flash-r 0.6s ease-out;
+    }
+    @keyframes flash-g {
+      0% { background-color: rgba(16, 185, 129, 0.25); }
+      100% { background-color: transparent; }
+    }
+    @keyframes flash-r {
+      0% { background-color: rgba(244, 63, 94, 0.25); }
+      100% { background-color: transparent; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="q-nav">
+    <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
+  </a>
+
+    <div class="q-nav-links">
+      <a href="/" id="nav-dashboard">Dashboard</a>
+      <a href="/sectors" id="nav-sectors">Sectors</a>
+      <a href="/nifty" id="nav-nifty">Nifty 50</a>
+    </div>
+
+    <div class="q-nav-right" style="margin-left:auto; display:flex; gap:16px; align-items:center;">
+      <button class="tv-script-btn" onclick="exportTvScript()" style="background: rgba(38,166,154,0.15); border: 1px solid rgba(38,166,154,0.4); color: #fff; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">💻 Export TV Script</button>
+      <button class="playbook-btn" onclick="openPlaybookModal()" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.4); color: #fff; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">📘 Playbook</button>
+      <div class="q-nav-status">
+        <span class="conn-dot off" id="connDot"></span>
+        <span id="connText">WS Offline</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Terminal Main Layout -->
+  <div class="terminal-container">
+    
+    <!-- Left Column: Watchlist -->
+    <div class="col-watchlist glass-panel">
+      <div class="glass-panel-header">
+        <div class="panel-title">
+          <span>📊</span> Live Ticker Feed
+        </div>
+        <div class="panel-subtitle" id="tickerCount">0 Instruments</div>
+      </div>
+      <div class="watchlist-search">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" placeholder="Search symbol or sector..." id="searchBox">
+        </div>
+        <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 11px; color: var(--text-vdim);">Filter</span>
+            <button id="btnFilterConviction" style="background: rgba(255,165,0,0.1); border: 1px solid rgba(255,165,0,0.3); color: orange; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: all 0.2s;">🔥 &gt; 70 Score</button>
+        </div>
+      </div>
+      <div class="watchlist-items" id="watchlistContainer">
+        <!-- Stock Rows populated dynamically -->
+      </div>
+    </div>
+
+    <!-- Center Column: Core Analytics -->
+    <div class="col-main">
+      
+      <!-- Top Summary Header -->
+      <div class="glass-panel" style="flex-shrink:0;">
+        <div class="ticker-summary">
+          <div class="ticker-header-left">
+            <div class="ticker-avatar" id="tickerAvatar">--</div>
+            <div class="ticker-identity">
+              <div class="ticker-symbol" id="tickerSymbol">SELECT TICKER</div>
+              <div class="ticker-name" id="tickerName">Please select an instrument from watchlist</div>
+            </div>
+          </div>
+          
+          <div class="ticker-header-mid">
+            <div class="ticker-price-block">
+              <div class="ticker-ltp" id="tickerLtp">--</div>
+              <div class="ticker-chg-block" id="tickerChg">
+                <span id="tickerChgIcon"></span>
+                <span id="tickerChgPct">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ticker-meta-pills">
+            <div class="meta-pill">Lot Size <span id="metaLot">--</span></div>
+            <div class="meta-pill">Expiry <span id="metaExpiry">--</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radial Score & Volume Profile -->
+      <div class="dashboard-grid-1">
+        <!-- 3-Layer Score Panel -->
+        <div class="glass-panel">
+          <div class="glass-panel-header">
+            <div class="panel-title">🛡️ 3-Layer Composite Score</div>
+          </div>
+          <div class="score-radial-wrapper">
+            <svg class="score-circle-svg" viewBox="0 0 100 100">
+              <circle class="score-circle-bg" cx="50" cy="50" r="45"></circle>
+              <circle class="score-circle-fill" id="radialFill" cx="50" cy="50" r="45"></circle>
+            </svg>
+            <div class="score-center-text">
+              <div class="score-val" id="scoreVal">0</div>
+              <div class="score-label">Score</div>
+            </div>
+            <div class="score-conviction-pill" id="scoreConviction">NO REGIME</div>
+          </div>
+          
+          <div class="layer-components">
+            <div class="layer-row">
+              <div class="layer-info">
+                <div class="layer-title">Layer 1: Volatility Regime</div>
+                <div class="layer-desc">Dealer Hedging Pressure (GEX)</div>
+              </div>
+              <div class="layer-status" id="layerRegime">--</div>
+            </div>
+            <div class="layer-row">
+              <div class="layer-info">
+                <div class="layer-title">Layer 2: Sentiment Bias</div>
+                <div class="layer-desc">Volatility Skew & Delta Flow</div>
+              </div>
+              <div class="layer-status" id="layerFlow">--</div>
+            </div>
+            <div class="layer-row">
+              <div class="layer-info">
+                <div class="layer-title">Layer 3: Technical Boundary</div>
+                <div class="layer-desc">Value Area breakout confirmation</div>
+              </div>
+              <div class="layer-status" id="layerBoundary">--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Volume Profile Panel -->
+        <div class="glass-panel" style="flex:1;">
+          <div class="glass-panel-header">
+            <div class="panel-title">⚖️ 10-Day Volume Profile & Zero Gamma</div>
+          </div>
+          <div class="profile-chart-area" id="profileChartContainer">
+            <svg class="profile-chart-svg" id="profileChartSvg" preserveAspectRatio="none">
+              <!-- Dynamically populated SVG paths -->
+            </svg>
+            <div class="profile-price-lines" id="profilePriceLines">
+              <div class="price-line-val" id="profilePriceMax">--</div>
+              <div class="price-line-val" id="profilePriceMid">--</div>
+              <div class="price-line-val" id="profilePriceMin">--</div>
+            </div>
+            <div class="profile-overlay-levels" id="profileOverlayLevels">
+              <!-- Dynamic Price Level Indicators -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strike Greeks Grid -->
+      <div class="glass-panel grid-strike-container">
+        <div class="glass-panel-header">
+          <div class="panel-title">🧬 Option Greek Microstructure Strike Grid</div>
+        </div>
+        <div class="grid-wrapper">
+          <table class="strike-table">
+            <thead>
+              <tr>
+                <th class="text-left">CE DNF (Lakh)</th>
+                <th>CE GEX (Lakh)</th>
+                <th>CE Delta</th>
+                <th>CE Gamma</th>
+                <th>CE IV</th>
+                <th>CE OI</th>
+                <th class="strike-cell">Strike Price</th>
+                <th>PE OI</th>
+                <th>PE IV</th>
+                <th>PE Gamma</th>
+                <th>PE Delta</th>
+                <th>PE GEX (Lakh)</th>
+                <th class="text-right">PE DNF (Lakh)</th>
+              </tr>
+            </thead>
+            <tbody id="strikeGridBody">
+              <tr>
+                <td colspan="13" style="padding: 40px; color: var(--text-dim);">Select a stock to render strike-level options Greeks</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Tactical Trade Generator -->
+    <div class="col-tactical glass-panel">
+      <div class="glass-panel-header">
+        <div class="panel-title">⚡ Tactical Trade Generator</div>
+      </div>
+      
+      <!-- Regime Summary Header Card -->
+      <div class="tactical-engine-card">
+        <div class="tactical-icon" id="tacticalIcon">🤖</div>
+        <div class="tactical-regime-title" id="tacticalRegime">Awaiting Signal</div>
+        <div class="tactical-regime-desc" id="tacticalDesc">
+          Please select a stock to enable the 3-Layer microstructure trade generation desk.
+        </div>
+      </div>
+
+      <!-- Tactical Recommendations Ticket -->
+      <div class="ticket-details" id="tacticalTicketBody" style="display:none;">
+        <div class="ticket-metric-card">
+          <div class="ticket-label">Microstructure Setup</div>
+          <div class="ticket-value" id="ticketSetup">--</div>
+        </div>
+
+        <div class="ticket-metric-card">
+          <div class="ticket-label">Recommended Action</div>
+          <div class="ticket-value" id="ticketAction" style="font-size:16px;">--</div>
+        </div>
+
+        <div class="ticket-metric-card">
+          <div class="ticket-label">Tactical Entry boundary</div>
+          <div class="ticket-value">
+            <span class="ticket-value-main" id="ticketEntry">--</span>
+            <span style="font-size:11px; color:var(--text-dim);" id="ticketEntrySource">--</span>
+          </div>
+        </div>
+
+        <div class="ticket-metric-card">
+          <div class="ticket-label">Structural Stop Loss</div>
+          <div class="ticket-value">
+            <span class="ticket-value-main" style="color:var(--red);" id="ticketSL">--</span>
+            <span style="font-size:11px; color:var(--text-dim);" id="ticketSLSource">--</span>
+          </div>
+        </div>
+
+        <div class="ticket-metric-card">
+          <div class="ticket-label">Structural Target</div>
+          <div class="ticket-value">
+            <span class="ticket-value-main" style="color:var(--green);" id="ticketTarget">--</span>
+            <span style="font-size:11px; color:var(--text-dim);" id="ticketTargetSource">--</span>
+          </div>
+        </div>
+        
+        <div class="ticket-subtext" id="ticketReasoning">--</div>
+
+        <!-- Fake order button linking to paper trading dashboard -->
+        <button class="btn-action" id="orderBtn">
+          <span>🚀</span> Execute Paper Order
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- JavaScript Desk Controller -->
+  <script>
+    // State management
+    let ws = null;
+    let stocks = {};
+    let activeSymbol = null;
+    let reconnectTimer = null;
+    let reconnectDelay = 3000;
+    let chainCache = {}; // Client-side cache piggy bank for detailed options microstructure data
+    
+    // UI elements cache
+    const connDot = document.getElementById("connDot");
+    const connText = document.getElementById("connText");
+    const searchBox = document.getElementById("searchBox");
+    const btnFilterConviction = document.getElementById("btnFilterConviction");
+    let filterHighConviction = false;
+    const watchlistContainer = document.getElementById("watchlistContainer");
+    const tickerCount = document.getElementById("tickerCount");
+    
+    // Details elements cache
+    const tickerSymbol = document.getElementById("tickerSymbol");
+    const tickerName = document.getElementById("tickerName");
+    const tickerAvatar = document.getElementById("tickerAvatar");
+    const tickerLtp = document.getElementById("tickerLtp");
+    const tickerChgPct = document.getElementById("tickerChgPct");
+    const tickerChgIcon = document.getElementById("tickerChgIcon");
+    const metaLot = document.getElementById("metaLot");
+    const metaExpiry = document.getElementById("metaExpiry");
+    
+    // Radials & Score elements
+    const scoreVal = document.getElementById("scoreVal");
+    const radialFill = document.getElementById("radialFill");
+    const scoreConviction = document.getElementById("scoreConviction");
+    const layerRegime = document.getElementById("layerRegime");
+    const layerFlow = document.getElementById("layerFlow");
+    const layerBoundary = document.getElementById("layerBoundary");
+    
+    // 10-day volume profile elements
+    const profileChartSvg = document.getElementById("profileChartSvg");
+    const profileOverlayLevels = document.getElementById("profileOverlayLevels");
+    const profilePriceLines = document.getElementById("profilePriceLines");
+    const profilePriceMax = document.getElementById("profilePriceMax");
+    const profilePriceMid = document.getElementById("profilePriceMid");
+    const profilePriceMin = document.getElementById("profilePriceMin");
+    
+    // Greeks Grid & Tactical Generator elements
+    const strikeGridBody = document.getElementById("strikeGridBody");
+    const tacticalIcon = document.getElementById("tacticalIcon");
+    const tacticalRegime = document.getElementById("tacticalRegime");
+    const tacticalDesc = document.getElementById("tacticalDesc");
+    const tacticalTicketBody = document.getElementById("tacticalTicketBody");
+    const ticketSetup = document.getElementById("ticketSetup");
+    const ticketAction = document.getElementById("ticketAction");
+    const ticketEntry = document.getElementById("ticketEntry");
+    const ticketEntrySource = document.getElementById("ticketEntrySource");
+    const ticketSL = document.getElementById("ticketSL");
+    const ticketSLSource = document.getElementById("ticketSLSource");
+    const ticketTarget = document.getElementById("ticketTarget");
+    const ticketTargetSource = document.getElementById("ticketTargetSource");
+    const ticketReasoning = document.getElementById("ticketReasoning");
+    const orderBtn = document.getElementById("orderBtn");
+
+    // Initialize Page
+    window.addEventListener("DOMContentLoaded", () => {
+      connectWS();
+      
+      // Filter list search logic
+      searchBox.addEventListener("input", () => {
+        renderWatchlist();
+      });
+      
+      if (btnFilterConviction) {
+        btnFilterConviction.addEventListener("click", () => {
+          filterHighConviction = !filterHighConviction;
+          if (filterHighConviction) {
+            btnFilterConviction.style.background = "rgba(255,165,0,0.3)";
+            btnFilterConviction.style.color = "white";
+          } else {
+            btnFilterConviction.style.background = "rgba(255,165,0,0.1)";
+            btnFilterConviction.style.color = "orange";
+          }
+          renderWatchlist();
+        });
+      }
+      
+      // Go to paper trading panel on execute order
+      orderBtn.addEventListener("click", () => {
+        if (activeSymbol) {
+          window.location.href = `/paper?symbol=${activeSymbol}`;
+        }
+      });
+    });
+
+    // Connection helpers
+    function setConnStatus(status) {
+      if (status === "connected") {
+        connDot.className = "conn-dot on";
+        connText.textContent = "WS Streaming";
+      } else if (status === "reconnecting") {
+        connDot.className = "conn-dot warn";
+        connText.textContent = "WS Connecting...";
+      } else {
+        connDot.className = "conn-dot off";
+        connText.textContent = "WS Disconnected";
+      }
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connectWS();
+      }, reconnectDelay);
+      reconnectDelay = Math.min(reconnectDelay * 2, 60000);
+    }
+
+    // Connect WebSocket
+    function connectWS() {
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+      const proto = window.location.protocol === "https:" ? "wss" : "ws";
+      // Point directly to proxy /ws endpoint which proxies to ws_server.py
+      const url = proto + "://" + window.location.host + "/ws";
+      setConnStatus("reconnecting");
+
+      try {
+        ws = new WebSocket(url);
+      } catch (err) {
+        console.error("Init Error:", err);
+      }
+
+      ws.onopen = () => {
+        setConnStatus("connected");
+        reconnectDelay = 3000;
+        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      };
+
+      ws.onmessage = (evt) => {
+        let msg;
+        try { msg = JSON.parse(evt.data); } catch (e) { return; }
+        handleMessage(msg);
+      };
+
+      ws.onclose = () => {
+        setConnStatus("disconnected");
+        scheduleReconnect();
+      };
+    }
+
+    // Handle WebSocket message
+    function handleMessage(msg) {
+      if (msg.type === "init" && msg.stocks) {
+        stocks = msg.stocks;
+        for (const sym of Object.keys(stocks)) {
+          stocks[sym].symbol = sym;
+        }
+        
+        // Default select NIFTY if loaded, else first stock in list
+        const keys = Object.keys(stocks);
+        if (keys.length > 0) {
+          tickerCount.textContent = `${keys.length} Instruments`;
+          renderWatchlist();
+          
+          if (!activeSymbol) {
+            if (stocks["NIFTY"]) {
+              selectSymbol("NIFTY");
+            } else {
+              selectSymbol(keys[0]);
+            }
+          }
+        }
+      } 
+      else if (msg.type === "tick" && msg.d) {
+        let dirty = false;
+        
+        for (const [sym, tick] of Object.entries(msg.d)) {
+          if (stocks[sym]) {
+            const oldVal = stocks[sym].ltp;
+            stocks[sym] = { ...stocks[sym], ...tick };
+            stocks[sym].symbol = sym;
+            
+            // Re-render row cell if spot price changed
+            updateWatchlistRowTick(sym, stocks[sym], oldVal);
+            
+            // If the selected ticker is currently active, flash price
+            if (sym === activeSymbol) {
+              updateActiveLtp(stocks[sym], oldVal);
+            }
+          }
+        }
+      } 
+      else if (msg.type === "chain" && msg.d) {
+        for (const [sym, chainAnalytics] of Object.entries(msg.d)) {
+          if (stocks[sym]) {
+            stocks[sym] = { ...stocks[sym], ...chainAnalytics };
+            
+            // Update piggy bank cache with latest metrics
+            if (chainCache[sym]) {
+              Object.assign(chainCache[sym], chainAnalytics);
+            }
+            
+            // If current symbol received an options chain refresh, reload detail panel
+            if (sym === activeSymbol) {
+              fetchAdvancedChainData(activeSymbol);
+            }
+          }
+        }
+        renderWatchlist();
+      }
+    }
+
+    // Render left sidebar watchlists
+    function renderWatchlist() {
+      const filterText = searchBox.value.toUpperCase().trim();
+      watchlistContainer.innerHTML = "";
+      
+      const sorted = Object.values(stocks).sort((a, b) => a.symbol.localeCompare(b.symbol));
+      
+      sorted.forEach(s => {
+        if (filterText && !s.symbol.includes(filterText) && !(s.sector && s.sector.toUpperCase().includes(filterText))) {
+          return;
+        }
+        if (filterHighConviction && (s.score || 0) < 70) {
+          return;
+        }
+        
+        const row = document.createElement("div");
+        row.className = `stock-row ${s.symbol === activeSymbol ? 'active' : ''}`;
+        row.id = `row-${s.symbol}`;
+        row.addEventListener("click", () => selectSymbol(s.symbol));
+        
+        const netFlow = s.dnf_net_lakhs || 0;
+        const netFlowStr = netFlow >= 0 ? `+₹${netFlow.toFixed(1)}L` : `-₹${Math.abs(netFlow).toFixed(1)}L`;
+        const netFlowClass = netFlow > 0 ? "flow-pos" : (netFlow < 0 ? "flow-neg" : "flow-neutral");
+        
+        const change = s.chg_pct || 0;
+        const changeStr = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+        const changeClass = change >= 0 ? "flow-pos" : "flow-neg";
+        
+        const gexVal = s.gex_total_lakhs || 0;
+        // In writer-dominated markets, high Call OI (positive GEX mathematically here) means Call Resistance -> Dealer Short
+        const regimeClass = gexVal < 0 ? "badge-gex-pos" : "badge-gex-neg";
+        const regimeText = gexVal < 0 ? "Dealer Long" : "Dealer Short";
+        
+        row.innerHTML = `
+          <div class="stock-row-left">
+            <div class="stock-row-sym">${s.symbol}</div>
+            <div class="stock-row-sec">${s.sector || 'Option Index'}</div>
+          </div>
+          <div class="stock-row-mid">
+            <div class="stock-row-price" id="row-price-${s.symbol}">₹${(s.ltp || 0).toLocaleString('en-IN', {minimumFractionDigits: 1})}</div>
+            <div class="stock-row-chg ${changeClass}" id="row-chg-${s.symbol}">${changeStr}</div>
+          </div>
+          <div class="stock-row-right">
+            <div class="stock-row-flow ${netFlowClass}">${netFlowStr}</div>
+            <div class="stock-row-regime ${regimeClass}">${regimeText}</div>
+          </div>
+        `;
+        
+        watchlistContainer.appendChild(row);
+      });
+    }
+
+    // Flash row on live ticking
+    function updateWatchlistRowTick(sym, data, oldVal) {
+      const priceEl = document.getElementById(`row-price-${sym}`);
+      const chgEl = document.getElementById(`row-chg-${sym}`);
+      if (!priceEl || !chgEl) return;
+      
+      const newLtp = data.ltp || 0;
+      priceEl.textContent = `₹${newLtp.toLocaleString('en-IN', {minimumFractionDigits: 1})}`;
+      
+      const change = data.chg_pct || 0;
+      chgEl.textContent = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+      chgEl.className = `stock-row-chg ${change >= 0 ? 'flow-pos' : 'flow-neg'}`;
+      
+      if (newLtp > oldVal) {
+        priceEl.className = "stock-row-price flash-green";
+        setTimeout(() => priceEl.className = "stock-row-price", 600);
+      } else if (newLtp < oldVal) {
+        priceEl.className = "stock-row-price flash-red";
+        setTimeout(() => priceEl.className = "stock-row-price", 600);
+      }
+    }
+
+    // Select Active Stock
+    function selectSymbol(sym) {
+      activeSymbol = sym;
+      
+      // Update active styling in watchlist
+      document.querySelectorAll(".stock-row").forEach(r => r.classList.remove("active"));
+      const activeRow = document.getElementById(`row-${sym}`);
+      if (activeRow) activeRow.classList.add("active");
+      
+      // Render baseline details instantly
+      const s = stocks[sym];
+      tickerSymbol.textContent = s.symbol;
+      tickerName.textContent = s.name || s.sector || "Institutional Derivative Instrument";
+      tickerAvatar.textContent = s.symbol.substring(0, 2);
+      tickerLtp.textContent = `₹${(s.ltp || 0).toLocaleString('en-IN', {minimumFractionDigits: 1})}`;
+      metaLot.textContent = s.lot_size || s.lot || "--";
+      metaExpiry.textContent = s.expiry || "--";
+      
+      const change = s.chg_pct || 0;
+      tickerChgPct.textContent = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+      tickerChgPct.className = change >= 0 ? "flow-pos" : "flow-neg";
+      tickerChgIcon.textContent = change >= 0 ? "▲" : "▼";
+      tickerChgIcon.className = change >= 0 ? "flow-pos" : "flow-neg";
+      
+      // Render from piggy bank cache instantly if available to eliminate loading layout flashes
+      if (chainCache[sym]) {
+        renderAdvancedDetails(chainCache[sym]);
+      }
+      
+      // Query advanced data API to refresh cache and UI
+      fetchAdvancedChainData(sym);
+    }
+
+    function updateActiveLtp(data, oldVal) {
+      tickerLtp.textContent = `₹${(data.ltp || 0).toLocaleString('en-IN', {minimumFractionDigits: 1})}`;
+      const change = data.chg_pct || 0;
+      tickerChgPct.textContent = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+      tickerChgPct.className = change >= 0 ? "flow-pos" : "flow-neg";
+      tickerChgIcon.textContent = change >= 0 ? "▲" : "▼";
+      tickerChgIcon.className = change >= 0 ? "flow-pos" : "flow-neg";
+      
+      if (data.ltp > oldVal) {
+        tickerLtp.className = "ticker-ltp flash-green";
+        setTimeout(() => tickerLtp.className = "ticker-ltp", 600);
+      } else if (data.ltp < oldVal) {
+        tickerLtp.className = "ticker-ltp flash-red";
+        setTimeout(() => tickerLtp.className = "ticker-ltp", 600);
+      }
+      
+      // Update our piggy bank cache and dynamically re-render panels in real-time
+      const cached = chainCache[activeSymbol];
+      if (cached && data.ltp) {
+        cached.spot_ltp = data.ltp;
+        if (data.chg_pct !== undefined) cached.chg_pct = data.chg_pct;
+        
+        // Dynamically re-evaluate ATM strike inside strikes
+        if (cached.strikes && cached.strikes.length > 0) {
+          let closestStrike = null;
+          let minDiff = Infinity;
+          cached.strikes.forEach(s => {
+            const diff = Math.abs(s.strike - data.ltp);
+            if (diff < minDiff) {
+              minDiff = diff;
+              closestStrike = s.strike;
+            }
+          });
+          
+          cached.strikes.forEach(s => {
+            s.is_atm = (s.strike === closestStrike);
+          });
+        }
+        
+        // Dynamic re-render without any network requests
+        renderAdvancedDetails(cached);
+      }
+    }
+
+    // Fetch Advanced Options Chain & Volume Profile
+    async function fetchAdvancedChainData(sym) {
+      try {
+        const resp = await fetch(`/api/advanced-chain?symbol=${sym}`);
+        if (!resp.ok) {
+          throw new Error("Endpoint failed");
+        }
+        const data = await resp.json();
+        chainCache[sym] = data; // store in our piggy bank!
+        if (sym === activeSymbol) {
+          renderAdvancedDetails(data);
+        }
+      } catch (e) {
+        console.error("Advanced chain fetch failed:", e);
+        strikeGridBody.innerHTML = `<tr><td colspan="13" style="padding: 40px; color: var(--red);">Error loading option microstructure data for ${sym}</td></tr>`;
+      }
+    }
+
+    // Render detailed panels
+    function renderAdvancedDetails(data) {
+      // 1. Render Radial Score & layers
+      const score = data.strikes.length > 0 ? computeThreeLayerScore(data) : 0;
+      scoreVal.textContent = score;
+      
+      // Radial circle progress calculation (circumference is 283)
+      const offset = 283 - (283 * score) / 100;
+      radialFill.style.strokeDashoffset = offset;
+      
+      // Score theme coloring
+      if (score >= 70) {
+        radialFill.style.stroke = "var(--green)";
+        scoreConviction.className = "score-conviction-pill badge-gex-pos";
+        scoreConviction.textContent = "High Conviction Buy";
+      } else if (score <= 35) {
+        radialFill.style.stroke = "var(--red)";
+        scoreConviction.className = "score-conviction-pill badge-gex-neg";
+        scoreConviction.textContent = "High Conviction Sell";
+      } else {
+        radialFill.style.stroke = "var(--blue)";
+        scoreConviction.className = "score-conviction-pill";
+        scoreConviction.style.background = "var(--blue-soft)";
+        scoreConviction.style.color = "var(--blue)";
+        scoreConviction.style.border = "1px solid rgba(59,130,246,0.2)";
+        scoreConviction.textContent = "Neutral / Range";
+      }
+
+      // Populate 3 layers status texts
+      const isGexPos = data.gex_total_lakhs >= 0;
+      // In Indian markets: Pos Gamma = High Call OI (Resistance -> Bearish/Red). Neg Gamma = High Put OI (Support -> Bullish/Green)
+      layerRegime.className = `layer-status ${isGexPos ? 'flow-neg' : 'flow-pos'}`;
+      layerRegime.innerHTML = `
+        <span>${isGexPos ? 'Call Resistance' : 'Put Support'}</span>
+        <span class="layer-score-tag">${isGexPos ? 'Regime Dampened' : 'Regime Squeeze'}</span>
+      `;
+      
+      const isFlowBull = data.dnf_net_lakhs >= 0 && data.skew_25d <= 0;
+      layerFlow.className = `layer-status ${isFlowBull ? 'flow-pos' : 'flow-neg'}`;
+      layerFlow.innerHTML = `
+        <span>${data.dnf_net_lakhs >= 0 ? 'Buy Flow' : 'Sell Flow'}</span>
+        <span class="layer-score-tag" style="font-size:9px;">Skew: ${data.skew_25d_pct.toFixed(1)}%</span>
+      `;
+      
+      // Technical break status
+      let techStatus = "In Range";
+      let techClass = "flow-neutral";
+      if (data.volume_profile && data.volume_profile.vah) {
+        const spot = data.spot_ltp;
+        if (spot > data.volume_profile.vah) {
+          techStatus = "Bull Breakout";
+          techClass = "flow-pos";
+        } else if (spot < data.volume_profile.val) {
+          techStatus = "Bear Breakdown";
+          techClass = "flow-neg";
+        }
+      }
+      layerBoundary.className = `layer-status ${techClass}`;
+      layerBoundary.innerHTML = `<span>${techStatus}</span>`;
+
+      // 2. Render Volume Profile SVG Chart
+      renderVolumeProfile(data);
+
+      // 3. Render Option strike table grid
+      renderStrikeGrid(data);
+
+      // 4. Generate tactical orders recommendations
+      generateTacticalTradeRecommendation(data, score);
+    }
+
+    // Client-side 3-Layer Score Calculator
+    function computeThreeLayerScore(data) {
+      let score = 50; // start at neutral baseline
+      
+      // Layer 1: GEX (Gamma Regime)
+      const gex = data.gex_total_lakhs || 0;
+      if (gex < -100) {
+        // Negative mathematically means Put OI dominates -> Strong Support -> Bullish
+        score += 10; 
+      } else if (gex > 100) {
+        // Positive mathematically means Call OI dominates -> Strong Resistance -> Bearish
+        score -= 5; 
+      }
+      
+      // Layer 2: Flow (DNF INR & Skew Direction)
+      const dnf = data.dnf_net_lakhs || 0;
+      if (dnf > 200) score += 15;
+      else if (dnf > 50) score += 5;
+      else if (dnf < -200) score -= 15;
+      else if (dnf < -50) score -= 5;
+      
+      const skew = data.skew_25d_pct || 0;
+      if (skew < -5) score += 10; // Call skew (FOMO chase)
+      else if (skew > 5) score -= 10; // Put skew (Panic downside protection)
+      
+      // Layer 3: Tech breakout vs. Value Area
+      if (data.volume_profile && data.volume_profile.vah) {
+        const spot = data.spot_ltp;
+        const vah = data.volume_profile.vah;
+        const val = data.volume_profile.val;
+        
+        if (spot > vah) {
+          score += 15; // Bullish breakout
+        } else if (spot < val) {
+          score -= 15; // Bearish breakdown
+        } else {
+          // Inside value area: drifts towards POC
+          const poc = data.volume_profile.poc;
+          if (spot > poc && dnf > 0) score += 5;
+          if (spot < poc && dnf < 0) score -= 5;
+        }
+      }
+      
+      return Math.min(100, Math.max(0, Math.round(score)));
+    }
+
+    // Render Volume Profile Chart overlay
+    function renderVolumeProfile(data) {
+      profileChartSvg.innerHTML = "";
+      profileOverlayLevels.innerHTML = "";
+      
+      const vp = data.volume_profile;
+      if (!vp || !vp.bins || vp.bins.length === 0) {
+        profilePriceLines.style.display = "none";
+        return;
+      }
+      
+      profilePriceLines.style.display = "flex";
+      
+      const bins = vp.bins;
+      const spot = data.spot_ltp;
+      
+      // Fetch prices bounding
+      const prices = bins.map(b => b.price);
+      const minP = Math.min(...prices);
+      const maxP = Math.max(...prices);
+      
+      profilePriceMax.textContent = `₹${maxP.toFixed(1)}`;
+      profilePriceMid.textContent = `₹${((maxP + minP) / 2.0).toFixed(1)}`;
+      profilePriceMin.textContent = `₹${minP.toFixed(1)}`;
+      
+      // Max volume for scaling bars horizontally
+      const maxVol = Math.max(...bins.map(b => b.volume));
+      
+      // Generate vertical layout coordinate maps
+      // Price maps to vertical axis (Y = height to 0)
+      const chartHeight = 250;
+      
+      function getPriceY(price) {
+        const pct = (price - minP) / (maxP - minP);
+        // SVG Y coordinates start at top (0) to bottom (height)
+        return chartHeight - (pct * (chartHeight - 20)) - 10;
+      }
+
+      // Draw horizontal binned bars as SVG paths
+      let pathD = "";
+      bins.forEach(b => {
+        const y = getPriceY(b.price);
+        const barWidthPct = (b.volume / maxVol) * 45; // limit bar lengths to 45% of width
+        
+        // Render bar centered around y point
+        const thickness = Math.max(2, (chartHeight / bins.length) - 1);
+        
+        // Check if this bin is inside the Value Area (VAH/VAL)
+        const isInsideVA = b.price >= vp.val && b.price <= vp.vah;
+        const color = isInsideVA ? "hsla(215, 100%, 55%, 0.15)" : "rgba(255, 255, 255, 0.03)";
+        const borderCol = isInsideVA ? "hsla(215, 100%, 55%, 0.4)" : "rgba(255, 255, 255, 0.08)";
+        
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", "0");
+        rect.setAttribute("y", (y - thickness/2).toFixed(1));
+        rect.setAttribute("width", `${barWidthPct}%`);
+        rect.setAttribute("height", thickness.toFixed(1));
+        rect.setAttribute("fill", color);
+        rect.setAttribute("stroke", borderCol);
+        rect.setAttribute("stroke-width", "0.5");
+        
+        profileChartSvg.appendChild(rect);
+      });
+
+      // Helper to add horizontal overlay lines
+      function addLevelMarker(price, className, labelText) {
+        if (price < minP || price > maxP) return;
+        const y = getPriceY(price);
+        
+        const marker = document.createElement("div");
+        marker.className = `chart-horizontal-marker ${className}`;
+        marker.style.top = `${y}px`;
+        marker.innerHTML = `<span class="marker-label">${labelText} ₹${price.toFixed(1)}</span>`;
+        
+        profileOverlayLevels.appendChild(marker);
+      }
+
+      // Overlay POC, VAH, VAL, Zero-Gamma, and Spot price lines!
+      addLevelMarker(vp.vah, "marker-vah", "VAH");
+      addLevelMarker(vp.val, "marker-val", "VAL");
+      addLevelMarker(vp.poc, "marker-poc", "POC");
+      
+      if (data.zero_gamma) {
+        addLevelMarker(data.zero_gamma, "marker-zero-gamma", "Zero Gamma");
+      }
+      addLevelMarker(spot, "marker-spot", "Spot");
+    }
+
+    // Render strike table grid
+    function renderStrikeGrid(data) {
+      strikeGridBody.innerHTML = "";
+      
+      if (data.strikes.length === 0) {
+        strikeGridBody.innerHTML = `<tr><td colspan="13" style="padding: 40px; color: var(--text-dim);">No strikes returned inside option chain</td></tr>`;
+        return;
+      }
+      
+      // Limit to 15 strikes centered around ATM to prevent list overflow scroll fatigue
+      const atmIndex = data.strikes.findIndex(s => s.is_atm);
+      let renderList = data.strikes;
+      if (atmIndex !== -1 && data.strikes.length > 15) {
+        const start = Math.max(0, atmIndex - 7);
+        const end = Math.min(data.strikes.length - 1, atmIndex + 7);
+        renderList = data.strikes.slice(start, end + 1);
+      }
+      
+      renderList.forEach(s => {
+        const row = document.createElement("tr");
+        if (s.is_atm) row.className = "atm-row";
+        
+        // Colors & labels
+        const ceDnf = s.ce_dnf_lakhs || 0;
+        const ceDnfStr = ceDnf > 0 ? `+${ceDnf.toFixed(1)}` : (ceDnf < 0 ? `${ceDnf.toFixed(1)}` : `0.0`);
+        const ceDnfClass = ceDnf > 0 ? "flow-pos" : (ceDnf < 0 ? "flow-neg" : "flow-neutral");
+        
+        const peDnf = s.pe_dnf_lakhs || 0;
+        const peDnfStr = peDnf > 0 ? `+${peDnf.toFixed(1)}` : (peDnf < 0 ? `${peDnf.toFixed(1)}` : `0.0`);
+        const peDnfClass = peDnf > 0 ? "flow-pos" : (peDnf < 0 ? "flow-neg" : "flow-neutral");
+        
+        const ceGex = s.ce_gex_lakhs || 0;
+        const peGex = s.pe_gex_lakhs || 0;
+        
+        row.innerHTML = `
+          <td class="text-left ${ceDnfClass}">${ceDnfStr}</td>
+          <td class="${ceGex >= 0 ? 'flow-pos' : 'flow-neg'}">${ceGex.toFixed(1)}</td>
+          <td>${s.ce_delta.toFixed(2)}</td>
+          <td>${s.ce_gamma.toFixed(5)}</td>
+          <td>${s.ce_iv.toFixed(1)}%</td>
+          <td>${(s.ce_oi).toLocaleString('en-IN')}</td>
+          <td class="strike-cell">${s.strike}</td>
+          <td>${(s.pe_oi).toLocaleString('en-IN')}</td>
+          <td>${s.pe_iv.toFixed(1)}%</td>
+          <td>${s.pe_gamma.toFixed(5)}</td>
+          <td>${s.pe_delta.toFixed(2)}</td>
+          <td class="${peGex >= 0 ? 'flow-pos' : 'flow-neg'}">${peGex.toFixed(1)}</td>
+          <td class="text-right ${peDnfClass}">${peDnfStr}</td>
+        `;
+        
+        strikeGridBody.appendChild(row);
+      });
+    }
+
+    // Trade recommendations engine
+    function generateTacticalTradeRecommendation(data, score) {
+      tacticalTicketBody.style.display = "flex";
+      
+      const spot = data.spot_ltp;
+      const gex = data.gex_total_lakhs;
+      const dnf = data.dnf_net_lakhs;
+      const vp = data.volume_profile;
+      
+      // Determine the market microstructure setup
+      if (gex < -100 && score <= 35) {
+        // Negative Gamma momentum breakdowns (Gamma Squeezes / Crashes)
+        tacticalIcon.textContent = "🔥";
+        tacticalIcon.style.filter = "drop-shadow(0 0 12px var(--red))";
+        tacticalRegime.textContent = "NEGATIVE GAMMA REGIME";
+        tacticalRegime.style.color = "var(--red)";
+        tacticalDesc.textContent = "Market is in negative gamma zone. Volatility is self-amplifying. Massive slippages and rapid expansion breakdown are highly probable.";
+        
+        ticketSetup.textContent = "Volatility Breakout (Bearish Gamma Squeeze)";
+        ticketSetup.style.color = "var(--red)";
+        ticketAction.textContent = "BUY OTM Put Options / SHORT Futures";
+        
+        // Entry at breakdown VAL (or spot)
+        const entryVal = vp && vp.val ? vp.val : spot;
+        ticketEntry.textContent = `₹${entryVal.toFixed(1)}`;
+        ticketEntrySource.textContent = "Value Area Low (VAL)";
+        
+        // SL inside value area (at POC or midway)
+        const slVal = vp && vp.poc ? vp.poc : spot * 1.015;
+        ticketSL.textContent = `₹${slVal.toFixed(1)}`;
+        ticketSLSource.textContent = "Point of Control (POC)";
+        
+        // Target next major downside target
+        const targetVal = entryVal * 0.965;
+        ticketTarget.textContent = `₹${targetVal.toFixed(1)}`;
+        ticketTargetSource.textContent = "-3.5% Liquidity Boundary";
+        
+        ticketReasoning.textContent = `Institutional distribution (-₹${Math.abs(dnf).toFixed(1)}L Net Flow) combined with a net short dealer gamma positioning (GEX: ₹${gex.toFixed(1)}L) creates structural short squeeze acceleration. A break below VAL (₹${entryVal}) triggers dealer re-hedging panic.`;
+      } 
+      else if (gex < -100 && score >= 70) {
+        // Bullish Gamma Squeeze
+        tacticalIcon.textContent = "🚀";
+        tacticalIcon.style.filter = "drop-shadow(0 0 12px var(--green))";
+        tacticalRegime.textContent = "GAMMA SQUEEZE (BULLISH)";
+        tacticalRegime.style.color = "var(--green)";
+        tacticalDesc.textContent = "Market in highly volatile short GEX territory. Buyers actively bidding up calls, forcing dealers to buy underlying stock to hedge.";
+        
+        ticketSetup.textContent = "Gamma Squeeze Momentum Breakout";
+        ticketSetup.style.color = "var(--green)";
+        ticketAction.textContent = "BUY OTM Call Options / LONG Futures";
+        
+        const entryVal = vp && vp.vah ? vp.vah : spot;
+        ticketEntry.textContent = `₹${entryVal.toFixed(1)}`;
+        ticketEntrySource.textContent = "Value Area High (VAH)";
+        
+        const slVal = vp && vp.poc ? vp.poc : spot * 0.985;
+        ticketSL.textContent = `₹${slVal.toFixed(1)}`;
+        ticketSLSource.textContent = "Point of Control (POC)";
+        
+        const targetVal = entryVal * 1.04;
+        ticketTarget.textContent = `₹${targetVal.toFixed(1)}`;
+        ticketTargetSource.textContent = "+4.0% Squeeze Target";
+        
+        ticketReasoning.textContent = `Aggressive call bidding (+₹${dnf.toFixed(1)}L DNF) combined with short dealer gamma positioning creates delta-hedging panic. Spot breaking VAH (₹${entryVal}) forces dealers to buy shares rapidly, creating a vertical squeeze.`;
+      }
+      else if (gex > 100 && score >= 45 && score <= 65) {
+        // Positive Gamma range trading (Premium decay)
+        tacticalIcon.textContent = "⏳";
+        tacticalIcon.style.filter = "drop-shadow(0 0 12px var(--gold))";
+        tacticalRegime.textContent = "POSITIVE GAMMA REGIME";
+        tacticalRegime.style.color = "var(--gold)";
+        tacticalDesc.textContent = "Dealers are net long options. Volatility is dampened and mean-reverting. Spot is pinned inside the Value Area bounds.";
+        
+        ticketSetup.textContent = "Premium Decay Range Trading";
+        ticketSetup.style.color = "var(--gold)";
+        ticketAction.textContent = "WRITE Options / Sell Iron Condors";
+        
+        const entryVal = vp && vp.poc ? vp.poc : spot;
+        ticketEntry.textContent = `₹${entryVal.toFixed(1)}`;
+        ticketEntrySource.textContent = "Point of Control (POC)";
+        
+        // Stop losses are outer bounds of Value Area + buffer
+        const vah = vp && vp.vah ? vp.vah : spot * 1.015;
+        const val = vp && vp.val ? vp.val : spot * 0.985;
+        ticketSL.textContent = `₹${(vah * 1.005).toFixed(1)} / ₹${(val * 0.995).toFixed(1)}`;
+        ticketSLSource.textContent = "VAH/VAL Outer Limits";
+        
+        ticketTarget.textContent = "Full Premium Collection";
+        ticketTargetSource.textContent = "Theta Decay Pin";
+        
+        ticketReasoning.textContent = `High positive dealer gamma (GEX: ₹${gex.toFixed(1)}L) pins spot price within Value Area bounds (₹${val.toFixed(0)} - ₹${vah.toFixed(0)}). Option decay is extremely favorable. Best played by writing outer wings and capturing theta.`;
+      }
+      else {
+        // Normal state or minor trends
+        tacticalIcon.textContent = "⚖️";
+        tacticalIcon.style.filter = "none";
+        tacticalRegime.textContent = "STABLE DISPLACEMENT REGIME";
+        tacticalRegime.style.color = "var(--text-bright)";
+        tacticalDesc.textContent = "Market is in standard liquidity conditions. Normal trends are active without systemic volatility stress.";
+        
+        ticketSetup.textContent = "Standard Technical Trend Follow";
+        ticketSetup.style.color = "var(--blue)";
+        ticketAction.textContent = score > 50 ? "BULLISH Directional Trade" : "BEARISH Directional Trade";
+        
+        ticketEntry.textContent = `₹${spot.toFixed(1)}`;
+        ticketEntrySource.textContent = "Market Spot Price";
+        
+        const slVal = score > 50 ? spot * 0.99 : spot * 1.01;
+        ticketSL.textContent = `₹${slVal.toFixed(1)}`;
+        ticketSLSource.textContent = "1.0% Technical Stop";
+        
+        const targetVal = score > 50 ? spot * 1.025 : spot * 0.975;
+        ticketTarget.textContent = `₹${targetVal.toFixed(1)}`;
+        ticketTargetSource.textContent = "2.5% Target Expansion";
+        
+        ticketReasoning.textContent = `Normal liquidity regime. Delta Notional Flow is moderately skewed (₹${dnf.toFixed(1)}L net flow). Follow technical momentum indicators towards structural liquidity levels.`;
+      }
+    }
+  </script>
+  <!-- Playbook Modal -->
+  <div id="playbookModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; max-width:600px; width:90%; padding:24px; box-shadow:0 10px 40px rgba(0,0,0,0.5); position:relative;">
+      <button onclick="closePlaybookModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:var(--text-dim); font-size:20px; cursor:pointer;">&times;</button>
+      <h2 style="margin-top:0; color:var(--text); font-size:20px;">📘 Microstructure Playbook</h2>
+      <p style="color:var(--text-dim); font-size:14px; margin-bottom:20px;">Use the following rules to execute trades based on the Advanced Desk signals.</p>
+
+      <div style="background:var(--surface); border:1px solid rgba(38,166,154,0.3); border-radius:8px; padding:16px; margin-bottom:16px;">
+        <h3 style="margin-top:0; color:var(--green); font-size:16px; margin-bottom:8px;">🔥 Playbook 1: Gamma Squeeze (Momentum)</h3>
+        <ul style="color:var(--text); font-size:14px; padding-left:20px; margin:0; line-height:1.6;">
+          <li><strong>Setup:</strong> Negative Net GEX (<b>Dealer Short</b>) + Delta Flow &gt; +₹50L.</li>
+          <li><strong>Logic:</strong> Dealers are short options and must buy stock as it rises to hedge, amplifying the upside.</li>
+          <li><strong>Action:</strong> Wait for Spot Price &gt; VAH. Buy slightly OTM Calls. Expect explosive, fast moves.</li>
+        </ul>
+      </div>
+
+      <div style="background:var(--surface); border:1px solid rgba(255,152,0,0.3); border-radius:8px; padding:16px; margin-bottom:16px;">
+        <h3 style="margin-top:0; color:var(--orange); font-size:16px; margin-bottom:8px;">⚖️ Playbook 2: Mean Reversion (Range Trading)</h3>
+        <ul style="color:var(--text); font-size:14px; padding-left:20px; margin:0; line-height:1.6;">
+          <li><strong>Setup:</strong> Positive Net GEX (<b>Dealer Long</b>) + Spot Price is between VAH and VAL.</li>
+          <li><strong>Logic:</strong> Dealers are long options and must sell rips/buy dips to hedge, compressing volatility.</li>
+          <li><strong>Action:</strong> Fade the extremes. Sell Calls if price stalls at VAH. Sell Puts if price holds at VAL. Target the POC.</li>
+        </ul>
+      </div>
+
+      <div style="background:var(--surface); border:1px solid rgba(171,71,188,0.3); border-radius:8px; padding:16px;">
+        <h3 style="margin-top:0; color:var(--purple); font-size:16px; margin-bottom:8px;">🧠 Playbook 3: Smart Money Flow</h3>
+        <ul style="color:var(--text); font-size:14px; padding-left:20px; margin:0; line-height:1.6;">
+          <li><strong>Setup:</strong> Skew is heavily negative (&lt;-2%) but stock is dropping, OR Skew is heavily positive (&gt;2%) but stock is rising.</li>
+          <li><strong>Logic:</strong> Retail is moving the stock price, but institutional money is buying the opposite direction options (Smart Flow).</li>
+          <li><strong>Action:</strong> Follow the Delta Flow. Never fight a strong +₹100L or -₹100L DNF regardless of chart patterns.</li>
+        </ul>
+      </div>
+  </div>
+  <script>
+    function openPlaybookModal() { document.getElementById('playbookModal').style.display = 'flex'; }
+    function closePlaybookModal() { document.getElementById('playbookModal').style.display = 'none'; }
+    
+    async function exportTvScript() {
+      try {
+        const response = await fetch('/api/tv-script');
+        if (!response.ok) throw new Error("Failed to generate script");
+        const scriptText = await response.text();
+        await navigator.clipboard.writeText(scriptText);
+        alert("✅ TradingView Pine Script copied to clipboard!\\n\\nOpen TradingView, go to Pine Editor, paste the code, and click 'Add to Chart'.");
+      } catch (err) {
+        console.error("Export TV script error", err);
+        alert("❌ Error exporting TradingView script. Check console.");
+      }
+    }
+  </script>
+
+</body>
+</html>

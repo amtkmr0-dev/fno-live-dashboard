@@ -1,698 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="bloomberg-pro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quantra Terminal &mdash; F&amp;O Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style id="theme-css">
-/* ============================================================
-   Quantra Terminal - Shared Design System
-   Theme: Obsidian Premium — modern fintech dark
-   Density: Balanced (B)
-   ============================================================ */
-
-/* --- Design Tokens --- */
-:root {
-  /* Backgrounds */
-  --bg:            #09090b;
-  --surface:       #18181b;
-  --surface-alt:   #1c1c20;
-  --surface-hover: #27272a;
-  --surface-active:#2e2e33;
-  --bg-elevated:   #27272a;
-
-  /* Borders */
-  --border:        #2e2e35;
-  --border-light:  #3f3f46;
-  --border-focus:  #3b82f6;
-
-  /* Text */
-  --text:          #e4e4e7;
-  --text-dim:      #71717a;
-  --text-vdim:     #52525b;
-  --text-bright:   #fafafa;
-
-  /* Accent */
-  --blue:          #3b82f6;
-  --blue-soft:     rgba(59,130,246,0.12);
-  --blue-hover:    #2563eb;
-
-  /* Semantic Colors */
-  --green:         #10b981;
-  --green-soft:    rgba(16,185,129,0.12);
-  --green-text:    #34d399;
-  --red:           #ef4444;
-  --red-soft:      rgba(239,68,68,0.12);
-  --red-text:      #f87171;
-  --gold:          #f59e0b;
-  --gold-soft:     rgba(245,158,11,0.1);
-  --orange:        #f97316;
-  --orange-soft:   rgba(249,115,22,0.1);
-  --purple:        #a855f7;
-  --purple-soft:   rgba(168,85,247,0.1);
-  --cyan:          #06b6d4;
-  --cyan-soft:     rgba(6,182,212,0.1);
-  --yellow:        #eab308;
-
-  /* Layout */
-  --nav-height:    48px;
-  --radius-sm:     4px;
-  --radius-md:     8px;
-  --radius-lg:     12px;
-  --radius-xl:     16px;
-  --shadow-sm:     0 1px 4px rgba(0,0,0,0.6);
-  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
-  --shadow-lg:     0 8px 32px rgba(0,0,0,0.8);
-
-  /* Typography */
-  --font-sans:     'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono:     'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
-  --fs-xs:         11px;
-  --fs-sm:         12px;
-  --fs-base:       13px;
-  --fs-md:         14px;
-  --fs-lg:         16px;
-  --fs-xl:         20px;
-  --fs-2xl:        24px;
-  --fs-3xl:        32px;
-  --fw-normal:     400;
-  --fw-medium:     500;
-  --fw-semibold:   600;
-  --fw-bold:       700;
-}
-
-/* --- Reset --- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-body {
-  font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--text);
-  font-size: var(--fs-base);
-  line-height: 1.5;
-  min-height: 100vh;
-}
-a { color: var(--blue); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* --- Scrollbar --- */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; border-radius: 4px; }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-vdim); }
-
-/* ============================================================
-   NAVIGATION BAR
-   ============================================================ */
-.q-nav {
-  display: flex;
-  align-items: center;
-  height: var(--nav-height);
-  background: linear-gradient(180deg, rgba(24,24,27,0.95) 0%, rgba(18,18,20,0.98) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(59,130,246,0.08), 0 4px 16px rgba(0,0,0,0.3);
-  padding: 0 16px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  flex-shrink: 0;
-  gap: 16px;
-}
-.q-nav::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(6,182,212,0.2) 70%, transparent 100%);
-}
-.q-nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-lg);
-  color: var(--text-bright);
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  text-decoration: none;
-}
-.q-nav-brand:hover { text-decoration: none; }
-.q-nav-brand img, .q-nav-brand .brand-png {
-  display: none; /* Hide old PNG logo */
-}
-.q-nav-brand .brand-icon {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, var(--blue), #06b6d4);
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 800;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
-}
-.q-nav-brand .brand-text {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 2.5px;
-  background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.q-nav-brand .brand-tag {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  opacity: 0.6;
-  margin-left: -2px;
-}
-.q-nav-links {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex: 1;
-  justify-content: center;
-}
-.q-nav-links a {
-  padding: 5px 13px;
-  border-radius: 999px;
-  color: var(--text-dim);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  text-decoration: none;
-}
-.q-nav-links a:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  text-decoration: none;
-}
-.q-nav-links a.active {
-  color: var(--text-bright);
-  background: var(--blue-soft);
-  box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.1);
-}
-.q-nav-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--fs-xs);
-  color: var(--text-dim);
-  white-space: nowrap;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-/* Connection indicators */
-.conn-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.conn-dot.on  { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
-.conn-dot.off { background: var(--red); }
-.conn-dot.reconn { background: var(--orange); }
-
-.pulse-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: q-pulse 2s infinite;
-  flex-shrink: 0;
-}
-.pulse-dot.off  { background: var(--red); animation: none; }
-.pulse-dot.warn { background: var(--orange); animation: q-pulse 1s infinite; }
-
-@keyframes q-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
-  50%      { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16,185,129,0); }
-}
-
-/* ============================================================
-   COMMON COMPONENTS
-   ============================================================ */
-
-/* --- Cards --- */
-.q-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.q-card:hover {
-  border-color: var(--border-light);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), var(--shadow-sm);
-}
-.q-card-header {
-  font-size: var(--fs-md);
-  font-weight: var(--fw-semibold);
-  color: var(--text-bright);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* --- Stat Cards (summary bars) --- */
-.q-stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.q-stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  transition: border-color 0.15s;
-}
-.q-stat-card:hover { border-color: var(--border-light); }
-.q-stat-label {
-  font-size: var(--fs-xs);
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-.q-stat-value {
-  font-size: var(--fs-xl);
-  font-weight: var(--fw-bold);
-  color: var(--text-bright);
-  line-height: 1.2;
-}
-.q-stat-sub {
-  font-size: var(--fs-xs);
-  color: var(--text-dim);
-  margin-top: 2px;
-}
-
-/* --- Buttons --- */
-.q-btn {
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+<style>
+/* --- Moneyness Pill Columns --- */
+.moneyness-pill-container {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
-  white-space: nowrap;
-  font-family: inherit;
-}
-.q-btn-primary {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue);
-  box-shadow: 0 1px 8px rgba(59,130,246,0.35);
-}
-.q-btn-primary:hover {
-  background: var(--blue-hover);
-  box-shadow: 0 2px 12px rgba(59,130,246,0.45);
-}
-.q-btn-ghost {
-  background: transparent;
-  color: var(--text-dim);
-  border-color: var(--border);
-}
-.q-btn-ghost:hover { color: var(--text); border-color: var(--border-light); }
-.q-btn-ghost.active { color: var(--blue); border-color: var(--blue); background: var(--blue-soft); }
-.q-btn-sm { padding: 4px 10px; font-size: var(--fs-xs); }
-.q-btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
-.q-btn-danger:hover { background: #dc2626; }
-.q-btn-success { background: var(--green); color: #fff; border-color: var(--green); }
-.q-btn-success:hover { background: #059669; }
-
-/* --- Inputs --- */
-.q-input {
-  background: var(--bg);
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 7px 10px;
-  color: var(--text);
-  font-size: var(--fs-sm);
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.q-input:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-}
-.q-input::placeholder { color: var(--text-vdim); }
-
-.q-select {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 6px 10px;
-  color: var(--text);
-  font-size: var(--fs-sm);
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.q-select:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-}
-
-/* --- Tables --- */
-.q-table-wrap {
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-}
-.q-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--fs-sm);
-}
-.q-table thead th {
-  position: sticky;
-  top: 0;
-  background: linear-gradient(180deg, var(--bg-elevated) 0%, rgba(39,39,42,0.92) 100%);
-  color: var(--text-dim);
-  font-weight: var(--fw-semibold);
-  font-size: var(--fs-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 8px 10px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
-  backdrop-filter: blur(4px);
-}
-.q-table thead th:hover { color: var(--text); }
-.q-table thead th.sorted { color: var(--blue); }
-.q-table tbody tr {
-  border-bottom: 1px solid rgba(46,46,53,0.6);
-  transition: background 0.1s;
-}
-.q-table tbody tr:hover { background: rgba(39,39,42,0.6); }
-.q-table tbody td {
-  padding: 7px 10px;
-  white-space: nowrap;
+  border-radius: 4px;
+  padding: 3.5px 5px;
   vertical-align: middle;
 }
-
-/* --- Badges / Pills --- */
-.q-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 9px;
-  border-radius: 999px;
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  line-height: 1.4;
+.mon-seg {
+  display: inline-block;
+  width: 14px;
+  height: 8px;
+  border-radius: 1.5px;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
-.q-badge-green  { background: var(--green-soft); color: var(--green-text); }
-.q-badge-red    { background: var(--red-soft); color: var(--red-text); }
-.q-badge-blue   { background: var(--blue-soft); color: var(--blue); }
-.q-badge-gold   { background: var(--gold-soft); color: var(--gold); }
-.q-badge-orange { background: var(--orange-soft); color: var(--orange); }
-.q-badge-purple { background: var(--purple-soft); color: var(--purple); }
-.q-badge-cyan   { background: var(--cyan-soft); color: var(--cyan); }
-.q-badge-dim    { background: rgba(113,113,122,0.1); color: var(--text-dim); }
-
-/* --- Toast --- */
-.q-toast {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 9999;
-  padding: 10px 18px;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  color: var(--text-bright);
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-20px);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s ease;
+.mon-seg:hover {
+  filter: brightness(1.3) saturate(1.2);
+  box-shadow: 0 0 6px rgba(255,255,255,0.4);
 }
-.q-toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
-.q-toast.success { border-left: 3px solid var(--green); }
-.q-toast.error   { border-left: 3px solid var(--red); }
-.q-toast.warning { border-left: 3px solid var(--orange); }
-.q-toast.info    { border-left: 3px solid var(--blue); }
-
-/* --- Loading Overlay --- */
-.q-loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, var(--bg) 0%, #0d0d10 50%, var(--bg) 100%);
-  z-index: 9998;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  transition: opacity 0.4s ease;
-}
-.q-loading-overlay.hide {
-  opacity: 0;
-  pointer-events: none;
-  display: none;
-}
-.q-spinner {
-  width: 40px; height: 40px;
-  border: 2px solid var(--border-light);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: q-spin 0.75s linear infinite;
-  box-shadow: 0 0 16px rgba(59,130,246,0.2);
-}
-@keyframes q-spin { to { transform: rotate(360deg); } }
-.q-loading-text {
-  font-size: var(--fs-sm);
+.mon-pill-empty {
   color: var(--text-dim);
-  letter-spacing: 0.3px;
+  font-size: 11px;
+  text-align: center;
+  font-family: monospace;
 }
 
-/* --- Modal / Overlay --- */
-.q-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(4px);
-  z-index: 500;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.q-modal-overlay.open { display: flex; }
-.q-modal {
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  max-width: 480px;
-  width: 90%;
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.04) inset;
-}
-.q-modal-title {
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-bold);
-  color: var(--text-bright);
-  margin-bottom: 12px;
-}
-
-/* --- Footer --- */
-.q-footer {
-  height: 28px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  font-size: var(--fs-xs);
-  color: var(--text-vdim);
-  flex-shrink: 0;
-}
-
-/* ============================================================
-   UTILITY CLASSES
-   ============================================================ */
-.text-green  { color: var(--green) !important; }
-.text-red    { color: var(--red) !important; }
-.text-blue   { color: var(--blue) !important; }
-.text-gold   { color: var(--gold) !important; }
-.text-orange { color: var(--orange) !important; }
-.text-purple { color: var(--purple) !important; }
-.text-cyan   { color: var(--cyan) !important; }
-.text-dim    { color: var(--text-dim) !important; }
-.text-vdim   { color: var(--text-vdim) !important; }
-.text-bright { color: var(--text-bright) !important; }
-
-.bg-green-soft  { background: var(--green-soft) !important; }
-.bg-red-soft    { background: var(--red-soft) !important; }
-
-.fw-medium   { font-weight: var(--fw-medium) !important; }
-.fw-semibold { font-weight: var(--fw-semibold) !important; }
-.fw-bold     { font-weight: var(--fw-bold) !important; }
-
-.fs-xs  { font-size: var(--fs-xs) !important; }
-.fs-sm  { font-size: var(--fs-sm) !important; }
-.fs-md  { font-size: var(--fs-md) !important; }
-.fs-lg  { font-size: var(--fs-lg) !important; }
-.fs-xl  { font-size: var(--fs-xl) !important; }
-
-.mono { font-family: var(--font-mono) !important; }
-
-.hidden { display: none !important; }
-
-/* Positive / Negative value coloring */
-.val-pos { color: var(--green-text); }
-.val-neg { color: var(--red-text); }
-.val-zero { color: var(--text-dim); }
-
-/* Flash animations for live price updates */
-@keyframes q-flash-green { 0% { background: var(--green-soft); } 100% { background: transparent; } }
-@keyframes q-flash-red   { 0% { background: var(--red-soft); } 100% { background: transparent; } }
-.flash-up   { animation: q-flash-green 0.6s ease-out; }
-.flash-down { animation: q-flash-red 0.6s ease-out; }
-
-/* --- Tabs --- */
-.q-tabs {
-  display: flex;
-  gap: 2px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 12px;
-}
-.q-tab {
-  padding: 8px 16px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  color: var(--text-dim);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s;
-  background: none;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  font-family: inherit;
-}
-.q-tab:hover { color: var(--text); }
-.q-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-.q-tab .count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--blue-soft);
-  border-radius: 9px;
-  font-size: 10px;
-  font-weight: var(--fw-bold);
-  margin-left: 6px;
-  color: var(--blue);
-}
-
-/* --- Toggle Switch --- */
-.q-toggle {
-  position: relative;
-  width: 36px;
-  height: 20px;
-  appearance: none;
-  -webkit-appearance: none;
-  background: var(--border-light);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-  border: none;
-  outline: none;
-}
-.q-toggle::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.2s;
-}
-.q-toggle:checked { background: var(--blue); }
-.q-toggle:checked::before { transform: translateX(16px); }
-
-/* --- Progress bar --- */
-.q-progress {
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.q-progress-fill {
-  height: 100%;
-  background: var(--blue);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 768px) {
-  .q-nav { padding: 0 10px; gap: 8px; }
-  .q-nav-links a { padding: 5px 9px; font-size: var(--fs-xs); }
-  .q-stats-row { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* Logout button in nav */
-.q-nav-logout {
-  margin-left: 8px;
-  padding: 5px 14px;
-  border-radius: 999px;
-  background: rgba(239,68,68,0.06);
-  border: 1px solid rgba(239,68,68,0.15);
-  color: var(--text-dim);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.q-nav-logout:hover {
-  color: var(--red);
-  border-color: var(--red);
-  background: rgba(239,68,68,0.12);
-  text-decoration: none;
-  box-shadow: 0 0 12px rgba(239,68,68,0.15);
-}
-</style>
-<style>
 /* ============================================================
    Page-specific styles: Dashboard
    (Only styles NOT covered by theme.css)
@@ -707,11 +55,86 @@ body {
   flex-direction: column;
 }
 
+/* --- Index Ticker Bar --- */
+.idx-ticker-bar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-shrink: 0;
+  height: 44px;
+  overflow-x: auto;
+}
+.idx-ticker-bar::-webkit-scrollbar { height: 0; }
+.idx-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 16px;
+  border-right: 1px solid var(--border);
+  min-width: 110px;
+  cursor: default;
+  transition: background 0.15s;
+}
+.idx-tile:hover { background: var(--surface); }
+.idx-tile:first-child { padding-left: 4px; }
+.idx-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-vdim);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.idx-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-bright);
+  font-family: var(--font-mono, monospace);
+  line-height: 1;
+}
+.idx-chg {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  line-height: 1;
+  margin-top: 1px;
+}
+.idx-chg.pos { color: var(--green); }
+.idx-chg.neg { color: var(--red); }
+.idx-chg.neu { color: var(--text-vdim); }
+.idx-vix .idx-val { color: var(--yellow, #eab308); }
+.idx-divider {
+  width: 1px;
+  background: var(--border);
+  margin: 8px 0;
+  flex-shrink: 0;
+}
+.idx-breadth {
+  border-right: none;
+  min-width: 90px;
+}
+.idx-breadth-val {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  line-height: 1;
+}
+.idx-adv { color: var(--green); }
+.idx-dec { color: var(--red); }
+.idx-sep { color: var(--text-vdim); font-size: 11px; }
+
 /* --- Controls Bar --- */
 .header-controls {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 8px 20px;
+  padding: 6px 16px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -808,14 +231,36 @@ body {
 .view-presets .btn-toggle { font-size: 10px; padding: 4px 8px; border-style: dashed; }
 
 /* --- Sector Heatmap --- */
-.heatmap-bar {
+.heatmap-strip {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+.heatmap-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border);
+  padding: 0 14px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-vdim);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.heatmap-toggle:hover { background: var(--surface-hover); color: var(--text); }
+.heatmap-toggle .ht-caret { font-size: 11px; opacity: 0.85; line-height: 1; }
+.heatmap-bar {
+  background: transparent;
   padding: 6px 16px;
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 .heatmap-bar.collapsed { display: none; }
 .heat-cell {
@@ -878,6 +323,24 @@ body {
 .pick-card .pc-dir { font-size: 9px; font-weight: var(--fw-bold); padding: 1px 5px; border-radius: 3px; }
 .pick-card .pc-dir.dir-CE { background: rgba(38,166,154,0.25); color: #4DD0C0; }
 .pick-card .pc-dir.dir-PE { background: rgba(239,83,80,0.25); color: #FF8A80; }
+.pick-card .pc-tier {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.pick-card .pc-tier.tier-strong {
+  background: rgba(16,185,129,0.18);
+  color: #34d399;
+  border: 1px solid rgba(16,185,129,0.35);
+}
+.pick-card .pc-tier.tier-watch {
+  background: rgba(234,179,8,0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(234,179,8,0.32);
+}
 .pick-card .pc-score { font-size: 10px; font-weight: var(--fw-bold); margin-left: auto; }
 .pick-card .pc-detail { font-size: 9px; color: var(--text-dim); line-height: 1.4; }
 .pick-card .pc-detail span { color: var(--text); }
@@ -903,7 +366,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
-  table-layout: fixed;
+  table-layout: auto;
 }
 thead { position: sticky; top: 0; z-index: 10; }
 thead th {
@@ -958,13 +421,16 @@ td {
   transition: background 0.3s;
 }
 td.col-sym { text-align: left; font-weight: var(--fw-semibold); }
+.row-watch-btn { background: transparent; border: none; color: var(--text-vdim); cursor: pointer; font-size: 14px; padding: 0 6px 0 0; transition: color 0.15s ease; vertical-align: middle; line-height: 1; }
+.row-watch-btn:hover { color: var(--gold); }
+.row-watch-btn.active { color: var(--gold); text-shadow: 0 0 6px rgba(255,183,0,0.4); }
 td.col-sector { text-align: left; }
 td.col-score { text-align: center; }
 td.null-val { color: var(--text-vdim); }
 
 /* Column widths */
 .w-score { width: 52px; }
-.w-sym { width: 120px; }
+.w-sym { width: 138px; }
 .w-sector { width: 72px; }
 .w-price { width: 80px; }
 .w-pct { width: 62px; }
@@ -1065,6 +531,20 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 .bu-SHORT_COVER { background: rgba(38,166,154,0.1); color: #5FBFB5; }
 .bu-NEUTRAL { background: rgba(158,158,158,0.08); color: var(--text-vdim); }
 
+/* --- Volume Confluence Pills --- */
+.vc-pill {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+.vc-TRIPLE { background: rgba(38,166,154,0.30); color: #4DD0C0; box-shadow: 0 0 0 1px rgba(38,166,154,0.5) inset; }
+.vc-DOUBLE { background: rgba(255,215,0,0.20);  color: #FFD54F; }
+.vc-SINGLE { background: rgba(158,158,158,0.15); color: var(--text-dim); }
+.vc-NONE   { background: rgba(158,158,158,0.05); color: var(--text-vdim); }
+
 /* --- Value Coloring --- */
 .val-pos { color: var(--green); }
 .val-neg { color: var(--red); }
@@ -1117,10 +597,195 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   border-top: 1px solid var(--border);
   padding: 6px 16px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   font-size: var(--fs-xs);
   color: var(--text-dim);
   flex-shrink: 0;
+  gap: 12px;
+  min-height: 36px;
+}
+.footer-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.footer-left   { flex: 1 1 auto; justify-content: flex-start; }
+.footer-center { flex: 1 1 auto; justify-content: center; }
+.footer-right  { flex: 1 1 auto; justify-content: flex-end; }
+
+@media (max-width: 900px) {
+  .footer {
+    justify-content: center;
+  }
+  .footer-left, .footer-center, .footer-right {
+    justify-content: center;
+    width: 100%;
+  }
+}
+.footer-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.footer-filter-label {
+  font-size: 11px;
+  color: var(--text-vdim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+.footer-fresh {
+  font-size: 10px;
+  color: var(--text-vdim);
+  font-feature-settings: "tnum" 1;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+.footer-conn {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* Volume Surge slider — minimal, footer-resident */
+.vol-surge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.vol-surge:hover { border-color: var(--border-light, var(--border)); }
+.vol-surge .vs-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-vdim);
+  font-weight: 700;
+}
+.vol-surge input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  width: 120px;
+  background: var(--border);
+  border-radius: 999px;
+  outline: none;
+  margin: 0;
+}
+.vol-surge input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.vol-surge input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.vol-surge input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent);
+  cursor: pointer;
+}
+.vol-surge .vs-val {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  font-feature-settings: "tnum" 1;
+  min-width: 32px;
+  text-align: right;
+}
+.vol-surge:has(input[value="0"]) .vs-val { color: var(--text-vdim); }
+
+.footer-counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 3px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.footer-counter .qcc-shown {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 12px;
+}
+.footer-counter .qcc-sep { color: var(--text-vdim); }
+.footer-counter .qcc-total { color: var(--text); font-weight: 600; }
+.footer-counter .qcc-suffix {
+  color: var(--text-vdim);
+  font-size: 9px;
+  margin-left: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+
+.footer-watch-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.footer-watch-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.footer-watch-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.footer-export-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+.footer-export-btn:hover {
+  background: var(--accent-soft);
 }
 .compliance-bar {
   background: var(--bg);
@@ -1463,6 +1128,8 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 }
 .ap-ask-quanta:hover { background: rgba(59,130,246,0.2); border-color: var(--blue); }
 
+
+
 /* --- Chat Panel --- */
 .chat-fab {
   position: fixed;
@@ -1659,6 +1326,7 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 }
 .chat-setup button:hover { opacity: 0.85; }
 </style>
+  <link rel="stylesheet" href="/static/css/themes.css">
 </head>
 <body>
 <script>
@@ -1670,6 +1338,16 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
       if(!d.ok){window.location.href='/login';return}
       window.__quantra_role=d.role;
       window.__quantra_user=d.user;
+      window.currentUser = { user: d.user, role: d.role, plan: d.plan, theme: d.theme };
+      
+      // Apply backend theme if available
+      if (d.theme) {
+                  localStorage.setItem('quantra-theme', d.theme);
+      }
+      
+      // Populate user dropdown
+      populateUserInfo(d.user, d.role);
+      
       if(d.role!=='admin'&&d.admin_paths){
         var links=document.querySelectorAll('.q-nav-links a');
         links.forEach(function(a){
@@ -1682,6 +1360,68 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
     })
     .catch(function(){window.location.href='/login'});
 })();
+
+// User dropdown toggle
+function toggleUserMenu() {
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userMenuBtn');
+  
+  if (menu.style.display === 'none' || menu.style.display === '') {
+    menu.style.display = 'block';
+    btn.classList.add('open');
+  } else {
+    menu.style.display = 'none';
+    btn.classList.remove('open');
+  }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+  var dropdown = document.querySelector('.q-nav-user-dropdown');
+  var menu = document.getElementById('userMenu');
+  var btn = document.getElementById('userMenuBtn');
+  
+  if (dropdown && !dropdown.contains(event.target)) {
+    menu.style.display = 'none';
+    btn.classList.remove('open');
+  }
+});
+
+// Populate user info in dropdown
+function populateUserInfo(username, role) {
+  if (!username) return;
+  
+  // Get initials from username
+  var initials = username.substring(0, 2).toUpperCase();
+  
+  // Update all user info elements
+  document.getElementById('userInitials').textContent = initials;
+  document.getElementById('userInitials2').textContent = initials;
+  document.getElementById('userName').textContent = username;
+  document.getElementById('userName2').textContent = username;
+  
+  // Update role
+  var roleText = role === 'admin' ? 'Administrator' : 'Member';
+  document.getElementById('userRole').textContent = roleText;
+
+  // Reveal admin console link if user is admin
+  var adminLink = document.getElementById('userMenuAdmin');
+  if (adminLink && role === 'admin') {
+    adminLink.style.display = '';
+  }
+}
+
+// Toast notification helper
+function showToast(message) {
+  var toast = document.getElementById('toast');
+  if (toast) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(function() {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+}
 </script>
 
 
@@ -1696,41 +1436,177 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 
 <!-- Navigation Bar -->
 <nav class="q-nav">
-  <a href="/" class="q-nav-brand">
-    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="navLogoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
-      <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#navLogoGrad)" stroke-width="3.5" fill="none"/>
-      <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#navLogoGrad)" opacity="0.85"/>
-      <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#navLogoGrad)" opacity="0.7"/>
-      <line x1="18" y1="28" x2="46" y2="20" stroke="url(#navLogoGrad)" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-    </svg>
-    <div style="display:flex;flex-direction:column;line-height:1;">
-      <span class="brand-text">QUANTRA</span>
-    </div>
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
   </a>
+
   <div class="q-nav-links">
-    <a href="/" class="active">Dashboard</a>
-    <a href="/paper">Paper Trades</a>
-    <a href="/sectors">Sectors</a>
-    <a href="/rsi">RSI Scanner</a>
-    <a href="/rsi-analysis">Stock Analysis</a>
-    <a href="/divergence">Divergence</a>
-    <a href="/profile">Profile</a>
-    <a href="/admin">Admin</a>
+    <a href="/" id="nav-dashboard" class="active">Dashboard</a>
+    <a href="/sectors" id="nav-sectors">Sectors</a>
+    <a href="/nifty" id="nav-nifty">Nifty 50</a>
+    <a href="/advanced-analytics" id="nav-advanced" style="color: var(--accent);">Advanced Desk</a>
   </div>
-  <div class="q-nav-status">
-    <span class="pulse-dot" id="pulseDot"></span>
-    <span class="conn-dot off" id="connDot"></span>
-    <span id="connText">Connecting</span>
-    <span id="updateTime"></span>
-    <span id="stockCount"></span>
-    <span id="paperBadge" style="display:none"></span>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
   </div>
-  <a href="/api/auth/logout" class="q-nav-logout">Logout</a>
 </nav>
 
-<!-- Controls Bar -->
+<!-- Index Ticker Bar (immediately under nav) -->
+<div class="idx-ticker-bar" id="idxTickerBar">
+  <div class="idx-tile" id="idx-NIFTY50">
+    <span class="idx-label">NIFTY 50</span>
+    <span class="idx-val" id="idx-NIFTY50-ltp">—</span>
+    <span class="idx-chg" id="idx-NIFTY50-chg">—</span>
+  </div>
+  <div class="idx-tile" id="idx-BANKNIFTY">
+    <span class="idx-label">BANK NIFTY</span>
+    <span class="idx-val" id="idx-BANKNIFTY-ltp">—</span>
+    <span class="idx-chg" id="idx-BANKNIFTY-chg">—</span>
+  </div>
+  <div class="idx-tile" id="idx-MIDCAPNIFTY">
+    <span class="idx-label">MIDCAP NIFTY</span>
+    <span class="idx-val" id="idx-MIDCAPNIFTY-ltp">—</span>
+    <span class="idx-chg" id="idx-MIDCAPNIFTY-chg">—</span>
+  </div>
+  <div class="idx-tile idx-vix" id="idx-INDIAVIX">
+    <span class="idx-label">INDIA VIX</span>
+    <span class="idx-val" id="idx-INDIAVIX-ltp">—</span>
+    <span class="idx-chg" id="idx-INDIAVIX-chg">—</span>
+  </div>
+  <div class="idx-divider"></div>
+  <div class="idx-tile idx-breadth">
+    <span class="idx-label">BREADTH</span>
+    <span class="idx-breadth-val">
+      <span class="idx-adv" id="idx-adv">—</span>
+      <span class="idx-sep">:</span>
+      <span class="idx-dec" id="idx-dec">—</span>
+    </span>
+  </div>
+  <div class="idx-divider"></div>
+  <div class="idx-tile" id="idx-NIFTY-PCR">
+    <span class="idx-label">NIFTY PCR</span>
+    <span class="idx-val" id="idx-nifty-pcr">—</span>
+  </div>
+  <div class="idx-tile" id="idx-NIFTY-MAXPAIN">
+    <span class="idx-label">NIFTY MAX PAIN</span>
+    <span class="idx-val" id="idx-nifty-maxpain">—</span>
+  </div>
+</div>
+
+<!-- Sector Heatmap strip (below ticker, expandable via caret) -->
+<div class="heatmap-strip" id="heatmapStrip">
+  <button class="heatmap-toggle" id="heatToggle" onclick="toggleHeatmap()" aria-expanded="true" aria-label="Toggle sector heatmap" title="Show / hide sector heatmap">
+    <span class="ht-caret" id="heatCaret">&#9650;</span>
+  </button>
+  <div class="heatmap-bar" id="heatmapBar"></div>
+</div>
+
+<!-- Top Picks (above filters as requested) -->
+<div class="top-picks-bar" id="topPicksBar">
+  <span class="top-picks-empty" id="topPicksEmpty">Waiting for chain data...</span>
+</div>
+
+<!-- Controls Bar (search + filters, sits right above the table) -->
 <div class="header-controls">
   <div class="filters">
     <input type="text" class="search-box" id="searchBox" placeholder="Search symbol...">
@@ -1738,19 +1614,14 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
       <option value="">All Sectors</option>
       <option value="IT">IT</option>
       <option value="BANK">BANK</option>
-      <option value="PSU_BANK">PSU BANK</option>
-      <option value="FIN">FIN</option>
+      <option value="FINANCE">FINANCE</option>
       <option value="AUTO">AUTO</option>
       <option value="METAL">METAL</option>
-      <option value="PHARMA">PHARMA</option>
-      <option value="FMCG">FMCG</option>
-      <option value="ENERGY">ENERGY</option>
-      <option value="REALTY">REALTY</option>
-      <option value="INFRA">INFRA</option>
+      <option value="HEALTHCARE">HEALTHCARE</option>
       <option value="CONSUMER">CONSUMER</option>
-      <option value="HEALTH">HEALTH</option>
-      <option value="MEDIA">MEDIA</option>
-      <option value="INSURANCE">INSURANCE</option>
+      <option value="ENERGY">ENERGY</option>
+      <option value="INFRA">INFRA</option>
+      <option value="INDEX">INDEX</option>
     </select>
     <select class="filter-select" id="signalFilter">
       <option value="">All Signals</option>
@@ -1767,29 +1638,40 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
       <option value="LONG_UNWIND">Long Unwind</option>
       <option value="SHORT_COVER">Short Cover</option>
     </select>
+    <button class="btn-toggle" id="oiFilterBtn" onclick="toggleOIFilter()" title="Toggle ATM ±5% Filter" style="border: 1px solid var(--gold); color: var(--gold);">[Filter: OFF] Overall OI</button>
     <button class="btn-toggle btn-n50" id="n50Btn" onclick="toggleN50()">NIFTY 50</button>
-    <button class="btn-toggle btn-poised" id="poisedBtn" onclick="togglePoised()">&#9733; Trade Ready</button>
-    <div class="col-toggles" id="col-toggles">
-      <button class="btn-toggle" data-group="pricedetail" onclick="toggleColGroup('pricedetail')">Price Detail</button>
-      <button class="btn-toggle" data-group="vol" onclick="toggleColGroup('vol')">Volume</button>
-      <button class="btn-toggle" data-group="oi" onclick="toggleColGroup('oi')">OI</button>
-      <button class="btn-toggle" data-group="opt" onclick="toggleColGroup('opt')">Options</button>
+    <select class="filter-select" id="convictionFilter" onchange="onConvictionChange()" title="Filter by composite conviction tier">
+      <option value="">All Conviction</option>
+      <option value="strong">Strong</option>
+      <option value="watch">Watch+</option>
+    </select>
+    <select class="filter-select" id="oiThesisFilter" onchange="onOiThesisChange()" title="Live real-time CE/PE divergence">
+      <option value="">All Thesis</option>
+      <option value="live_bull">Live Bull</option>
+      <option value="live_bear">Live Bear</option>
+      <option value="live_both">Live Both</option>
+    </select>
+    <select class="filter-select" id="moneynessFilter" onchange="onMoneynessChange()" title="Filter by Options Moneyness Structure">
+      <option value="">Moneyness</option>
+      <option value="bull_support">Support [G|G|G]</option>
+      <option value="bear_resist">Resist [R|R|R]</option>
+      <option value="bull_bear_both">GGG + RRR</option>
+      <option value="bull_capped">Capped [G|G|R]</option>
+      <option value="bear_trap">Trap [R|R|G]</option>
+      <option value="strangled">Strangled [R|G|R]</option>
+      <option value="straddle">Breakout [G|R|G]</option>
+    </select>
+        <div class="oi-tv-split" role="group" aria-label="Export OI thesis as TradingView watchlist">
+      <button type="button" class="oi-tv-btn oi-tv-bull" onclick="exportOiThesisTV('bull')" title="Download today's bull list as TradingView .txt watchlist">Bull TV</button>
+      <button type="button" class="oi-tv-btn oi-tv-bear" onclick="exportOiThesisTV('bear')" title="Download today's bear list as TradingView .txt watchlist">Bear TV</button>
+      <button type="button" class="oi-tv-btn oi-tv-both" onclick="exportOiThesisTV('both')" title="Download both bull and bear (sectioned) as TradingView .txt watchlist">Both TV</button>
     </div>
-    <div class="view-presets">
-      <button class="btn-toggle" onclick="setViewMode('compact')" title="Hide all detail columns">Compact</button>
-      <button class="btn-toggle" onclick="setViewMode('full')" title="Show all columns">Full</button>
-    </div>
-    <button class="btn-toggle" id="heatToggle" onclick="toggleHeatmap()">Heatmap</button>
+
+    <button class="qchip qchip-clear" id="qchipClearBtn" onclick="clearAllFilters()" title="Reset all filters" style="margin-left:auto;">
+      <span id="qchipClearLabel">No filters</span>
+      <span class="qc-count" id="qchipClearCount" style="display:none;">0</span>
+    </button>
   </div>
-</div>
-
-<!-- Sector Heatmap -->
-<div class="heatmap-bar collapsed" id="heatmapBar"></div>
-
-<!-- Top Picks -->
-<div class="top-picks-bar" id="topPicksBar">
-  <span class="top-picks-label">&#9733; TOP PICKS</span>
-  <span class="top-picks-empty" id="topPicksEmpty">Waiting for chain data...</span>
 </div>
 
 <!-- Table -->
@@ -1799,8 +1681,8 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 <tr class="col-group-row col-group-header">
   <th colspan="8"></th>
   <th colspan="5" class="g-pricedetail">Price Detail</th>
-  <th colspan="2" class="g-vol">Volume</th>
-  <th colspan="4" class="g-oi">OI Detail</th>
+  <th colspan="5" class="g-vol">Volume</th>
+  <th colspan="12" class="g-oi">OI Detail</th>
   <th colspan="6" class="g-opt">Options</th>
 </tr>
 <tr id="headerRow">
@@ -1821,12 +1703,23 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
   <th class="w-pct g-pricedetail" data-key="range_pct">Range%</th>
   <!-- Volume group -->
   <th class="w-vol g-vol" data-key="vol">Volume</th>
-  <th class="w-small g-vol" data-key="vol_surge">Surge</th>
+  <th class="w-small g-vol" data-key="vol_surge" title="Surge vs 5-day SMA (legacy)">Surge</th>
+  <th class="w-small g-vol" data-key="vol_surge_10d" title="Surge vs 10-day SMA — fortnight baseline">10d</th>
+  <th class="w-small g-vol" data-key="vol_surge_20d" title="Surge vs 20-day SMA — institutional / breakout standard">20d</th>
+  <th class="w-small g-vol" data-key="vol_confluence" title="TRIPLE = surge ≥1.5× against all 3 windows · DOUBLE = 2 of 3 · SINGLE = 1 of 3">Conf</th>
   <!-- OI group -->
   <th class="w-small g-oi" data-key="pcr">PCR</th>
-  <th class="w-oi g-oi" data-key="ce_oi_chg">CE OI Chg</th>
-  <th class="w-oi g-oi" data-key="pe_oi_chg">PE OI Chg</th>
-  <th class="w-oi g-oi" data-key="net_oi">Net OI</th>
+  <th class="w-oi g-oi" data-key="total_oi">Total OI</th>
+  <th class="w-oi g-oi" data-key="moneyness" title="OI Moneyness (ATM | Near OTM | Deep OTM)">OI Moneyness</th>
+  <th class="w-oi g-oi" data-key="ce_oi_chg">CE OI (sh)</th>
+  <th class="w-oi g-oi" data-key="pe_oi_chg">PE OI (sh)</th>
+  <th class="w-oi g-oi" data-key="net_oi">Net OI (sh)</th>
+  <th class="w-oi g-oi" data-key="ce_oi_chg_lots">CE Lots</th>
+  <th class="w-oi g-oi" data-key="pe_oi_chg_lots">PE Lots</th>
+  <th class="w-oi g-oi" data-key="net_oi_lots">Net Lots</th>
+  <th class="w-oi g-oi" data-key="ce_oi_chg_rs">CE ₹</th>
+  <th class="w-oi g-oi" data-key="pe_oi_chg_rs">PE ₹</th>
+  <th class="w-oi g-oi" data-key="net_oi_rs">Net OI ₹</th>
   <!-- Options group -->
   <th class="w-small g-opt" data-key="atm_iv">IV%</th>
   <th class="w-price g-opt" data-key="max_pain">MaxPain</th>
@@ -1842,11 +1735,43 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 
 <!-- Footer -->
 <div class="footer">
-  <span id="footerFilter">Showing all stocks</span>
-  <span id="footerFresh">LTP: -- | OHLC: -- | Chain: --</span>
-  <span id="footerConn">--</span>
+  <div class="footer-section footer-left">
+    <span class="footer-counter" title="Visible vs total stocks (matches the filter pill)">
+      <span class="qcc-shown" id="qccShown">0</span>
+      <span class="qcc-sep">/</span>
+      <span class="qcc-total" id="qccTotal">0</span>
+      <span class="qcc-suffix">stocks</span>
+    </span>
+    <span class="footer-sep"></span>
+    <button class="footer-watch-btn" id="wlFilterBtn" onclick="toggleWatchlistFilter()" title="Show only watchlisted stocks">★ Watchlist (<span id="wlCount">0</span>)</button>
+    <span class="footer-sep"></span>
+    <span class="footer-filter-label" id="footerFilter">No filters</span>
+  </div>
+
+  <div class="footer-section footer-center">
+    <label class="vol-surge" title="Show only stocks with volume &ge; N&times; their 5-day average">
+      <span class="vs-label">Min Vol Surge</span>
+      <input type="range" id="minSurgeSlider" min="0" max="50" step="5" value="0" oninput="onMinSurgeChange()" aria-label="Minimum volume surge multiple">
+      <span class="vs-val" id="minSurgeVal">0.0&times;</span>
+    </label>
+    <label class="vol-surge" style="margin-left:8px" title="Capital-weight filter: only show stocks where |Net OI ₹ notional| ≥ N crores. Use to filter to whale-sized flow.">
+      <span class="vs-label">Min ₹ Cr</span>
+      <input type="range" id="minRsCrSlider" min="0" max="500" step="10" value="0" oninput="onMinRsCrChange()" aria-label="Minimum Net OI ₹ Notional in crores">
+      <span class="vs-val" id="minRsCrVal">0 Cr</span>
+    </label>
+  </div>
+
+  <div class="footer-section footer-right">
+    <span class="footer-fresh" id="footerFresh" title="Last update timestamps">LTP - OHLC - Chain -</span>
+    <span class="footer-sep"></span>
+    <span class="footer-conn" id="footerConn">-</span>
+    <span class="footer-sep"></span>
+    <button class="footer-export-btn" onclick="openColsExport()" title="Customize columns and export data">Columns &middot; Export</button>
+  </div>
 </div>
 <div class="compliance-bar">
+  <strong style="color:#a1a1aa;">SEBI FY25:</strong> 91% of individual F&amp;O traders made net losses (avg &#8377;1.1 lakh / trader). This dashboard surfaces data, not advice.
+  <br>
   Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
   &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a>
 </div>
@@ -1869,6 +1794,105 @@ thead th.col-sym { z-index: 15; background: var(--bg-elevated); }
 <button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Chat with Quantra">
   <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
 </button>
+
+
+
+<!-- Columns & Export Modal -->
+<div class="ce-overlay" id="ceOverlay" onclick="closeColsExport(event)" style="display:none;">
+  <div class="ce-modal" id="ceModal" onclick="event.stopPropagation()">
+    <div class="ce-header">
+      <div class="ce-tabs">
+        <button class="ce-tab active" data-tab="cols" onclick="switchCeTab('cols')">
+          <span class="ce-tab-ico">&#9776;</span> Columns
+        </button>
+        <button class="ce-tab" data-tab="export" onclick="switchCeTab('export')">
+          <span class="ce-tab-ico">&#11015;</span> Export
+        </button>
+      </div>
+      <button class="ce-close" onclick="closeColsExport()" aria-label="Close">&#10005;</button>
+    </div>
+
+    <!-- Columns tab -->
+    <div class="ce-body" id="cePanelCols">
+      <div class="ce-section-row">
+        <div class="ce-hint">Toggle columns and drag to reorder. Saved automatically.</div>
+        <div class="ce-presets">
+          <button class="ce-preset-btn" onclick="applyColPreset('essentials')">Essentials</button>
+          <button class="ce-preset-btn" onclick="applyColPreset('compact')">Compact</button>
+          <button class="ce-preset-btn" onclick="applyColPreset('full')">Full</button>
+          <button class="ce-preset-btn" onclick="applyColPreset('reset')">Reset</button>
+        </div>
+      </div>
+
+      <ul class="ce-col-list" id="ceColList"><!-- populated by JS --></ul>
+
+      <div class="ce-meta">
+        <span id="ceColShown">0</span> of <span id="ceColTotal">0</span> columns visible
+      </div>
+    </div>
+
+    <!-- Export tab -->
+    <div class="ce-body" id="cePanelExport" style="display:none;">
+      <div class="ce-export-section">
+        <div class="ce-export-label">Format</div>
+        <div class="ce-radio-row">
+          <label class="ce-radio">
+            <input type="radio" name="ceFmt" value="csv" checked>
+            <span>CSV</span>
+            <small>Excel / Sheets</small>
+          </label>
+          <label class="ce-radio">
+            <input type="radio" name="ceFmt" value="json">
+            <span>JSON</span>
+            <small>Programmatic</small>
+          </label>
+          <label class="ce-radio">
+            <input type="radio" name="ceFmt" value="tradingview">
+            <span>TradingView</span>
+            <small>.txt watchlist (NSE:SYMBOL)</small>
+          </label>
+        </div>
+      </div>
+
+      <div class="ce-export-section">
+        <div class="ce-export-label">Rows</div>
+        <div class="ce-radio-row">
+          <label class="ce-radio">
+            <input type="radio" name="ceRows" value="filtered" checked>
+            <span>Filtered <em id="ceRowsFilteredCount">0</em></span>
+            <small>What you see right now</small>
+          </label>
+          <label class="ce-radio">
+            <input type="radio" name="ceRows" value="all">
+            <span>All <em id="ceRowsAllCount">0</em></span>
+            <small>Every loaded stock</small>
+          </label>
+        </div>
+      </div>
+
+      <div class="ce-export-section">
+        <div class="ce-export-label">Columns</div>
+        <div class="ce-radio-row">
+          <label class="ce-radio">
+            <input type="radio" name="ceCols" value="visible" checked>
+            <span>Visible only</span>
+            <small>Match the table</small>
+          </label>
+          <label class="ce-radio">
+            <input type="radio" name="ceCols" value="all">
+            <span>All columns</span>
+            <small>Full dataset</small>
+          </label>
+        </div>
+      </div>
+
+      <button class="ce-export-go" onclick="doExport()">
+        <span>&#11015;</span> Download
+      </button>
+      <div class="ce-export-status" id="ceExportStatus"></div>
+    </div>
+  </div>
+</div>
 
 <div class="chat-panel" id="chatPanel">
   <div class="chat-head">
@@ -1926,13 +1950,62 @@ let sortAsc = false;
 let symbolOrder = [];  // sorted symbols for rendering
 let rowElements = {};  // symbol \u2192 <tr> element
 let cellMap = {};      // "SYM:field" \u2192 <td> element
-let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false };
-let colGroups = { pricedetail: false, vol: false, oi: false, opt: false };
+let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false, conviction: '', oiThesis: '', moneyness: '', watchlist: false };
+
+// OI thesis symbol sets (loaded from /api/oi-thesis once per page load + every 5min)
+let oiThesisSymbols = { bull: new Set(), bear: new Set(), both: new Set(), loadedAt: null };
+
+// Quick filter chips state — REMOVED (only Min Vol Surge slider remains).
+// Vars kept as no-ops so any old persisted state hydrates harmlessly.
+// `hideQuiet` is FORCED OFF — was previously persisted true from the old chip
+// bar, but the toggle UI is gone, so leaving it persisted true silently hid
+// ~50% of stocks. We ignore the persisted value and always start with hideQuiet=false.
+let activeChips = new Set();
+let hideQuiet = false;
+let minSurge = 0;
+let minRsCr = 0;   // Minimum |Net OI ₹ notional| in crores; 0 = disabled
+let watchlist = new Set();
+
+// Restore persisted state — single key for all filter state, plus separate watchlist
+const FILTER_STORE_KEY = 'quantra_filters_v1';
+try {
+  const saved = JSON.parse(localStorage.getItem(FILTER_STORE_KEY) || '{}');
+  if (saved && typeof saved === 'object') {
+    if (saved.filters && typeof saved.filters === 'object') {
+      filters.search  = saved.filters.search  || '';
+      filters.sector  = saved.filters.sector  || '';
+      filters.signal  = saved.filters.signal  || '';
+      filters.buildup = saved.filters.buildup || '';
+      filters.n50     = !!saved.filters.n50;
+      filters.poised  = !!saved.filters.poised;
+      filters.conviction = saved.filters.conviction || '';
+      filters.oiThesis   = saved.filters.oiThesis   || '';
+      filters.moneyness  = saved.filters.moneyness  || '';
+    }
+    if (Array.isArray(saved.chips)) saved.chips.forEach(c => activeChips.add(c));
+    // hideQuiet intentionally NOT hydrated — the UI for it was removed,
+    // and any persisted true value would silently drop ~50% of stocks.
+    if (typeof saved.minSurge === 'number') minSurge = saved.minSurge;
+    if (typeof saved.minRsCr === 'number') minRsCr = saved.minRsCr;
+  }
+  // Legacy migration: older 'quantra_chips' key
+  const legacy = localStorage.getItem('quantra_chips');
+  if (legacy && !saved.chips) {
+    const lo = JSON.parse(legacy);
+    if (Array.isArray(lo.chips)) lo.chips.forEach(c => activeChips.add(c));
+    // hideQuiet intentionally NOT hydrated from legacy state either
+    if (typeof lo.minSurge === 'number') minSurge = lo.minSurge;
+  }
+  const wl = JSON.parse(localStorage.getItem('quantra_watchlist') || '[]');
+  if (Array.isArray(wl)) wl.forEach(s => watchlist.add(s));
+} catch (e) {}
+
+let colGroups = { pricedetail: true, vol: true, oi: true, opt: true };
 let wsConn = null;
 let reconnectDelay = 3000;
 let reconnectTimer = null;
 let lastTick = 0, lastOhlc = 0, lastChain = 0;
-let heatmapVisible = false;
+let heatmapVisible = true;
 
 // === Formatting ===
 function fmtPrice(v) {
@@ -1955,6 +2028,47 @@ function fmtVol(v) {
 function fmtOI(v) {
   if (v == null || v === 0) return '\u2013';
   return fmtVol(v);
+}
+function fmtRs(v) {
+  if (v == null || v === 0) return '\u2013';
+  var n = Number(v);
+  var sign = n > 0 ? '+\u20B9' : '-\u20B9';
+  var a = Math.abs(n);
+  if (a >= 1e7) return sign + (a / 1e7).toFixed(2) + 'Cr';
+  if (a >= 1e5) return sign + (a / 1e5).toFixed(2) + 'L';
+  if (a >= 1e3) return sign + (a / 1e3).toFixed(0) + 'K';
+  return sign + a.toFixed(0);
+}
+function fmtLots(v) {
+  if (v == null || v === 0 || !isFinite(v)) return '\u2013';
+  var n = Number(v);
+  var sign = n > 0 ? '+' : '-';
+  var a = Math.abs(n);
+  if (a >= 1e6) return sign + (a / 1e6).toFixed(2) + 'M';
+  if (a >= 1e3) return sign + (a / 1e3).toFixed(1) + 'K';
+  return sign + a.toFixed(0);
+}
+function fmtMoneynessPill(m) {
+  if (!m) return '<div class="mon-pill-empty">—</div>';
+  const getShiftColor = (ce, pe) => {
+    ce = ce || 0;
+    pe = pe || 0;
+    if (ce === 0 && pe === 0) return 'rgba(113, 113, 122, 0.2)';
+    if (Math.abs(ce) < 500 && Math.abs(pe) < 500) return 'rgba(113, 113, 122, 0.4)';
+    if (pe > ce) return 'var(--green)';
+    if (ce > pe) return 'var(--red)';
+    return 'rgba(113, 113, 122, 0.4)';
+  };
+  const atmColor = getShiftColor(m.atm_ce, m.atm_pe);
+  const nearColor = getShiftColor(m.near_ce, m.near_pe);
+  const deepColor = getShiftColor(m.deep_ce, m.deep_pe);
+  const fNum = (v) => {
+    if (v === 0 || v == null) return '0';
+    const sign = v > 0 ? '+' : '';
+    return sign + fmtVol(v);
+  };
+  const tooltipText = `ATM: CE ${fNum(m.atm_ce)} | PE ${fNum(m.atm_pe)}\nNear: CE ${fNum(m.near_ce)} | PE ${fNum(m.near_pe)}\nDeep: CE ${fNum(m.deep_ce)} | PE ${fNum(m.deep_pe)}`;
+  return `<div class="moneyness-pill-container" title="${tooltipText}"><span class="mon-seg" style="background: ${atmColor};" title="ATM Strike"></span><span class="mon-seg" style="background: ${nearColor};" title="Near OTM"></span><span class="mon-seg" style="background: ${deepColor};" title="Deep OTM"></span></div>`;
 }
 function fmtIV(v) {
   if (v == null) return '\u2013';
@@ -2009,6 +2123,12 @@ function sectorPill(s) {
   return `<span class="sector-pill ${cls}">${s}</span>`;
 }
 
+// === Volume Confluence Pill (TRIPLE / DOUBLE / SINGLE / None) ===
+function volConfPill(v) {
+  if (!v) return '<span class="vc-pill vc-NONE">\u2013</span>';
+  return `<span class="vc-pill vc-${v}" title="${v} = surge against ${v === 'TRIPLE' ? 'all 3' : v === 'DOUBLE' ? '2 of 3' : '1 of 3'} windows (5d / 10d / 20d)">${v}</span>`;
+}
+
 // === Value class ===
 function valClass(v) {
   if (v == null || v === 0) return 'null-val';
@@ -2046,7 +2166,7 @@ function buildTable() {
     const fields = [
       // Always visible
       { key: 'score', cls: 'col-score w-score', html: scoreHTML(d.score) },
-      { key: 'symbol', cls: 'col-sym w-sym', html: '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(d.symbol) + '" target="_blank" rel="noopener" class="tv-link" title="Open in TradingView" onclick="event.stopPropagation()">' + d.symbol + '</a>' + (d.is_n50 ? '<span class="n50-badge">N50</span>' : '') + (_poised ? '<span class="poised-badge">READY</span>' : '') + (_dir ? '<span class="dir-badge dir-' + _dir + '">' + (_dir === 'CE' ? 'BUY CE' : 'BUY PE') + '</span>' : '') },
+      { key: 'symbol', cls: 'col-sym w-sym', html: '<button class="row-watch-btn ' + (watchlist.has(d.symbol) ? 'active' : '') + '" data-watch-sym="' + d.symbol + '" onclick="toggleWatchlist(\'' + d.symbol + '\', event)">' + (watchlist.has(d.symbol) ? '\u2605' : '\u2606') + '</button><a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(d.symbol) + '" target="_blank" rel="noopener" class="tv-link" title="Open in TradingView" onclick="event.stopPropagation()">' + d.symbol + '</a>' + (d.is_n50 ? '<span class="n50-badge">N50</span>' : '') + (_poised ? '<span class="poised-badge">READY</span>' : '') + (_dir ? '<span class="dir-badge dir-' + _dir + '">' + (_dir === 'CE' ? 'BUY CE' : 'BUY PE') + '</span>' : '') },
       { key: 'sector', cls: 'col-sector w-sector', html: sectorPill(d.sector) },
       { key: 'ltp', cls: 'w-price', text: fmtPrice(d.ltp) },
       { key: 'chg_pct', cls: 'w-pct ' + valClass(d.chg_pct), text: fmtPct(d.chg_pct) },
@@ -2062,11 +2182,24 @@ function buildTable() {
       // Volume group
       { key: 'vol', cls: 'w-vol g-vol', text: fmtVol(d.vol) },
       { key: 'vol_surge', cls: 'w-small g-vol ' + surgeClass(d.vol_surge), text: fmtSurge(d.vol_surge) },
+      { key: 'vol_surge_10d', cls: 'w-small g-vol ' + surgeClass(d.vol_surge_10d), text: fmtSurge(d.vol_surge_10d) },
+      { key: 'vol_surge_20d', cls: 'w-small g-vol ' + surgeClass(d.vol_surge_20d), text: fmtSurge(d.vol_surge_20d) },
+      { key: 'vol_confluence', cls: 'w-small g-vol', html: volConfPill(d.vol_confluence) },
       // OI group
       { key: 'pcr', cls: 'w-small g-oi ' + pcrClass(d.pcr), text: d.pcr != null ? d.pcr.toFixed(2) : '\u2013' },
+      { key: 'total_oi', cls: 'w-oi g-oi', text: fmtOI(d.total_oi) },
+      { key: 'moneyness', cls: 'w-oi g-oi', html: fmtMoneynessPill(d.moneyness) },
       { key: 'ce_oi_chg', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtOI(d.ce_oi_chg) },
       { key: 'pe_oi_chg', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtOI(d.pe_oi_chg) },
       { key: 'net_oi', cls: 'w-oi g-oi ' + valClass(d.net_oi), text: fmtOI(d.net_oi) },
+      // ── Lots (= shares ÷ lot_size). Academically-clean unit, comparable across stocks ──
+      { key: 'ce_oi_chg_lots', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtLots((d.ce_oi_chg || 0) / (d.lot || 1)) },
+      { key: 'pe_oi_chg_lots', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtLots((d.pe_oi_chg || 0) / (d.lot || 1)) },
+      { key: 'net_oi_lots',    cls: 'w-oi g-oi ' + valClass(d.net_oi),    text: fmtLots((d.net_oi    || 0) / (d.lot || 1)) },
+      // ── ₹ notional (CE/PE OI change × spot)  — uses dashboard 'lot' field for accurate notional ──
+      { key: 'ce_oi_chg_rs', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtRs((d.ce_oi_chg || 0) * (d.ltp || 0)) },
+      { key: 'pe_oi_chg_rs', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtRs((d.pe_oi_chg || 0) * (d.ltp || 0)) },
+      { key: 'net_oi_rs',    cls: 'w-oi g-oi ' + valClass(d.net_oi),    text: fmtRs(((d.pe_oi_chg || 0) - (d.ce_oi_chg || 0)) * (d.ltp || 0)) },
       // Options group
       { key: 'atm_iv', cls: 'w-small g-opt', text: fmtIV(d.atm_iv) },
       { key: 'max_pain', cls: 'w-price g-opt', text: fmtPrice(d.max_pain) },
@@ -2092,6 +2225,7 @@ function buildTable() {
   }
   applyFilters();
   applyColVisibility();
+  applyInitialColumnOrder();
   updateCounts();
   renderTopPicks();
 }
@@ -2109,99 +2243,130 @@ function pcrClass(v) {
   return '';
 }
 
-// === Poised / Trade Ready Logic ===
-function isPoised(d) {
-  if (!d) return false;
-  // Must have composite score >= 50
-  if ((d.score || 0) < 50) return false;
-  // Must have prem_ok (at least one side >= Rs 15)
-  if (!d.prem_ok) return false;
-  // Must have directional signal (not NEUTRAL)
-  const sig = d.pcr_sig || 'NEUTRAL';
-  if (sig === 'NEUTRAL') return false;
-  // Must have meaningful buildup (not NEUTRAL)
-  const bu = d.buildup || 'NEUTRAL';
-  if (bu === 'NEUTRAL') return false;
-  // Buildup must align with signal direction
-  const bullSig = (sig === 'BULLISH' || sig === 'MILDLY_BULL');
-  const bearSig = (sig === 'BEARISH' || sig === 'MILDLY_BEAR');
-  const bullBU = (bu === 'LONG_BUILD' || bu === 'SHORT_COVER');
-  const bearBU = (bu === 'SHORT_BUILD' || bu === 'LONG_UNWIND');
-  if (bullSig && !bullBU) return false;
-  if (bearSig && !bearBU) return false;
-  return true;
-}
+// === Conviction (server-driven) ===
+// All scoring is computed server-side now. These helpers just read fields.
+// Components: info_flow (0-40), action_mag (0-35), pcr_confirm (0-15),
+// liquidity status (excellent/good/marginal/vetoed). Multiplier 0 if vetoed.
+// Refs: Easley-O'Hara (1998), Fodor-Krieger-Doran (2011), Bessembinder et al,
+// Jena-Tiwari-Mitra (2019). Phase 2: Goyal-Saretto IV-RV spread, Xing-Zhang-Zhao skew.
 
+function isStrongPick(d) {
+  return !!d && d.conviction_tier === 'strong';
+}
+function isWatchPick(d) {
+  return !!d && (d.conviction_tier === 'strong' || d.conviction_tier === 'watch');
+}
 function getDirection(d) {
-  if (!d) return null;
-  const sig = d.pcr_sig || 'NEUTRAL';
-  const bu = d.buildup || 'NEUTRAL';
-  const bullSig = (sig === 'BULLISH' || sig === 'MILDLY_BULL');
-  const bearSig = (sig === 'BEARISH' || sig === 'MILDLY_BEAR');
-  const bullBU = (bu === 'LONG_BUILD' || bu === 'SHORT_COVER');
-  const bearBU = (bu === 'SHORT_BUILD' || bu === 'LONG_UNWIND');
-  if (bullSig && bullBU) return 'CE';
-  if (bearSig && bearBU) return 'PE';
-  if (bullSig) return 'CE';
-  if (bearSig) return 'PE';
-  return null;
+  return d ? (d.direction || null) : null;
+}
+function isPoised(d)     { return isStrongPick(d); }
+function poisedScore(d)  { return d ? (d.score || 0) : 0; }
+
+// Render the score component breakdown for the analysis panel.
+// Each component is a labeled progress bar showing earned / max with one-line rationale.
+function renderScoreBreakdown(d) {
+  const c = d && d.score_components;
+  if (!c) {
+    return '<div class="rec-rr-bar" style="opacity:0.7;">Score components are still loading. Try again in a moment.</div>';
+  }
+  const tierLabel = d.conviction_tier === 'strong' ? 'STRONG'
+                  : d.conviction_tier === 'watch'  ? 'WATCH'
+                  : 'BACKGROUND';
+  const tierColor = d.conviction_tier === 'strong' ? 'var(--green)'
+                  : d.conviction_tier === 'watch'  ? 'var(--gold)'
+                  : 'var(--text-vdim)';
+  const liqColor = c.liquidity === 'vetoed'    ? 'var(--red)'
+                : c.liquidity === 'marginal'   ? 'var(--orange)'
+                : c.liquidity === 'good'       ? 'var(--gold)'
+                : c.liquidity === 'excellent'  ? 'var(--green)'
+                : 'var(--text-dim)';
+  const conf = (d.confidence || 'none').toUpperCase();
+  function bar(label, val, max, hint) {
+    const pct = max > 0 ? Math.max(0, Math.min(100, (val / max) * 100)) : 0;
+    return `
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+          <span style="color:var(--text-dim);">${label}</span>
+          <span style="font-family:var(--font-mono,monospace);font-weight:700;">${val.toFixed(1)} / ${max}</span>
+        </div>
+        <div style="height:6px;border-radius:3px;background:var(--surface);overflow:hidden;">
+          <div style="height:100%;width:${pct.toFixed(1)}%;background:linear-gradient(90deg,var(--accent),var(--cyan,var(--accent)));"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text-vdim);margin-top:3px;line-height:1.4;">${hint}</div>
+      </div>`;
+  }
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="font-size:32px;font-weight:800;color:${tierColor};line-height:1;">${d.score || 0}</div>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <span style="font-size:10px;font-weight:800;letter-spacing:0.6px;color:${tierColor};">${tierLabel} TIER</span>
+        <span style="font-size:10px;color:var(--text-dim);">${conf} confidence \u00B7 ${d.direction || 'no direction'}</span>
+      </div>
+    </div>
+    ${bar('Information Flow',     c.info_flow,    c.info_flow_max,    'Volume surge \u00D7 OI buildup direction. Easley-O\u2019Hara (1998), Fodor et al (2011).')}
+    ${bar('Action Magnitude',     c.action_mag,   c.action_mag_max,   '|price chg|, |OI chg %|, day range. Bessembinder et al \u2014 co-movement signals informed positioning.')}
+    ${bar('PCR Confirmation',     c.pcr_confirm,  c.pcr_confirm_max,  'OI-PCR distance from 1.0 (12-day horizon). Jena-Tiwari-Mitra (2019).')}
+    <div style="display:flex;justify-content:space-between;font-size:11px;padding-top:6px;border-top:1px dashed var(--border);">
+      <span style="color:var(--text-dim);">Liquidity Gate</span>
+      <span style="font-weight:700;color:${liqColor};text-transform:uppercase;">${c.liquidity}</span>
+    </div>
+    <div style="font-size:10px;color:var(--text-vdim);margin-top:8px;line-height:1.5;font-style:italic;">
+      Phase 2 will add IV-RV spread (Goyal-Saretto 2009) and 25-delta skew (Xing-Zhang-Zhao 2010) \u2014 the two highest-evidence option signals not yet computed here.
+    </div>`;
 }
 
-function poisedScore(d) {
-  // Composite ranking score for poised stocks (base score + alignment bonuses)
-  let ps = d.score || 0;
-  const sig = d.pcr_sig || 'NEUTRAL';
-  const bu = d.buildup || 'NEUTRAL';
-  const bullSig = (sig === 'BULLISH' || sig === 'MILDLY_BULL');
-  const bearSig = (sig === 'BEARISH' || sig === 'MILDLY_BEAR');
-  const bullBU = (bu === 'LONG_BUILD' || bu === 'SHORT_COVER');
-  const bearBU = (bu === 'SHORT_BUILD' || bu === 'LONG_UNWIND');
-  // Signal-buildup alignment bonus
-  if ((bullSig && bullBU) || (bearSig && bearBU)) ps += 10;
-  // Strong signal bonus (not just mildly)
-  if (sig === 'BULLISH' || sig === 'BEARISH') ps += 5;
-  // Volume surge bonus
-  if ((d.vol_surge || 0) >= 2.0) ps += 5;
-  else if ((d.vol_surge || 0) >= 1.5) ps += 2;
-  // Strong PCR directional bonus
-  if (d.pcr != null && (d.pcr > 1.3 || d.pcr < 0.7)) ps += 5;
-  // Premium liquidity bonus (higher prem = tighter spreads)
-  const maxPrem = Math.max(d.atm_ce || 0, d.atm_pe || 0);
-  if (maxPrem >= 30) ps += 3;
-  return ps;
-}
+function poisedScoreLegacy(d) { return d ? (d.score || 0) : 0; }
 
 function togglePoised() {
   filters.poised = !filters.poised;
   document.getElementById('poisedBtn').classList.toggle('active', filters.poised);
+  persistFilterState();
+  applyFilters();
+}
+
+function toggleWatchlistFilter() {
+  filters.watchlist = !filters.watchlist;
+  document.getElementById('wlFilterBtn').classList.toggle('active', filters.watchlist);
+  persistFilterState();
   applyFilters();
 }
 
 function renderTopPicks() {
   const bar = document.getElementById('topPicksBar');
   const emptyMsg = document.getElementById('topPicksEmpty');
-  // Collect all poised stocks
-  const poised = Object.keys(stocks).filter(sym => isPoised(stocks[sym]));
+  // Strong tier first, then Watch tier; both must have a direction
+  const candidates = Object.keys(stocks).filter(sym => {
+    const d = stocks[sym];
+    return d && d.direction && (d.conviction_tier === 'strong' || d.conviction_tier === 'watch');
+  });
   // Clear old cards (keep label + empty msg)
   bar.querySelectorAll('.pick-card').forEach(c => c.remove());
 
-  if (poised.length === 0) {
+  if (candidates.length === 0) {
     if (emptyMsg) emptyMsg.style.display = '';
     return;
   }
   if (emptyMsg) emptyMsg.style.display = 'none';
 
-  // Sort by poised score desc, take top 5
-  poised.sort((a, b) => poisedScore(stocks[b]) - poisedScore(stocks[a]));
-  const top = poised.slice(0, 5);
+  // Sort: strong before watch, then by raw score desc
+  const tierRank = { strong: 0, watch: 1 };
+  candidates.sort((a, b) => {
+    const ta = tierRank[stocks[a].conviction_tier];
+    const tb = tierRank[stocks[b].conviction_tier];
+    if (ta !== tb) return ta - tb;
+    return (stocks[b].score || 0) - (stocks[a].score || 0);
+  });
+  const top = candidates.slice(0, 5);
 
   for (const sym of top) {
     const d = stocks[sym];
-    const dir = getDirection(d);
-    const ps = poisedScore(d);
+    const dir = d.direction;
+    const displayScore = Math.min(100, d.score || 0);
     const dirCls = dir === 'CE' ? 'dir-CE' : 'dir-PE';
     const dirLabel = dir === 'CE' ? 'BUY CE' : 'BUY PE';
     const prem = dir === 'CE' ? d.atm_ce : d.atm_pe;
+    const tierLabel = d.conviction_tier === 'strong' ? 'STRONG' : 'WATCH';
+    const tierCls = d.conviction_tier === 'strong' ? 'tier-strong' : 'tier-watch';
 
     const card = document.createElement('div');
     card.className = 'pick-card';
@@ -2209,16 +2374,16 @@ function renderTopPicks() {
       <div class="pc-head">
         <span class="pc-sym">${sym}${d.is_n50 ? ' <span class="n50-badge">N50</span>' : ''}</span>
         <span class="pc-dir ${dirCls}">${dirLabel}</span>
-        <span class="pc-score" style="color:${ps >= 70 ? 'var(--green)' : ps >= 50 ? 'var(--gold)' : 'var(--orange)'}">${ps}</span>
+        <span class="pc-tier ${tierCls}" title="Conviction tier (composite of info-flow, action-magnitude, PCR confirmation)">${tierLabel}</span>
+        <span class="pc-score" title="Composite score 0\u2013100 \u00B7 same number as the Score column" style="color:${displayScore >= 70 ? 'var(--green)' : displayScore >= 50 ? 'var(--gold)' : 'var(--orange)'}">${displayScore}</span>
       </div>
       <div class="pc-detail">
         \u20B9<span>${fmtPrice(d.ltp)}</span> \u00B7 Prem \u20B9<span>${fmtPrice(prem)}</span> \u00B7 IV <span>${d.atm_iv ? d.atm_iv.toFixed(1) + '%' : '\u2013'}</span> \u00B7 ${d.buildup ? d.buildup.replace(/_/g, ' ') : '\u2013'}
       </div>`;
     card.onclick = (e) => {
-      if (e.target.closest('.pick-paper-btn')) return; // don't open analysis if clicking paper trade btn
+      if (e.target.closest('.pick-paper-btn')) return;
       openAnalysis(sym);
     };
-    // Add small paper trade button
     const ptBtn = document.createElement('button');
     ptBtn.className = 'pick-paper-btn';
     ptBtn.style.cssText = 'margin-top:4px;padding:2px 8px;font-size:9px;font-weight:700;border:1px solid rgba(171,71,188,0.3);background:rgba(171,71,188,0.08);color:#CE93D8;border-radius:4px;cursor:pointer;transition:all 0.2s;width:100%';
@@ -2234,10 +2399,43 @@ function renderTopPicks() {
 }
 
 // === Sorting ===
+// Some columns are derived (e.g., ₹ values = OI × spot) and not stored on the
+// stock object directly. Resolver returns either the stored value or the
+// computed derived value so click-sort works for every column.
+function getSortValue(stock, key) {
+  if (!stock) return null;
+  switch (key) {
+    case 'ce_oi_chg_rs':
+      return (stock.ce_oi_chg || 0) * (stock.ltp || 0);
+    case 'pe_oi_chg_rs':
+      return (stock.pe_oi_chg || 0) * (stock.ltp || 0);
+    case 'net_oi_rs':
+      return ((stock.pe_oi_chg || 0) - (stock.ce_oi_chg || 0)) * (stock.ltp || 0);
+    case 'ce_oi_chg_lots':
+      return (stock.ce_oi_chg || 0) / (stock.lot || 1);
+    case 'pe_oi_chg_lots':
+      return (stock.pe_oi_chg || 0) / (stock.lot || 1);
+    case 'net_oi_lots':
+      return (stock.net_oi || 0) / (stock.lot || 1);
+    case 'moneyness': {
+      if (!stock.moneyness) return 0;
+      const m = stock.moneyness;
+      return (m.deep_pe || 0) - (m.deep_ce || 0); // Sort by Put Deep OTM vs Call Deep OTM change delta
+    }
+    case 'vol_confluence': {
+      // Rank: TRIPLE (3) > DOUBLE (2) > SINGLE (1) > null (0)
+      const v = stock.vol_confluence;
+      return v === 'TRIPLE' ? 3 : v === 'DOUBLE' ? 2 : v === 'SINGLE' ? 1 : 0;
+    }
+    default:
+      return stock[key];
+  }
+}
+
 function sortSymbols() {
   symbolOrder = Object.keys(stocks);
   symbolOrder.sort((a, b) => {
-    let va = stocks[a][sortKey], vb = stocks[b][sortKey];
+    let va = getSortValue(stocks[a], sortKey), vb = getSortValue(stocks[b], sortKey);
     if (va == null) va = sortAsc ? Infinity : -Infinity;
     if (vb == null) vb = sortAsc ? Infinity : -Infinity;
     if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
@@ -2259,45 +2457,359 @@ document.getElementById('headerRow').addEventListener('click', function(e) {
 // === Filtering ===
 document.getElementById('searchBox').addEventListener('input', function() {
   filters.search = this.value.toUpperCase();
+  persistFilterState();
   applyFilters();
 });
 document.getElementById('sectorFilter').addEventListener('change', function() {
   filters.sector = this.value;
+  persistFilterState();
   applyFilters();
 });
 document.getElementById('signalFilter').addEventListener('change', function() {
   filters.signal = this.value;
+  persistFilterState();
   applyFilters();
 });
 document.getElementById('buildupFilter').addEventListener('change', function() {
   filters.buildup = this.value;
+  persistFilterState();
   applyFilters();
 });
+
+function onConvictionChange() {
+  filters.conviction = document.getElementById('convictionFilter').value || '';
+  persistFilterState();
+  applyFilters();
+}
+
+function onOiThesisChange() {
+  filters.oiThesis = document.getElementById('oiThesisFilter').value || '';
+  persistFilterState();
+  applyFilters();
+}
+
+function onMoneynessChange() {
+  filters.moneyness = document.getElementById('moneynessFilter').value || '';
+  persistFilterState();
+  applyFilters();
+}
+
+// === OI Thesis TradingView export (mirrors the OI Thesis page format) ===
+function _qtDownload(content, filename, mime) {
+  try {
+    const blob = new Blob([content], { type: (mime || 'text/plain') + ';charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+  } catch (e) {
+    alert('Export failed: ' + e);
+  }
+}
+
+// side: 'bull' | 'bear' | 'both'. Uses live LIVE DATA (T-0).
+function exportOiThesisTV(side) {
+  if (!window.DATA || !window.DATA.stocks) {
+    if (typeof showToast === 'function') showToast('No live data available yet.', 'warn');
+    return;
+  }
+  const bulls = [];
+  const bears = [];
+  Object.keys(window.DATA.stocks).forEach(function(sym) {
+    const d = window.DATA.stocks[sym];
+    const ceChg = d.ce_oi_chg || 0;
+    const peChg = d.pe_oi_chg || 0;
+    if (ceChg < 0 && peChg > 0) bulls.push(sym);
+    if (ceChg > 0 && peChg < 0) bears.push(sym);
+  });
+
+  const stamp = new Date().toISOString().slice(0,10).replace(/-/g, '');
+  let payload, fname;
+  if (side === 'bull') {
+    if (!bulls.length) { showToast && showToast('No live bull flags', 'warn'); return; }
+    payload = bulls.map(function(s){ return 'NSE:' + s; }).join(',') + '\n';
+    fname   = 'oi_thesis_live_bull_' + stamp + '.txt';
+  } else if (side === 'bear') {
+    if (!bears.length) { showToast && showToast('No live bear flags', 'warn'); return; }
+    payload = bears.map(function(s){ return 'NSE:' + s; }).join(',') + '\n';
+    fname   = 'oi_thesis_live_bear_' + stamp + '.txt';
+  } else {
+    const lines = [];
+    if (bulls.length) lines.push('###Live Bull (' + stamp + '),' + bulls.map(function(s){ return 'NSE:' + s; }).join(','));
+    if (bears.length) lines.push('###Live Bear (' + stamp + '),' + bears.map(function(s){ return 'NSE:' + s; }).join(','));
+    if (!lines.length) { showToast && showToast('No live flags', 'warn'); return; }
+    payload = lines.join('\n') + '\n';
+    fname   = 'oi_thesis_live_both_' + stamp + '.txt';
+  }
+  _qtDownload(payload, fname, 'text/plain');
+  if (typeof showToast === 'function') {
+    showToast('Downloaded ' + fname + ' \u2014 import into TradingView watchlist', 'info');
+  }
+}
+
+// Pull today's OI thesis symbol sets from the tracker API. Lightweight call
+// (one row per flag, ~20 rows). Refreshed every 5 min, plus on tab focus,
+// plus a forced refresh shortly after 15:35 IST so the post-close capture
+// from the launchd job appears in the dropdown without a manual reload.
+function loadOiThesisSymbols() {
+  return fetch('/api/oi-thesis?days=1', { credentials: 'same-origin' })
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      const bull = new Set(), bear = new Set();
+      (d.today_flags || []).forEach(function(f) {
+        if (f.side === 'bull') bull.add(f.symbol);
+        else if (f.side === 'bear') bear.add(f.symbol);
+      });
+      const both = new Set([...bull, ...bear]);
+      const flagDate = d.latest_flag_date || '';
+      // Only treat as a "new dataset" if the date or member sets actually changed.
+      const prev = oiThesisSymbols || {};
+      const sameDate = prev.flagDate === flagDate;
+      const sameSize = prev.bull && prev.bear &&
+                       prev.bull.size === bull.size && prev.bear.size === bear.size;
+      oiThesisSymbols = { bull: bull, bear: bear, both: both, flagDate: flagDate, loadedAt: Date.now() };
+      // Update the filter label so user sees the live counts
+      const sel = document.getElementById('oiThesisFilter');
+      if (sel) {
+        const dt = flagDate ? ' \u2022 ' + flagDate : '';
+        const optBull = sel.querySelector('option[value="bull"]');
+        const optBear = sel.querySelector('option[value="bear"]');
+        const optBoth = sel.querySelector('option[value="both"]');
+        if (optBull) optBull.textContent = 'OI Thesis \u2014 Bull (' + bull.size + ')' + dt;
+        if (optBear) optBear.textContent = 'OI Thesis \u2014 Bear (' + bear.size + ')' + dt;
+        if (optBoth) optBoth.textContent = 'OI Thesis \u2014 Both (' + both.size + ')' + dt;
+      }
+      // Re-apply if user already had this filter on
+      if (filters.oiThesis) applyFilters();
+      // Toast on visible change so user notices the daily refresh
+      if (!sameDate || !sameSize) {
+        try {
+          if (typeof showToast === 'function') {
+            showToast('OI Thesis flags updated' + (flagDate ? ' \u2014 ' + flagDate : '') +
+                      ' (' + bull.size + ' bull / ' + bear.size + ' bear)', 'info');
+          }
+        } catch (_) {}
+      }
+    })
+    .catch(function(){ /* silent — page still works without thesis */ });
+}
+
+// Initial load + 5-min refresh covers the post-close (15:35 IST) capture window
+loadOiThesisSymbols();
+setInterval(loadOiThesisSymbols, 5 * 60 * 1000);
+
+// Refresh whenever the tab becomes visible — picks up the post-close capture
+// without requiring a hard reload.
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') loadOiThesisSymbols();
+});
+
+// Force refresh shortly after 15:35 IST (15:40, 15:50, 16:00) on weekdays so
+// the dropdown reflects the launchd capture run within minutes.
+(function _scheduleOiThesisPostClose() {
+  function nextRefreshDelayMs() {
+    const now = new Date();
+    // Mac local clock is set to IST per the launchd plist comment.
+    const day = now.getDay();          // Sun=0 ... Sat=6
+    const hh  = now.getHours();
+    const mm  = now.getMinutes();
+    if (day === 0 || day === 6) return 0;        // weekend — no special schedule
+    const mins = hh * 60 + mm;
+    const targets = [15*60+40, 15*60+50, 16*60+0, 16*60+15];
+    for (let i = 0; i < targets.length; i++) {
+      if (mins < targets[i]) return (targets[i] - mins) * 60 * 1000;
+    }
+    return 0;
+  }
+  const delay = nextRefreshDelayMs();
+  if (delay > 0) {
+    setTimeout(function() {
+      loadOiThesisSymbols();
+      // Schedule the next slot
+      _scheduleOiThesisPostClose();
+    }, delay);
+  }
+})();
+
+
+window.useFilteredOI = false;
+function toggleOIFilter() {
+  window.useFilteredOI = !window.useFilteredOI;
+  const btn = document.getElementById('oiFilterBtn');
+  if (window.useFilteredOI) {
+    btn.innerHTML = '[Filter: ON] ATM &plusmn;5%';
+    btn.classList.add('active');
+    btn.style.background = 'rgba(245, 158, 11, 0.15)';
+  } else {
+    btn.innerHTML = '[Filter: OFF] Overall OI';
+    btn.classList.remove('active');
+    btn.style.background = 'transparent';
+  }
+  applyOIFilterState();
+}
+
+function applyOIFilterState() {
+  Object.values(stocks).forEach(d => {
+    if (window.useFilteredOI) {
+      d.ce_oi_chg = d.ce_oi_chg_filtered !== undefined ? d.ce_oi_chg_filtered : d._ce_oi_chg_overall;
+      d.pe_oi_chg = d.pe_oi_chg_filtered !== undefined ? d.pe_oi_chg_filtered : d._pe_oi_chg_overall;
+      d.net_oi = d.net_oi_filtered !== undefined ? d.net_oi_filtered : d._net_oi_overall;
+    } else {
+      if (d._ce_oi_chg_overall !== undefined) d.ce_oi_chg = d._ce_oi_chg_overall;
+      if (d._pe_oi_chg_overall !== undefined) d.pe_oi_chg = d._pe_oi_chg_overall;
+      if (d._net_oi_overall !== undefined) d.net_oi = d._net_oi_overall;
+    }
+  });
+  buildTable();
+}
 
 function toggleN50() {
   filters.n50 = !filters.n50;
   document.getElementById('n50Btn').classList.toggle('active', filters.n50);
+  persistFilterState();
   applyFilters();
 }
 
 function applyFilters() {
   let visible = 0, total = 0;
+  const surgeMin = minSurge / 10; // slider 0-50 → 0.0-5.0
   for (const sym of symbolOrder) {
     total++;
     const tr = rowElements[sym];
     if (!tr) continue;
+    const d = stocks[sym] || {};
     let show = true;
     if (filters.search && !sym.includes(filters.search)) show = false;
     if (filters.sector && tr.dataset.sector !== filters.sector) show = false;
     if (filters.signal && tr.dataset.sig !== filters.signal) show = false;
     if (filters.buildup && tr.dataset.bu !== filters.buildup) show = false;
-    if (filters.n50 && tr.dataset.n50 !== '1') show = false;
+    if (filters.n50 && tr.dataset.n50 !== '1' && tr.dataset.sector !== 'INDEX') show = false;
+    
+    // Custom visibility rules for Indices: Hide by default unless explicitly requested
+    if (show && tr.dataset.sector === 'INDEX') {
+      let explicit = false;
+      if (filters.sector === 'INDEX') explicit = true;
+      if (filters.n50) explicit = true;
+      if (watchlist.has(sym)) explicit = true;
+      if (filters.search && sym.includes(filters.search)) explicit = true;
+      if (!explicit) show = false;
+    }
     if (filters.poised && tr.dataset.poised !== '1') show = false;
+    if (show && filters.conviction) {
+      const tier = (d.conviction_tier || 'background');
+      if (filters.conviction === 'strong' && tier !== 'strong') show = false;
+      else if (filters.conviction === 'watch' && tier === 'background') show = false;
+    }
+    if (show && filters.watchlist && !watchlist.has(sym)) {
+      show = false;
+    }
+    if (show && filters.oiThesis) {
+      if (filters.oiThesis.startsWith('live_')) {
+        // Live OI divergence — computed from current stocks state, no floor on rank
+        const d2 = stocks[sym] || {};
+        const ce = d2.ce_oi_chg || 0;
+        const pe = d2.pe_oi_chg || 0;
+        const toi = d2.total_oi || 0;
+        const LIVE_OI_FLOOR = 100000;
+        if (toi < LIVE_OI_FLOOR) { show = false; }
+        else if (filters.oiThesis === 'live_bull' && !(ce < 0 && pe > 0)) show = false;
+        else if (filters.oiThesis === 'live_bear' && !(ce > 0 && pe < 0)) show = false;
+        else if (filters.oiThesis === 'live_both' && !((ce < 0 && pe > 0) || (ce > 0 && pe < 0))) show = false;
+      } else {
+        // EOD frozen thesis set
+        const set = oiThesisSymbols[filters.oiThesis];
+        if (!set || !set.has(sym)) show = false;
+      }
+    }
+
+    if (show && filters.moneyness) {
+      const m = d.moneyness;
+      if (!m) {
+        show = false;
+      } else {
+        const getCol = (c, p) => {
+          if (c === 0 && p === 0) return 'N';
+          if (Math.abs(c) < 500 && Math.abs(p) < 500) return 'N';
+          if (c > p) return 'R';
+          if (p > c) return 'G';
+          return 'N';
+        };
+        const pattern = getCol(m.atm_ce, m.atm_pe) + getCol(m.near_ce, m.near_pe) + getCol(m.deep_ce, m.deep_pe);
+        
+        if (filters.moneyness === 'bull_support' && pattern !== 'GGG') show = false;
+        else if (filters.moneyness === 'bear_resist' && pattern !== 'RRR') show = false;
+        else if (filters.moneyness === 'bull_bear_both' && pattern !== 'GGG' && pattern !== 'RRR') show = false;
+        else if (filters.moneyness === 'bull_capped' && pattern !== 'GGR') show = false;
+        else if (filters.moneyness === 'bear_trap' && pattern !== 'RRG') show = false;
+        else if (filters.moneyness === 'strangled' && pattern !== 'RGR') show = false;
+        else if (filters.moneyness === 'straddle' && pattern !== 'GRG') show = false;
+      }
+    }
+
+    // Hide Quiet: drop dead rows (works only when no chip explicitly wants them)
+    if (show && hideQuiet) {
+      const vs = +d.vol_surge || 0;
+      const sc = +d.score || 0;
+      if (vs < 0.8 && sc < 30) show = false;
+    }
+
+    // Min surge slider
+    if (show && surgeMin > 0) {
+      if ((+d.vol_surge || 0) < surgeMin) show = false;
+    }
+
+    // Min ₹ Cr (Net OI notional capital-weight filter)
+    if (show && minRsCr > 0) {
+      const ce = d.ce_oi_chg || 0;
+      const pe = d.pe_oi_chg || 0;
+      const ltp = d.ltp || 0;
+      const netRs = (pe - ce) * ltp;        // signed Net OI ₹ notional
+      if (Math.abs(netRs) < minRsCr * 1e7) show = false;
+    }
+
+    // Quick chips (OR within watchlist+others is intentional: chips = saved searches)
+    if (show && activeChips.size > 0) {
+      let chipPass = false;
+      for (const chip of activeChips) {
+        if (matchChip(chip, sym, d)) { chipPass = true; break; }
+      }
+      if (!chipPass) show = false;
+    }
+
     tr.classList.toggle('hidden', !show);
     if (show) visible++;
   }
   updateCounts(visible, total);
   updateFooterFilter();
+  updateChipCounter(visible, total);
+}
+
+// Predicate per chip — keep simple, read from live `d` (stocks[sym])
+function matchChip(chip, sym, d) {
+  const vs = +d.vol_surge || 0;
+  const sc = +d.score || 0;
+  const ch = Math.abs(+d.chg_pct || 0);
+  const sig = d.pcr_sig || '';
+  const bu = d.buildup || '';
+  const pcr = +d.pcr || 0;
+  switch (chip) {
+    case 'surge':
+      return vs >= 1.25;
+    case 'breakout':
+      return vs >= 1.5 && ch >= 1.5 && sc >= 55;
+    case 'hiconv':
+      return sc >= 70 && (sig === 'BULLISH' || sig === 'BEARISH');
+    case 'long_bu':
+      return bu === 'LONG_BUILD' && vs >= 1.2;
+    case 'short_bu':
+      return bu === 'SHORT_BUILD' && vs >= 1.2;
+    case 'unusual':
+      return vs >= 2.0 || pcr >= 1.4 || (pcr > 0 && pcr <= 0.6);
+    case 'watchlist':
+      return watchlist.has(sym);
+    default:
+      return false;
+  }
 }
 
 function updateCounts(visible, total) {
@@ -2313,9 +2825,322 @@ function updateFooterFilter() {
   if (filters.signal) parts.push('Signal: ' + filters.signal);
   if (filters.buildup) parts.push('Buildup: ' + filters.buildup);
   if (filters.n50) parts.push('NIFTY 50 only');
-  if (filters.poised) parts.push('\uD83C\uDFAF Trade Ready only');
-  document.getElementById('footerFilter').textContent = parts.length ? parts.join(' | ') : 'Showing all stocks';
+  if (filters.poised) parts.push('Trade Ready only');
+  if (filters.conviction === 'strong') parts.push('Conviction: Strong');
+  else if (filters.conviction === 'watch') parts.push('Conviction: Watch+');
+  if (filters.oiThesis === 'bull') parts.push('OI Thesis: Bull (EOD)');
+  else if (filters.oiThesis === 'bear') parts.push('OI Thesis: Bear (EOD)');
+  else if (filters.oiThesis === 'both') parts.push('OI Thesis: Both (EOD)');
+  else if (filters.oiThesis === 'live_bull') parts.push('Live OI: Bull');
+  else if (filters.oiThesis === 'live_bear') parts.push('Live OI: Bear');
+  else if (filters.oiThesis === 'live_both') parts.push('Live OI: Both');
+  if (activeChips.size) parts.push('Chips: ' + Array.from(activeChips).join(', '));
+  if (minSurge > 0) parts.push('Surge \u2265 ' + (minSurge / 10).toFixed(1) + '\u00D7');
+  if (minRsCr > 0) parts.push('Net \u20B9 \u2265 ' + minRsCr + ' Cr');
+  // hideQuiet retired (toggle UI gone, value forced false)
+  document.getElementById('footerFilter').textContent = parts.length ? parts.join('  \u00B7  ') : 'No filters';
 }
+
+// === Quick Filter Chips ===
+function persistFilterState() {
+  try {
+    localStorage.setItem(FILTER_STORE_KEY, JSON.stringify({
+      filters: {
+        search:  filters.search,
+        sector:  filters.sector,
+        signal:  filters.signal,
+        buildup: filters.buildup,
+        n50:     filters.n50,
+        poised:  filters.poised,
+        conviction: filters.conviction,
+        oiThesis: filters.oiThesis,
+        moneyness: filters.moneyness
+      },
+      chips: Array.from(activeChips),
+      hideQuiet: hideQuiet,
+      minSurge: minSurge,
+      minRsCr: minRsCr
+    }));
+  } catch (e) {}
+}
+// Back-compat alias
+const persistChipState = persistFilterState;
+
+function toggleQuickChip(chip) {
+  if (activeChips.has(chip)) activeChips.delete(chip);
+  else activeChips.add(chip);
+  syncChipUI();
+  persistChipState();
+  applyFilters();
+}
+
+function clearQuickChips() {
+  activeChips.clear();
+  minSurge = 0;
+  minRsCr = 0;
+  document.getElementById('minSurgeSlider').value = 0;
+  document.getElementById('minSurgeVal').innerHTML = '0.0&times;';
+  document.getElementById('minRsCrSlider').value = 0;
+  document.getElementById('minRsCrVal').textContent = '0 Cr';
+  syncChipUI();
+  persistFilterState();
+  applyFilters();
+}
+
+// Clear EVERY user-selected filter at once (Hide Quiet is intentionally preserved
+// because it's a passive noise-reducer, not a filter the user "picked").
+function clearAllFilters() {
+  // Existing filters
+  filters.search = '';
+  filters.sector = '';
+  filters.signal = '';
+  filters.buildup = '';
+  filters.n50 = false;
+  filters.poised = false;
+  filters.conviction = '';
+  filters.oiThesis = '';
+  filters.moneyness = '';
+  filters.watchlist = false;
+  // Sync inputs
+  const sb = document.getElementById('searchBox');         if (sb) sb.value = '';
+  const sf = document.getElementById('sectorFilter');      if (sf) sf.value = '';
+  const sgf = document.getElementById('signalFilter');     if (sgf) sgf.value = '';
+  const bf = document.getElementById('buildupFilter');     if (bf) bf.value = '';
+  const cf = document.getElementById('convictionFilter');  if (cf) cf.value = '';
+  const otf = document.getElementById('oiThesisFilter');   if (otf) otf.value = '';
+  const mf = document.getElementById('moneynessFilter');   if (mf) mf.value = '';
+  const n50btn = document.getElementById('n50Btn');        if (n50btn) n50btn.classList.remove('active');
+  const pbtn = document.getElementById('poisedBtn');       if (pbtn) pbtn.classList.remove('active');
+  const wlbtn = document.getElementById('wlFilterBtn');    if (wlbtn) wlbtn.classList.remove('active');
+  // Chips + sliders
+  activeChips.clear();
+  minSurge = 0;
+  minRsCr = 0;
+  const slider = document.getElementById('minSurgeSlider');
+  const sval = document.getElementById('minSurgeVal');
+  if (slider) slider.value = 0;
+  if (sval) sval.innerHTML = '0.0&times;';
+  const rsSlider = document.getElementById('minRsCrSlider');
+  const rsVal = document.getElementById('minRsCrVal');
+  if (rsSlider) rsSlider.value = 0;
+  if (rsVal) rsVal.textContent = '0 Cr';
+  syncChipUI();
+  persistFilterState();
+  applyFilters();
+}
+
+function onHideQuietChange() {
+  hideQuiet = document.getElementById('hideQuietToggle').checked;
+  persistChipState();
+  applyFilters();
+}
+
+function onMinSurgeChange() {
+  minSurge = +document.getElementById('minSurgeSlider').value;
+  document.getElementById('minSurgeVal').innerHTML = (minSurge / 10).toFixed(1) + '&times;';
+  syncChipUI();
+  persistChipState();
+  applyFilters();
+}
+
+function onMinRsCrChange() {
+  minRsCr = +document.getElementById('minRsCrSlider').value;
+  document.getElementById('minRsCrVal').textContent = minRsCr + ' Cr';
+  syncChipUI();
+  persistChipState();
+  applyFilters();
+}
+
+function syncChipUI() {
+  document.querySelectorAll('.qchip[data-chip]').forEach(btn => {
+    const c = btn.getAttribute('data-chip');
+    btn.classList.toggle('active', activeChips.has(c));
+  });
+  // Count every active user-selected filter
+  let n = activeChips.size;
+  if (filters.search)  n++;
+  if (filters.sector)  n++;
+  if (filters.signal)  n++;
+  if (filters.buildup) n++;
+  if (filters.n50)     n++;
+  if (filters.poised)  n++;
+  if (filters.conviction) n++;
+  if (filters.oiThesis) n++;
+  if (minSurge > 0)    n++;
+  if (minRsCr > 0)     n++;
+
+  const btn   = document.getElementById('qchipClearBtn');
+  const label = document.getElementById('qchipClearLabel');
+  const count = document.getElementById('qchipClearCount');
+  if (btn) {
+    if (n > 0) {
+      btn.classList.add('has-filters');
+      if (label) label.textContent = 'Clear all';
+      if (count) { count.style.display = ''; count.textContent = n; }
+    } else {
+      btn.classList.remove('has-filters');
+      if (label) label.textContent = 'No filters';
+      if (count) count.style.display = 'none';
+    }
+  }
+  const wlc = document.getElementById('wlCount');
+  if (wlc) wlc.textContent = watchlist.size;
+}
+
+function updateChipCounter(visible, total) {
+  const s = document.getElementById('qccShown');
+  const t = document.getElementById('qccTotal');
+  if (s) s.textContent = visible;
+  if (t) t.textContent = total;
+}
+
+// === Index Ticker Bar ===
+function updateIdxTile(sym, data) {
+  const ltp = data.ltp;
+  const chg = data.chg_pct;
+  const ltpEl = document.getElementById('idx-' + sym + '-ltp');
+  const chgEl = document.getElementById('idx-' + sym + '-chg');
+  if (!ltpEl || !chgEl) return;
+  if (ltp != null) {
+    ltpEl.textContent = ltp >= 1000
+      ? ltp.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+      : ltp.toFixed(2);
+  }
+  if (chg != null) {
+    chgEl.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+    chgEl.className = 'idx-chg ' + (chg > 0 ? 'pos' : chg < 0 ? 'neg' : 'neu');
+  }
+}
+
+function pollIndexSummary() {
+  fetch('/api/index-summary', { credentials: 'same-origin' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      ['NIFTY50', 'BANKNIFTY', 'MIDCAPNIFTY', 'INDIAVIX'].forEach(function(sym) {
+        if (d[sym]) updateIdxTile(sym, d[sym]);
+      });
+      if (d.breadth) {
+        const advEl = document.getElementById('idx-adv');
+        const decEl = document.getElementById('idx-dec');
+        if (advEl) advEl.textContent = d.breadth.adv;
+        if (decEl) decEl.textContent = d.breadth.dec;
+      }
+      if (d.NIFTY50) {
+        const pcrEl = document.getElementById('idx-nifty-pcr');
+        const mpEl = document.getElementById('idx-nifty-maxpain');
+        if (pcrEl && d.NIFTY50.pcr) pcrEl.textContent = d.NIFTY50.pcr.toFixed(2);
+        if (mpEl && d.NIFTY50.max_pain) mpEl.textContent = d.NIFTY50.max_pain.toLocaleString('en-IN');
+      }
+    })
+    .catch(function() {}); // silent — ticker is informational
+}
+
+// Poll every 3 seconds during market hours
+pollIndexSummary();
+setInterval(pollIndexSummary, 3000);
+
+// === Watchlist (per-row star) — server-synced ===
+function toggleWatchlist(sym, ev) {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  const adding = !watchlist.has(sym);
+  if (adding) watchlist.add(sym);
+  else watchlist.delete(sym);
+
+  // Optimistic local update
+  try {
+    localStorage.setItem('quantra_watchlist', JSON.stringify(Array.from(watchlist)));
+  } catch (e) {}
+  document.querySelectorAll('.row-watch-btn[data-watch-sym="' + sym + '"]').forEach(b => {
+    b.classList.toggle('active', watchlist.has(sym));
+    b.textContent = watchlist.has(sym) ? '\u2605' : '\u2606';
+  });
+  document.getElementById('wlCount').textContent = watchlist.size;
+  if (activeChips.has('watchlist')) applyFilters();
+
+  // Sync to server (fire-and-forget)
+  const endpoint = adding ? '/api/user/watchlist/add' : '/api/user/watchlist/remove';
+  fetch(endpoint, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+    body: JSON.stringify({ symbol: sym }),
+  }).catch(() => {}); // silent fail — localStorage is the fallback
+}
+
+// Load watchlist from server on startup (overrides localStorage if server has data)
+function loadServerWatchlist() {
+  fetch('/api/user/watchlist', { credentials: 'same-origin' })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (!d || !Array.isArray(d.symbols)) return;
+      // Merge: server is source of truth, but keep any local additions not yet synced
+      const serverSet = new Set(d.symbols);
+      // Sync any local-only symbols to server
+      watchlist.forEach(sym => {
+        if (!serverSet.has(sym)) {
+          fetch('/api/user/watchlist/add', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+            body: JSON.stringify({ symbol: sym }),
+          }).catch(() => {});
+        }
+      });
+      // Update local watchlist to server state + local additions
+      serverSet.forEach(s => watchlist.add(s));
+      try {
+        localStorage.setItem('quantra_watchlist', JSON.stringify(Array.from(watchlist)));
+      } catch (e) {}
+      document.getElementById('wlCount').textContent = watchlist.size;
+      // Refresh star buttons
+      document.querySelectorAll('.row-watch-btn').forEach(b => {
+        const s = b.dataset.watchSym;
+        if (s) {
+          b.classList.toggle('active', watchlist.has(s));
+          b.textContent = watchlist.has(s) ? '\u2605' : '\u2606';
+        }
+      });
+    })
+    .catch(() => {}); // silent fail — localStorage fallback
+}
+
+// Restore UI state on first paint
+window.addEventListener('DOMContentLoaded', function() {
+  // Sync watchlist from server (after auth is confirmed)
+  loadServerWatchlist();
+  // Classic filters: write persisted state into the actual inputs
+  const sb = document.getElementById('searchBox');
+  if (sb && filters.search) sb.value = filters.search;
+  const sf = document.getElementById('sectorFilter');
+  if (sf && filters.sector) sf.value = filters.sector;
+  const sgf = document.getElementById('signalFilter');
+  if (sgf && filters.signal) sgf.value = filters.signal;
+  const bf = document.getElementById('buildupFilter');
+  if (bf && filters.buildup) bf.value = filters.buildup;
+  const cf = document.getElementById('convictionFilter');
+  if (cf) cf.value = filters.conviction || '';
+  const otf = document.getElementById('oiThesisFilter');
+  if (otf) otf.value = filters.oiThesis || '';
+  const mf = document.getElementById('moneynessFilter');
+  if (mf) mf.value = filters.moneyness || '';
+  const n50btn = document.getElementById('n50Btn');
+  if (n50btn) n50btn.classList.toggle('active', filters.n50);
+  const pbtn = document.getElementById('poisedBtn');
+  if (pbtn) pbtn.classList.toggle('active', filters.poised);
+
+  // Chip controls
+  const hq = document.getElementById('hideQuietToggle');
+  if (hq) hq.checked = hideQuiet;
+  const ms = document.getElementById('minSurgeSlider');
+  const mv = document.getElementById('minSurgeVal');
+  if (ms) ms.value = minSurge;
+  if (mv) mv.innerHTML = (minSurge / 10).toFixed(1) + '&times;';
+  const rs = document.getElementById('minRsCrSlider');
+  const rv = document.getElementById('minRsCrVal');
+  if (rs) rs.value = minRsCr;
+  if (rv) rv.textContent = minRsCr + ' Cr';
+
+  syncChipUI();
+});
 
 // === Column Visibility ===
 function toggleColGroup(group) {
@@ -2326,6 +3151,7 @@ function toggleColGroup(group) {
 }
 
 function applyColVisibility() {
+  // Layer 1: legacy group-level visibility
   const groupMap = { pricedetail: 'g-pricedetail', vol: 'g-vol', oi: 'g-oi', opt: 'g-opt' };
   for (const [group, cls] of Object.entries(groupMap)) {
     const vis = colGroups[group];
@@ -2333,27 +3159,441 @@ function applyColVisibility() {
       el.style.display = vis ? '' : 'none';
     });
   }
+  // Layer 2: per-column visibility from new column-picker
+  applyColumnPickerVisibility();
 }
 
-// === View Mode Presets ===
+// === View Mode Presets (legacy, still used by some callers) ===
 function setViewMode(mode) {
   if (mode === 'compact') {
     colGroups = { pricedetail: false, vol: false, oi: false, opt: false };
   } else {
     colGroups = { pricedetail: true, vol: true, oi: true, opt: true };
   }
-  // Update all toggle buttons
-  document.querySelectorAll('.col-toggles [data-group]').forEach(btn => {
-    btn.classList.toggle('active', colGroups[btn.dataset.group]);
-  });
   applyColVisibility();
 }
+
+// =============================================================
+// COLUMN PICKER + EXPORT (new unified UI)
+// =============================================================
+
+// Single source of truth for every column in the table.
+// "essential" = part of the always-on default view; protected from "Compact" preset.
+const COLUMN_REGISTRY = [
+  { key: 'score',     label: 'Score',     group: 'core',        essential: true },
+  { key: 'symbol',    label: 'Symbol',    group: 'core',        essential: true, locked: true },
+  { key: 'sector',    label: 'Sector',    group: 'core',        essential: true },
+  { key: 'ltp',       label: 'LTP',       group: 'core',        essential: true },
+  { key: 'chg_pct',   label: 'Chg%',      group: 'core',        essential: true },
+  { key: 'pcr_sig',   label: 'Signal',    group: 'core',        essential: true },
+  { key: 'buildup',   label: 'Buildup',   group: 'core',        essential: true },
+  { key: 'prem_ok',   label: 'Prem',      group: 'core',        essential: false },
+  { key: 'gap_pct',   label: 'Gap%',      group: 'pricedetail', essential: false },
+  { key: 'open',      label: 'Open',      group: 'pricedetail', essential: false },
+  { key: 'high',      label: 'High',      group: 'pricedetail', essential: false },
+  { key: 'low',       label: 'Low',       group: 'pricedetail', essential: false },
+  { key: 'range_pct', label: 'Range%',    group: 'pricedetail', essential: false },
+  { key: 'vol',       label: 'Volume',    group: 'vol',         essential: false },
+  { key: 'vol_surge', label: 'Surge 5d',  group: 'vol',         essential: false },
+  { key: 'vol_surge_10d', label: 'Surge 10d', group: 'vol',     essential: false },
+  { key: 'vol_surge_20d', label: 'Surge 20d', group: 'vol',     essential: false },
+  { key: 'vol_confluence', label: 'Vol Conf', group: 'vol',     essential: true },
+  { key: 'pcr',       label: 'PCR',       group: 'oi',          essential: false },
+  { key: 'total_oi',  label: 'Total OI',  group: 'oi',          essential: false },
+  { key: 'moneyness',  label: 'OI Moneyness', group: 'oi',       essential: true },
+  { key: 'ce_oi_chg', label: 'CE OI (sh)', group: 'oi',         essential: true },
+  { key: 'pe_oi_chg', label: 'PE OI (sh)', group: 'oi',         essential: true },
+  { key: 'net_oi',    label: 'Net OI (sh)', group: 'oi',        essential: true },
+  { key: 'ce_oi_chg_lots', label: 'CE Lots',   group: 'oi',     essential: false },
+  { key: 'pe_oi_chg_lots', label: 'PE Lots',   group: 'oi',     essential: false },
+  { key: 'net_oi_lots',    label: 'Net Lots',  group: 'oi',     essential: false },
+  { key: 'ce_oi_chg_rs', label: 'CE \u20B9',    group: 'oi',     essential: true },
+  { key: 'pe_oi_chg_rs', label: 'PE \u20B9',    group: 'oi',     essential: true },
+  { key: 'net_oi_rs',    label: 'Net OI \u20B9', group: 'oi',    essential: true },
+  { key: 'atm_iv',    label: 'IV%',       group: 'opt',         essential: false },
+  { key: 'max_pain',  label: 'MaxPain',   group: 'opt',         essential: false },
+  { key: 'mp_dist',   label: 'MP Dist%',  group: 'opt',         essential: false },
+  { key: 'atm_ce',    label: 'CE Prem',   group: 'opt',         essential: false },
+  { key: 'atm_pe',    label: 'PE Prem',   group: 'opt',         essential: false },
+  { key: 'lot',       label: 'Lot',       group: 'opt',         essential: false }
+];
+const GROUP_LABELS = {
+  core: 'Core', pricedetail: 'Price Detail', vol: 'Volume', oi: 'Open Interest', opt: 'Options'
+};
+const COLS_STORE_KEY = 'quantra_cols_v3';
+
+// Hydrate column visibility + order from localStorage (essentials default-on, others default-off)
+let colVisible = {};      // key -> boolean
+let colOrder   = COLUMN_REGISTRY.map(c => c.key);
+
+(function hydrateCols() {
+  // Sensible defaults: essentials on, rest off
+  COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = !!c.essential; });
+  try {
+    const saved = JSON.parse(localStorage.getItem(COLS_STORE_KEY) || '{}');
+    if (saved && saved.visible && typeof saved.visible === 'object') {
+      // Only adopt keys we know about; ignore stale keys
+      COLUMN_REGISTRY.forEach(c => {
+        if (typeof saved.visible[c.key] === 'boolean') colVisible[c.key] = saved.visible[c.key];
+      });
+    }
+    if (Array.isArray(saved.order) && saved.order.length) {
+      // Keep saved order, then append any new keys at the end
+      const known = new Set(COLUMN_REGISTRY.map(c => c.key));
+      const ordered = saved.order.filter(k => known.has(k));
+      COLUMN_REGISTRY.forEach(c => { if (!ordered.includes(c.key)) ordered.push(c.key); });
+      colOrder = ordered;
+    }
+    // Symbol always locked-on
+    colVisible['symbol'] = true;
+  } catch (e) {}
+})();
+
+function persistCols() {
+  try {
+    localStorage.setItem(COLS_STORE_KEY, JSON.stringify({ visible: colVisible, order: colOrder }));
+  } catch (e) {}
+}
+
+function applyColumnPickerVisibility() {
+  // Show/hide each column by its data-key
+  COLUMN_REGISTRY.forEach(c => {
+    const vis = colVisible[c.key] !== false;
+    const sel = '[data-key="' + c.key + '"], [data-field="' + c.key + '"]';
+    document.querySelectorAll(sel).forEach(el => {
+      // If a group is currently hidden via legacy colGroups, leave it hidden;
+      // otherwise honor per-column toggle.
+      if (c.group && c.group !== 'core' && colGroups && colGroups[c.group] === false) {
+        // Legacy group already hides this; no-op here
+        return;
+      }
+      el.style.display = vis ? '' : 'none';
+    });
+  });
+  // Update the visible-count meta in the modal if open
+  const shown = COLUMN_REGISTRY.filter(c => colVisible[c.key] !== false).length;
+  const sEl = document.getElementById('ceColShown');
+  const tEl = document.getElementById('ceColTotal');
+  if (sEl) sEl.textContent = shown;
+  if (tEl) tEl.textContent = COLUMN_REGISTRY.length;
+  rebuildGroupHeaders();
+}
+
+function rebuildGroupHeaders() {
+  const head = document.getElementById('headerRow');
+  const groupRow = document.querySelector('.col-group-row');
+  if (!head || !groupRow) return;
+
+  // 1. Get visible columns in their current order
+  const ths = Array.from(head.querySelectorAll('th'));
+  const visibleCols = ths.filter(th => th.style.display !== 'none');
+
+  // 2. Map each column key to its group
+  const keyToGroup = {};
+  COLUMN_REGISTRY.forEach(c => {
+    keyToGroup[c.key] = c.group || 'core';
+  });
+
+  const runs = [];
+  visibleCols.forEach(th => {
+    const key = th.getAttribute('data-key');
+    const group = keyToGroup[key] || 'core';
+    
+    if (runs.length > 0 && runs[runs.length - 1].group === group) {
+      runs[runs.length - 1].span++;
+    } else {
+      runs.push({ group: group, span: 1 });
+    }
+  });
+
+  // 3. Build the group header th elements
+  groupRow.innerHTML = '';
+  runs.forEach(run => {
+    const th = document.createElement('th');
+    th.colSpan = run.span;
+    if (run.group !== 'core') {
+      th.className = 'g-' + run.group;
+      if (run.group === 'pricedetail') th.textContent = 'Price Detail';
+      else if (run.group === 'vol') th.textContent = 'Volume';
+      else if (run.group === 'oi') th.textContent = 'OI Detail';
+      else if (run.group === 'opt') th.textContent = 'Options';
+    }
+    groupRow.appendChild(th);
+  });
+}
+
+// --- Modal open/close + tabs ---
+function openColsExport(initialTab) {
+  const overlay = document.getElementById('ceOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  switchCeTab(initialTab || 'cols');
+  renderColPicker();
+  refreshExportCounts();
+}
+function closeColsExport(ev) {
+  if (ev && ev.target && ev.target.id !== 'ceOverlay') return;
+  const overlay = document.getElementById('ceOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+function switchCeTab(tab) {
+  document.querySelectorAll('.ce-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.getElementById('cePanelCols').style.display   = tab === 'cols'   ? '' : 'none';
+  document.getElementById('cePanelExport').style.display = tab === 'export' ? '' : 'none';
+  if (tab === 'export') refreshExportCounts();
+}
+
+// --- Render the column list with checkbox + drag handle, grouped ---
+function renderColPicker() {
+  const list = document.getElementById('ceColList');
+  if (!list) return;
+  list.innerHTML = '';
+  // Group rendering, but iterate in colOrder so user's saved order is respected within groups
+  const byKey = Object.fromEntries(COLUMN_REGISTRY.map(c => [c.key, c]));
+  const groupOrder = ['core', 'pricedetail', 'vol', 'oi', 'opt'];
+  groupOrder.forEach(g => {
+    const groupKeys = colOrder.filter(k => byKey[k] && byKey[k].group === g);
+    if (!groupKeys.length) return;
+    const header = document.createElement('li');
+    header.className = 'ce-col-group';
+    header.textContent = GROUP_LABELS[g] || g;
+    list.appendChild(header);
+    groupKeys.forEach(k => {
+      const c = byKey[k];
+      const li = document.createElement('li');
+      li.className = 'ce-col-item' + (c.locked ? ' locked' : '');
+      li.dataset.key = c.key;
+      li.draggable = !c.locked;
+      li.innerHTML =
+        '<span class="ce-drag-handle" title="Drag to reorder">' + (c.locked ? '&#128274;' : '&#8801;') + '</span>' +
+        '<label class="ce-col-label">' +
+          '<input type="checkbox" ' + (colVisible[c.key] !== false ? 'checked' : '') + (c.locked ? ' disabled' : '') + ' data-key="' + c.key + '">' +
+          '<span class="ce-col-name">' + c.label + '</span>' +
+          '<span class="ce-col-key">' + c.key + '</span>' +
+        '</label>';
+      list.appendChild(li);
+    });
+  });
+
+  // Wire checkboxes
+  list.querySelectorAll('input[type="checkbox"][data-key]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      colVisible[this.dataset.key] = this.checked;
+      persistCols();
+      applyColumnPickerVisibility();
+    });
+  });
+
+  // Wire drag-reorder
+  let dragKey = null;
+  list.querySelectorAll('.ce-col-item').forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      if (this.classList.contains('locked')) { e.preventDefault(); return; }
+      dragKey = this.dataset.key;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', function() {
+      this.classList.remove('dragging');
+      dragKey = null;
+      // Capture the new order from the DOM
+      const newOrder = Array.from(list.querySelectorAll('.ce-col-item')).map(el => el.dataset.key);
+      colOrder = newOrder.concat(colOrder.filter(k => !newOrder.includes(k)));
+      persistCols();
+      reorderTableColumns();
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (!dragKey || dragKey === this.dataset.key) return;
+      const rect = this.getBoundingClientRect();
+      const after = (e.clientY - rect.top) > rect.height / 2;
+      const dragging = list.querySelector('.dragging');
+      if (!dragging) return;
+      if (after) this.parentNode.insertBefore(dragging, this.nextSibling);
+      else this.parentNode.insertBefore(dragging, this);
+    });
+  });
+  applyColumnPickerVisibility();
+}
+
+// Reorder DOM <th>/<td> to match colOrder. Sticky symbol col stays at index 0.
+function reorderTableColumns() {
+  const head = document.getElementById('headerRow');
+  const tbody = document.querySelector('#stockTable tbody') || document.querySelector('table tbody');
+  if (!head || !tbody) return;
+  const targetOrder = colOrder.slice(); // shallow copy
+
+  // Reorder the header
+  const ths = Array.from(head.querySelectorAll('th'));
+  const thMap = {};
+  ths.forEach(th => {
+    const k = th.getAttribute('data-key');
+    if (k) thMap[k] = th;
+  });
+  // Detach + reattach in target order; unknown keys stay where they were appended
+  targetOrder.forEach(k => { if (thMap[k]) head.appendChild(thMap[k]); });
+
+  // Reorder each row
+  Array.from(tbody.children).forEach(tr => {
+    const tdMap = {};
+    Array.from(tr.children).forEach(td => {
+      const k = td.getAttribute('data-field');
+      if (k) tdMap[k] = td;
+    });
+    targetOrder.forEach(k => { if (tdMap[k]) tr.appendChild(tdMap[k]); });
+  });
+  rebuildGroupHeaders();
+}
+
+// Apply order on initial load (after the table has been rendered)
+function applyInitialColumnOrder() {
+  // Defer slightly so renderInitialTable has populated rows
+  setTimeout(() => { reorderTableColumns(); applyColumnPickerVisibility(); }, 0);
+}
+
+// --- Presets ---
+function applyColPreset(preset) {
+  if (preset === 'reset') {
+    COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = !!c.essential; });
+    colOrder = COLUMN_REGISTRY.map(c => c.key);
+  } else if (preset === 'essentials') {
+    COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = !!c.essential; });
+  } else if (preset === 'compact') {
+    COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = (c.key === 'score' || c.key === 'symbol' || c.key === 'ltp' || c.key === 'chg_pct' || c.key === 'vol_surge'); });
+  } else if (preset === 'full') {
+    COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = true; });
+  }
+  colVisible['symbol'] = true;
+  persistCols();
+  renderColPicker();
+  reorderTableColumns();
+  applyColumnPickerVisibility();
+}
+
+// =============================================================
+// EXPORT
+// =============================================================
+function refreshExportCounts() {
+  const total = (typeof symbolOrder !== 'undefined') ? symbolOrder.length : 0;
+  const visible = (typeof symbolOrder !== 'undefined')
+    ? symbolOrder.filter(s => rowElements[s] && !rowElements[s].classList.contains('hidden')).length
+    : 0;
+  const a = document.getElementById('ceRowsAllCount');
+  const f = document.getElementById('ceRowsFilteredCount');
+  if (a) a.textContent = total;
+  if (f) f.textContent = visible;
+}
+
+function getExportSymbols(rowMode) {
+  if (typeof symbolOrder === 'undefined') return [];
+  if (rowMode === 'all') return symbolOrder.slice();
+  return symbolOrder.filter(s => rowElements[s] && !rowElements[s].classList.contains('hidden'));
+}
+
+function getExportColumnKeys(colMode) {
+  if (colMode === 'all') return COLUMN_REGISTRY.map(c => c.key);
+  // visible + respect saved order
+  return colOrder.filter(k => colVisible[k] !== false && COLUMN_REGISTRY.some(c => c.key === k));
+}
+
+function buildExportRow(sym, keys) {
+  const d = stocks[sym] || {};
+  const row = {};
+  keys.forEach(k => {
+    let v;
+    if (k === 'symbol') v = sym;
+    else v = d[k];
+    if (v === undefined || v === null) v = '';
+    if (typeof v === 'number') v = +v.toFixed(4);
+    row[k] = v;
+  });
+  return row;
+}
+
+function csvEscape(v) {
+  const s = String(v == null ? '' : v);
+  if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime + ';charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+}
+
+function doExport() {
+  const fmt = (document.querySelector('input[name="ceFmt"]:checked') || {}).value || 'csv';
+  const rowMode = (document.querySelector('input[name="ceRows"]:checked') || {}).value || 'filtered';
+  const colMode = (document.querySelector('input[name="ceCols"]:checked') || {}).value || 'visible';
+
+  const syms = getExportSymbols(rowMode);
+  const keys = getExportColumnKeys(colMode);
+  if (!syms.length) {
+    setExportStatus('No rows match current filter', 'warn');
+    return;
+  }
+  if (!keys.length) {
+    setExportStatus('No columns selected', 'warn');
+    return;
+  }
+
+  const ts = new Date();
+  const stamp = ts.getFullYear() + ('0' + (ts.getMonth() + 1)).slice(-2) + ('0' + ts.getDate()).slice(-2) +
+                '_' + ('0' + ts.getHours()).slice(-2) + ('0' + ts.getMinutes()).slice(-2);
+  const baseName = 'quantra_' + rowMode + '_' + stamp;
+
+  if (fmt === 'csv') {
+    // Header row uses friendly labels
+    const labelByKey = Object.fromEntries(COLUMN_REGISTRY.map(c => [c.key, c.label]));
+    const headerLine = keys.map(k => csvEscape(labelByKey[k] || k)).join(',');
+    const dataLines = syms.map(s => {
+      const r = buildExportRow(s, keys);
+      return keys.map(k => csvEscape(r[k])).join(',');
+    });
+    const csv = headerLine + '\r\n' + dataLines.join('\r\n');
+    downloadBlob(csv, baseName + '.csv', 'text/csv');
+  } else if (fmt === 'tradingview') {
+    // TradingView format: just a text file with NSE:SYMBOL, one per line
+    const tvLines = syms.map(s => 'NSE:' + s.toUpperCase());
+    downloadBlob(tvLines.join('\n') + '\n', baseName + '_tv.txt', 'text/plain');
+  } else {
+    const arr = syms.map(s => buildExportRow(s, keys));
+    downloadBlob(JSON.stringify(arr, null, 2), baseName + '.json', 'application/json');
+  }
+  setExportStatus('Downloaded ' + syms.length + ' rows \u00d7 ' + keys.length + ' cols', 'ok');
+}
+
+function setExportStatus(msg, kind) {
+  const el = document.getElementById('ceExportStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'ce-export-status' + (kind ? ' ' + kind : '');
+  if (kind === 'ok') {
+    setTimeout(() => { el.textContent = ''; el.className = 'ce-export-status'; }, 3000);
+  }
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const overlay = document.getElementById('ceOverlay');
+    if (overlay && overlay.style.display !== 'none') closeColsExport();
+  }
+});
 
 // === Heatmap ===
 function toggleHeatmap() {
   heatmapVisible = !heatmapVisible;
-  document.getElementById('heatmapBar').classList.toggle('collapsed', !heatmapVisible);
-  document.getElementById('heatToggle').classList.toggle('active', heatmapVisible);
+  const bar = document.getElementById('heatmapBar');
+  const btn = document.getElementById('heatToggle');
+  const caret = document.getElementById('heatCaret');
+  if (bar) bar.classList.toggle('collapsed', !heatmapVisible);
+  if (btn) btn.setAttribute('aria-expanded', heatmapVisible ? 'true' : 'false');
+  if (caret) caret.innerHTML = heatmapVisible ? '&#9650;' : '&#9660;';
   if (heatmapVisible) renderHeatmap();
 }
 
@@ -2381,6 +3621,7 @@ function renderHeatmap() {
     cell.onclick = () => {
       document.getElementById('sectorFilter').value = sec;
       filters.sector = sec;
+      persistFilterState();
       applyFilters();
     };
     bar.appendChild(cell);
@@ -2473,6 +3714,16 @@ function handleMessage(msg) {
     case 'init':
       stocks = msg.stocks || {};
       meta = msg.meta || {};
+      for (const [sym, d] of Object.entries(stocks)) {
+        if ('ce_oi_chg' in d) d._ce_oi_chg_overall = d.ce_oi_chg;
+        if ('pe_oi_chg' in d) d._pe_oi_chg_overall = d.pe_oi_chg;
+        if ('net_oi' in d) d._net_oi_overall = d.net_oi;
+        if (window.useFilteredOI) {
+          if (d.ce_oi_chg_filtered !== undefined) d.ce_oi_chg = d.ce_oi_chg_filtered;
+          if (d.pe_oi_chg_filtered !== undefined) d.pe_oi_chg = d.pe_oi_chg_filtered;
+          if (d.net_oi_filtered !== undefined) d.net_oi = d.net_oi_filtered;
+        }
+      }
       buildTable();
       document.getElementById('loadingOverlay').classList.add('hide');
       lastTick = lastOhlc = lastChain = Date.now();
@@ -2491,11 +3742,17 @@ function handleMessage(msg) {
           }
           if (d.ltp != null) updateCell(sym, 'ltp', d.ltp, fmtPrice);
           if (d.chg_pct != null) updateCell(sym, 'chg_pct', d.chg_pct, fmtPct, valClass(d.chg_pct));
-          if (typeof heatmapVisible !== "undefined" && heatmapVisible) renderHeatmap();
+          
           if (d.vol != null) updateCell(sym, 'vol', d.vol, fmtVol);
+          
+          // Chart live update
+          if (sym === currentChartSym && d.ltp != null) {
+            handleChartLiveUpdate(sym, d.ltp, d.vol);
+          }
         }
       }
       updateTimestamp();
+      if (typeof heatmapVisible !== "undefined" && heatmapVisible) renderHeatmap();
       break;
 
     case 'ohlc':
@@ -2515,7 +3772,15 @@ function handleMessage(msg) {
           updateCell(sym, 'range_pct', d.range_pct, fmtPct);
           updateCell(sym, 'vol', d.vol, fmtVol);
           if (d.vol_surge != null) updateCell(sym, 'vol_surge', d.vol_surge, fmtSurge, surgeClass(d.vol_surge));
+          if (d.vol_surge_10d != null) updateCell(sym, 'vol_surge_10d', d.vol_surge_10d, fmtSurge, surgeClass(d.vol_surge_10d));
+          if (d.vol_surge_20d != null) updateCell(sym, 'vol_surge_20d', d.vol_surge_20d, fmtSurge, surgeClass(d.vol_surge_20d));
+          if (d.vol_confluence !== undefined) updateCellHTML(sym, 'vol_confluence', volConfPill(d.vol_confluence));
           if (d.score != null) updateCellHTML(sym, 'score', scoreHTML(d.score));
+          
+          // Chart live update
+          if (sym === currentChartSym && d.ltp != null) {
+            handleChartLiveUpdate(sym, d.ltp, d.vol);
+          }
         }
       }
       updateTimestamp();
@@ -2527,21 +3792,57 @@ function handleMessage(msg) {
       if (msg.d) {
         for (const [sym, d] of Object.entries(msg.d)) {
           if (!stocks[sym]) continue;
+          if ('ce_oi_chg' in d) stocks[sym]._ce_oi_chg_overall = d.ce_oi_chg;
+          if ('pe_oi_chg' in d) stocks[sym]._pe_oi_chg_overall = d.pe_oi_chg;
+          if ('net_oi' in d) stocks[sym]._net_oi_overall = d.net_oi;
           for (const [k, v] of Object.entries(d)) {
             if (v != null) stocks[sym][k] = v;
           }
+          if (window.useFilteredOI) {
+            if (stocks[sym].ce_oi_chg_filtered !== undefined) stocks[sym].ce_oi_chg = stocks[sym].ce_oi_chg_filtered;
+            if (stocks[sym].pe_oi_chg_filtered !== undefined) stocks[sym].pe_oi_chg = stocks[sym].pe_oi_chg_filtered;
+            if (stocks[sym].net_oi_filtered !== undefined) stocks[sym].net_oi = stocks[sym].net_oi_filtered;
+          } else {
+            if (stocks[sym]._ce_oi_chg_overall !== undefined) stocks[sym].ce_oi_chg = stocks[sym]._ce_oi_chg_overall;
+            if (stocks[sym]._pe_oi_chg_overall !== undefined) stocks[sym].pe_oi_chg = stocks[sym]._pe_oi_chg_overall;
+            if (stocks[sym]._net_oi_overall !== undefined) stocks[sym].net_oi = stocks[sym]._net_oi_overall;
+          }
+          let s = stocks[sym];
           updateCell(sym, 'pcr', d.pcr, v => v != null ? v.toFixed(2) : '\u2013', pcrClass(d.pcr));
           updateCellHTML(sym, 'pcr_sig', sigPill(d.pcr_sig));
           updateCellHTML(sym, 'buildup', buPill(d.buildup));
-          updateCell(sym, 'ce_oi_chg', d.ce_oi_chg, fmtOI, valClass(d.ce_oi_chg));
-          updateCell(sym, 'pe_oi_chg', d.pe_oi_chg, fmtOI, valClass(d.pe_oi_chg));
-          updateCell(sym, 'net_oi', d.net_oi, fmtOI, valClass(d.net_oi));
+          updateCell(sym, 'total_oi', d.total_oi, fmtOI);
+          if ('moneyness' in d || d.moneyness) {
+            updateCellHTML(sym, 'moneyness', fmtMoneynessPill(d.moneyness || stocks[sym].moneyness));
+          }
+          updateCell(sym, 'ce_oi_chg', s.ce_oi_chg, fmtOI, valClass(s.ce_oi_chg));
+          updateCell(sym, 'pe_oi_chg', s.pe_oi_chg, fmtOI, valClass(s.pe_oi_chg));
+          updateCell(sym, 'net_oi', s.net_oi, fmtOI, valClass(s.net_oi));
+          // ₹ notional + Lots: derive from current spot × OI delta (always read latest cached state)
+          (function() {
+            var s = stocks[sym] || d;
+            var spot = s.ltp || 0;
+            var lot  = s.lot  || 1;
+            var ce = s.ce_oi_chg || 0;
+            var pe = s.pe_oi_chg || 0;
+            var net = s.net_oi || 0;
+            updateCell(sym, 'ce_oi_chg_lots', ce / lot, fmtLots, valClass(ce));
+            updateCell(sym, 'pe_oi_chg_lots', pe / lot, fmtLots, valClass(pe));
+            updateCell(sym, 'net_oi_lots',    net / lot, fmtLots, valClass(net));
+            updateCell(sym, 'ce_oi_chg_rs', ce * spot, fmtRs, valClass(ce));
+            updateCell(sym, 'pe_oi_chg_rs', pe * spot, fmtRs, valClass(pe));
+            updateCell(sym, 'net_oi_rs',   (pe - ce) * spot, fmtRs, valClass(pe - ce));
+          })();
           updateCell(sym, 'atm_iv', d.atm_iv, fmtIV);
           updateCell(sym, 'max_pain', d.max_pain, fmtPrice);
           updateCell(sym, 'mp_dist', d.mp_dist, fmtMPDist);
           updateCell(sym, 'atm_ce', d.atm_ce, fmtPrice, d.atm_ce != null && d.atm_ce < 15 ? 'prem-low' : '');
           updateCell(sym, 'atm_pe', d.atm_pe, fmtPrice, d.atm_pe != null && d.atm_pe < 15 ? 'prem-low' : '');
           updateCellHTML(sym, 'prem_ok', d.prem_ok ? '<span class="prem-yes">\u2713</span>' : '<span class="prem-no">\u2717</span>');
+          // Multi-window vol surge + confluence (server pushes these on chain refresh)
+          if (d.vol_surge_10d != null) updateCell(sym, 'vol_surge_10d', d.vol_surge_10d, fmtSurge, surgeClass(d.vol_surge_10d));
+          if (d.vol_surge_20d != null) updateCell(sym, 'vol_surge_20d', d.vol_surge_20d, fmtSurge, surgeClass(d.vol_surge_20d));
+          if ('vol_confluence' in d) updateCellHTML(sym, 'vol_confluence', volConfPill(d.vol_confluence));
           if (d.score != null) updateCellHTML(sym, 'score', scoreHTML(d.score));
           // Update row data attributes for filtering + poised status
           const tr = rowElements[sym];
@@ -2555,7 +3856,8 @@ function handleMessage(msg) {
             const dir = p ? getDirection(stocks[sym]) : null;
             const symCell = cellMap[sym + ':symbol'];
             if (symCell) {
-              symCell.innerHTML = '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(sym) + '" target="_blank" rel="noopener" class="tv-link" title="Open in TradingView" onclick="event.stopPropagation()">' + sym + '</a>'
+              symCell.innerHTML = '<button class="row-watch-btn ' + (watchlist.has(sym) ? 'active' : '') + '" data-watch-sym="' + sym + '" onclick="toggleWatchlist(\'' + sym + '\', event)">' + (watchlist.has(sym) ? '\u2605' : '\u2606') + '</button>'
+                + '<a href="https://www.tradingview.com/chart/?symbol=NSE%3A' + encodeURIComponent(sym) + '" target="_blank" rel="noopener" class="tv-link" title="Open in TradingView" onclick="event.stopPropagation()">' + sym + '</a>'
                 + (stocks[sym].is_n50 ? '<span class="n50-badge">N50</span>' : '')
                 + (p ? '<span class="poised-badge">READY</span>' : '')
                 + (dir ? '<span class="dir-badge dir-' + dir + '">' + (dir === 'CE' ? 'BUY CE' : 'BUY PE') + '</span>' : '');
@@ -2620,9 +3922,17 @@ function updateFreshness() {
     return Math.floor(s / 60) + 'm ago';
   };
   document.getElementById('footerFresh').textContent =
-    'LTP: ' + fmt(lastTick) + ' | OHLC: ' + fmt(lastOhlc) + ' | Chain: ' + fmt(lastChain);
+    'LTP ' + fmt(lastTick) + '  \u00B7  OHLC ' + fmt(lastOhlc) + '  \u00B7  Chain ' + fmt(lastChain);
 }
 setInterval(updateFreshness, 5000);
+
+// Periodically re-evaluate chip filters so volume/score updates don't leave stale rows visible.
+// Only runs when at least one dynamic filter is active.
+setInterval(function() {
+  if (activeChips.size > 0 || minSurge > 0 || minRsCr > 0 || hideQuiet) {
+    applyFilters();
+  }
+}, 3000);
 
 // === Toast ===
 let toastTimer = null;
@@ -2653,6 +3963,12 @@ function openAnalysis(sym) {
   }
   document.getElementById('analysisOverlay').classList.add('open');
   document.getElementById('analysisPanel').classList.add('open');
+  
+  // Initialize lightweight chart
+  initLightweightChart(sym, "5minute");
+  
+  // Fetch and render Option Chain Context
+  fetchChainContext(sym);
 }
 
 function closeAnalysis() {
@@ -2702,23 +4018,46 @@ function renderAnalysisPanel() {
     </div>
 
     <div class="ap-section">
-      <div class="ap-section-title">Intraday Chart</div>
-      <div class="chart-tf-bar" id="chartTfBar">
-        <button class="chart-tf-btn" data-interval="1" onclick="switchChartTf('${sym}','1',this)">1m</button>
-        <button class="chart-tf-btn" data-interval="3" onclick="switchChartTf('${sym}','3',this)">3m</button>
-        <button class="chart-tf-btn active" data-interval="5" onclick="switchChartTf('${sym}','5',this)">5m</button>
-        <button class="chart-tf-btn" data-interval="15" onclick="switchChartTf('${sym}','15',this)">15m</button>
-        <button class="chart-tf-btn" data-interval="60" onclick="switchChartTf('${sym}','60',this)">1H</button>
-        <button class="chart-tf-btn" data-interval="D" onclick="switchChartTf('${sym}','D',this)">1D</button>
-        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u2197</a>
+      <div class="ap-section-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Intraday Price &amp; OI Chart</span>
       </div>
-      <div class="tv-chart-wrap" id="tvChartWrap">
-        <iframe id="tvChartFrame" src="https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart" allowtransparency="true" allow="autoplay"></iframe>
+      <div class="chart-tf-bar" id="chartTfBar" style="margin-bottom: 8px;">
+        <button class="chart-tf-btn" data-interval="3minute" onclick="switchChartTf('${sym}','3minute',this)">3m</button>
+        <button class="chart-tf-btn active" data-interval="5minute" onclick="switchChartTf('${sym}','5minute',this)">5m</button>
+        <button class="chart-tf-btn" data-interval="15minute" onclick="switchChartTf('${sym}','15minute',this)">15m</button>
+        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">TradingView ↗</a>
+      </div>
+      <div class="tv-chart-wrap" id="tvChartWrap" style="height: 380px; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); overflow: hidden; position: relative;">
+        <div id="chartLoadingOverlay" style="position: absolute; top:0; left:0; right:0; bottom:0; background: var(--bg-card); display: flex; align-items: center; justify-content: center; z-index: 10; color: var(--text-dim); font-size: 13px; font-family: inherit;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="pulse-dot active" style="width:8px; height:8px; background:var(--accent);"></span>
+            Loading Intraday Price &amp; OI Chart...
+          </div>
+        </div>
+        <div id="priceChartContainer" style="flex: 2; min-height: 220px; border-bottom: 1px solid var(--border); position: relative;"></div>
+        <div style="display: flex; gap: 8px; padding: 4px 8px; background: var(--bg-card); border-bottom: 1px solid var(--border); z-index: 5;">
+          <button class="chart-tf-btn active" onclick="toggleBottomChartMode('futures', this)" style="font-size: 10px;">Futures OI</button>
+          <button class="chart-tf-btn" onclick="toggleBottomChartMode('options', this)" style="font-size: 10px;">Options Delta</button>
+        </div>
+        <div id="oiChartContainer" style="flex: 1.2; min-height: 130px; position: relative;"></div>
+        ${!(window.currentUser && (window.currentUser.plan === 'pro' || window.currentUser.role === 'admin')) ? `
+        <div style="position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(10, 10, 15, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; color: var(--text);">
+          <div style="margin-bottom: 12px; font-size: 24px;">\uD83D\uDD12</div>
+          <div style="font-weight: 600; margin-bottom: 8px;">Premium Feature</div>
+          <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 16px; text-align: center; padding: 0 20px;">Advanced Interactive Charts are locked under the Pro subscription.</div>
+          <a href="/settings#billing" class="btn" style="text-decoration:none; background:var(--gold); color:#000;">Upgrade to Pro</a>
+        </div>
+        ` : ''}
       </div>
     </div>
 
     <div class="ap-section">
-      <div class="ap-section-title">Why This Stock Is Trade Ready</div>
+      <div class="ap-section-title">Conviction Score Breakdown</div>
+      ${renderScoreBreakdown(d)}
+    </div>
+
+    <div class="ap-section">
+      <div class="ap-section-title">Supporting Signals</div>
       <div class="reason-list" id="reasonList">
         ${reasons.map(r => `
           <div class="reason-chip ${isBull ? '' : 'bear'}">
@@ -2787,6 +4126,7 @@ function renderAnalysisPanel() {
         <div class="snap-item"><div class="si-label">PE OI Chg</div><div class="si-val ${valClass(d.pe_oi_chg)}">${fmtOI(d.pe_oi_chg)}</div></div>
         <div class="snap-item"><div class="si-label">Net OI</div><div class="si-val ${valClass(d.net_oi)}">${fmtOI(d.net_oi)}</div></div>
       </div>
+      <div id="optionChainMiniTableContainer"></div>
     </div>
 
     <div class="ap-section" style="margin-bottom:8px;">
@@ -2831,18 +4171,36 @@ function renderChartOnlyPanel() {
     </div>
 
     <div class="ap-section">
-      <div class="ap-section-title">Intraday Chart</div>
-      <div class="chart-tf-bar" id="chartTfBar">
-        <button class="chart-tf-btn" data-interval="1" onclick="switchChartTf('${sym}','1',this)">1m</button>
-        <button class="chart-tf-btn" data-interval="3" onclick="switchChartTf('${sym}','3',this)">3m</button>
-        <button class="chart-tf-btn active" data-interval="5" onclick="switchChartTf('${sym}','5',this)">5m</button>
-        <button class="chart-tf-btn" data-interval="15" onclick="switchChartTf('${sym}','15',this)">15m</button>
-        <button class="chart-tf-btn" data-interval="60" onclick="switchChartTf('${sym}','60',this)">1H</button>
-        <button class="chart-tf-btn" data-interval="D" onclick="switchChartTf('${sym}','D',this)">1D</button>
-        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">Open in TradingView \u2197</a>
+      <div class="ap-section-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Intraday Price &amp; OI Chart</span>
       </div>
-      <div class="tv-chart-wrap" id="tvChartWrap">
-        <iframe id="tvChartFrame" src="https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A${encodeURIComponent(sym)}&interval=5&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart" allowtransparency="true" allow="autoplay"></iframe>
+      <div class="chart-tf-bar" id="chartTfBar" style="margin-bottom: 8px;">
+        <button class="chart-tf-btn" data-interval="3minute" onclick="switchChartTf('${sym}','3minute',this)">3m</button>
+        <button class="chart-tf-btn active" data-interval="5minute" onclick="switchChartTf('${sym}','5minute',this)">5m</button>
+        <button class="chart-tf-btn" data-interval="15minute" onclick="switchChartTf('${sym}','15minute',this)">15m</button>
+        <a href="https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}" target="_blank" rel="noopener" class="chart-tv-open">TradingView ↗</a>
+      </div>
+      <div class="tv-chart-wrap" id="tvChartWrap" style="height: 380px; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); overflow: hidden; position: relative;">
+        <div id="chartLoadingOverlay" style="position: absolute; top:0; left:0; right:0; bottom:0; background: var(--bg-card); display: flex; align-items: center; justify-content: center; z-index: 10; color: var(--text-dim); font-size: 13px; font-family: inherit;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="pulse-dot active" style="width:8px; height:8px; background:var(--accent);"></span>
+            Loading Intraday Price &amp; OI Chart...
+          </div>
+        </div>
+        <div id="priceChartContainer2" style="flex: 2; min-height: 220px; border-bottom: 1px solid var(--border); position: relative;"></div>
+        <div style="display: flex; gap: 8px; padding: 4px 8px; background: var(--bg-card); border-bottom: 1px solid var(--border); z-index: 5;">
+          <button class="chart-tf-btn active" onclick="toggleBottomChartMode('futures', this)" style="font-size: 10px;">Futures OI</button>
+          <button class="chart-tf-btn" onclick="toggleBottomChartMode('options', this)" style="font-size: 10px;">Options Delta</button>
+        </div>
+        <div id="oiChartContainer2" style="flex: 1.2; min-height: 130px; position: relative;"></div>
+        ${!(window.currentUser && (window.currentUser.plan === 'pro' || window.currentUser.role === 'admin')) ? `
+        <div style="position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(10, 10, 15, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; color: var(--text);">
+          <div style="margin-bottom: 12px; font-size: 24px;">\uD83D\uDD12</div>
+          <div style="font-weight: 600; margin-bottom: 8px;">Premium Feature</div>
+          <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 16px; text-align: center; padding: 0 20px;">Advanced Interactive Charts are locked under the Pro subscription.</div>
+          <a href="/settings#billing" class="btn" style="text-decoration:none; background:var(--gold); color:#000;">Upgrade to Pro</a>
+        </div>
+        ` : ''}
       </div>
     </div>
 
@@ -2857,6 +4215,7 @@ function renderChartOnlyPanel() {
         <div class="snap-item"><div class="si-label">Max Pain</div><div class="si-val">\u20B9${fmtPrice(d.max_pain)}</div></div>
         <div class="snap-item"><div class="si-label">ATM CE/PE</div><div class="si-val">\u20B9${fmtPrice(d.atm_ce)} / \u20B9${fmtPrice(d.atm_pe)}</div></div>
       </div>
+      <div id="optionChainMiniTableContainer"></div>
     </div>
     ` : ''}
 
@@ -2925,13 +4284,18 @@ function buildReasons(d, dir) {
     reasons.push({ icon: '\uD83D\uDCCA', text: 'Volume surge <span class="rc-val">' + d.vol_surge.toFixed(1) + 'x</span> \u2014 above average, decent participation' });
   }
 
-  // 5. Max pain context
-  if (d.mp_dist != null && d.max_pain) {
-    if (isBull && d.mp_dist < -1) {
-      reasons.push({ icon: '\uD83E\uDDF2', text: 'Max pain \u20B9' + fmtPrice(d.max_pain) + ' is <span class="rc-val">' + Math.abs(d.mp_dist).toFixed(1) + '% above</span> \u2014 price likely to gravitate up' });
-    } else if (!isBull && d.mp_dist > 1) {
-      reasons.push({ icon: '\uD83E\uDDF2', text: 'Max pain \u20B9' + fmtPrice(d.max_pain) + ' is <span class="rc-val">' + Math.abs(d.mp_dist).toFixed(1) + '% below</span> \u2014 price likely to gravitate down' });
-    }
+  // 5. Max pain context — informational only.
+  // Empirical: max-pain pinning is a coin flip mid-cycle and only a weak
+  // attractor T-3 to T-0 (Filippou et al 2023, AdvancedAutoTrades 100-SPX).
+  // We surface it as a *level reference*, not a directional reason.
+  if (d.mp_dist != null && d.max_pain && Math.abs(d.mp_dist) >= 0.5) {
+    var dir = d.mp_dist < 0 ? 'above' : 'below';
+    reasons.push({
+      icon: '\uD83E\uDDF2',
+      text: 'Max pain at \u20B9' + fmtPrice(d.max_pain) + ' (<span class="rc-val">' +
+            Math.abs(d.mp_dist).toFixed(1) + '% ' + dir + ' spot</span>) \u2014 ' +
+            'level reference, weak attractor only in expiry week'
+    });
   }
 
   // 6. Premium liquidity
@@ -2993,7 +4357,8 @@ async function enterPaperTrade(symbol, optionType, entry, sl, t1, t2) {
   try {
     const resp = await fetch('/api/paper/enter', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
       body: JSON.stringify({
         symbol: symbol,
         option_type: optionType,
@@ -3104,7 +4469,8 @@ async function saveChatKey() {
   try {
     const resp = await fetch('/api/admin/chat-key', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
       body: JSON.stringify({ key: key }),
     });
     const data = await resp.json();
@@ -3386,23 +4752,581 @@ setTimeout(function() {
 }, 6000);
 </script>
 <script>
-// === TradingView Widget Chart ===
-function switchChartTf(sym, interval, btn) {
-  // Update active button
-  document.querySelectorAll('#chartTfBar .chart-tf-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+// === TradingView Lightweight Charts Engine ===
+let priceChartInstance = null;
+let candleSeries = null;
+let volumeSeries = null;
+let oiChartInstance = null;
+let oiSeries = null;
+let oiChangeSeries = null;
 
-  const frame = document.getElementById('tvChartFrame');
-  if (!frame) return;
-  const url = 'https://s.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=NSE%3A'
-    + encodeURIComponent(sym)
-    + '&interval=' + interval
-    + '&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722'
-    + '&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FKolkata'
-    + '&studies_overrides=%7B%7D&overrides=%7B%7D'
-    + '&enabled_features=%5B%5D&disabled_features=%5B%5D'
-    + '&locale=en&utm_source=localhost&utm_medium=widget_new&utm_campaign=chart';
-  frame.src = url;
+function fetchChainContext(sym) {
+  const container = document.getElementById('optionChainMiniTableContainer');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-dim); font-size:12px;">Loading chain context...</div>';
+
+  fetch('/api/chain?symbol=' + encodeURIComponent(sym))
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        container.innerHTML = '<div style="text-align:center; padding:10px; color:var(--red); font-size:12px;">' + data.error + '</div>';
+        return;
+      }
+      
+      let html = `
+      <div style="margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+        <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 11px;">
+          <thead>
+            <tr style="background: rgba(255,255,255,0.02); color: var(--text-vdim); border-bottom: 1px solid var(--border);">
+              <th style="padding: 8px 10px; font-weight: var(--fw-medium);">CE OI</th>
+              <th style="padding: 8px 10px; font-weight: var(--fw-medium);">CE LTP</th>
+              <th style="padding: 8px 10px; font-weight: var(--fw-bold); text-align: center; color: var(--text-dim);">STRIKE</th>
+              <th style="padding: 8px 10px; font-weight: var(--fw-medium);">PE LTP</th>
+              <th style="padding: 8px 10px; font-weight: var(--fw-medium);">PE OI</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      data.chain.forEach(row => {
+        const isAtm = row.is_atm;
+        const bg = isAtm ? 'background: rgba(245, 158, 11, 0.05); border-left: 2px solid var(--gold); border-right: 2px solid var(--gold);' : '';
+        const textColor = isAtm ? 'color: var(--text-bright); font-weight: var(--fw-bold);' : 'color: var(--text);';
+        const strStyle = isAtm ? 'color: var(--gold); font-weight: var(--fw-bold);' : 'color: var(--text-dim);';
+        
+        html += `
+          <tr style="border-bottom: 1px solid var(--border); ${bg}">
+            <td style="padding: 8px 10px; color: var(--red-text);">${fmtOI(row.ce_oi)}</td>
+            <td style="padding: 8px 10px; ${textColor}">\u20B9${row.ce_ltp.toFixed(2)}</td>
+            <td style="padding: 8px 10px; text-align: center; ${strStyle}">${row.strike}</td>
+            <td style="padding: 8px 10px; ${textColor}">\u20B9${row.pe_ltp.toFixed(2)}</td>
+            <td style="padding: 8px 10px; color: var(--green-text);">${fmtOI(row.pe_oi)}</td>
+          </tr>
+        `;
+      });
+      
+      html += `
+          </tbody>
+        </table>
+      </div>
+      `;
+      container.innerHTML = html;
+    })
+    .catch(err => {
+      container.innerHTML = '<div style="text-align:center; padding:10px; color:var(--red); font-size:12px;">Failed to load strike data</div>';
+    });
+}
+let currentBottomChartMode = 'futures';
+let currentChartSym = null;
+let currentChartInterval = "5minute";
+let candleCache = {}; // keyed by symbol_interval
+let lastCandlesArray = []; // keep a local copy of full candles
+let priceChartResizeObserver = null;
+let oiChartResizeObserver = null;
+let isSyncingRange = false;
+let isSyncingCrosshair = false;
+
+function getCandleForTime(time) {
+  if (!lastCandlesArray || lastCandlesArray.length === 0) return null;
+  const timeVal = (typeof time === 'object' && time !== null) ? (time.timestamp || time) : time;
+  return lastCandlesArray.find(c => {
+    const cTimeVal = (typeof c.time === 'object' && c.time !== null) ? (c.time.timestamp || c.time) : c.time;
+    return cTimeVal === timeVal;
+  });
+}
+
+function initLightweightChart(sym, interval) {
+  if (typeof LightweightCharts === 'undefined') {
+    console.warn('LightweightCharts not loaded');
+    return;
+  }
+  if (!sym) return;
+  currentChartSym = sym;
+  if (interval) currentChartInterval = interval;
+  
+  const priceContainer = document.getElementById('priceChartContainer') || document.getElementById('priceChartContainer2');
+  const oiContainer = document.getElementById('oiChartContainer') || document.getElementById('oiChartContainer2');
+  if (!priceContainer || !oiContainer) return;
+  
+  // Clean up existing
+  if (priceChartResizeObserver) {
+    priceChartResizeObserver.disconnect();
+    priceChartResizeObserver = null;
+  }
+  if (oiChartResizeObserver) {
+    oiChartResizeObserver.disconnect();
+    oiChartResizeObserver = null;
+  }
+  
+  if (priceChartInstance) {
+    try { priceChartInstance.remove(); } catch(e) { console.error(e); }
+    priceChartInstance = null;
+    candleSeries = null;
+    volumeSeries = null;
+  }
+  if (oiChartInstance) {
+    try { oiChartInstance.remove(); } catch(e) { console.error(e); }
+    oiChartInstance = null;
+    oiSeries = null;
+    oiChangeSeries = null;
+  }
+  
+  priceContainer.innerHTML = '';
+  oiContainer.innerHTML = '';
+
+  const themeColors = getThemeChartColors();
+
+  // Show loading overlay
+  const overlay = document.getElementById('chartLoadingOverlay');
+  if (overlay) overlay.style.display = 'flex';
+
+  // 1. Create Price Chart (Top Pane)
+  priceChartInstance = LightweightCharts.createChart(priceContainer, {
+    width: priceContainer.clientWidth || 400,
+    height: 220,
+    layout: {
+      background: { type: 'solid', color: themeColors.bgColor },
+      textColor: themeColors.textColor,
+      fontSize: 11,
+      fontFamily: 'Inter, sans-serif',
+    },
+    grid: {
+      vertLines: { color: themeColors.gridColor, style: 2 },
+      horzLines: { color: themeColors.gridColor, style: 2 },
+    },
+    crosshair: { mode: 1 },
+    timeScale: {
+      visible: false, // hide top time scale for unified look
+    },
+    leftPriceScale: { visible: false },
+    rightPriceScale: {
+      borderColor: themeColors.gridColor,
+      autoScale: true,
+    }
+  });
+
+  candleSeries = priceChartInstance.addCandlestickSeries({
+    upColor: themeColors.upColor,
+    downColor: themeColors.downColor,
+    borderUpColor: themeColors.upColor,
+    borderDownColor: themeColors.downColor,
+    wickUpColor: themeColors.upColor,
+    wickDownColor: themeColors.downColor,
+  });
+
+  volumeSeries = priceChartInstance.addHistogramSeries({
+    color: themeColors.volumeColor,
+    priceFormat: { type: 'volume' },
+    priceScaleId: 'volume-scale',
+  });
+
+  priceChartInstance.priceScale('volume-scale').applyOptions({
+    scaleMargins: { top: 0.75, bottom: 0 },
+    visible: false,
+  });
+
+  // 2. Create OI Chart (Bottom Pane)
+  oiChartInstance = LightweightCharts.createChart(oiContainer, {
+    width: oiContainer.clientWidth || 400,
+    height: 130,
+    layout: {
+      background: { type: 'solid', color: themeColors.bgColor },
+      textColor: themeColors.textColor,
+      fontSize: 11,
+      fontFamily: 'Inter, sans-serif',
+    },
+    grid: {
+      vertLines: { color: themeColors.gridColor, style: 2 },
+      horzLines: { color: themeColors.gridColor, style: 2 },
+    },
+    crosshair: { mode: 1 },
+    timeScale: {
+      borderColor: themeColors.gridColor,
+      timeVisible: true,
+      secondsVisible: false,
+    },
+    leftPriceScale: { visible: false },
+    rightPriceScale: {
+      borderColor: themeColors.gridColor,
+      autoScale: true,
+    }
+  });
+
+  oiSeries = oiChartInstance.addAreaSeries({
+    lineColor: '#3b82f6',
+    topColor: 'rgba(59, 130, 246, 0.25)',
+    bottomColor: 'rgba(59, 130, 246, 0.0)',
+    lineWidth: 2,
+    priceFormat: {
+      type: 'custom',
+      formatter: (price) => {
+        if (price >= 10000000) return (price / 10000000).toFixed(2) + 'Cr';
+        if (price >= 100000) return (price / 100000).toFixed(2) + 'L';
+        return price.toLocaleString('en-IN');
+      }
+    }
+  });
+
+  oiChangeSeries = oiChartInstance.addHistogramSeries({
+    color: 'rgba(16, 185, 129, 0.5)',
+    priceScaleId: 'oi-change-scale',
+  });
+
+  oiChartInstance.priceScale('oi-change-scale').applyOptions({
+    scaleMargins: { top: 0.6, bottom: 0 },
+    visible: false,
+  });
+
+  // 3. Setup Synchronization Range
+  priceChartInstance.timeScale().subscribeVisibleTimeRangeChange(range => {
+    if (isSyncingRange || !range) return;
+    isSyncingRange = true;
+    try { oiChartInstance.timeScale().setVisibleRange(range); } catch(e){}
+    isSyncingRange = false;
+  });
+  oiChartInstance.timeScale().subscribeVisibleTimeRangeChange(range => {
+    if (isSyncingRange || !range) return;
+    isSyncingRange = true;
+    try { priceChartInstance.timeScale().setVisibleRange(range); } catch(e){}
+    isSyncingRange = false;
+  });
+
+  // 4. Setup Crosshair Synchronization
+  priceChartInstance.subscribeCrosshairMove(param => {
+    if (isSyncingCrosshair) return;
+    isSyncingCrosshair = true;
+    if (param.time) {
+      const c = getCandleForTime(param.time);
+      if (c) {
+        oiChartInstance.setCrosshairPosition(c.oi || 0, param.time, oiSeries);
+      } else {
+        oiChartInstance.clearCrosshairPosition();
+      }
+    } else {
+      oiChartInstance.clearCrosshairPosition();
+    }
+    isSyncingCrosshair = false;
+  });
+
+  oiChartInstance.subscribeCrosshairMove(param => {
+    if (isSyncingCrosshair) return;
+    isSyncingCrosshair = true;
+    if (param.time) {
+      const c = getCandleForTime(param.time);
+      if (c) {
+        priceChartInstance.setCrosshairPosition(c.close, param.time, candleSeries);
+      } else {
+        priceChartInstance.clearCrosshairPosition();
+      }
+    } else {
+      priceChartInstance.clearCrosshairPosition();
+    }
+    isSyncingCrosshair = false;
+  });
+
+  // 5. Setup Resize Observers
+  priceChartResizeObserver = new ResizeObserver(entries => {
+    if (priceChartInstance && entries[0]) {
+      const { width, height } = entries[0].contentRect;
+      priceChartInstance.resize(width, height || 220);
+    }
+  });
+  priceChartResizeObserver.observe(priceContainer);
+
+  oiChartResizeObserver = new ResizeObserver(entries => {
+    if (oiChartInstance && entries[0]) {
+      const { width, height } = entries[0].contentRect;
+      oiChartInstance.resize(width, height || 130);
+    }
+  });
+  oiChartResizeObserver.observe(oiContainer);
+
+  updateTfButtonStates();
+
+  // 6. Fetch/Load Data
+  const cacheKey = sym + "_" + currentChartInterval;
+  const cached = candleCache[cacheKey];
+  if (cached && (Date.now() - cached.timestamp < 60000)) {
+    lastCandlesArray = JSON.parse(JSON.stringify(cached.data));
+    renderChartData();
+  } else {
+    let apiInterval = "5minute";
+    if (currentChartInterval === "3minute" || currentChartInterval === "3m") apiInterval = "3minute";
+    else if (currentChartInterval === "15minute" || currentChartInterval === "15m") apiInterval = "15minute";
+
+    Promise.all([
+      fetch(`/api/candles?symbol=${encodeURIComponent(sym)}&interval=${apiInterval}`).then(r => r.json()),
+      fetch(`/api/stock/oi_timeseries?symbol=${encodeURIComponent(sym)}`).then(r => r.json()).catch(err => ({data: []}))
+    ]).then(([resCandles, resOi]) => {
+        if (resCandles.candles && resCandles.candles.length > 0) {
+          const candles = resCandles.candles;
+          const oiMap = {};
+          if (resOi && resOi.data) {
+            resOi.data.forEach(item => {
+              // map by time, rounding to nearest minute
+              const rounded = Math.floor(item.time / 60) * 60;
+              oiMap[rounded] = item;
+            });
+          }
+          
+          candles.forEach(c => {
+             // Find closest option data within 5 mins
+             let closest = null;
+             for (let t = c.time; t <= c.time + 300; t += 60) {
+                 if (oiMap[t]) { closest = oiMap[t]; break; }
+             }
+             if (closest) {
+                 c.pe_oi_chg = closest.pe_oi_chg;
+                 c.ce_oi_chg = closest.ce_oi_chg;
+             }
+          });
+          
+          candleCache[cacheKey] = {
+            timestamp: Date.now(),
+            data: candles
+          };
+          lastCandlesArray = JSON.parse(JSON.stringify(candles));
+          renderChartData();
+        } else {
+          const overlayText = document.getElementById('chartLoadingOverlay');
+          if (overlayText) overlayText.innerHTML = '<div style="color:var(--text-dim);font-size:12px;">No historical candles found.</div>';
+        }
+      })
+      .catch(err => {
+        console.error("Error loading candles:", err);
+        const overlayText = document.getElementById('chartLoadingOverlay');
+        if (overlayText) overlayText.innerHTML = '<div style="color:var(--red);font-size:12px;">Error fetching candle data.</div>';
+      });
+  }
+}
+
+function getThemeChartColors() {
+  const activeTheme = document.documentElement.getAttribute('data-theme') || 'midnight-blue';
+  
+  // Read exact styling values dynamically from computed styles (syncs with themes.css)
+  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim() || '#0f172a';
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#f8fafc';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(255, 255, 255, 0.05)';
+  
+  return {
+    bgColor: bgColor,
+    textColor: textColor,
+    gridColor: gridColor,
+    upColor: '#10b981', // green
+    downColor: '#ef4444', // red
+    volumeColor: 'rgba(59, 130, 246, 0.4)',
+  };
+}
+
+function updateChartColorsForTheme() {
+  if (!priceChartInstance || !oiChartInstance) return;
+  const themeColors = getThemeChartColors();
+  
+  const commonOptions = {
+    layout: {
+      background: { type: 'solid', color: themeColors.bgColor },
+      textColor: themeColors.textColor,
+    },
+    grid: {
+      vertLines: { color: themeColors.gridColor },
+      horzLines: { color: themeColors.gridColor },
+    },
+    rightPriceScale: {
+      borderColor: themeColors.gridColor,
+    }
+  };
+
+  priceChartInstance.applyOptions({
+    ...commonOptions,
+    timeScale: {
+      visible: false,
+    }
+  });
+
+  oiChartInstance.applyOptions({
+    ...commonOptions,
+    timeScale: {
+      borderColor: themeColors.gridColor,
+    }
+  });
+
+  if (candleSeries) {
+    candleSeries.applyOptions({
+      upColor: themeColors.upColor,
+      downColor: themeColors.downColor,
+      borderUpColor: themeColors.upColor,
+      borderDownColor: themeColors.downColor,
+      wickUpColor: themeColors.upColor,
+      wickDownColor: themeColors.downColor,
+    });
+  }
+  
+  renderChartData();
+}
+
+function renderChartData() {
+  // Hide loading overlay first, so if data is empty we still clear the loading state
+  const overlay = document.getElementById('chartLoadingOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  if (!priceChartInstance || !oiChartInstance || !candleSeries || !volumeSeries || !oiSeries || !oiChangeSeries || !lastCandlesArray || lastCandlesArray.length === 0) return;
+
+
+  const candleData = [];
+  const volumeData = [];
+  const oiData = [];
+  const oiChangeData = [];
+  
+  for (let i = 0; i < lastCandlesArray.length; i++) {
+    const c = lastCandlesArray[i];
+    
+    candleData.push({
+      time: c.time,
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close
+    });
+    
+    volumeData.push({
+      time: c.time,
+      value: c.volume || 0,
+      color: c.close >= c.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+    });
+    
+    oiData.push({
+      time: c.time,
+      value: c.oi || 0
+    });
+    
+    if (currentBottomChartMode === "options") {
+      const peChg = c.pe_oi_chg || 0;
+      const ceChg = c.ce_oi_chg || 0;
+      const diff = peChg - ceChg;
+      oiChangeData.push({
+        time: c.time,
+        value: diff,
+        color: diff >= 0 ? "rgba(16, 185, 129, 0.65)" : "rgba(239, 68, 68, 0.65)"
+      });
+    } else {
+      const prev = lastCandlesArray[i - 1];
+      const diff = prev ? (c.oi - prev.oi) : 0;
+      oiChangeData.push({
+        time: c.time,
+        value: diff,
+        color: diff >= 0 ? "rgba(16, 185, 129, 0.5)" : "rgba(239, 68, 68, 0.5)"
+      });
+    }
+  }
+  
+  try {
+    candleSeries.setData(candleData);
+    volumeSeries.setData(volumeData);
+    oiSeries.setData(oiData);
+    oiChangeSeries.setData(oiChangeData);
+  } catch (e) {
+    console.error("Error setting chart data", e);
+    const overlayText = document.getElementById('chartLoadingOverlay');
+    if (overlayText) {
+      overlayText.style.display = 'flex';
+      overlayText.innerHTML = '<div style="color:var(--red);font-size:12px;">Error parsing chart data. Check console.</div>';
+    }
+  }
+  
+  priceChartInstance.timeScale().fitContent();
+  
+  // Sync the time scale of the bottom chart to match
+  const range = priceChartInstance.timeScale().getVisibleRange();
+  if (range) {
+    isSyncingRange = true;
+    try { oiChartInstance.timeScale().setVisibleRange(range); } catch(e){}
+    isSyncingRange = false;
+  }
+}
+
+
+function toggleBottomChartMode(mode, btn) {
+  currentBottomChartMode = mode;
+  // Update UI buttons
+  const parent = btn.parentElement;
+  parent.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  // Re-render
+  renderChartData();
+}
+
+function switchChartTf(sym, interval, btn) {
+  currentChartInterval = interval;
+  initLightweightChart(sym, interval);
+}
+
+function updateTfButtonStates() {
+  document.querySelectorAll('#chartTfBar .chart-tf-btn').forEach(btn => {
+    const tf = btn.getAttribute('data-interval');
+    if (tf === currentChartInterval) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function handleChartLiveUpdate(sym, ltp, volume) {
+  if (sym !== currentChartSym || !priceChartInstance || !oiChartInstance || !candleSeries || !lastCandlesArray || lastCandlesArray.length === 0) return;
+  
+  const lastCandle = lastCandlesArray[lastCandlesArray.length - 1];
+  const nowSec = Math.floor(Date.now() / 1000);
+  
+  let intervalSec = 300; // default 5m
+  if (currentChartInterval === "3minute" || currentChartInterval === "3m") intervalSec = 180;
+  else if (currentChartInterval === "15minute" || currentChartInterval === "15m") intervalSec = 900;
+  
+  const currentBlockTime = Math.floor(nowSec / intervalSec) * intervalSec;
+  
+  let updateCandle;
+  if (currentBlockTime > lastCandle.time) {
+    updateCandle = {
+      time: currentBlockTime,
+      open: ltp,
+      high: ltp,
+      low: ltp,
+      close: ltp
+    };
+    lastCandlesArray.push({ ...updateCandle, volume: volume || 0, oi: lastCandle.oi });
+  } else {
+    lastCandle.close = ltp;
+    lastCandle.high = Math.max(lastCandle.high, ltp);
+    lastCandle.low = Math.min(lastCandle.low, ltp);
+    if (volume) lastCandle.volume = volume;
+    updateCandle = {
+      time: lastCandle.time,
+      open: lastCandle.open,
+      high: lastCandle.high,
+      low: lastCandle.low,
+      close: lastCandle.close
+    };
+  }
+  
+  candleSeries.update(updateCandle);
+  
+  volumeSeries.update({
+    time: updateCandle.time,
+    value: volume || lastCandle.volume || 0,
+    color: updateCandle.close >= updateCandle.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+  });
+  
+  oiSeries.update({
+    time: updateCandle.time,
+    value: lastCandle.oi || 0
+  });
+  
+  const prevCandle = lastCandlesArray[lastCandlesArray.length - 2];
+  const diff = prevCandle ? (lastCandle.oi - prevCandle.oi) : 0;
+  oiChangeSeries.update({
+    time: updateCandle.time,
+    value: diff,
+    color: diff >= 0 ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'
+  });
 }
 </script>
 

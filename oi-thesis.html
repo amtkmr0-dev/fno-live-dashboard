@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="bloomberg-pro">
+<head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OI Thesis Tracker — Quantra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+<style>
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+.oi-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 14px;
+}
+.oi-page-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.oi-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin: 0;
+}
+.oi-page-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 400;
+  margin-left: 8px;
+}
+.oi-rule-line {
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: var(--font-mono, monospace);
+}
+
+.oi-export-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.oi-export-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-right: 4px;
+}
+.oi-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.oi-export-btn:hover {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+}
+.oi-export-btn em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--text-vdim);
+  font-family: var(--font-mono, monospace);
+  margin-left: 2px;
+}
+.oi-export-btn.bull { border-color: rgba(16,185,129,0.4); }
+.oi-export-btn.bull:hover { background: rgba(16,185,129,0.1); }
+.oi-export-btn.bull em { color: var(--green); }
+.oi-export-btn.bear { border-color: rgba(239,68,68,0.4); }
+.oi-export-btn.bear:hover { background: rgba(239,68,68,0.1); }
+.oi-export-btn.bear em { color: var(--red); }
+.oi-export-btn.both { border-color: rgba(59,130,246,0.4); }
+.oi-export-btn.both:hover { background: rgba(59,130,246,0.1); }
+.oi-export-btn.both em { color: var(--accent); }
+.oi-export-btn.alt { color: var(--text-dim); }
+.oi-export-fmt {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--surface-alt);
+  color: var(--text-vdim);
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  margin-left: 2px;
+}
+.oi-export-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 2px;
+}
+
+.oi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.oi-card-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--bg-elevated);
+  flex-shrink: 0;
+}
+.oi-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.oi-card-title.bull { color: var(--green); }
+.oi-card-title.bear { color: var(--red); }
+.oi-card-title .oi-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.oi-card-title.bull .oi-dot { background: var(--green); }
+.oi-card-title.bear .oi-dot { background: var(--red); }
+.oi-card-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.oi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.oi-table th {
+  background: var(--bg);
+  text-align: right;
+  padding: 6px 8px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.oi-table th.left { text-align: left; }
+.oi-table td {
+  padding: 6px 8px;
+  text-align: right;
+  border-bottom: 1px solid rgba(54,58,69,0.3);
+  white-space: nowrap;
+}
+.oi-table td.left { text-align: left; }
+.oi-table tr:hover td { background: var(--surface-hover); }
+.oi-sym {
+  font-weight: 600;
+  color: var(--text-bright);
+  font-family: var(--font-mono, monospace);
+}
+.oi-rank {
+  width: 22px; height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-right: 6px;
+}
+.oi-rank-1 { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+.val-pos { color: var(--green); }
+.val-neg { color: var(--red); }
+.val-dim { color: var(--text-vdim); }
+
+/* Stats panel */
+.oi-stats {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.stat-card.bull { border-left: 3px solid var(--green); }
+.stat-card.bear { border-left: 3px solid var(--red); }
+.stat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.stat-side {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.stat-card.bull .stat-side { color: var(--green); }
+.stat-card.bear .stat-side { color: var(--red); }
+.stat-n {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.stat-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-vdim);
+}
+.stat-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-mono, monospace);
+}
+.stat-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* Outcomes panel */
+.oi-outcomes {
+  grid-column: 1 / -1;
+}
+.outcome-row.win-strict { background: rgba(16,185,129,0.06); }
+.outcome-row.win-loose  { background: rgba(16,185,129,0.025); }
+.outcome-row.miss       { opacity: 0.7; }
+.tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}
+.tag-bull { background: rgba(16,185,129,0.15); color: var(--green); }
+.tag-bear { background: rgba(239,68,68,0.15);  color: var(--red); }
+.tag-strict { background: rgba(16,185,129,0.25); color: var(--green); }
+.tag-loose  { background: rgba(234,179,8,0.20);  color: var(--yellow, #eab308); }
+.tag-miss   { background: rgba(115,115,115,0.15); color: var(--text-vdim); }
+
+.empty {
+  padding: 30px;
+  text-align: center;
+  color: var(--text-vdim);
+  font-size: 12px;
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  .oi-main { grid-template-columns: 1fr; }
+  .oi-stats { grid-template-columns: 1fr; }
+}
+</style>
+  <link rel="stylesheet" href="/static/css/themes.css">
+</head>
+<body>
+<script>
+// Auth gate (mirrors dashboard)
+(function(){
+  fetch('/api/auth/verify',{credentials:'same-origin'})
+    .then(function(r){if(!r.ok)throw r;return r.json()})
+    .then(function(d){if(!d.ok){window.location.href='/login';return}
+      window.__quantra_role=d.role; window.__quantra_user=d.user;
+      var el=document.getElementById('userName');  if(el) el.textContent=d.user||'User';
+      var el2=document.getElementById('userInitials'); if(el2) el2.textContent=(d.user||'U').substring(0,2).toUpperCase();
+    })
+    .catch(function(){window.location.href='/login'});
+})();
+</script>
+
+<!-- Top nav -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
+  </a>
+
+  <div class="q-nav-links">
+    <a href="/" id="nav-dashboard">Dashboard</a>
+    <a href="/sectors" id="nav-sectors">Sectors</a>
+    <a href="/nifty" id="nav-nifty">Nifty 50</a>
+</div>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/advanced-analytics" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Advanced Desk</span>
+        </a>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="oi-main">
+
+  <div class="oi-page-header">
+    <div>
+      <h1 class="oi-page-title">OI Divergence Thesis Tracker
+        <span class="oi-page-sub" id="pageSubtitle">— loading…</span>
+      </h1>
+    </div>
+    <div class="oi-export-row">
+      <span class="oi-export-label">Export today's flags:</span>
+      <button class="oi-export-btn bull" onclick="exportFlags('bull','tv')" title="TradingView watchlist (.txt)">
+        <span class="oi-export-ico">&#11015;</span> Bull <em id="bullCountBtn">—</em>
+        <span class="oi-export-fmt">TV</span>
+      </button>
+      <button class="oi-export-btn bear" onclick="exportFlags('bear','tv')" title="TradingView watchlist (.txt)">
+        <span class="oi-export-ico">&#11015;</span> Bear <em id="bearCountBtn">—</em>
+        <span class="oi-export-fmt">TV</span>
+      </button>
+      <button class="oi-export-btn both" onclick="exportFlags('both','tv')" title="TradingView watchlist (.txt)">
+        <span class="oi-export-ico">&#11015;</span> Both <em id="bothCountBtn">—</em>
+        <span class="oi-export-fmt">TV</span>
+      </button>
+      <span class="oi-export-divider"></span>
+      <button class="oi-export-btn alt" onclick="exportFlags('both','csv')" title="Today's flags as CSV with all metadata">
+        <span class="oi-export-ico">&#11015;</span> Flags
+        <span class="oi-export-fmt">CSV</span>
+      </button>
+      <button class="oi-export-btn alt" onclick="exportOutcomes('csv')" title="All resolved outcomes from the last 30 days">
+        <span class="oi-export-ico">&#11015;</span> Outcomes
+        <span class="oi-export-fmt">CSV</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="oi-rule-line" style="grid-column: 1 / -1; margin-top: -4px;">
+    <strong>Rule:</strong> Bullish = CE OI ↓ + PE OI ↑ &nbsp;|&nbsp; Bearish = CE OI ↑ + PE OI ↓
+    &nbsp;|&nbsp; <strong>Win:</strong> peak ≥ <span id="cfgWin">0.75</span>% in dir AND close didn't cross
+  </div>
+
+  <!-- Today's flags: bull -->
+  <div class="oi-card">
+    <div class="oi-card-head">
+      <div class="oi-card-title bull"><span class="oi-dot"></span> Today's Bullish Flags</div>
+      <div class="oi-card-meta" id="bullMeta">—</div>
+    </div>
+    <table class="oi-table" id="tblBull">
+      <thead>
+        <tr>
+          <th class="left">#</th>
+          <th class="left">Symbol</th>
+          <th>Spot</th>
+          <th>CE chg</th>
+          <th>PE chg</th>
+          <th>Net</th>
+          <th>Surge</th>
+          <th>PCR</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyBull">
+        <tr><td colspan="8" class="empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Today's flags: bear -->
+  <div class="oi-card">
+    <div class="oi-card-head">
+      <div class="oi-card-title bear"><span class="oi-dot"></span> Today's Bearish Flags</div>
+      <div class="oi-card-meta" id="bearMeta">—</div>
+    </div>
+    <table class="oi-table" id="tblBear">
+      <thead>
+        <tr>
+          <th class="left">#</th>
+          <th class="left">Symbol</th>
+          <th>Spot</th>
+          <th>CE chg</th>
+          <th>PE chg</th>
+          <th>Net</th>
+          <th>Surge</th>
+          <th>PCR</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyBear">
+        <tr><td colspan="8" class="empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Stats summary -->
+  <div class="oi-stats">
+    <div class="stat-card bull" id="statCardBull">
+      <div class="stat-head">
+        <span class="stat-side">Bullish · Rolling 30d</span>
+        <span class="stat-n" id="bullStatN">— flags resolved</span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <span class="stat-label">Win Rate (loose)</span>
+          <span class="stat-val" id="bullLooseRate">—</span>
+          <span class="stat-sub">peak ≥ 0.75% in dir &amp; close held</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-label">Win Rate (strict)</span>
+          <span class="stat-val" id="bullStrictRate">—</span>
+          <span class="stat-sub">peak ≥ 1.0% in dir</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-label">Avg Move (close)</span>
+          <span class="stat-val" id="bullAvgClose">—</span>
+          <span class="stat-sub">T+1 close vs T close</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bear" id="statCardBear">
+      <div class="stat-head">
+        <span class="stat-side">Bearish · Rolling 30d</span>
+        <span class="stat-n" id="bearStatN">— flags resolved</span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <span class="stat-label">Win Rate (loose)</span>
+          <span class="stat-val" id="bearLooseRate">—</span>
+          <span class="stat-sub">peak ≥ 0.75% in dir &amp; close held</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-label">Win Rate (strict)</span>
+          <span class="stat-val" id="bearStrictRate">—</span>
+          <span class="stat-sub">peak ≥ 1.0% in dir</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-label">Avg Move (close)</span>
+          <span class="stat-val" id="bearAvgClose">—</span>
+          <span class="stat-sub">T+1 close vs T close</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resolved outcomes log -->
+  <div class="oi-card oi-outcomes">
+    <div class="oi-card-head">
+      <div class="oi-card-title" style="color:var(--text);"><span class="oi-dot" style="background:var(--accent);"></span> Resolved Outcomes</div>
+      <div class="oi-card-meta" id="outcomeMeta">last 30 days · most recent first</div>
+    </div>
+    <table class="oi-table" id="tblOutcomes">
+      <thead>
+        <tr>
+          <th class="left">Date</th>
+          <th class="left">Side</th>
+          <th class="left">Symbol</th>
+          <th>T close</th>
+          <th>T+1 close</th>
+          <th>Peak %</th>
+          <th>Close %</th>
+          <th class="left">Result</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyOutcomes">
+        <tr><td colspan="8" class="empty">No resolved flags yet. Capture today's data, then this fills in tomorrow.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<div class="compliance-bar">
+  <strong style="color:#a1a1aa;">SEBI FY25:</strong> 91% of individual F&amp;O traders made net losses. This page surfaces patterns from your own data, not advice.
+</div>
+
+<script>
+function toggleUserMenu(){
+  var m=document.getElementById('userMenu');
+  m.style.display = m.style.display==='none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e){
+  var dd=document.querySelector('.q-nav-user-dropdown');
+  if(dd && !dd.contains(e.target)) document.getElementById('userMenu').style.display='none';
+});
+
+function fmtInt(n) {
+  n = Number(n) || 0;
+  var abs = Math.abs(n);
+  var sign = n < 0 ? '-' : (n > 0 ? '+' : '');
+  if (abs >= 1e7) return sign + (abs/1e7).toFixed(2) + 'Cr';
+  if (abs >= 1e5) return sign + (abs/1e5).toFixed(2) + 'L';
+  if (abs >= 1e3) return sign + (abs/1e3).toFixed(1) + 'K';
+  return sign + abs.toString();
+}
+function fmtPct(n, places) {
+  n = Number(n);
+  if (!isFinite(n)) return '—';
+  var p = (places == null) ? 2 : places;
+  return (n >= 0 ? '+' : '') + n.toFixed(p) + '%';
+}
+function pctColor(n) {
+  if (!isFinite(Number(n))) return 'val-dim';
+  return Number(n) > 0 ? 'val-pos' : (Number(n) < 0 ? 'val-neg' : 'val-dim');
+}
+function rateOrDash(num, den) {
+  if (!den) return '—';
+  return Math.round(100 * num / den) + '%';
+}
+
+function renderFlagsTable(tbodyId, flags, sideFilter) {
+  var tbody = document.getElementById(tbodyId);
+  var rows = (flags || []).filter(function(f){ return f.side === sideFilter; });
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No flags for today (yet). Capture runs at 15:35 IST.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(function(f) {
+    var rk = f.rank;
+    return '<tr>' +
+      '<td class="left"><span class="oi-rank' + (rk===1?' oi-rank-1':'') + '">' + rk + '</span></td>' +
+      '<td class="left oi-sym">' + f.symbol + '</td>' +
+      '<td>' + (f.spot_at_flag != null ? Number(f.spot_at_flag).toFixed(2) : '—') + '</td>' +
+      '<td class="' + pctColor(f.ce_oi_chg) + '">' + fmtInt(f.ce_oi_chg) + '</td>' +
+      '<td class="' + pctColor(f.pe_oi_chg) + '">' + fmtInt(f.pe_oi_chg) + '</td>' +
+      '<td><strong>' + fmtInt(f.net_thesis) + '</strong></td>' +
+      '<td>' + (f.surge_at_flag != null ? Number(f.surge_at_flag).toFixed(2) + 'x' : '—') + '</td>' +
+      '<td>' + (f.pcr_at_flag != null ? Number(f.pcr_at_flag).toFixed(2) : '—') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function renderStats(stats) {
+  function applySide(prefix, s) {
+    var n = (s && s.n) || 0;
+    var loose  = (s && s.w_loose) || 0;
+    var strict = (s && s.w_strict) || 0;
+    document.getElementById(prefix + 'StatN').textContent = n + ' flag' + (n===1?'':'s') + ' resolved';
+    document.getElementById(prefix + 'LooseRate').textContent  = rateOrDash(loose,  n);
+    document.getElementById(prefix + 'StrictRate').textContent = rateOrDash(strict, n);
+    document.getElementById(prefix + 'AvgClose').textContent =
+      (s && s.avg_close != null) ? fmtPct(s.avg_close, 2) : '—';
+  }
+  applySide('bull', stats && stats.bull);
+  applySide('bear', stats && stats.bear);
+}
+
+function renderOutcomes(outcomes) {
+  var tbody = document.getElementById('tbodyOutcomes');
+  if (!outcomes || !outcomes.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No resolved flags yet. Capture runs at 15:35 IST; verification happens the next trading day.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = outcomes.map(function(o) {
+    var resultTag, rowCls;
+    if (o.win_peak_strict) { resultTag = '<span class="tag tag-strict">STRICT WIN</span>'; rowCls = 'win-strict'; }
+    else if (o.win_peak_loose) { resultTag = '<span class="tag tag-loose">LOOSE WIN</span>'; rowCls = 'win-loose'; }
+    else { resultTag = '<span class="tag tag-miss">MISS</span>'; rowCls = 'miss'; }
+    return '<tr class="outcome-row ' + rowCls + '">' +
+      '<td class="left">' + o.flag_date + '</td>' +
+      '<td class="left"><span class="tag ' + (o.side==='bull'?'tag-bull':'tag-bear') + '">' + o.side.toUpperCase() + '</span></td>' +
+      '<td class="left oi-sym">' + o.symbol + '</td>' +
+      '<td>' + (o.spot_at_flag != null ? Number(o.spot_at_flag).toFixed(2) : '—') + '</td>' +
+      '<td>' + (o.spot_close_next != null ? Number(o.spot_close_next).toFixed(2) : '—') + '</td>' +
+      '<td class="' + pctColor(o.chg_pct_peak) + '">' + fmtPct(o.chg_pct_peak, 2) + '</td>' +
+      '<td class="' + pctColor(o.chg_pct_close) + '">' + fmtPct(o.chg_pct_close, 2) + '</td>' +
+      '<td class="left">' + resultTag + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+// Cached page state for export buttons
+let _pageData = { today_flags: [], outcomes: [], latest_flag_date: null };
+
+function loadData() {
+  fetch('/api/oi-thesis?days=30', { credentials: 'same-origin' })
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.error) {
+        document.getElementById('pageSubtitle').textContent = '— ' + d.error;
+        return;
+      }
+      _pageData = d;
+      var dt = d.latest_flag_date || 'no data yet';
+      document.getElementById('pageSubtitle').textContent = '— latest flags: ' + dt;
+      
+      document.getElementById('cfgWin').textContent = (d.config.peak_pct_win || 0.75);
+
+      var bullN = (d.today_flags || []).filter(function(f){return f.side==='bull';}).length;
+      var bearN = (d.today_flags || []).filter(function(f){return f.side==='bear';}).length;
+      document.getElementById('bullMeta').textContent = bullN + ' flagged · ranked by |PE+ − CE−|';
+      document.getElementById('bearMeta').textContent = bearN + ' flagged · ranked by |CE+ − PE−|';
+      document.getElementById('outcomeMeta').textContent = (d.outcomes || []).length + ' resolved · last ' + (d.config.n_days || 30) + ' days';
+
+      // Update export-button counts
+      document.getElementById('bullCountBtn').textContent = bullN;
+      document.getElementById('bearCountBtn').textContent = bearN;
+      document.getElementById('bothCountBtn').textContent = (bullN + bearN);
+
+      renderFlagsTable('tbodyBull', d.today_flags, 'bull');
+      renderFlagsTable('tbodyBear', d.today_flags, 'bear');
+      renderStats(d.stats);
+      renderOutcomes(d.outcomes);
+    })
+    .catch(function(err) {
+      document.getElementById('pageSubtitle').textContent = '— failed to load: ' + err;
+    });
+}
+
+// === Export helpers ===
+function _csvEscape(v) {
+  var s = (v === null || v === undefined) ? '' : String(v);
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function _download(content, filename, mime) {
+  var blob = new Blob([content], { type: mime + ';charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+}
+function _stamp(date) {
+  // Use latest_flag_date for the filename so it matches the data
+  return (date || new Date().toISOString().slice(0,10)).replace(/-/g, '');
+}
+
+// Export today's flags. side = 'bull' | 'bear' | 'both'. fmt = 'tv' | 'csv'
+function exportFlags(side, fmt) {
+  var flags = (_pageData.today_flags || []);
+  var rows = side === 'both' ? flags : flags.filter(function(f){ return f.side === side; });
+  if (!rows.length) {
+    alert('No ' + side + ' flags to export.');
+    return;
+  }
+  var stamp = _stamp(_pageData.latest_flag_date);
+  var base = 'oi_thesis_' + side + '_' + stamp;
+
+  if (fmt === 'tv') {
+    // TradingView watchlist format. Section headers (###Name,) group by side
+    // when 'both' is selected; otherwise one flat list.
+    var lines = [];
+    if (side === 'both') {
+      var bulls = flags.filter(function(f){ return f.side === 'bull'; })
+                        .map(function(f){ return 'NSE:' + f.symbol; });
+      var bears = flags.filter(function(f){ return f.side === 'bear'; })
+                        .map(function(f){ return 'NSE:' + f.symbol; });
+      if (bulls.length) lines.push('###Bull (' + stamp + '),' + bulls.join(','));
+      if (bears.length) lines.push('###Bear (' + stamp + '),' + bears.join(','));
+    } else {
+      lines.push(rows.map(function(f){ return 'NSE:' + f.symbol; }).join(','));
+    }
+    _download(lines.join('\n'), base + '.txt', 'text/plain');
+  } else {
+    // CSV with full metadata (rank, OI changes, PCR, surge, etc.)
+    var keys = ['flag_date','side','rank','symbol','spot_at_flag',
+                'ce_oi_chg','pe_oi_chg','net_thesis','pcr_at_flag',
+                'surge_at_flag','total_oi','sector'];
+    var labels = ['Date','Side','Rank','Symbol','Spot',
+                  'CE OI Chg','PE OI Chg','Net Thesis','PCR',
+                  'Vol Surge','Total OI','Sector'];
+    var header = labels.map(_csvEscape).join(',');
+    var body = rows.map(function(f){
+      return keys.map(function(k){ return _csvEscape(f[k]); }).join(',');
+    }).join('\r\n');
+    _download(header + '\r\n' + body, base + '.csv', 'text/csv');
+  }
+}
+
+// Export the resolved-outcomes log for analytics.
+function exportOutcomes(fmt) {
+  var rows = _pageData.outcomes || [];
+  if (!rows.length) {
+    alert('No resolved outcomes yet. They appear once flags are verified the next trading day.');
+    return;
+  }
+  var stamp = _stamp();
+  var base = 'oi_thesis_outcomes_' + stamp;
+  if (fmt === 'json') {
+    _download(JSON.stringify(rows, null, 2), base + '.json', 'application/json');
+    return;
+  }
+  var keys = ['flag_date','rule_id','side','rank','symbol','resolution_date',
+              'spot_at_flag','spot_close_next','spot_high_next','spot_low_next',
+              'chg_pct_close','chg_pct_peak',
+              'win_peak_loose','win_peak_strict','win_close_only',
+              'ce_oi_chg','pe_oi_chg','net_thesis','pcr_at_flag','surge_at_flag','total_oi'];
+  var labels = ['Flag Date','Rule','Side','Rank','Symbol','Resolved On',
+                'Spot @ Flag','Close T+1','High T+1','Low T+1',
+                'Close % T+1','Peak % T+1',
+                'Win Loose','Win Strict','Win Close',
+                'CE OI Chg','PE OI Chg','Net Thesis','PCR','Vol Surge','Total OI'];
+  var header = labels.map(_csvEscape).join(',');
+  var body = rows.map(function(o){
+    return keys.map(function(k){ return _csvEscape(o[k]); }).join(',');
+  }).join('\r\n');
+  _download(header + '\r\n' + body, base + '.csv', 'text/csv');
+}
+
+loadData();
+// Auto-refresh every 5 minutes
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+
+<script src="/static/js/nav-common.js"></script>
+</body>
+</html>

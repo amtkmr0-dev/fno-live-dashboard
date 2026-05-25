@@ -300,11 +300,12 @@ SECURITY_HEADERS = {
 # Allows inline styles (needed for our single-file HTML approach) but blocks eval
 CONTENT_SECURITY_POLICY = (
     "default-src 'self'; "
-    "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; "
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://checkout.razorpay.com https://unpkg.com https://cdn.jsdelivr.net; "
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-    "font-src 'self' https://fonts.gstatic.com; "
-    "img-src 'self' data: blob:; "
-    "connect-src 'self' ws: wss:; "
+    "font-src 'self' https://fonts.gstatic.com https://frontend-cdn.perplexity.ai; "
+    "img-src 'self' data: blob: https://*.razorpay.com; "
+    "connect-src 'self' ws: wss: https://api.razorpay.com; "
+    "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com; "
     "frame-ancestors 'none'; "
     "base-uri 'self'; "
     "form-action 'self';"

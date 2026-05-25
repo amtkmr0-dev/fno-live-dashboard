@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="bloomberg-pro">
+<head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OI Time-Series — Quantra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (self-contained, no external CSS dependency) ── */
+:root {
+  --bg:            #09090b;
+  --surface:       #18181b;
+  --surface-alt:   #1c1c20;
+  --surface-hover: #27272a;
+  --bg-elevated:   #27272a;
+  --border:        #2e2e35;
+  --border-light:  #3f3f46;
+  --text:          #e4e4e7;
+  --text-dim:      #71717a;
+  --text-vdim:     #52525b;
+  --text-bright:   #fafafa;
+  --accent:        #3b82f6;
+  --accent-soft:   rgba(59,130,246,0.12);
+  --green:         #10b981;
+  --green-soft:    rgba(16,185,129,0.12);
+  --red:           #ef4444;
+  --red-soft:      rgba(239,68,68,0.12);
+  --gold:          #f59e0b;
+  --orange:        #f97316;
+  --font-sans:     'Inter', system-ui, sans-serif;
+  --font-mono:     'IBM Plex Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 13px; }
+body { display: flex; flex-direction: column; }
+</style>
+<style>
+/* ── Nav ── */
+.q-nav { display:flex; align-items:center; gap:12px; padding:0 16px; height:44px; background:var(--bg); border-bottom:1px solid var(--border); flex-shrink:0; }
+.q-nav-brand { font-size:15px; font-weight:800; color:var(--text-bright); text-decoration:none; letter-spacing:-0.3px; }
+.q-nav-brand span { color:var(--accent); }
+.q-nav-links { display:flex; gap:2px; margin-left:8px; }
+.q-nav-links a { font-size:12px; font-weight:500; color:var(--text-dim); text-decoration:none; padding:4px 10px; border-radius:6px; transition:all 0.15s; }
+.q-nav-links a:hover, .q-nav-links a.active { color:var(--text); background:var(--surface-hover); }
+.q-nav-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+/* ── Controls bar ── */
+.ctrl-bar { display:flex; align-items:center; gap:8px; padding:8px 16px; background:var(--bg); border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
+.sym-search-wrap { position:relative; }
+.sym-input { background:var(--surface); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:var(--font-mono); font-size:13px; font-weight:600; padding:5px 10px; width:140px; outline:none; transition:border-color 0.15s; }
+.sym-input:focus { border-color:var(--accent); }
+.sym-dropdown { position:absolute; top:calc(100%+4px); left:0; min-width:200px; max-height:260px; overflow-y:auto; background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.4); z-index:200; display:none; }
+.sym-dropdown.open { display:block; }
+.sym-dd-item { padding:6px 12px; font-size:12px; cursor:pointer; color:var(--text); font-family:var(--font-mono); }
+.sym-dd-item:hover, .sym-dd-item.selected { background:var(--surface-hover); color:var(--accent); }
+.ctrl-label { font-size:11px; color:var(--text-dim); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; }
+.ctrl-select { background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:11px; padding:4px 8px; outline:none; cursor:pointer; }
+.ctrl-select:focus { border-color:var(--accent); }
+.ctrl-btn { background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text-dim); font-size:11px; font-weight:600; padding:4px 12px; cursor:pointer; transition:all 0.15s; font-family:inherit; }
+.ctrl-btn:hover { border-color:var(--accent); color:var(--accent); }
+.ctrl-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.ctrl-btn.primary:hover { background:#2563eb; }
+.live-badge { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:var(--green); background:var(--green-soft); border:1px solid rgba(16,185,129,0.3); border-radius:20px; padding:2px 8px; }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.last-update { font-size:10px; color:var(--text-vdim); }
+</style>
+<style>
+/* ── Summary strip ── */
+.summary-strip { display:flex; gap:8px; padding:8px 16px; background:var(--bg); border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
+.metric-pill { display:flex; flex-direction:column; gap:1px; padding:6px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; min-width:90px; }
+.mp-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-vdim); }
+.mp-val { font-size:14px; font-weight:700; color:var(--text-bright); font-family:var(--font-mono); }
+.mp-val.green { color:var(--green); }
+.mp-val.red { color:var(--red); }
+.mp-val.gold { color:var(--gold); }
+.mp-sub { font-size:10px; color:var(--text-dim); font-family:var(--font-mono); }
+/* ── Table ── */
+.table-wrap { flex:1; overflow:auto; padding:0 16px 16px; }
+.oi-table { width:100%; border-collapse:collapse; font-size:12px; }
+.oi-table thead { position:sticky; top:0; z-index:10; }
+.oi-table th { background:var(--bg-elevated); color:var(--text-dim); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:8px 10px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+.oi-table th:first-child { text-align:left; }
+.oi-table td { padding:7px 10px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.03); font-family:var(--font-mono); font-size:11px; color:var(--text); white-space:nowrap; vertical-align:middle; }
+.oi-table td:first-child { text-align:left; color:var(--text-dim); font-size:11px; }
+.oi-table tr:hover td { background:var(--surface-hover); }
+.oi-table tr.latest td { background:rgba(59,130,246,0.06); }
+.oi-table tr.latest td:first-child { border-left:2px solid var(--accent); }
+.delta-pos { color:var(--green); }
+.delta-neg { color:var(--red); }
+.delta-zero { color:var(--text-vdim); }
+.tag-bu { display:inline-block; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; letter-spacing:0.3px; }
+.tag-lb { background:rgba(16,185,129,0.15); color:var(--green); }
+.tag-sb { background:rgba(239,68,68,0.15); color:var(--red); }
+.tag-lu { background:rgba(245,158,11,0.15); color:var(--gold); }
+.tag-sc { background:rgba(59,130,246,0.15); color:var(--accent); }
+.tag-n  { background:var(--surface-alt); color:var(--text-vdim); }
+.empty-state { text-align:center; padding:60px 20px; color:var(--text-dim); }
+.empty-state h3 { font-size:16px; margin-bottom:8px; color:var(--text); }
+.empty-state p { font-size:12px; }
+/* ── Compliance ── */
+.compliance-bar { background:var(--bg); border-top:1px solid rgba(255,255,255,0.03); padding:6px 16px; text-align:center; font-size:9px; color:var(--text-vdim); flex-shrink:0; }
+</style>
+  <link rel="stylesheet" href="/static/css/themes.css">
+</head>
+<body>
+
+<!-- Auth gate -->
+<script>
+(function() {
+  fetch('/api/auth/verify', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(d => { if (!d.ok) window.location.href = '/login'; })
+    .catch(() => window.location.href = '/login');
+})();
+</script>
+
+<!-- Nav -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
+  </a>
+
+  <div class="q-nav-links">
+    <a href="/" id="nav-dashboard">Dashboard</a>
+    <a href="/sectors" id="nav-sectors">Sectors</a>
+    <a href="/nifty" id="nav-nifty">Nifty 50</a>
+</div>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/advanced-analytics" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Advanced Desk</span>
+        </a>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Controls -->
+<div class="ctrl-bar">
+  <div class="sym-search-wrap">
+    <input type="text" class="sym-input" id="symInput" placeholder="Symbol…" autocomplete="off" spellcheck="false">
+    <div class="sym-dropdown" id="symDropdown"></div>
+  </div>
+  <span class="ctrl-label">Date</span>
+  <input type="date" class="ctrl-select" id="dateInput">
+  <button class="ctrl-btn primary" onclick="loadData()">Load</button>
+  <button class="ctrl-btn" onclick="toggleAutoRefresh()" id="autoRefreshBtn">Auto ↻ ON</button>
+  <span style="margin-left:auto; font-size:11px; color:var(--text-dim);" id="rowCount"></span>
+</div>
+
+<!-- Summary strip -->
+<div class="summary-strip" id="summaryStrip">
+  <div class="metric-pill"><div class="mp-label">Symbol</div><div class="mp-val" id="mSym">—</div></div>
+  <div class="metric-pill"><div class="mp-label">LTP</div><div class="mp-val" id="mLtp">—</div><div class="mp-sub" id="mExpiry">—</div></div>
+  <div class="metric-pill"><div class="mp-label">PCR (live)</div><div class="mp-val" id="mPcr">—</div><div class="mp-sub" id="mPcrSig">—</div></div>
+  <div class="metric-pill"><div class="mp-label">Max Pain</div><div class="mp-val gold" id="mMaxPain">—</div></div>
+  <div class="metric-pill"><div class="mp-label">CE OI Chg</div><div class="mp-val" id="mCeChg">—</div></div>
+  <div class="metric-pill"><div class="mp-label">PE OI Chg</div><div class="mp-val" id="mPeChg">—</div></div>
+  <div class="metric-pill"><div class="mp-label">Buildup</div><div class="mp-val" id="mBuildup">—</div></div>
+  <div class="metric-pill"><div class="mp-label">ATM IV</div><div class="mp-val" id="mIv">—</div></div>
+  <div class="metric-pill"><div class="mp-label">Total OI</div><div class="mp-val" id="mTotalOi">—</div></div>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+  <table class="oi-table" id="oiTable">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>LTP</th>
+        <th>PCR</th>
+        <th>Max Pain</th>
+        <th>CE OI Chg</th>
+        <th>Δ CE OI</th>
+        <th>PE OI Chg</th>
+        <th>Δ PE OI</th>
+        <th>Net OI Chg</th>
+        <th>Buildup</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody id="oiTbody">
+      <tr><td colspan="11" class="empty-state"><h3>Select a symbol to begin</h3><p>Use the search box above to pick any F&O stock</p></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="compliance-bar">For educational and informational purposes only. Not investment advice. F&O trading involves substantial risk.</div>
+
+<script>
+// ── State ──
+let currentSymbol = '';
+let allSymbols = [];
+let autoRefresh = true;
+let refreshTimer = null;
+const REFRESH_INTERVAL = 60000; // 1 min
+
+// ── Init ──
+(function init() {
+  const today = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('dateInput').value =
+    today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+
+  // Load symbol list from /api/state
+  fetch('/api/state', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(d => {
+      allSymbols = Object.keys(d.stocks || {}).sort();
+      // Check URL param
+      const params = new URLSearchParams(window.location.search);
+      const sym = (params.get('symbol') || '').toUpperCase();
+      if (sym && allSymbols.includes(sym)) {
+        document.getElementById('symInput').value = sym;
+        currentSymbol = sym;
+        loadData();
+      }
+    })
+    .catch(() => {});
+})();
+
+// ── Symbol search ──
+const symInput = document.getElementById('symInput');
+const symDropdown = document.getElementById('symDropdown');
+
+symInput.addEventListener('input', function() {
+  const q = this.value.toUpperCase().trim();
+  if (!q) { symDropdown.classList.remove('open'); return; }
+  const matches = allSymbols.filter(s => s.startsWith(q)).slice(0, 20);
+  if (!matches.length) { symDropdown.classList.remove('open'); return; }
+  symDropdown.innerHTML = matches.map(s =>
+    '<div class="sym-dd-item" onclick="selectSymbol(\'' + s + '\')">' + s + '</div>'
+  ).join('');
+  symDropdown.classList.add('open');
+});
+
+symInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const val = this.value.toUpperCase().trim();
+    if (val) { selectSymbol(val); }
+  }
+  if (e.key === 'Escape') symDropdown.classList.remove('open');
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.sym-search-wrap')) symDropdown.classList.remove('open');
+});
+
+function selectSymbol(sym) {
+  currentSymbol = sym;
+  symInput.value = sym;
+  symDropdown.classList.remove('open');
+  loadData();
+}
+
+// ── Load data ──
+function loadData() {
+  if (!currentSymbol) return;
+  const date = document.getElementById('dateInput').value;
+  const url = '/api/oi-timeseries?symbol=' + encodeURIComponent(currentSymbol) + '&date=' + date;
+
+  fetch(url, { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(renderData)
+    .catch(err => {
+      document.getElementById('oiTbody').innerHTML =
+        '<tr><td colspan="11" class="empty-state"><h3>Error loading data</h3><p>' + err + '</p></td></tr>';
+    });
+}
+
+// ── Render ──
+function fmtNum(v, decimals) {
+  if (v === null || v === undefined) return '—';
+  return Number(v).toFixed(decimals !== undefined ? decimals : 2);
+}
+function fmtOI(v) {
+  if (v === null || v === undefined) return '—';
+  const n = Number(v);
+  if (Math.abs(n) >= 10000000) return (n/10000000).toFixed(2) + 'Cr';
+  if (Math.abs(n) >= 100000)   return (n/100000).toFixed(2) + 'L';
+  if (Math.abs(n) >= 1000)     return (n/1000).toFixed(1) + 'K';
+  return String(n);
+}
+function deltaClass(v) {
+  if (v === null || v === undefined) return 'delta-zero';
+  return v > 0 ? 'delta-pos' : v < 0 ? 'delta-neg' : 'delta-zero';
+}
+function fmtDelta(v) {
+  if (v === null || v === undefined) return '—';
+  const s = fmtOI(v);
+  return v > 0 ? '+' + s : s;
+}
+function buildupTag(b) {
+  if (!b || b === 'NEUTRAL') return '<span class="tag-bu tag-n">NEUTRAL</span>';
+  if (b === 'LONG_BUILD')    return '<span class="tag-bu tag-lb">LONG BUILD</span>';
+  if (b === 'SHORT_BUILD')   return '<span class="tag-bu tag-sb">SHORT BUILD</span>';
+  if (b === 'LONG_UNWIND')   return '<span class="tag-bu tag-lu">LONG UNWIND</span>';
+  if (b === 'SHORT_COVER')   return '<span class="tag-bu tag-sc">SHORT COVER</span>';
+  return '<span class="tag-bu tag-n">' + b + '</span>';
+}
+function fmtTime(snap_ts) {
+  // snap_ts is ISO like "2026-05-21T10:15:00+05:30"
+  try {
+    const t = snap_ts.substring(11, 16); // HH:MM
+    return t;
+  } catch(e) { return snap_ts; }
+}
+
+function renderData(d) {
+  // Update summary strip from live state
+  const live = d.live || {};
+  document.getElementById('mSym').textContent = d.symbol || '—';
+  document.getElementById('mLtp').textContent = live.ltp ? fmtNum(live.ltp, 2) : '—';
+  document.getElementById('mExpiry').textContent = live.expiry ? 'Exp: ' + live.expiry : '—';
+
+  const pcr = live.pcr;
+  const pcrEl = document.getElementById('mPcr');
+  pcrEl.textContent = pcr ? fmtNum(pcr, 2) : '—';
+  pcrEl.className = 'mp-val' + (pcr > 1 ? ' green' : pcr < 0.8 ? ' red' : '');
+
+  document.getElementById('mPcrSig').textContent = live.pcr_sig || '—';
+  document.getElementById('mMaxPain').textContent = live.max_pain ? fmtNum(live.max_pain, 0) : '—';
+
+  const ceChg = live.ce_oi_chg;
+  const ceEl = document.getElementById('mCeChg');
+  ceEl.textContent = ceChg !== null && ceChg !== undefined ? fmtDelta(ceChg) : '—';
+  ceEl.className = 'mp-val ' + deltaClass(ceChg);
+
+  const peChg = live.pe_oi_chg;
+  const peEl = document.getElementById('mPeChg');
+  peEl.textContent = peChg !== null && peChg !== undefined ? fmtDelta(peChg) : '—';
+  peEl.className = 'mp-val ' + deltaClass(peChg);
+
+  document.getElementById('mBuildup').textContent = live.buildup || '—';
+  document.getElementById('mIv').textContent = live.atm_iv ? fmtNum(live.atm_iv, 1) + '%' : '—';
+  document.getElementById('mTotalOi').textContent = live.total_oi ? fmtOI(live.total_oi) : '—';
+
+  // Render table — newest first
+  const rows = (d.rows || []).slice().reverse();
+  document.getElementById('rowCount').textContent = rows.length + ' ticks';
+  document.getElementById('lastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+
+  if (!rows.length) {
+    document.getElementById('oiTbody').innerHTML =
+      '<tr><td colspan="11" class="empty-state"><h3>No data for ' + d.symbol + ' on ' + d.date + '</h3>' +
+      '<p>OI time-series data is recorded every ~3 minutes during market hours (09:15–15:30 IST).<br>Data accumulates from today\'s session onwards.</p></td></tr>';
+    return;
+  }
+
+  const html = rows.map((r, i) => {
+    const isLatest = i === 0;
+    return '<tr class="' + (isLatest ? 'latest' : '') + '">' +
+      '<td>' + fmtTime(r.snap_ts) + '</td>' +
+      '<td>' + fmtNum(r.spot_ltp, 2) + '</td>' +
+      '<td class="' + (r.pcr > 1 ? 'delta-pos' : r.pcr < 0.8 ? 'delta-neg' : '') + '">' + fmtNum(r.pcr, 2) + '</td>' +
+      '<td class="gold">' + (r.max_pain ? fmtNum(r.max_pain, 0) : '—') + '</td>' +
+      '<td class="' + deltaClass(r.ce_oi_chg) + '">' + fmtOI(r.ce_oi_chg) + '</td>' +
+      '<td class="' + deltaClass(r.d_ce_oi) + '">' + fmtDelta(r.d_ce_oi) + '</td>' +
+      '<td class="' + deltaClass(r.pe_oi_chg) + '">' + fmtOI(r.pe_oi_chg) + '</td>' +
+      '<td class="' + deltaClass(r.d_pe_oi) + '">' + fmtDelta(r.d_pe_oi) + '</td>' +
+      '<td class="' + deltaClass(r.net_oi_chg) + '">' + fmtOI(r.net_oi_chg) + '</td>' +
+      '<td>' + buildupTag(r.buildup) + '</td>' +
+      '<td>' + (r.score !== null && r.score !== undefined ? r.score : '—') + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('oiTbody').innerHTML = html;
+}
+
+// ── Auto-refresh ──
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+  if (autoRefresh && currentSymbol) {
+    refreshTimer = setTimeout(function() {
+      loadData();
+      scheduleRefresh();
+    }, REFRESH_INTERVAL);
+  }
+}
+
+function toggleAutoRefresh() {
+  autoRefresh = !autoRefresh;
+  document.getElementById('autoRefreshBtn').textContent = 'Auto ↻ ' + (autoRefresh ? 'ON' : 'OFF');
+  if (autoRefresh) scheduleRefresh();
+  else clearTimeout(refreshTimer);
+}
+
+// Start auto-refresh after first load
+const origLoad = loadData;
+window.loadData = function() {
+  origLoad();
+  scheduleRefresh();
+};
+</script>
+</body>
+</html>

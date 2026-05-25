@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight-blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme Explorer &mdash; Quantra Terminal</title>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Source+Code+Pro:wght@400;600;800&family=Outfit:wght@400;700;800&family=Manrope:wght@500;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+
+<!-- Dashboard CSS Stylesheets -->
+<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/themes.css">
+<link rel="stylesheet" href="/static/css/premium-polish.css">
+
+<style>
+/* ============================================================
+   Page-specific styles: Dashboard & Theme Explorer
+   ============================================================ */
+
+html { height: 100%; overflow: hidden; }
+body {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Theme Explorer Control Deck (Glassmorphism & Sleek Design) --- */
+.explorer-deck {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.explorer-deck::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
+  opacity: 0.3;
+}
+.exp-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.exp-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.exp-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+.exp-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--accent, #3b82f6), var(--cyan, #06b6d4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.exp-subtitle {
+  font-size: 9px;
+  color: var(--text-vdim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.exp-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.exp-theme-pill {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-bright);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+}
+.exp-apply-btn {
+  background: linear-gradient(135deg, var(--green, #10b981) 0%, var(--accent, #3b82f6) 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.exp-apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  filter: brightness(1.1);
+}
+.exp-categories {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 1024px) {
+  .exp-categories {
+    grid-template-columns: 1fr 1.3fr;
+    gap: 20px;
+  }
+}
+.exp-cat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.exp-cat-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-vdim);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+  max-height: 140px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.exp-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.exp-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.exp-card.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.exp-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.exp-card-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+.exp-card-desc {
+  font-size: 8px;
+  color: var(--text-dim);
+  line-height: 1.1;
+}
+.exp-swatches {
+  display: flex;
+  gap: 2px;
+}
+.exp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* --- Live Preview Workspace Area --- */
+.preview-workspace {
+  flex-grow: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg);
+}
+
+/* --- Page-specific components (replicated from dashboard) --- */
+.idx-ticker-bar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-shrink: 0;
+  height: 44px;
+  overflow-x: auto;
+}
+.idx-ticker-bar::-webkit-scrollbar { height: 0; }
+.idx-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 16px;
+  border-right: 1px solid var(--border);
+  min-width: 110px;
+  cursor: default;
+  transition: background 0.15s;
+}
+.idx-tile:hover { background: var(--surface); }
+.idx-tile:first-child { padding-left: 4px; }
+.idx-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-vdim);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.idx-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-bright);
+  font-family: var(--font-mono, monospace);
+  line-height: 1;
+}
+.idx-chg {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  line-height: 1;
+  margin-top: 1px;
+}
+.idx-chg.pos { color: var(--green); }
+.idx-chg.neg { color: var(--red); }
+.idx-chg.neu { color: var(--text-vdim); }
+.idx-vix .idx-val { color: var(--yellow, #eab308); }
+.idx-divider {
+  width: 1px;
+  background: var(--border);
+  margin: 8px 0;
+  flex-shrink: 0;
+}
+.idx-breadth {
+  border-right: none;
+  min-width: 90px;
+}
+.idx-breadth-val {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  line-height: 1;
+}
+.idx-adv { color: var(--green); }
+.idx-dec { color: var(--red); }
+.idx-sep { color: var(--text-vdim); font-size: 11px; }
+
+/* --- Top Picks Bar --- */
+.top-picks-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  align-items: center;
+  min-height: 38px;
+  flex-shrink: 0;
+}
+.top-picks-bar::-webkit-scrollbar { height: 0; }
+.top-picks-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--green);
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+.top-picks-empty {
+  font-size: 11px;
+  color: var(--text-vdim);
+  font-style: italic;
+}
+.pick-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  min-width: 170px;
+  transition: all 0.15s ease;
+}
+.pick-card:hover {
+  border-color: var(--accent);
+}
+.pc-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.pc-sym {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-bright);
+}
+.pc-dir {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.pc-dir.dir-CE { background: var(--green-soft); color: var(--green); }
+.pc-dir.dir-PE { background: var(--red-soft); color: var(--red); }
+.pc-tier {
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: var(--surface-alt);
+  color: var(--text-dim);
+}
+.pc-tier.tier-strong { border: 1px solid var(--green); color: var(--green); }
+.pc-tier.tier-watch { border: 1px solid var(--yellow); color: var(--yellow); }
+.pc-score {
+  font-size: 11px;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+}
+.pc-detail {
+  font-size: 9px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* --- Controls Bar --- */
+.header-controls {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  z-index: 99;
+}
+.header-controls::-webkit-scrollbar { height: 0; }
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  flex-wrap: nowrap;
+}
+.filter-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+.search-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px 6px 30px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  width: 160px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23787B86' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  transition: border-color 0.2s;
+}
+.search-box:focus { border-color: var(--accent); }
+.filter-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.filter-select:focus { border-color: var(--accent); }
+.btn-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 12px;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.btn-toggle:hover { border-color: var(--text-dim); color: var(--text); }
+.btn-toggle.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn-n50 { border-color: rgba(255,215,0,0.3); color: var(--gold); }
+.btn-n50.active { border-color: var(--gold); background: var(--gold-soft); }
+.btn-poised { border-color: rgba(38,166,154,0.3); color: var(--green); }
+.btn-poised.active { border-color: var(--green); background: var(--green-soft); }
+
+/* --- Heatmap Bar --- */
+.heatmap-strip {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.heatmap-toggle {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border);
+  width: 32px;
+  height: 32px;
+  color: var(--text-vdim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.heatmap-toggle:hover { color: var(--text); }
+.heatmap-bar {
+  display: flex;
+  gap: 6px;
+  padding: 4px 10px;
+  overflow-x: auto;
+  flex: 1;
+}
+.heatmap-bar::-webkit-scrollbar { height: 0; }
+.heat-cell {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.h-name { opacity: 0.85; }
+.h-val { font-family: var(--font-mono, monospace); }
+
+/* --- Table Styles --- */
+.table-wrap {
+  flex-grow: 1;
+  overflow: auto;
+  background: var(--bg);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 11px;
+}
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+th {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+  color: var(--text-dim);
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+}
+th[data-key] {
+  cursor: pointer;
+}
+th[data-key]:hover {
+  color: var(--text-bright);
+}
+th.sort-asc::after { content: " ▲"; font-size: 8px; }
+th.sort-desc::after { content: " ▼"; font-size: 8px; }
+
+.col-group-row th {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+tbody tr:nth-child(even) {
+  background: var(--surface-alt);
+}
+tbody tr:hover {
+  background: var(--surface-hover) !important;
+}
+tbody tr.row-poised {
+  background: linear-gradient(90deg, var(--green-soft) 0%, transparent 100%);
+}
+td {
+  padding: 6px 10px;
+  color: var(--text);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.col-sym { font-weight: 700; }
+.col-sym a { color: var(--text-bright); text-decoration: none; }
+.col-sym a:hover { text-decoration: underline; }
+
+/* Flashing animations */
+@keyframes flashUpAnim {
+  0% { background-color: rgba(16, 185, 129, 0.4); }
+  100% { background-color: transparent; }
+}
+@keyframes flashDownAnim {
+  0% { background-color: rgba(239, 68, 68, 0.4); }
+  100% { background-color: transparent; }
+}
+.flash-up { animation: flashUpAnim 1s ease; }
+.flash-down { animation: flashDownAnim 1s ease; }
+
+/* Custom badges */
+.n50-badge {
+  background: rgba(255, 215, 0, 0.15);
+  color: var(--gold);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+.poised-badge {
+  background: var(--green-soft);
+  color: var(--green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+.dir-badge {
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+.dir-CE { background: var(--green-soft); color: var(--green); }
+.dir-PE { background: var(--red-soft); color: var(--red); }
+
+/* Value coloring classes */
+.val-pos { color: var(--green) !important; font-weight: 600; }
+.val-neg { color: var(--red) !important; font-weight: 600; }
+.val-dim { color: var(--text-vdim) !important; }
+.null-val { color: var(--text-muted) !important; }
+.prem-low { opacity: 0.6; }
+
+/* Score ring custom widget */
+.score-ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+.score-ring svg {
+  transform: rotate(-90deg);
+}
+.score-ring .s-val {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-bright);
+}
+
+/* Pills styling */
+.sig-pill, .bu-pill, .sector-pill, .vc-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  display: inline-block;
+}
+.sig-BULLISH { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+.sig-MILDLY_BULL { background: rgba(16,185,129,0.08); color: var(--green); opacity: 0.85; }
+.sig-BEARISH { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+.sig-MILDLY_BEAR { background: rgba(239,68,68,0.08); color: var(--red); opacity: 0.85; }
+.sig-NEUTRAL { background: var(--surface-alt); color: var(--text-dim); }
+
+.bu-LONG_BUILD { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+.bu-SHORT_BUILD { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+.bu-LONG_UNWIND { background: rgba(239,68,68,0.06); color: var(--red); opacity: 0.8; }
+.bu-SHORT_COVER { background: rgba(16,185,129,0.06); color: var(--green); opacity: 0.8; }
+.bu-NEUTRAL { background: var(--surface-alt); color: var(--text-dim); }
+
+.sector-pill { background: var(--surface-alt); color: var(--text-dim); border: 1px solid var(--border); }
+.vc-pill { font-size: 8px; padding: 1px 4px; border-radius: 3px; }
+.vc-TRIPLE { background: rgba(255,215,0,0.2); color: var(--gold); border: 1px solid rgba(255,215,0,0.4); }
+.vc-DOUBLE { background: var(--surface-alt); color: var(--text-bright); border: 1px solid var(--border); }
+.vc-SINGLE { background: var(--surface-alt); color: var(--text-dim); opacity: 0.8; }
+.vc-NONE { color: var(--text-muted); }
+
+/* --- Footer --- */
+.footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 6px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.footer-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-counter {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-weight: 600;
+}
+.qcc-shown { color: var(--accent); }
+.qcc-total { color: var(--text-vdim); }
+.footer-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--border);
+}
+
+/* --- Toast notification system --- */
+.q-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-bright);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999;
+}
+.q-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.q-toast::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+  background: var(--accent);
+}
+.q-toast.success::before { background: var(--green); }
+.q-toast.error::before { background: var(--red); }
+</style>
+</head>
+<body class="minimal-pro-mode">
+
+<!-- Theme Selector control panel -->
+<div class="explorer-deck" id="explorerDeck">
+  <div class="exp-top">
+    <div class="exp-brand">
+      <svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#3b82f6"/>
+            <stop offset="1" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c5.2 0 10.08-1.42 14.26-3.89L52 62l-2.11-7.74C54.58 50.08 60 41.52 60 32 60 16.536 47.464 4 32 4z" stroke="url(#logoGrad)" stroke-width="3.5" fill="none"/>
+        <rect x="20" y="22" width="4" height="20" rx="1.5" fill="url(#logoGrad)" opacity="0.7"/>
+        <rect x="30" y="16" width="4" height="26" rx="1.5" fill="url(#logoGrad)" opacity="0.85"/>
+        <rect x="40" y="26" width="4" height="16" rx="1.5" fill="url(#logoGrad)" opacity="0.7"/>
+      </svg>
+      <div class="exp-brand-text">
+        <span class="exp-title">Quantra Workspace Theme Explorer</span>
+        <span class="exp-subtitle">Select &amp; Preview Themes with Live Data</span>
+      </div>
+    </div>
+    <div class="exp-actions">
+      <span class="exp-theme-pill">Active Preview: <span id="activeThemeLabel">Midnight Blue</span></span>
+      <button class="exp-apply-btn" onclick="applySelectedTheme()" title="Apply this theme choice to the live dashboard page.">Apply to Live Dashboard</button>
+    </div>
+  </div>
+
+  <div class="exp-categories">
+    <div class="exp-cat">
+      <span class="exp-cat-label">Classic Interfaces</span>
+      <div class="exp-grid" id="classicGrid"></div>
+    </div>
+    <div class="exp-cat">
+      <span class="exp-cat-label">Premium Visual Concepts</span>
+      <div class="exp-grid" id="premiumGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Live Preview Area -->
+<div class="preview-workspace">
+  <!-- Index Ticker Bar -->
+  <div class="idx-ticker-bar" id="idxTickerBar">
+    <div class="idx-tile" id="idx-NIFTY50">
+      <span class="idx-label">NIFTY 50</span>
+      <span class="idx-val" id="idx-NIFTY50-ltp">—</span>
+      <span class="idx-chg" id="idx-NIFTY50-chg">—</span>
+    </div>
+    <div class="idx-tile" id="idx-BANKNIFTY">
+      <span class="idx-label">BANK NIFTY</span>
+      <span class="idx-val" id="idx-BANKNIFTY-ltp">—</span>
+      <span class="idx-chg" id="idx-BANKNIFTY-chg">—</span>
+    </div>
+    <div class="idx-tile" id="idx-MIDCAPNIFTY">
+      <span class="idx-label">MIDCAP NIFTY</span>
+      <span class="idx-val" id="idx-MIDCAPNIFTY-ltp">—</span>
+      <span class="idx-chg" id="idx-MIDCAPNIFTY-chg">—</span>
+    </div>
+    <div class="idx-tile idx-vix" id="idx-INDIAVIX">
+      <span class="idx-label">INDIA VIX</span>
+      <span class="idx-val" id="idx-INDIAVIX-ltp">—</span>
+      <span class="idx-chg" id="idx-INDIAVIX-chg">—</span>
+    </div>
+    <div class="idx-divider"></div>
+    <div class="idx-tile idx-breadth">
+      <span class="idx-label">BREADTH</span>
+      <span class="idx-breadth-val">
+        <span class="idx-adv" id="idx-adv">—</span>
+        <span class="idx-sep">:</span>
+        <span class="idx-dec" id="idx-dec">—</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Sector Heatmap Strip -->
+  <div class="heatmap-strip" id="heatmapStrip">
+    <button class="heatmap-toggle" id="heatToggle" onclick="toggleHeatmap()" aria-expanded="true" aria-label="Toggle sector heatmap" title="Show / hide sector heatmap">
+      <span class="ht-caret" id="heatCaret">&#9650;</span>
+    </button>
+    <div class="heatmap-bar" id="heatmapBar"></div>
+  </div>
+
+  <!-- Top Picks Bar -->
+  <div class="top-picks-bar" id="topPicksBar">
+    <span class="top-picks-label">Picks Watch:</span>
+    <span class="top-picks-empty" id="topPicksEmpty">Waiting for options chain data stream...</span>
+  </div>
+
+  <!-- Filter Controls -->
+  <div class="header-controls">
+    <div class="filters">
+      <input type="text" class="search-box" id="searchBox" placeholder="Search symbol...">
+      <select class="filter-select" id="sectorFilter">
+        <option value="">All Sectors</option>
+        <option value="IT">IT</option>
+        <option value="BANK">BANK</option>
+        <option value="PSU_BANK">PSU BANK</option>
+        <option value="FIN">FIN</option>
+        <option value="AUTO">AUTO</option>
+        <option value="METAL">METAL</option>
+        <option value="PHARMA">PHARMA</option>
+        <option value="FMCG">FMCG</option>
+        <option value="ENERGY">ENERGY</option>
+        <option value="REALTY">REALTY</option>
+        <option value="INFRA">INFRA</option>
+        <option value="CONSUMER">CONSUMER</option>
+        <option value="HEALTH">HEALTH</option>
+        <option value="MEDIA">MEDIA</option>
+        <option value="INSURANCE">INSURANCE</option>
+      </select>
+      <select class="filter-select" id="signalFilter">
+        <option value="">All Signals</option>
+        <option value="BULLISH">Bullish</option>
+        <option value="MILDLY_BULL">Mildly Bullish</option>
+        <option value="BEARISH">Bearish</option>
+        <option value="MILDLY_BEAR">Mildly Bearish</option>
+        <option value="NEUTRAL">Neutral</option>
+      </select>
+      <select class="filter-select" id="buildupFilter">
+        <option value="">All Buildup</option>
+        <option value="LONG_BUILD">Long Buildup</option>
+        <option value="SHORT_BUILD">Short Buildup</option>
+        <option value="LONG_UNWIND">Long Unwind</option>
+        <option value="SHORT_COVER">Short Cover</option>
+      </select>
+      <button class="btn-toggle btn-n50" id="n50Btn" onclick="toggleN50()">NIFTY 50</button>
+      <button class="btn-toggle btn-poised" id="poisedBtn" onclick="togglePoised()">TRADE READY</button>
+      <select class="filter-select" id="convictionFilter" onchange="onConvictionChange()" title="Filter by composite conviction tier">
+        <option value="">All Conviction</option>
+        <option value="strong">Strong</option>
+        <option value="watch">Watch+</option>
+      </select>
+      <button class="qchip qchip-clear" id="qchipClearBtn" onclick="clearAllFilters()" title="Reset all filters" style="margin-left:auto; display:none; padding:4px 8px; font-size:10px;">
+        <span>Reset Filters</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Data Table Wrap -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="col-group-row col-group-header">
+          <th colspan="8"></th>
+          <th colspan="5" class="g-pricedetail">Price Detail</th>
+          <th colspan="5" class="g-vol">Volume</th>
+          <th colspan="11" class="g-oi">OI Detail</th>
+          <th colspan="6" class="g-opt">Options</th>
+        </tr>
+        <tr id="headerRow">
+          <th class="col-score w-score" data-key="score">Score</th>
+          <th class="col-sym w-sym" data-key="symbol">Symbol</th>
+          <th class="col-sector w-sector" data-key="sector">Sector</th>
+          <th class="w-price" data-key="ltp">LTP</th>
+          <th class="w-pct" data-key="chg_pct">Chg%</th>
+          <th class="w-sig" data-key="pcr_sig">Signal</th>
+          <th class="w-sig" data-key="buildup">Buildup</th>
+          <th class="w-small" data-key="prem_ok">Prem</th>
+          <!-- Price Detail group -->
+          <th class="w-pct g-pricedetail" data-key="gap_pct">Gap%</th>
+          <th class="w-price g-pricedetail" data-key="open">Open</th>
+          <th class="w-price g-pricedetail" data-key="high">High</th>
+          <th class="w-price g-pricedetail" data-key="low">Low</th>
+          <th class="w-pct g-pricedetail" data-key="range_pct">Range%</th>
+          <!-- Volume group -->
+          <th class="w-vol g-vol" data-key="vol">Volume</th>
+          <th class="w-small g-vol" data-key="vol_surge" title="Surge vs 5-day SMA">Surge</th>
+          <th class="w-small g-vol" data-key="vol_surge_10d" title="Surge vs 10-day SMA">10d</th>
+          <th class="w-small g-vol" data-key="vol_surge_20d" title="Surge vs 20-day SMA">20d</th>
+          <th class="w-small g-vol" data-key="vol_confluence">Conf</th>
+          <!-- OI group -->
+          <th class="w-small g-oi" data-key="pcr">PCR</th>
+          <th class="w-oi g-oi" data-key="total_oi">Total OI</th>
+          <th class="w-oi g-oi" data-key="ce_oi_chg">CE OI (sh)</th>
+          <th class="w-oi g-oi" data-key="pe_oi_chg">PE OI (sh)</th>
+          <th class="w-oi g-oi" data-key="net_oi">Net OI (sh)</th>
+          <th class="w-oi g-oi" data-key="ce_oi_chg_lots">CE Lots</th>
+          <th class="w-oi g-oi" data-key="pe_oi_chg_lots">PE Lots</th>
+          <th class="w-oi g-oi" data-key="net_oi_lots">Net Lots</th>
+          <th class="w-oi g-oi" data-key="ce_oi_chg_rs">CE ₹</th>
+          <th class="w-oi g-oi" data-key="pe_oi_chg_rs">PE ₹</th>
+          <th class="w-oi g-oi" data-key="net_oi_rs">Net OI ₹</th>
+          <!-- Options group -->
+          <th class="w-small g-opt" data-key="atm_iv">IV%</th>
+          <th class="w-price g-opt" data-key="max_pain">MaxPain</th>
+          <th class="w-pct g-opt" data-key="mp_dist">MP Dist%</th>
+          <th class="w-prem g-opt" data-key="atm_ce">CE Prem</th>
+          <th class="w-prem g-opt" data-key="atm_pe">PE Prem</th>
+          <th class="w-small g-opt" data-key="lot">Lot</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr>
+          <td colspan="35" style="text-align: center; padding: 30px; color: var(--text-dim); font-style: italic;">
+            Waiting for live streaming data initialization from server...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-section">
+      <span class="footer-counter">
+        <span class="qcc-shown" id="stockCount">0 / 0</span>
+        <span>stocks</span>
+      </span>
+      <span class="footer-sep"></span>
+      <span id="footerFilter">No filters</span>
+    </div>
+    <div class="footer-section">
+      <span id="footerConn">Connecting...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="q-toast" id="toast"></div>
+
+<!-- WS, Polling and Render Logic -->
+<script>
+// --- Themes List ---
+const themesList = [
+  { id: 'midnight-blue', name: 'Midnight Blue', desc: 'Professional dark blue (Default)', category: 'classic', colors: ['#0f172a', '#1e293b', '#3b82f6', '#f1f5f9'] },
+  { id: 'obsidian-black', name: 'Obsidian Black', desc: 'Pure OLED black', category: 'classic', colors: ['#000000', '#0a0a0a', '#3b82f6', '#ffffff'] },
+  { id: 'emerald-dark', name: 'Emerald Dark', desc: 'Dark with green accents', category: 'classic', colors: ['#0a1612', '#0f1f1a', '#10b981', '#ecfdf5'] },
+  { id: 'royal-purple', name: 'Royal Purple', desc: 'Elegant deep purple', category: 'classic', colors: ['#1a0f2e', '#251642', '#a855f7', '#f3e8ff'] },
+  { id: 'crimson-red', name: 'Crimson Red', desc: 'Bold trading red', category: 'classic', colors: ['#1e0b0b', '#2d1212', '#ef4444', '#fef2f2'] },
+  { id: 'arctic-blue', name: 'Arctic Blue', desc: 'Cool terminal blue', category: 'classic', colors: ['#091824', '#0f293d', '#0ea5e9', '#f0f9ff'] },
+  { id: 'obsidian-quantum', name: 'Obsidian Quantum', desc: 'Deep glowing cyberpunk', category: 'premium', colors: ['#050508', '#0d0d12', '#3b82f6', '#e2e8f0'] },
+  { id: 'neon-cyber', name: 'Neon Cyber', desc: 'Retro synthwave terminal', category: 'premium', colors: ['#070919', '#0b0e26', '#00d4ff', '#ffffff'] },
+  { id: 'glassmorphism', name: 'Glassmorphism', desc: 'Sleek frosted layout', category: 'premium', colors: ['#4f46e5', 'rgba(255,255,255,0.15)', '#ffffff', '#ffffff'] },
+  { id: 'minimal-pro', name: 'Minimal Pro', desc: 'High-contrast light mode', category: 'premium', colors: ['#fafafa', '#ffffff', '#000000', '#0f172a'] },
+  { id: 'terminal-hacker', name: 'Terminal Hacker', desc: 'Retro green CRT style', category: 'premium', colors: ['#000000', '#050905', '#00ff00', '#00ff00'] },
+  { id: 'gradient-luxury', name: 'Gradient Luxury', desc: 'Velvet dark rose gold', category: 'premium', colors: ['#09090f', 'rgba(255,255,255,0.03)', '#ff0080', '#ffffff'] },
+  { id: 'neumorphism', name: 'Neumorphism', desc: 'Soft tactile bevel curves', category: 'premium', colors: ['#e0e5ec', '#e0e5ec', '#3182ce', '#4a5568'] },
+  { id: 'bloomberg-pro', name: 'Bloomberg Pro', desc: 'Bloomberg density standard', category: 'premium', colors: ['#000000', '#0b0b0b', '#ff9800', '#e0e0e0'] }
+];
+
+let selectedTheme = 'midnight-blue';
+
+// Render the Selector Deck Cards
+function renderSelectorDeck() {
+  const classicContainer = document.getElementById('classicGrid');
+  const premiumContainer = document.getElementById('premiumGrid');
+  
+  classicContainer.innerHTML = '';
+  premiumContainer.innerHTML = '';
+
+  themesList.forEach(t => {
+    const card = document.createElement('div');
+    card.className = `exp-card ${t.id === selectedTheme ? 'active' : ''}`;
+    card.dataset.theme = t.id;
+    card.onclick = () => selectTheme(t.id);
+
+    const swatchesHtml = t.colors.map(col => 
+      `<span class="exp-dot" style="background: ${col}"></span>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="exp-card-info">
+        <span class="exp-card-name">${t.name}</span>
+        <span class="exp-card-desc">${t.desc}</span>
+      </div>
+      <div class="exp-swatches">
+        ${swatchesHtml}
+      </div>
+    `;
+
+    if (t.category === 'classic') {
+      classicContainer.appendChild(card);
+    } else {
+      premiumContainer.appendChild(card);
+    }
+  });
+}
+
+function selectTheme(themeId) {
+  selectedTheme = themeId;
+  document.documentElement.setAttribute('data-theme', themeId);
+  
+  document.querySelectorAll('.exp-card').forEach(card => {
+    card.classList.toggle('active', card.dataset.theme === themeId);
+  });
+  
+  const themeObj = themesList.find(t => t.id === themeId);
+  if (themeObj) {
+    document.getElementById('activeThemeLabel').textContent = themeObj.name;
+    showToast(`Previewing theme: ${themeObj.name}`, 'info');
+  }
+}
+
+function applySelectedTheme() {
+  if (!selectedTheme) return;
+  const themeObj = themesList.find(t => t.id === selectedTheme);
+  
+  if (themeObj && themeObj.category === 'premium') {
+    if (window.userRole !== 'pro' && window.userRole !== 'admin') {
+      showToast(`Premium Theme Locked. Upgrade to Pro to use ${themeObj.name}`, 'error');
+      alert(`Premium Theme Locked!\n\nThe "${themeObj.name}" theme requires a Pro subscription.\nPlease upgrade to Pro to apply premium visual concepts to your dashboard.`);
+      return;
+    }
+  }
+
+  localStorage.setItem('quantra-theme', selectedTheme);
+  
+  // Save to backend so it persists across sessions and overrides
+  fetch('/api/user/settings', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': getCsrfToken()
+    },
+    body: JSON.stringify({ theme: selectedTheme })
+  }).then(r => r.json())
+    .then(d => {
+      showToast(`Applied ${themeObj.name} successfully!`, 'success');
+      setTimeout(() => {
+        if (confirm(`Successfully saved theme "${themeObj.name}"! Return to the Live Dashboard now to see it?`)) {
+          location.href = '/';
+        }
+      }, 1000);
+    }).catch(err => {
+      showToast(`Error saving theme to backend`, 'error');
+    });
+}
+
+// --- Live Ticker & Socket System ---
+let stocks = {};
+let meta = {};
+let symbolOrder = [];
+let cellMap = {};
+let rowElements = {};
+let sortKey = 'score';
+let sortAsc = false;
+let heatmapVisible = true;
+
+const filters = {
+  search: '',
+  sector: '',
+  signal: '',
+  buildup: '',
+  n50: false,
+  poised: false,
+  conviction: ''
+};
+
+// Formatting helpers
+function fmtPrice(v) {
+  if (v == null || v === 0) return '–';
+  return v.toFixed(2);
+}
+function fmtPct(v) {
+  if (v == null || v === 0) return '–';
+  const s = v.toFixed(2);
+  return v > 0 ? '+' + s : s;
+}
+function fmtVol(v) {
+  if (v == null || v === 0) return '–';
+  const abs = Math.abs(v);
+  if (abs >= 1e7) return (v / 1e7).toFixed(1) + 'Cr';
+  if (abs >= 1e5) return (v / 1e5).toFixed(1) + 'L';
+  if (abs >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+  return String(v);
+}
+function fmtOI(v) { return fmtVol(v); }
+function fmtRs(v) {
+  if (v == null || v === 0) return '–';
+  var n = Number(v);
+  var sign = n > 0 ? '+₹' : '-₹';
+  var a = Math.abs(n);
+  if (a >= 1e7) return sign + (a / 1e7).toFixed(2) + 'Cr';
+  if (a >= 1e5) return sign + (a / 1e5).toFixed(2) + 'L';
+  if (a >= 1e3) return sign + (a / 1e3).toFixed(0) + 'K';
+  return sign + a.toFixed(0);
+}
+function fmtLots(v) {
+  if (v == null || v === 0 || !isFinite(v)) return '–';
+  var n = Number(v);
+  var sign = n > 0 ? '+' : '-';
+  var a = Math.abs(n);
+  if (a >= 1e6) return sign + (a / 1e6).toFixed(2) + 'M';
+  if (a >= 1e3) return sign + (a / 1e3).toFixed(1) + 'K';
+  return sign + a.toFixed(0);
+}
+function fmtIV(v) {
+  if (v == null) return '–';
+  return v.toFixed(1) + '%';
+}
+function fmtSurge(v) {
+  if (v == null || v === 0) return '–';
+  return v.toFixed(1) + 'x';
+}
+function fmtMPDist(v) {
+  if (v == null) return '–';
+  return v.toFixed(1) + '%';
+}
+
+function scoreHTML(val) {
+  val = val || 0;
+  const pct = val / 100;
+  const r = 13, circ = 2 * Math.PI * r;
+  const dash = pct * circ;
+  let cls = 'score-vlow';
+  let stroke = '#ef4444';
+  if (val >= 60) { cls = 'score-high'; stroke = '#10b981'; }
+  else if (val >= 40) { cls = 'score-mid'; stroke = '#eab308'; }
+  else if (val >= 20) { cls = 'score-low'; stroke = '#f97316'; }
+  return `<div class="score-ring ${cls}">
+    <svg width="28" height="28" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/>
+      <circle cx="16" cy="16" r="${r}" fill="none" stroke="${stroke}" stroke-width="2.5"
+        stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
+    </svg>
+    <span class="s-val">${val}</span>
+  </div>`;
+}
+
+function sigPill(sig) {
+  if (!sig || sig === '~') return '<span class="sig-pill sig-NEUTRAL">–</span>';
+  return `<span class="sig-pill sig-${sig}">${sig.replace('_', ' ')}</span>`;
+}
+function buPill(bu) {
+  if (!bu || bu === '~' || bu === 'NEUTRAL') return '<span class="bu-pill bu-NEUTRAL">–</span>';
+  const labels = { LONG_BUILD: 'LONG BUILD', SHORT_BUILD: 'SHORT BUILD', LONG_UNWIND: 'LONG UNWIND', SHORT_COVER: 'SHORT COVER' };
+  return `<span class="bu-pill bu-${bu}">${labels[bu] || bu}</span>`;
+}
+function sectorPill(s) {
+  if (!s || s === '-') return '<span class="sector-pill sector-DEFAULT">–</span>';
+  const cls = 'sector-' + (s.replace(/[^A-Z_]/g, '') || 'DEFAULT');
+  return `<span class="sector-pill ${cls}">${s}</span>`;
+}
+function volConfPill(v) {
+  if (!v) return '<span class="vc-pill vc-NONE">–</span>';
+  return `<span class="vc-pill vc-${v}">${v}</span>`;
+}
+function valClass(v) {
+  if (v == null || v === 0) return 'null-val';
+  return v > 0 ? 'val-pos' : 'val-neg';
+}
+function surgeClass(v) {
+  if (v == null || v === 0) return 'null-val';
+  if (v >= 2.0) return 'val-pos';
+  if (v >= 1.5) return '';
+  return 'val-dim';
+}
+function pcrClass(v) {
+  if (v == null) return 'null-val';
+  if (v > 1.0) return 'val-pos';
+  if (v < 1.0) return 'val-neg';
+  return '';
+}
+
+function isStrongPick(d) { return !!d && d.conviction_tier === 'strong'; }
+function isPoised(d)     { return isStrongPick(d); }
+function getDirection(d) { return d ? (d.direction || null) : null; }
+
+// Build Table rows
+function buildTable() {
+  sortSymbols();
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  rowElements = {};
+  cellMap = {};
+
+  if (symbolOrder.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="35" style="text-align: center; padding: 30px; color: var(--text-dim);">No stocks loaded. WebSocket active?</td></tr>`;
+    return;
+  }
+
+  for (const sym of symbolOrder) {
+    const d = stocks[sym];
+    if (!d) continue;
+    
+    const tr = document.createElement('tr');
+    tr.dataset.sym = sym;
+    tr.dataset.sector = d.sector || '';
+    tr.dataset.sig = d.pcr_sig || '';
+    tr.dataset.bu = d.buildup || '';
+    tr.dataset.n50 = d.is_n50 ? '1' : '0';
+    
+    const poised = isPoised(d);
+    const dir = poised ? getDirection(d) : null;
+    tr.dataset.poised = poised ? '1' : '0';
+    if (poised) tr.classList.add('row-poised');
+
+    const fields = [
+      { key: 'score', cls: 'col-score w-score', html: scoreHTML(d.score) },
+      { key: 'symbol', cls: 'col-sym w-sym', html: `<a href="#" onclick="event.preventDefault(); showToast('Selected ${sym} preview', 'info')">${d.symbol}</a>` + (d.is_n50 ? '<span class="n50-badge">N50</span>' : '') + (poised ? '<span class="poised-badge">READY</span>' : '') + (dir ? `<span class="dir-badge dir-${dir}">${dir === 'CE' ? 'BUY CE' : 'BUY PE'}</span>` : '') },
+      { key: 'sector', cls: 'col-sector w-sector', html: sectorPill(d.sector) },
+      { key: 'ltp', cls: 'w-price', text: fmtPrice(d.ltp) },
+      { key: 'chg_pct', cls: 'w-pct ' + valClass(d.chg_pct), text: fmtPct(d.chg_pct) },
+      { key: 'pcr_sig', cls: 'w-sig', html: sigPill(d.pcr_sig) },
+      { key: 'buildup', cls: 'w-sig', html: buPill(d.buildup) },
+      { key: 'prem_ok', cls: 'w-small', html: d.prem_ok ? '<span class="val-pos">✓</span>' : '<span class="val-neg">✗</span>' },
+      
+      { key: 'gap_pct', cls: 'w-pct g-pricedetail ' + valClass(d.gap_pct), text: fmtPct(d.gap_pct) },
+      { key: 'open', cls: 'w-price g-pricedetail', text: fmtPrice(d.open) },
+      { key: 'high', cls: 'w-price g-pricedetail', text: fmtPrice(d.high) },
+      { key: 'low', cls: 'w-price g-pricedetail', text: fmtPrice(d.low) },
+      { key: 'range_pct', cls: 'w-pct g-pricedetail', text: fmtPct(d.range_pct) },
+      
+      { key: 'vol', cls: 'w-vol g-vol', text: fmtVol(d.vol) },
+      { key: 'vol_surge', cls: 'w-small g-vol ' + surgeClass(d.vol_surge), text: fmtSurge(d.vol_surge) },
+      { key: 'vol_surge_10d', cls: 'w-small g-vol ' + surgeClass(d.vol_surge_10d), text: fmtSurge(d.vol_surge_10d) },
+      { key: 'vol_surge_20d', cls: 'w-small g-vol ' + surgeClass(d.vol_surge_20d), text: fmtSurge(d.vol_surge_20d) },
+      { key: 'vol_confluence', cls: 'w-small g-vol', html: volConfPill(d.vol_confluence) },
+      
+      { key: 'pcr', cls: 'w-small g-oi ' + pcrClass(d.pcr), text: d.pcr != null ? d.pcr.toFixed(2) : '–' },
+      { key: 'total_oi', cls: 'w-oi g-oi', text: fmtOI(d.total_oi) },
+      { key: 'ce_oi_chg', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtOI(d.ce_oi_chg) },
+      { key: 'pe_oi_chg', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtOI(d.pe_oi_chg) },
+      { key: 'net_oi', cls: 'w-oi g-oi ' + valClass(d.net_oi), text: fmtOI(d.net_oi) },
+      
+      { key: 'ce_oi_chg_lots', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtLots((d.ce_oi_chg || 0) / (d.lot || 1)) },
+      { key: 'pe_oi_chg_lots', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtLots((d.pe_oi_chg || 0) / (d.lot || 1)) },
+      { key: 'net_oi_lots',    cls: 'w-oi g-oi ' + valClass(d.net_oi),    text: fmtLots((d.net_oi    || 0) / (d.lot || 1)) },
+      
+      { key: 'ce_oi_chg_rs', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtRs((d.ce_oi_chg || 0) * (d.ltp || 0)) },
+      { key: 'pe_oi_chg_rs', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtRs((d.pe_oi_chg || 0) * (d.ltp || 0)) },
+      { key: 'net_oi_rs',    cls: 'w-oi g-oi ' + valClass(d.net_oi),    text: fmtRs(((d.pe_oi_chg || 0) - (d.ce_oi_chg || 0)) * (d.ltp || 0)) },
+      
+      { key: 'atm_iv', cls: 'w-small g-opt', text: fmtIV(d.atm_iv) },
+      { key: 'max_pain', cls: 'w-price g-opt', text: fmtPrice(d.max_pain) },
+      { key: 'mp_dist', cls: 'w-pct g-opt', text: fmtMPDist(d.mp_dist) },
+      { key: 'atm_ce', cls: 'w-prem g-opt' + (d.atm_ce != null && d.atm_ce < 15 ? ' prem-low' : ''), text: fmtPrice(d.atm_ce) },
+      { key: 'atm_pe', cls: 'w-prem g-opt' + (d.atm_pe != null && d.atm_pe < 15 ? ' prem-low' : ''), text: fmtPrice(d.atm_pe) },
+      { key: 'lot', cls: 'w-small g-opt', text: d.lot || '–' },
+    ];
+
+    fields.forEach(f => {
+      const td = document.createElement('td');
+      td.className = f.cls;
+      td.dataset.sym = sym;
+      td.dataset.field = f.key;
+      if (f.html) td.innerHTML = f.html;
+      else td.textContent = f.text;
+      tr.appendChild(td);
+      cellMap[sym + ':' + f.key] = td;
+    });
+
+    rowElements[sym] = tr;
+    tbody.appendChild(tr);
+  }
+  
+  applyFilters();
+}
+
+function getSortValue(stock, key) {
+  if (!stock) return null;
+  switch (key) {
+    case 'ce_oi_chg_rs': return (stock.ce_oi_chg || 0) * (stock.ltp || 0);
+    case 'pe_oi_chg_rs': return (stock.pe_oi_chg || 0) * (stock.ltp || 0);
+    case 'net_oi_rs': return ((stock.pe_oi_chg || 0) - (stock.ce_oi_chg || 0)) * (stock.ltp || 0);
+    case 'ce_oi_chg_lots': return (stock.ce_oi_chg || 0) / (stock.lot || 1);
+    case 'pe_oi_chg_lots': return (stock.pe_oi_chg || 0) / (stock.lot || 1);
+    case 'net_oi_lots': return (stock.net_oi || 0) / (stock.lot || 1);
+    case 'vol_confluence': {
+      const v = stock.vol_confluence;
+      return v === 'TRIPLE' ? 3 : v === 'DOUBLE' ? 2 : v === 'SINGLE' ? 1 : 0;
+    }
+    default: return stock[key];
+  }
+}
+
+function sortSymbols() {
+  symbolOrder = Object.keys(stocks);
+  symbolOrder.sort((a, b) => {
+    let va = getSortValue(stocks[a], sortKey), vb = getSortValue(stocks[b], sortKey);
+    if (va == null) va = sortAsc ? Infinity : -Infinity;
+    if (vb == null) vb = sortAsc ? Infinity : -Infinity;
+    if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortAsc ? va - vb : vb - va;
+  });
+}
+
+// Bind sorting clicks
+document.getElementById('headerRow').addEventListener('click', function(e) {
+  const th = e.target.closest('th');
+  if (!th || !th.dataset.key) return;
+  const key = th.dataset.key;
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = false; }
+  document.querySelectorAll('#headerRow th').forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+  th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+  buildTable();
+});
+
+// Update table cells
+function updateCell(sym, field, value, formatter, extraClass) {
+  const td = cellMap[sym + ':' + field];
+  if (!td) return;
+  const oldText = td.textContent;
+  const newText = formatter ? formatter(value) : String(value == null ? '–' : value);
+  if (oldText === newText) return;
+
+  td.textContent = newText;
+  if (extraClass) td.className = td.className.replace(/val-pos|val-neg|null-val|val-dim|prem-low/g, '').trim() + ' ' + extraClass;
+
+  // Flash animation
+  const oldVal = parseFloat(oldText.replace(/[^0-9.\-]/g, ''));
+  const newVal = parseFloat(newText.replace(/[^0-9.\-]/g, ''));
+  if (!isNaN(oldVal) && !isNaN(newVal) && oldVal !== newVal) {
+    td.classList.remove('flash-up', 'flash-down');
+    void td.offsetWidth; // force reflow
+    td.classList.add(newVal > oldVal ? 'flash-up' : 'flash-down');
+  }
+}
+
+function updateCellHTML(sym, field, html) {
+  const td = cellMap[sym + ':' + field];
+  if (!td) return;
+  td.innerHTML = html;
+}
+
+// Filter handling
+function applyFilters() {
+  let visible = 0, total = 0;
+  for (const sym of symbolOrder) {
+    total++;
+    const tr = rowElements[sym];
+    if (!tr) continue;
+    const d = stocks[sym] || {};
+    let show = true;
+    
+    if (filters.search && !sym.includes(filters.search)) show = false;
+    if (filters.sector && tr.dataset.sector !== filters.sector) show = false;
+    if (filters.signal && tr.dataset.sig !== filters.signal) show = false;
+    if (filters.buildup && tr.dataset.bu !== filters.buildup) show = false;
+    if (filters.n50 && tr.dataset.n50 !== '1') show = false;
+    if (filters.poised && tr.dataset.poised !== '1') show = false;
+    if (show && filters.conviction) {
+      const tier = (d.conviction_tier || 'background');
+      if (filters.conviction === 'strong' && tier !== 'strong') show = false;
+      else if (filters.conviction === 'watch' && tier === 'background') show = false;
+    }
+
+    tr.style.display = show ? '' : 'none';
+    if (show) visible++;
+  }
+  
+  document.getElementById('stockCount').textContent = `${visible} / ${total}`;
+  updateFooterFilterText();
+  
+  // Show / Hide clear filters button
+  const hasActiveFilters = filters.search || filters.sector || filters.signal || filters.buildup || filters.n50 || filters.poised || filters.conviction;
+  document.getElementById('qchipClearBtn').style.display = hasActiveFilters ? 'inline-block' : 'none';
+}
+
+function updateFooterFilterText() {
+  const parts = [];
+  if (filters.search) parts.push(`Search: ${filters.search}`);
+  if (filters.sector) parts.push(`Sector: ${filters.sector}`);
+  if (filters.signal) parts.push(`Signal: ${filters.signal}`);
+  if (filters.buildup) parts.push(`Buildup: ${filters.buildup}`);
+  if (filters.n50) parts.push('NIFTY 50');
+  if (filters.poised) parts.push('Trade Ready');
+  if (filters.conviction) parts.push(`Conviction: ${filters.conviction}`);
+  document.getElementById('footerFilter').textContent = parts.length ? parts.join('  ·  ') : 'No filters active';
+}
+
+// Bind filter inputs
+document.getElementById('searchBox').addEventListener('input', function() {
+  filters.search = this.value.toUpperCase();
+  applyFilters();
+});
+document.getElementById('sectorFilter').addEventListener('change', function() {
+  filters.sector = this.value;
+  applyFilters();
+});
+document.getElementById('signalFilter').addEventListener('change', function() {
+  filters.signal = this.value;
+  applyFilters();
+});
+document.getElementById('buildupFilter').addEventListener('change', function() {
+  filters.buildup = this.value;
+  applyFilters();
+});
+function toggleN50() {
+  filters.n50 = !filters.n50;
+  document.getElementById('n50Btn').classList.toggle('active', filters.n50);
+  applyFilters();
+}
+function togglePoised() {
+  filters.poised = !filters.poised;
+  document.getElementById('poisedBtn').classList.toggle('active', filters.poised);
+  applyFilters();
+}
+function onConvictionChange() {
+  filters.conviction = document.getElementById('convictionFilter').value;
+  applyFilters();
+}
+function clearAllFilters() {
+  filters.search = '';
+  filters.sector = '';
+  filters.signal = '';
+  filters.buildup = '';
+  filters.n50 = false;
+  filters.poised = false;
+  filters.conviction = '';
+
+  document.getElementById('searchBox').value = '';
+  document.getElementById('sectorFilter').value = '';
+  document.getElementById('signalFilter').value = '';
+  document.getElementById('buildupFilter').value = '';
+  document.getElementById('convictionFilter').value = '';
+  document.getElementById('n50Btn').classList.remove('active');
+  document.getElementById('poisedBtn').classList.remove('active');
+
+  applyFilters();
+  showToast('Filters cleared', 'info');
+}
+
+// Sector Heatmap
+function toggleHeatmap() {
+  heatmapVisible = !heatmapVisible;
+  const bar = document.getElementById('heatmapBar');
+  const caret = document.getElementById('heatCaret');
+  bar.style.display = heatmapVisible ? 'flex' : 'none';
+  caret.innerHTML = heatmapVisible ? '&#9650;' : '&#9660;';
+  if (heatmapVisible) renderHeatmap();
+}
+
+function renderHeatmap() {
+  const bar = document.getElementById('heatmapBar');
+  const sectorData = {};
+  for (const sym of Object.keys(stocks)) {
+    const d = stocks[sym];
+    const sec = d.sector || '-';
+    if (!sectorData[sec]) sectorData[sec] = { count: 0, chgSum: 0, chgCount: 0 };
+    sectorData[sec].count++;
+    if (d.chg_pct) { sectorData[sec].chgSum += d.chg_pct; sectorData[sec].chgCount++; }
+  }
+  const sorted = Object.entries(sectorData).sort((a, b) => b[1].count - a[1].count);
+  bar.innerHTML = '';
+  for (const [sec, data] of sorted) {
+    if (sec === '-') continue;
+    const avg = data.chgCount > 0 ? data.chgSum / data.chgCount : 0;
+    const cell = document.createElement('div');
+    cell.className = 'heat-cell';
+    const intensity = Math.min(Math.abs(avg) * 15, 40);
+    const hue = avg >= 0 ? '160' : '0';
+    cell.style.background = `hsla(${hue}, 60%, 50%, ${(intensity / 100).toFixed(2)})`;
+    cell.innerHTML = `<span class="h-name">${sec} (${data.count})</span><span class="h-val">${avg >= 0 ? '+' : ''}${avg.toFixed(1)}%</span>`;
+    cell.onclick = () => {
+      document.getElementById('sectorFilter').value = sec;
+      filters.sector = sec;
+      applyFilters();
+    };
+    bar.appendChild(cell);
+  }
+}
+
+// Top Picks Bar
+function renderTopPicks() {
+  const bar = document.getElementById('topPicksBar');
+  const emptyMsg = document.getElementById('topPicksEmpty');
+  
+  const candidates = Object.keys(stocks).filter(sym => {
+    const d = stocks[sym];
+    return d && d.direction && (d.conviction_tier === 'strong' || d.conviction_tier === 'watch');
+  });
+
+  bar.querySelectorAll('.pick-card').forEach(c => c.remove());
+
+  if (candidates.length === 0) {
+    emptyMsg.style.display = 'inline';
+    return;
+  }
+
+  emptyMsg.style.display = 'none';
+  // Sort candidate list by score descending
+  candidates.sort((a, b) => (stocks[b].score || 0) - (stocks[a].score || 0));
+
+  candidates.forEach(sym => {
+    const d = stocks[sym];
+    const dir = getDirection(d);
+    const displayScore = d.score || 0;
+    const dirCls = dir === 'CE' ? 'dir-CE' : 'dir-PE';
+    const dirLabel = dir === 'CE' ? 'BUY CE' : 'BUY PE';
+    const prem = dir === 'CE' ? d.atm_ce : d.atm_pe;
+    const tierLabel = d.conviction_tier === 'strong' ? 'STRONG' : 'WATCH';
+    const tierCls = d.conviction_tier === 'strong' ? 'tier-strong' : 'tier-watch';
+
+    const card = document.createElement('div');
+    card.className = 'pick-card';
+    card.innerHTML = `
+      <div class="pc-head">
+        <span class="pc-sym">${sym}${d.is_n50 ? ' <span class="n50-badge">N50</span>' : ''}</span>
+        <span class="pc-dir ${dirCls}">${dirLabel}</span>
+        <span class="pc-tier ${tierCls}">${tierLabel}</span>
+        <span class="pc-score" style="color:${displayScore >= 60 ? 'var(--green)' : displayScore >= 40 ? 'var(--gold)' : 'var(--red)'}">${displayScore}</span>
+      </div>
+      <div class="pc-detail">
+        ₹<span>${fmtPrice(d.ltp)}</span> · Prem ₹<span>${fmtPrice(prem)}</span> · IV <span>${d.atm_iv ? d.atm_iv.toFixed(1) + '%' : '–'}</span>
+      </div>`;
+    
+    card.onclick = () => {
+      showToast(`Selected pick: ${sym} (${dirLabel})`, 'info');
+    };
+    bar.appendChild(card);
+  });
+}
+
+// Index polling
+function pollIndexSummary() {
+  fetch('/api/index-summary', { credentials: 'same-origin' })
+    .then(r => {
+      if (r.status === 401) {
+        showToast('Session expired. Please log in.', 'error');
+        document.getElementById('footerConn').textContent = 'Session Expired';
+        return null;
+      }
+      return r.json();
+    })
+    .then(d => {
+      if (!d) return;
+      ['NIFTY50', 'BANKNIFTY', 'MIDCAPNIFTY', 'INDIAVIX'].forEach(sym => {
+        if (d[sym]) {
+          const ltpEl = document.getElementById(`idx-${sym}-ltp`);
+          const chgEl = document.getElementById(`idx-${sym}-chg`);
+          if (ltpEl) {
+            ltpEl.textContent = d[sym].ltp >= 1000
+              ? d[sym].ltp.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+              : d[sym].ltp.toFixed(2);
+          }
+          if (chgEl) {
+            chgEl.textContent = (d[sym].chg_pct >= 0 ? '+' : '') + d[sym].chg_pct.toFixed(2) + '%';
+            chgEl.className = 'idx-chg ' + (d[sym].chg_pct > 0 ? 'pos' : d[sym].chg_pct < 0 ? 'neg' : 'neu');
+          }
+        }
+      });
+      if (d.breadth) {
+        const advEl = document.getElementById('idx-adv');
+        const decEl = document.getElementById('idx-dec');
+        if (advEl) advEl.textContent = d.breadth.adv;
+        if (decEl) decEl.textContent = d.breadth.dec;
+      }
+    })
+    .catch(() => {});
+}
+
+// WebSocket Connection
+let wsConn = null;
+let reconnectTimer = null;
+let reconnectDelay = 3000;
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const url = proto + '//' + location.host + '/ws';
+  document.getElementById('footerConn').textContent = 'Connecting...';
+
+  wsConn = new WebSocket(url);
+
+  wsConn.onopen = function() {
+    document.getElementById('footerConn').textContent = 'Connected';
+    reconnectDelay = 3000;
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  };
+
+  wsConn.onclose = function(e) {
+    document.getElementById('footerConn').textContent = 'Disconnected';
+    if (e.status === 401 || e.code === 4001) {
+      showToast('WS Unauthorized. Make sure you are logged in to the dashboard.', 'error');
+    } else {
+      scheduleReconnect();
+    }
+  };
+
+  wsConn.onerror = function() {
+    document.getElementById('footerConn').textContent = 'Error';
+  };
+
+  wsConn.onmessage = function(e) {
+    try {
+      const msg = JSON.parse(e.data);
+      handleMessage(msg);
+    } catch (err) {
+      console.error('WS parse error:', err);
+    }
+  };
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return;
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
+    connectWS();
+  }, reconnectDelay);
+}
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case 'init':
+      stocks = msg.stocks || {};
+      meta = msg.meta || {};
+      buildTable();
+      showToast(`Workspace ready: ${Object.keys(stocks).length} symbols loaded`, 'success');
+      if (heatmapVisible) renderHeatmap();
+      break;
+
+    case 'tick':
+      if (msg.d) {
+        for (const [sym, d] of Object.entries(msg.d)) {
+          if (!stocks[sym]) continue;
+          for (const [k, v] of Object.entries(d)) {
+            if (v != null) stocks[sym][k] = v;
+          }
+          if (d.ltp != null) updateCell(sym, 'ltp', d.ltp, fmtPrice);
+          if (d.chg_pct != null) updateCell(sym, 'chg_pct', d.chg_pct, fmtPct, valClass(d.chg_pct));
+          if (d.vol != null) updateCell(sym, 'vol', d.vol, fmtVol);
+        }
+      }
+      if (heatmapVisible) renderHeatmap();
+      break;
+
+    case 'ohlc':
+      if (msg.d) {
+        for (const [sym, d] of Object.entries(msg.d)) {
+          if (!stocks[sym]) continue;
+          for (const [k, v] of Object.entries(d)) {
+            if (v != null) stocks[sym][k] = v;
+          }
+          if (d.ltp != null) updateCell(sym, 'ltp', d.ltp, fmtPrice);
+          updateCell(sym, 'chg_pct', d.chg_pct, fmtPct, valClass(d.chg_pct));
+          updateCell(sym, 'gap_pct', d.gap_pct, fmtPct, valClass(d.gap_pct));
+          updateCell(sym, 'open', d.open, fmtPrice);
+          updateCell(sym, 'high', d.high, fmtPrice);
+          updateCell(sym, 'low', d.low, fmtPrice);
+          updateCell(sym, 'range_pct', d.range_pct, fmtPct);
+          updateCell(sym, 'vol', d.vol, fmtVol);
+          if (d.vol_surge != null) updateCell(sym, 'vol_surge', d.vol_surge, fmtSurge, surgeClass(d.vol_surge));
+          if (d.vol_surge_10d != null) updateCell(sym, 'vol_surge_10d', d.vol_surge_10d, fmtSurge, surgeClass(d.vol_surge_10d));
+          if (d.vol_surge_20d != null) updateCell(sym, 'vol_surge_20d', d.vol_surge_20d, fmtSurge, surgeClass(d.vol_surge_20d));
+          if (d.vol_confluence !== undefined) updateCellHTML(sym, 'vol_confluence', volConfPill(d.vol_confluence));
+          if (d.score != null) updateCellHTML(sym, 'score', scoreHTML(d.score));
+        }
+      }
+      if (heatmapVisible) renderHeatmap();
+      break;
+
+    case 'chain':
+      if (msg.d) {
+        for (const [sym, d] of Object.entries(msg.d)) {
+          if (!stocks[sym]) continue;
+          for (const [k, v] of Object.entries(d)) {
+            if (v != null) stocks[sym][k] = v;
+          }
+          updateCell(sym, 'pcr', d.pcr, v => v != null ? v.toFixed(2) : '–', pcrClass(d.pcr));
+          updateCellHTML(sym, 'pcr_sig', sigPill(d.pcr_sig));
+          updateCellHTML(sym, 'buildup', buPill(d.buildup));
+          updateCell(sym, 'total_oi', d.total_oi, fmtOI);
+          updateCell(sym, 'ce_oi_chg', d.ce_oi_chg, fmtOI, valClass(d.ce_oi_chg));
+          updateCell(sym, 'pe_oi_chg', d.pe_oi_chg, fmtOI, valClass(d.pe_oi_chg));
+          updateCell(sym, 'net_oi', d.net_oi, fmtOI, valClass(d.net_oi));
+          
+          // Lots and Rupees (Spot-derived values)
+          (function() {
+            var s = stocks[sym] || d;
+            var spot = s.ltp || 0;
+            var lot  = s.lot  || 1;
+            var ce = s.ce_oi_chg || 0;
+            var pe = s.pe_oi_chg || 0;
+            var net = s.net_oi || 0;
+            updateCell(sym, 'ce_oi_chg_lots', ce / lot, fmtLots, valClass(ce));
+            updateCell(sym, 'pe_oi_chg_lots', pe / lot, fmtLots, valClass(pe));
+            updateCell(sym, 'net_oi_lots',    net / lot, fmtLots, valClass(net));
+            updateCell(sym, 'ce_oi_chg_rs', ce * spot, fmtRs, valClass(ce));
+            updateCell(sym, 'pe_oi_chg_rs', pe * spot, fmtRs, valClass(pe));
+            updateCell(sym, 'net_oi_rs',   (pe - ce) * spot, fmtRs, valClass(pe - ce));
+          })();
+          
+          updateCell(sym, 'atm_iv', d.atm_iv, fmtIV);
+          updateCell(sym, 'max_pain', d.max_pain, fmtPrice);
+          updateCell(sym, 'mp_dist', d.mp_dist, fmtMPDist);
+          updateCell(sym, 'atm_ce', d.atm_ce, fmtPrice, d.atm_ce != null && d.atm_ce < 15 ? 'prem-low' : '');
+          updateCell(sym, 'atm_pe', d.atm_pe, fmtPrice, d.atm_pe != null && d.atm_pe < 15 ? 'prem-low' : '');
+          updateCellHTML(sym, 'prem_ok', d.prem_ok ? '<span class="val-pos">✓</span>' : '<span class="val-neg">✗</span>');
+          if (d.vol_surge_10d != null) updateCell(sym, 'vol_surge_10d', d.vol_surge_10d, fmtSurge, surgeClass(d.vol_surge_10d));
+          if (d.vol_surge_20d != null) updateCell(sym, 'vol_surge_20d', d.vol_surge_20d, fmtSurge, surgeClass(d.vol_surge_20d));
+          if ('vol_confluence' in d) updateCellHTML(sym, 'vol_confluence', volConfPill(d.vol_confluence));
+          if (d.score != null) updateCellHTML(sym, 'score', scoreHTML(d.score));
+          
+          // Row poised classes and badge indicators
+          const tr = rowElements[sym];
+          if (tr) {
+            tr.dataset.sig = d.pcr_sig || '';
+            tr.dataset.bu = d.buildup || '';
+            const p = isPoised(stocks[sym]);
+            tr.dataset.poised = p ? '1' : '0';
+            tr.classList.toggle('row-poised', p);
+            
+            const dir = p ? getDirection(stocks[sym]) : null;
+            const symCell = cellMap[sym + ':symbol'];
+            if (symCell) {
+              symCell.innerHTML = `<a href="#" onclick="event.preventDefault(); showToast('Selected ${sym}', 'info')">${sym}</a>`
+                + (stocks[sym].is_n50 ? '<span class="n50-badge">N50</span>' : '')
+                + (p ? '<span class="poised-badge">READY</span>' : '')
+                + (dir ? `<span class="dir-badge dir-${dir}">${dir === 'CE' ? 'BUY CE' : 'BUY PE'}</span>` : '');
+            }
+          }
+        }
+      }
+      renderTopPicks();
+      break;
+  }
+}
+
+// Toast alerts helper
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `q-toast show ${type}`;
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3500);
+}
+
+function getCsrfToken() {
+  var match = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
+  return match ? match[1] : '';
+}
+
+window.userRole = 'free';
+
+// --- Init Page state ---
+(function initPage() {
+  // Restore theme preference from localStorage if set
+  const savedTheme = localStorage.getItem('quantra-theme');
+  if (savedTheme) {
+    selectedTheme = savedTheme;
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const themeObj = themesList.find(t => t.id === savedTheme);
+    if (themeObj) {
+      document.getElementById('activeThemeLabel').textContent = themeObj.name;
+    }
+  }
+
+  // Draw the switcher panel cards
+  renderSelectorDeck();
+  
+  // Establish data channels
+  connectWS();
+  pollIndexSummary();
+  setInterval(pollIndexSummary, 3000);
+  
+  // Fetch user role
+  fetch('/api/auth/verify')
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        window.userRole = d.role;
+      }
+    }).catch(e => console.error("Error fetching auth", e));
+})();
+</script>
+</body>
+</html>

@@ -702,8 +702,11 @@ async def deep_analyze_stock(symbol, token=None):
             tasks.append(fetch_candles(session, eq_key, "15minute", token))
             tasks.append(fetch_candles(session, eq_key, "day", token, days=60))
         else:
-            tasks.append(asyncio.coroutine(lambda: [])())
-            tasks.append(asyncio.coroutine(lambda: [])())
+            # Return empty lists as coroutines for instruments without equity keys
+            async def empty_list():
+                return []
+            tasks.append(empty_list())
+            tasks.append(empty_list())
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 

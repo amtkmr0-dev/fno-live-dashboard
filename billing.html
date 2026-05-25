@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="bloomberg-pro">
+<head>
+<script>
+  (function(){
+    var t = localStorage.getItem('quantra-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billing & Pricing — QUANTRA Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUANTRA Terminal — Premium Obsidian Theme
+   Billing & Pricing Page
+   ============================================================ */
+
+:root {
+  --bg:            #09090b;
+  --surface:       #18181b;
+  --surface-alt:   #1c1c20;
+  --surface-hover: #27272a;
+  --border:        #2e2e35;
+  --border-light:  #3f3f46;
+  --border-focus:  #3b82f6;
+  --text:          #e4e4e7;
+  --text-dim:      #71717a;
+  --text-vdim:     #52525b;
+  --text-bright:   #fafafa;
+  --blue:          #3b82f6;
+  --blue-soft:     rgba(59,130,246,0.12);
+  --blue-hover:    #2563eb;
+  --green:         #10b981;
+  --green-soft:    rgba(16,185,129,0.12);
+  --red:           #ef4444;
+  --gold:          #f59e0b;
+  --gold-soft:     rgba(245,158,11,0.1);
+  --nav-height:    48px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+  --font-sans:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:     'IBM Plex Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--blue); text-decoration: none; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+
+/* ---- Navigation ---- */
+.q-nav {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 16px;
+}
+.q-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  text-decoration: none;
+}
+.q-nav-brand .brand-name {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-size: 15px;
+}
+.q-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+.q-nav-links a {
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.q-nav-links a:hover { color: var(--text); background: var(--surface-hover); }
+.q-nav-links a.active {
+  color: var(--text-bright);
+  background: var(--blue-soft);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.25);
+}
+
+/* ---- Main Layout ---- */
+.billing-main {
+  flex: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.back-link:hover { color: var(--text); border-color: var(--border-light); }
+
+/* ---- Pricing Hero ---- */
+.hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.hero-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-bright);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.hero-subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ---- Status Info ---- */
+.status-box {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.status-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.status-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-vdim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-bright);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge-pro {
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid rgba(245,158,11,0.3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.badge-free {
+  background: var(--surface-hover);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ---- Pricing Grid ---- */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.pricing-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 36px 32px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.pricing-card:hover {
+  border-color: var(--border-light);
+}
+.pricing-card.premium {
+  border-color: rgba(59,130,246,0.3);
+  background: linear-gradient(180deg, var(--surface) 0%, rgba(59,130,246,0.03) 100%);
+  box-shadow: 0 0 24px rgba(59,130,246,0.05);
+}
+.pricing-card.premium::after {
+  content: 'POPULAR';
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.plan-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+.plan-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  min-height: 38px;
+}
+.plan-price {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-bright);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.plan-price-period {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+  flex: 1;
+}
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+}
+.feature-icon-yes {
+  color: var(--blue);
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.feature-icon-no {
+  color: var(--text-vdim);
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.feature-text {
+  color: var(--text);
+}
+.feature-item.disabled .feature-text {
+  color: var(--text-vdim);
+  text-decoration: line-through;
+}
+
+.btn-upgrade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.btn-upgrade:hover {
+  background: var(--border-light);
+}
+.premium .btn-upgrade {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.25);
+}
+.premium .btn-upgrade:hover {
+  background: var(--blue-hover);
+}
+.premium .btn-upgrade:disabled {
+  background: var(--border-light);
+  color: var(--text-dim);
+  box-shadow: none;
+  cursor: default;
+}
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.toast.ok { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); color: var(--green); }
+.toast.err { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); color: var(--red); }
+.toast.warn { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); color: var(--gold); }
+
+/* ---- Footer ---- */
+.q-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  font-size: 11px;
+  color: var(--text-vdim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.q-footer a { color: var(--text-dim); }
+.q-footer a:hover { color: var(--blue); }
+.footer-links { display: flex; gap: 16px; }
+
+@media (max-width: 640px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+  .billing-main { padding: 24px 16px 48px; }
+  .status-box { flex-direction: column; align-items: flex-start; }
+  .q-footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+<script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+  <link rel="stylesheet" href="/static/css/themes.css">
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="q-nav">
+  <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
+  </a>
+
+  <div class="q-nav-links">
+    <a href="/" id="nav-dashboard">Dashboard</a>
+    <a href="/sectors" id="nav-sectors">Sectors</a>
+    <a href="/nifty" id="nav-nifty">Nifty 50</a>
+</div>
+
+  <div class="q-nav-right">
+    <div class="q-nav-status">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span class="conn-dot off" id="connDot"></span>
+      <span id="connText">Connecting</span>
+      <span id="updateTime"></span>
+      <span id="stockCount"></span>
+      <span id="paperBadge" style="display:none"></span>
+    </div>
+    
+    <!-- User Dropdown -->
+    <div class="q-nav-user-dropdown">
+      <button class="q-nav-user-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="q-avatar q-avatar-sm">
+          <span id="userInitials">U</span>
+        </div>
+        <span id="userName" class="user-name">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="q-dropdown-menu" id="userMenu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="q-avatar">
+            <span id="userInitials2">U</span>
+          </div>
+          <div class="user-menu-info">
+            <div class="user-menu-name" id="userName2">User</div>
+            <div class="user-menu-role" id="userRole">Member</div>
+          </div>
+        </div>
+
+        <div class="q-dropdown-section-label">Tools</div>
+        <a href="/advanced-analytics" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Advanced Desk</span>
+        </a>
+        <a href="/oi-scanner" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>OI Scanner</span>
+        </a>
+        <a href="/oi-thesis" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 3 3 5-7"/>
+          </svg>
+          <span>OI Thesis</span>
+        </a>
+        <a href="/rsi" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"></polyline>
+            <polyline points="15 7 21 7 21 13"></polyline>
+          </svg>
+          <span>RSI Scanner</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <div class="q-dropdown-section-label">Account</div>
+        <a href="/profile" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </a>
+        <a href="/paper" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Paper Trades</span>
+        </a>
+        <a href="/settings" class="q-dropdown-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="/admin" class="q-dropdown-item q-dropdown-admin" id="userMenuAdmin" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Console</span>
+        </a>
+
+        <div class="q-dropdown-divider"></div>
+        <a href="/api/auth/logout" class="q-dropdown-item text-red">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="billing-main">
+
+  <a href="/profile" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to Profile
+  </a>
+
+  <!-- Pricing Hero -->
+  <div class="hero">
+    <h1 class="hero-title">Upgrade your trading</h1>
+    <p class="hero-subtitle">Get access to professional institutional-grade auto-trading systems and premium quantitative market signals.</p>
+  </div>
+
+  <!-- Subscription Status Box -->
+  <div class="status-box">
+    <div class="status-left">
+      <span class="status-label">Current Subscription</span>
+      <span class="status-value" id="status-plan">
+        Free Plan <span class="badge-free">FREE</span>
+      </span>
+    </div>
+    <div class="status-right" id="status-expires-container" style="display:none;">
+      <div class="status-left">
+        <span class="status-label">Valid Until</span>
+        <span class="status-value" id="status-expires" style="color:var(--green);">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing Grid -->
+  <div class="pricing-grid">
+    <!-- Free Card -->
+    <div class="pricing-card">
+      <div class="plan-name">Free Plan</div>
+      <div class="plan-desc">For individual traders testing strategies manually.</div>
+      <div class="plan-price">₹0 <span class="plan-price-period">/ month</span></div>
+
+      <div class="features-list">
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text">Unlimited Manual Paper Trades</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text">Real-time OI and Volatility Scanner</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text">Multi-Timeframe Charting</span>
+        </div>
+        <div class="feature-item disabled">
+          <span class="feature-icon-no">✗</span>
+          <span class="feature-text">Auto-Trading Signal Engine</span>
+        </div>
+        <div class="feature-item disabled">
+          <span class="feature-icon-no">✗</span>
+          <span class="feature-text">Unlimited Perplexity AI Prompts</span>
+        </div>
+        <div class="feature-item disabled">
+          <span class="feature-icon-no">✗</span>
+          <span class="feature-text">Telegram Trading Alert Broadcasts</span>
+        </div>
+      </div>
+
+      <button class="btn-upgrade" id="btn-free" disabled>
+        Current Plan
+      </button>
+    </div>
+
+    <!-- Pro Card -->
+    <div class="pricing-card premium">
+      <div class="plan-name">Pro Plan</div>
+      <div class="plan-desc">For serious traders seeking algorithmic execution and alerts.</div>
+      <div class="plan-price">₹999 <span class="plan-price-period">/ month</span></div>
+
+      <div class="features-list">
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text"><strong>Everything in Free</strong></span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text"><strong>Automated Algorithmic Trading</strong></span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text">Unlimited Premium AI Chat Assistants</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text">Instant Telegram Alert Broadcasts</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text">Custom Default Dashboard Columns</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon-yes">✓</span>
+          <span class="feature-text">Priority Live Support and Custom Integrations</span>
+        </div>
+      </div>
+
+      <button class="btn-upgrade" id="btn-pro" onclick="startCheckout()">
+        💳 Upgrade to Pro
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- Footer -->
+<footer class="q-footer">
+  <span>&copy; 2026 QUANTRA Terminal — Secure payments processed via Razorpay.</span>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+</footer>
+
+<script>
+var _billingData = {};
+var _toastT = null;
+
+function toast(msg, kind) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (kind || '');
+  if (_toastT) clearTimeout(_toastT);
+  _toastT = setTimeout(function() { el.classList.remove('show'); }, 4000);
+}
+
+function post(url, body) {
+  var csrf = '';
+  var m = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
+  if (m) csrf = m[1];
+  return fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrf
+    },
+    credentials: 'same-origin',
+    body: JSON.stringify(body)
+  }).then(r => r.json());
+}
+
+function loadBillingStatus() {
+  fetch('/api/billing/status', {credentials: 'same-origin'})
+    .then(r => r.json())
+    .then(d => {
+      if (!d.ok) return;
+      _billingData = d;
+      var isPro = d.plan === 'pro';
+      var statusPlan = document.getElementById('status-plan');
+      var statusExpiresContainer = document.getElementById('status-expires-container');
+      var statusExpires = document.getElementById('status-expires');
+      var btnPro = document.getElementById('btn-pro');
+      var btnFree = document.getElementById('btn-free');
+
+      if (isPro) {
+        statusPlan.innerHTML = 'Pro Plan <span class="badge-pro">PRO</span>';
+        btnPro.textContent = '💎 Pro Member Active';
+        btnPro.disabled = true;
+        btnFree.disabled = false;
+        btnFree.textContent = 'Downgrade to Free';
+        btnFree.onclick = function() {
+          toast('To manage or cancel your subscription, please contact support@quantraterminal.com', 'warn');
+        };
+
+        if (d.subscription_expires_at) {
+          statusExpiresContainer.style.display = 'block';
+          statusExpires.textContent = new Date(d.subscription_expires_at).toLocaleDateString('en-IN', {day: 'numeric', month: 'long', year: 'numeric'});
+        }
+      } else {
+        statusPlan.innerHTML = 'Free Plan <span class="badge-free">FREE</span>';
+        btnPro.textContent = '💳 Upgrade to Pro';
+        btnPro.disabled = false;
+        btnFree.textContent = 'Current Plan';
+        btnFree.disabled = true;
+        btnFree.onclick = null;
+        statusExpiresContainer.style.display = 'none';
+      }
+    })
+    .catch(() => {});
+}
+
+function startCheckout() {
+  if (!_billingData.razorpay_key) {
+    toast('Payment system not configured. Contact admin.', 'warn');
+    return;
+  }
+  
+  var btnPro = document.getElementById('btn-pro');
+  btnPro.disabled = true;
+  btnPro.textContent = '⏳ Creating order…';
+
+  post('/api/billing/create-order', {})
+    .then(d => {
+      if (!d.ok) {
+        toast(d.error || 'Failed to create order', 'err');
+        btnPro.disabled = false;
+        btnPro.textContent = '💳 Upgrade to Pro';
+        return;
+      }
+      
+      var options = {
+        key: _billingData.razorpay_key,
+        amount: d.amount,
+        currency: d.currency,
+        name: 'Quantra Terminal',
+        description: 'Quantra Pro — ₹999/month',
+        order_id: d.order_id,
+        handler: function(response) {
+          btnPro.textContent = '⚡ Verifying payment…';
+          post('/api/billing/verify-payment', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          }).then(vd => {
+            if (vd.ok) {
+              toast('🎉 Successfully upgraded to Pro!', 'ok');
+              loadBillingStatus();
+            } else {
+              toast(vd.error || 'Payment verification failed', 'err');
+              btnPro.disabled = false;
+              btnPro.textContent = '💳 Upgrade to Pro';
+            }
+          });
+        },
+        modal: {
+          ondismiss: function() {
+            btnPro.disabled = false;
+            btnPro.textContent = '💳 Upgrade to Pro';
+          }
+        },
+        prefill: {
+          name: '',
+          email: ''
+        },
+        theme: {
+          color: '#3b82f6',
+          background_color: '#09090b'
+        }
+      };
+      
+      var rzp = new Razorpay(options);
+      rzp.open();
+    })
+    .catch(() => {
+      toast('Network error. Try again.', 'err');
+      btnPro.disabled = false;
+      btnPro.textContent = '💳 Upgrade to Pro';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadBillingStatus();
+});
+</script>
+</body>
+</html>

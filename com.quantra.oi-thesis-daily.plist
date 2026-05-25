@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyLists-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.quantra.oi-thesis-daily</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-lc</string>
+        <string>cd "/Users/amitkumar/Desktop/FNO Dashboard/fno-live-dashboard" &amp;&amp; ./oi_thesis_cron.sh &gt;&gt; oi_thesis.log 2&gt;&amp;1</string>
+    </array>
+
+    <!-- 15:35 IST every Monday-Friday. Mac local time = IST when machine is set to IST. -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Weekday</key><integer>1</integer>
+            <key>Hour</key><integer>15</integer>
+            <key>Minute</key><integer>35</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>2</integer>
+            <key>Hour</key><integer>15</integer>
+            <key>Minute</key><integer>35</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>3</integer>
+            <key>Hour</key><integer>15</integer>
+            <key>Minute</key><integer>35</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>4</integer>
+            <key>Hour</key><integer>15</integer>
+            <key>Minute</key><integer>35</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>5</integer>
+            <key>Hour</key><integer>15</integer>
+            <key>Minute</key><integer>35</integer>
+        </dict>
+    </array>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/amitkumar/Desktop/FNO Dashboard/fno-live-dashboard/oi_thesis_launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/amitkumar/Desktop/FNO Dashboard/fno-live-dashboard/oi_thesis_launchd.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/amitkumar/Desktop/FNO Dashboard/fno-live-dashboard</string>
+</dict>
+</plist>

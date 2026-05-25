@@ -33,8 +33,28 @@ import os
 import secrets
 import time
 import logging
+from datetime import datetime
+from pathlib import Path
 
-from aiohttp import web, ClientSession, WSMsgType
+from aiohttp import web, WSMsgType
+
+# -- GLOBAL CLIENT SESSION OVERRIDE --
+_global_client_session = None
+
+class GlobalClientSessionManager:
+    async def __aenter__(self):
+        global _global_client_session
+        import aiohttp
+        if _global_client_session is None or _global_client_session.closed:
+            _global_client_session = aiohttp.ClientSession()
+        return _global_client_session
+
+    async def __aexit__(self, *args):
+        pass
+
+ClientSession = GlobalClientSessionManager
+# ------------------------------------
+
 
 try:
     from db import DB
@@ -57,6 +77,30 @@ try:
 except ImportError:
     ANALYSIS_AVAILABLE = False
 
+def load_config_env():
+    """Load config.env variables into os.environ if the file exists."""
+    env_path = os.path.join(os.path.dirname(__file__), "config.env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        key, val = line.split("=", 1)
+                        key = key.strip()
+                        val = val.strip()
+                        if val.startswith('"') and val.endswith('"'):
+                            val = val[1:-1]
+                        elif val.startswith("'") and val.endswith("'"):
+                            val = val[1:-1]
+                        os.environ[key] = val
+        except Exception as e:
+            print(f"Error loading config.env: {e}")
+
+load_config_env()
+
 # ============================================================
 # CONFIG
 # ============================================================
@@ -71,6 +115,29 @@ DEFAULT_ADMIN_PATHS = ["/admin", "/divergence"]
 MAX_REQUEST_SIZE = 100 * 1024       # 100KB default
 MAX_CHAT_REQUEST_SIZE = 500 * 1024  # 500KB for chat (includes context)
 MAX_CONCURRENT_SESSIONS = 5         # per user
+
+# Resend.com email API key
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM = os.environ.get("RESEND_FROM", "noreply@resend.dev")
+
+# Razorpay credentials
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
+RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "")
+
+# Pro plan pricing (in paise — 1 INR = 100 paise)
+PRO_PLAN_AMOUNT_PAISE = 99900  # ₹999
+PRO_PLAN_NAME = "Quantra Pro"
+
+
+# Set IST timezone for all logging
+import logging
+import pytz
+from datetime import datetime
+ist = pytz.timezone('Asia/Kolkata')
+def custom_time(*args):
+    return datetime.now(ist).timetuple()
+logging.Formatter.converter = custom_time
 
 logging.basicConfig(
     level=logging.INFO,
@@ -207,13 +274,22 @@ async def security_middleware(request, handler):
     """
     ip = get_client_ip(request)
 
+    # Skip auth for static files
+    if request.path.startswith("/static/"):
+        response = await handler(request)
+        if SECURITY_AVAILABLE:
+            apply_security_headers(response)
+        return response
+
     # CSRF check for state-changing /api/ requests
     if SECURITY_AVAILABLE and request.path.startswith("/api/") and request.method not in ("GET", "HEAD", "OPTIONS"):
         ok, reason = CSRFProtection.validate(request)
         if not ok:
             if _audit:
                 _audit.csrf_violation(ip, request.path)
-            log.warning(f"CSRF violation: {ip} {request.method} {request.path} — {reason}")
+            client_token = request.headers.get("X-CSRF-Token")
+            session_token = request.cookies.get("csrf_token")
+            log.warning(f"CSRF violation: {ip} {request.method} {request.path} — {reason} (client: {client_token}, session: {session_token})")
             return web.json_response({"error": "CSRF validation failed"}, status=403)
 
     # General API rate limiting (per IP for unauthenticated, per user for authenticated)
@@ -361,10 +437,20 @@ async def handle_verify_api(request):
     session = validate_session(token)
     if session:
         admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
+        theme = "midnight-blue"
+        if DB_AVAILABLE:
+            plan = _db.get_user_plan(session["user_id"])
+            if session["role"] == "admin":
+                plan = "pro"
+            settings = _db.get_user_settings(session["user_id"])
+            if settings and settings.get("theme"):
+                theme = settings["theme"]
         return web.json_response({
             "ok": True,
             "user": session["username"],
             "role": session["role"],
+            "plan": plan,
+            "theme": theme,
             "display_name": session.get("display_name", session["username"]),
             "user_id": session["user_id"],
             "admin_paths": admin_paths,
@@ -516,7 +602,25 @@ async def handle_register_api(request):
     if _audit:
         _audit.registration(ip, username, user_id)
     log.info(f"New user registered: {username} (id={user_id}) from {ip}")
-    return web.json_response({"ok": True, "user_id": user_id, "username": username})
+
+    # Send email verification OTP if email provided
+    email_verification_sent = False
+    api_key = os.environ.get("RESEND_API_KEY", "") or RESEND_API_KEY
+    if email and api_key:
+        import random
+        from datetime import datetime, timedelta
+        otp = str(random.randint(100000, 999999))
+        expires_at = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
+        _db.set_email_otp(user_id, otp, expires_at)
+        email_verification_sent = await send_verification_email(email, username, otp)
+
+    return web.json_response({
+        "ok": True,
+        "user_id": user_id,
+        "username": username,
+        "email_verification_sent": email_verification_sent,
+        "verify_email_required": email_verification_sent,
+    })
 
 
 # ============================================================
@@ -570,6 +674,7 @@ async def handle_user_profile_get(request):
             "default_capital": settings.get("default_capital", 50000),
             "auto_exit_enabled": bool(settings.get("auto_exit_enabled", 1)),
             "auto_trail_sl": bool(settings.get("auto_trail_sl", 1)),
+            "theme": settings.get("theme", "midnight-blue"),
         },
         "auto_settings": {
             "auto_trade_enabled": bool(settings.get("auto_trade_enabled", 0)),
@@ -658,6 +763,8 @@ async def handle_user_settings_post(request):
         updates["auto_exit_enabled"] = 1 if data["auto_exit_enabled"] else 0
     if "auto_trail_sl" in data:
         updates["auto_trail_sl"] = 1 if data["auto_trail_sl"] else 0
+    if "theme" in data:
+        updates["theme"] = str(data["theme"]).strip()
 
     if not updates:
         return web.json_response({"error": "No valid settings to update"}, status=400)
@@ -681,7 +788,12 @@ async def handle_user_auto_settings_post(request):
 
     updates = {}
     if "auto_trade_enabled" in data:
-        updates["auto_trade_enabled"] = 1 if data["auto_trade_enabled"] else 0
+        enabled = 1 if data["auto_trade_enabled"] else 0
+        if enabled:
+            plan = _db.get_user_plan(session["user_id"])
+            if plan != "pro" and session["role"] != "admin":
+                return web.json_response({"error": "Quantra Pro subscription required to enable Auto-Trading. Upgrade in settings."}, status=403)
+        updates["auto_trade_enabled"] = enabled
     if "auto_trade_max_positions" in data:
         v = int(data["auto_trade_max_positions"])
         updates["auto_trade_max_positions"] = max(1, min(10, v))
@@ -810,8 +922,131 @@ async def handle_user_logout_all(request):
 
 
 # ============================================================
+# COLUMN CONFIG API (per-user display preferences)
+# ============================================================
+
+async def handle_column_config_get(request):
+    """GET /api/user/column-config — return saved column config."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    if not DB_AVAILABLE:
+        return web.json_response({"config": None})
+    settings = _db.get_user_settings(session["user_id"])
+    raw = (settings or {}).get("column_config")
+    config = None
+    if raw:
+        try:
+            import json as _json
+            config = _json.loads(raw) if isinstance(raw, str) else raw
+        except Exception:
+            config = None
+    return web.json_response({"ok": True, "config": config})
+
+
+async def handle_column_config_post(request):
+    """POST /api/user/column-config — save column config {visible: [...], order: [...]}."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    if not DB_AVAILABLE:
+        return web.json_response({"error": "DB unavailable"}, status=503)
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+    # Validate structure
+    visible = data.get("visible")
+    order = data.get("order")
+    if not isinstance(visible, list):
+        return web.json_response({"error": "visible must be a list"}, status=400)
+    import json as _json
+    config_str = _json.dumps({"visible": visible, "order": order or visible})
+    _db.update_user_settings(session["user_id"], column_config=config_str)
+    return web.json_response({"ok": True})
+
+
+async def handle_settings_page(request):
+    """Serve the /settings page."""
+    return await _serve_static_page("settings.html")
+
+
+# ============================================================
 # PAPER TRADES API
 # ============================================================
+
+async def send_verification_email(email: str, username: str, otp: str) -> bool:
+    """Send OTP verification email via Resend.com. Returns True on success."""
+    api_key = os.environ.get("RESEND_API_KEY", "") or RESEND_API_KEY
+    from_email = os.environ.get("RESEND_FROM", "") or RESEND_FROM
+    if not api_key:
+        log.warning("RESEND_API_KEY not set — skipping email verification send")
+        return False
+    html_body = f"""
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#050508;padding:50px 20px;color:#d1d1f0;text-align:center;">
+      <div style="max-width:480px;margin:0 auto;background:#101016;border:1px solid rgba(255,255,255,0.06);border-radius:16px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.5);text-align:left;position:relative;">
+        <div style="height:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4);"></div>
+        <div style="padding:40px 32px;">
+          <!-- Logo -->
+          <div style="text-align:center;margin-bottom:32px;">
+            <span style="font-size:15px;font-weight:800;color:#fff;letter-spacing:2px;text-transform:uppercase;">QUANTRA</span>
+          </div>
+          
+          <!-- Heading -->
+          <h2 style="font-size:20px;font-weight:700;color:#fff;margin:0 0 12px 0;line-height:1.3;letter-spacing:-0.2px;text-align:center;">Verify your email address</h2>
+          <p style="font-size:13px;color:#7878a3;line-height:1.6;margin:0 0 28px 0;text-align:center;">Hi {username}, use the verification code below to activate your institutional Quantra Terminal workspace. This code is valid for 10 minutes.</p>
+          
+          <!-- OTP Container -->
+          <div style="background:#181822;border:1px solid rgba(59,130,246,0.18);border-radius:10px;padding:24px;text-align:center;margin-bottom:28px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);">
+            <div style="font-family:'JetBrains Mono','Courier New',Courier,monospace;font-size:36px;font-weight:700;color:#3b82f6;letter-spacing:8px;text-shadow:0 0 12px rgba(59,130,246,0.3);margin-left:8px;">{otp}</div>
+            <div style="font-size:11px;color:#52527a;margin-top:8px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Valid for 10 minutes</div>
+          </div>
+          
+          <p style="font-size:11px;color:#4d4d73;line-height:1.5;margin:0;text-align:center;">If you did not attempt to register on Quantra Terminal, please safely ignore this email.</p>
+        </div>
+      </div>
+      <div style="margin-top:24px;text-align:center;font-size:11px;color:#4d4d73;">
+        &copy; 2026 QUANTRA Terminal. All rights reserved.
+      </div>
+    </div>
+    """
+    try:
+        async with ClientSession() as cs:
+            async with cs.post(
+                "https://api.resend.com/emails",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={
+                    "from": from_email,
+                    "to": [email],
+                    "subject": f"{otp} — Your Quantra verification code",
+                    "html": html_body,
+                },
+            ) as resp:
+                if resp.status in (200, 201):
+                    log.info(f"Verification email sent to {email}")
+                    return True
+                body = await resp.text()
+                log.warning(f"Resend API error {resp.status}: {body[:200]}")
+                return False
+    except Exception as e:
+        log.error(f"Email send failed: {e}")
+        return False
+
+
+async def notify_backend_sync():
+    """Notify ws_server to reload active paper trades from SQLite."""
+    try:
+        async with ClientSession() as cs_session:
+            async with cs_session.post(f"http://{BACKEND_HOST}:{BACKEND_PORT}/api/paper/sync") as resp:
+                if resp.status == 200:
+                    log.info("Backend paper trades sync triggered successfully.")
+                else:
+                    log.warning(f"Backend paper trades sync returned status {resp.status}")
+    except Exception as e:
+        log.error(f"Failed to notify backend sync: {e}")
+
 
 async def handle_paper_trades_list(request):
     """GET /api/user/trades - list user's paper trades."""
@@ -885,9 +1120,12 @@ async def handle_paper_trade_create(request):
         t2_premium=data.get("t2_premium"),
         status=data.get("status", "PENDING"),
         entry_reason=InputValidator.sanitize_string(data.get("entry_reason", ""), 500) if SECURITY_AVAILABLE else str(data.get("entry_reason", ""))[:500],
+        option_type=data.get("option_type") or ("CE" if direction in ("BULLISH", "CE") else "PE"),
+        spot_at_entry=data.get("spot_at_entry"),
     )
 
     log.info(f"Paper trade created: {session['username']} {symbol} {direction} (id={trade_id})")
+    await notify_backend_sync()
     return web.json_response({"ok": True, "trade_id": trade_id})
 
 
@@ -913,14 +1151,122 @@ async def handle_paper_trade_update(request):
     except Exception:
         return web.json_response({"error": "Invalid JSON"}, status=400)
 
+    # Prevent client-side P&L tampering: remove any client-sent P&L values
+    for field in ["pnl", "pnl_pct", "costs_estimated", "net_pnl"]:
+        data.pop(field, None)
+
+    # Server-side calculate P&L if exiting/closed
+    status = data.get("status") or trade.get("status")
+    if status in ("EXITED", "CLOSED"):
+        direction = (data.get("direction") or trade.get("direction") or "BUY").upper()
+        qty = (data.get("lot_size") or trade.get("lot_size") or 1) * (data.get("lots") or trade.get("lots") or 1)
+        entry_premium = data.get("entry_premium") if data.get("entry_premium") is not None else trade.get("entry_premium")
+        exit_premium = data.get("exit_premium") if data.get("exit_premium") is not None else trade.get("exit_premium")
+        
+        if entry_premium is not None and exit_premium is not None:
+            if direction == "SELL":
+                pnl = round((entry_premium - exit_premium) * qty, 2)
+            else:
+                pnl = round((exit_premium - entry_premium) * qty, 2)
+            
+            pnl_pct = round((pnl / (entry_premium * qty) * 100), 2) if (entry_premium * qty) != 0 else 0.0
+            costs_estimated = 40.0
+            net_pnl = round(pnl - costs_estimated, 2)
+            
+            data["pnl"] = pnl
+            data["pnl_pct"] = pnl_pct
+            data["costs_estimated"] = costs_estimated
+            data["net_pnl"] = net_pnl
+
+        if not data.get("exited_at") and not trade.get("exited_at"):
+            data["exited_at"] = datetime.utcnow().isoformat()
+    elif status == "ENTERED":
+        if not data.get("entered_at") and not trade.get("entered_at"):
+            data["entered_at"] = datetime.utcnow().isoformat()
+
     _db.update_paper_trade(trade_id, user_id=session["user_id"], **data)
     log.info(f"Paper trade updated: {session['username']} trade_id={trade_id} fields={list(data.keys())}")
+    await notify_backend_sync()
     return web.json_response({"ok": True, "trade_id": trade_id})
 
 
 # ============================================================
-# AI CHAT (Multi-Provider: Perplexity + NVIDIA NIM)
+# WATCHLIST (per-user, server-side)
 # ============================================================
+
+async def handle_watchlist_get(request):
+    """GET /api/user/watchlist — return user's watchlist."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    if not DB_AVAILABLE:
+        return web.json_response({"symbols": []})
+    rows = _db.get_watchlist(session["user_id"])
+    return web.json_response({
+        "symbols": [r["symbol"] for r in rows],
+        "count": len(rows),
+    })
+
+
+async def handle_watchlist_set(request):
+    """POST /api/user/watchlist — replace entire watchlist with {symbols: [...]}."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    if not DB_AVAILABLE:
+        return web.json_response({"error": "DB unavailable"}, status=503)
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+    symbols = body.get("symbols")
+    if not isinstance(symbols, list):
+        return web.json_response({"error": "symbols must be a list"}, status=400)
+    _db.set_watchlist(session["user_id"], symbols)
+    return web.json_response({"ok": True, "count": len(symbols)})
+
+
+async def handle_watchlist_add(request):
+    """POST /api/user/watchlist/add — add {symbol} to watchlist."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    if not DB_AVAILABLE:
+        return web.json_response({"error": "DB unavailable"}, status=503)
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+    symbol = (body.get("symbol") or "").upper().strip()
+    if not symbol:
+        return web.json_response({"error": "symbol required"}, status=400)
+    try:
+        _db.add_to_watchlist(session["user_id"], symbol)
+    except ValueError as e:
+        return web.json_response({"error": str(e)}, status=400)
+    return web.json_response({"ok": True, "symbol": symbol})
+
+
+async def handle_watchlist_remove(request):
+    """POST /api/user/watchlist/remove — remove {symbol} from watchlist."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    if not DB_AVAILABLE:
+        return web.json_response({"error": "DB unavailable"}, status=503)
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+    symbol = (body.get("symbol") or "").upper().strip()
+    if not symbol:
+        return web.json_response({"error": "symbol required"}, status=400)
+    _db.remove_from_watchlist(session["user_id"], symbol)
+    return web.json_response({"ok": True, "symbol": symbol})
 
 AI_PROVIDERS = {
     "perplexity": {
@@ -981,6 +1327,12 @@ async def handle_chat_api(request):
     session = validate_session(token)
     if not session:
         return web.json_response({"error": "Unauthorized"}, status=401)
+
+    plan = _db.get_user_plan(session["user_id"]) if _db else "free"
+    if plan != "pro" and session["role"] != "admin":
+        return web.json_response({
+            "reply": "💎 Quantra Pro subscription required to chat with the Premium AI Assistant. Please upgrade your plan in Settings > Billing to unlock unlimited AI market analysis."
+        })
 
     # Chat-specific rate limit
     rate_resp = check_rate_limit("chat", f"user:{session['user_id']}", request)
@@ -1278,6 +1630,160 @@ async def handle_ai_test(request):
         return web.json_response({"ok": False, "error": str(e)})
 
 
+
+# ============================================================
+# ADMIN INTEGRATIONS (Resend Email + Razorpay Billing)
+# ============================================================
+
+def _mask_key(key: str) -> str:
+    """Return a masked version of an API key for display."""
+    if not key:
+        return ""
+    if len(key) > 12:
+        return key[:6] + "..." + key[-4:]
+    return "••••"
+
+
+def _write_env_key(env_key: str, value: str):
+    """Write or update a key=value pair in config.env. Creates the file if it doesn't exist."""
+    env_path = os.path.join(os.path.dirname(__file__), "config.env")
+    lines = []
+    found = False
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            lines = f.readlines()
+    new_lines = []
+    for line in lines:
+        if line.startswith(f"{env_key}=") or line.startswith(f"# {env_key}="):
+            new_lines.append(f"{env_key}={value}\n")
+            found = True
+        else:
+            new_lines.append(line)
+    if not found:
+        new_lines.append(f"{env_key}={value}\n")
+    with open(env_path, "w") as f:
+        f.writelines(new_lines)
+    # Also update runtime env so it takes effect immediately
+    os.environ[env_key] = value
+
+
+async def handle_admin_integrations_get(request):
+    """GET /api/admin/integrations - Return Resend + Razorpay config status (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    resend_key = os.environ.get("RESEND_API_KEY", "") or _config.get("resend_api_key", "")
+    resend_from = os.environ.get("RESEND_FROM", "") or _config.get("resend_from", "")
+    rzp_key_id = os.environ.get("RAZORPAY_KEY_ID", "") or _config.get("razorpay_key_id", "")
+    rzp_secret = os.environ.get("RAZORPAY_KEY_SECRET", "") or _config.get("razorpay_key_secret", "")
+    rzp_webhook = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "") or _config.get("razorpay_webhook_secret", "")
+
+    return web.json_response({
+        "ok": True,
+        "resend": {
+            "has_key": bool(resend_key),
+            "key_masked": _mask_key(resend_key),
+            "from_email": resend_from,
+        },
+        "razorpay": {
+            "has_key_id": bool(rzp_key_id),
+            "has_secret": bool(rzp_secret),
+            "has_webhook": bool(rzp_webhook),
+            "key_id_masked": _mask_key(rzp_key_id),
+            "mode": "live" if rzp_key_id.startswith("rzp_live_") else "test",
+        },
+    })
+
+
+async def handle_admin_integrations_post(request):
+    """POST /api/admin/integrations - Save Resend + Razorpay keys (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    ip = get_client_ip(request)
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    updated = []
+    env_map = {
+        "resend_api_key":        "RESEND_API_KEY",
+        "resend_from":           "RESEND_FROM",
+        "razorpay_key_id":       "RAZORPAY_KEY_ID",
+        "razorpay_key_secret":   "RAZORPAY_KEY_SECRET",
+        "razorpay_webhook_secret": "RAZORPAY_WEBHOOK_SECRET",
+    }
+
+    for field, env_key in env_map.items():
+        if field in data and data[field].strip():
+            val = data[field].strip()
+            _config[field] = val          # runtime config dict
+            _write_env_key(env_key, val)  # persist to config.env
+            updated.append(field)
+
+    if not updated:
+        return web.json_response({"error": "No valid fields to update"}, status=400)
+
+    # Persist to JSON config too (for cross-restart availability before env reload)
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(_config, f, indent=2)
+
+    if _audit:
+        _audit.admin_action(ip, session["username"], session["user_id"],
+                            f"integrations_update: {', '.join(updated)}")
+    log.info(f"Integration keys updated by {session['username']}: {', '.join(updated)}")
+    return web.json_response({"ok": True, "updated": updated})
+
+
+async def handle_admin_test_email(request):
+    """POST /api/admin/test-email - Send a test email to the admin's address (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    api_key = os.environ.get("RESEND_API_KEY", "") or _config.get("resend_api_key", "")
+    from_email = os.environ.get("RESEND_FROM", "") or _config.get("resend_from", "noreply@resend.dev")
+    if not api_key:
+        return web.json_response({"error": "RESEND_API_KEY not configured. Add it in the Integrations card above."}, status=400)
+
+    # Get admin email
+    user = _db.get_user(session["user_id"]) if _db else None
+    to_email = user.get("email") if user else None
+    if not to_email:
+        return web.json_response({"error": "No email on admin account. Set your email in Profile first."}, status=400)
+
+    
+    test_html = f"""
+    <div style="font-family:Inter,sans-serif;background:#09090b;color:#e4e4e7;padding:32px;max-width:480px;margin:auto;border-radius:12px;">
+      <div style="font-size:20px;font-weight:800;color:#3b82f6;margin-bottom:8px;">QUANTRA</div>
+      <div style="font-size:16px;font-weight:600;color:#fafafa;margin-bottom:12px;">&#9989; Email Integration Test</div>
+      <p style="color:#71717a;">Resend.com is correctly configured for your Quantra Terminal instance.</p>
+      <p style="color:#52525b;font-size:11px;margin-top:16px;">Sent from: {from_email}</p>
+    </div>
+    """
+    try:
+        async with ClientSession() as cs:
+            async with cs.post(
+                "https://api.resend.com/emails",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"from": from_email, "to": [to_email], "subject": "Quantra — Email Integration Test", "html": test_html},
+            ) as resp:
+                if resp.status in (200, 201):
+                    log.info(f"Test email sent to {to_email} by admin {session['username']}")
+                    return web.json_response({"ok": True, "sent_to": to_email})
+                body = await resp.text()
+                log.warning(f"Resend test email failed {resp.status}: {body[:200]}")
+                return web.json_response({"error": f"Resend API error {resp.status}: {body[:100]}"}, status=400)
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+
 # ============================================================
 # ADMIN USER MANAGEMENT
 # ============================================================
@@ -1292,6 +1798,42 @@ async def handle_admin_users(request):
     users = _db.list_users(include_inactive=True)
     stats = _db.get_platform_stats()
     return web.json_response({"ok": True, "users": users, "stats": stats})
+
+
+
+async def handle_admin_upgrade_user(request):
+    """POST /api/admin/upgrade-user - toggle pro plan for a user (admin only)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session or session["role"] != "admin":
+        return web.json_response({"error": "Admin access required"}, status=403)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    user_id = data.get("user_id")
+    is_pro = data.get("is_pro")
+    
+    if not user_id or is_pro is None:
+        return web.json_response({"error": "user_id and is_pro required"}, status=400)
+
+    from datetime import datetime, timedelta
+    
+    if is_pro:
+        # Upgrade to pro for 1 year manually
+        exp = (datetime.utcnow() + timedelta(days=365)).isoformat()
+        _db.update_subscription(int(user_id), plan="pro", subscription_status="active", subscription_expires_at=exp)
+        action = f"upgrade_user: {user_id} to PRO"
+    else:
+        # Downgrade to free
+        _db.update_subscription(int(user_id), plan="free", subscription_status="inactive", subscription_expires_at=None)
+        action = f"downgrade_user: {user_id} to FREE"
+
+    ip = get_client_ip(request)
+    _audit.admin_action(ip, session["username"], session["user_id"], action)
+    return web.json_response({"ok": True})
 
 
 async def handle_admin_unlock_user(request):
@@ -1503,7 +2045,7 @@ async def handle_auto_trade_run(request):
 
         if SECURITY_AVAILABLE:
             _audit.admin_action(
-                request.remote, session["username"],
+                request.remote, session["username"], session["user_id"],
                 f"auto_trade_scan: {result.get('nifty_direction')}, "
                 f"entered={len(result.get('trades_entered', []))}"
             )
@@ -1589,13 +2131,20 @@ async def handle_auto_trade_status(request):
 async def proxy_websocket(request):
     """Proxy WebSocket connections to backend."""
     token = get_session_from_request(request)
-    if not validate_session(token):
+    session = validate_session(token)
+    if not session:
         return web.Response(text="Unauthorized", status=401)
 
     ws_client = web.WebSocketResponse()
     await ws_client.prepare(request)
 
-    backend_url = f"ws://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
+    import urllib.parse
+    qs = request.query_string
+    params = urllib.parse.parse_qs(qs)
+    params['user_id'] = [str(session['user_id'])]
+    params['username'] = [str(session['username'])]
+    new_qs = urllib.parse.urlencode(params, doseq=True)
+    backend_url = f"ws://{BACKEND_HOST}:{BACKEND_PORT}{request.path}?{new_qs}"
 
     async with ClientSession() as cs_session:
         try:
@@ -1640,8 +2189,47 @@ async def proxy_websocket(request):
 async def proxy_http(request):
     """Proxy HTTP requests to backend with role-based access control."""
     path = request.path
+    
+    # Block external access to internal-only background endpoints
+    internal_only_paths = {"/api/paper/sync", "/api/paper/auto-scan"}
+    if path in internal_only_paths:
+        return web.json_response({"error": "Forbidden: Internal endpoint"}, status=403)
+        
     public_paths = {"/login", "/register", "/api/auth/login", "/api/auth/register", "/api/auth/verify", "/api/auth/logout"}
 
+    # Allow static files without authentication
+    if path.startswith("/static/"):
+        backend_url = f"http://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
+        headers = {}
+        skip_headers = {"host", "connection", "transfer-encoding", "keep-alive"}
+        for key, val in request.headers.items():
+            if key.lower() not in skip_headers:
+                headers[key] = val
+
+        async with ClientSession() as cs_session:
+            try:
+                async with cs_session.request(
+                    request.method, backend_url,
+                    headers=headers,
+                    allow_redirects=False
+                ) as resp:
+                    response_headers = {}
+                    skip_resp_headers = {"content-encoding", "transfer-encoding", "connection"}
+                    for key, val in resp.headers.items():
+                        if key.lower() not in skip_resp_headers:
+                            response_headers[key] = val
+
+                    response_body = await resp.read()
+                    return web.Response(
+                        status=resp.status,
+                        headers=response_headers,
+                        body=response_body
+                    )
+            except Exception as e:
+                log.error(f"Static file proxy error: {e}")
+                return web.Response(text=f"Static file unavailable: {e}", status=502)
+
+    session = None
     if path not in public_paths:
         token = get_session_from_request(request)
         session = validate_session(token)
@@ -1662,6 +2250,26 @@ async def proxy_http(request):
                 status=403
             )
 
+        premium_pages = {"/sectors", "/oi-thesis", "/oi-scanner", "/rsi", "/rsi-analysis", "/nifty", "/advanced-analytics"}
+        if path in premium_pages and session["role"] != "admin":
+            plan = _db.get_user_plan(session["user_id"]) if _db else "free"
+            if plan != "pro":
+                log.info(f"Premium page access blocked for free user {session['username']} on {path}")
+                return web.Response(
+                    text="<html><head><title>Upgrade to Pro — QUANTRA</title><link href='https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap' rel='stylesheet'></head>"
+                         "<body style=\"background:#050508;color:#d1d1f0;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;overflow:hidden;position:relative;\">"
+                         "<div style='position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,0.08) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;'></div>"
+                         "<div style='text-align:center;max-width:440px;padding:48px 40px;background:rgba(20,20,27,0.45);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.06);border-radius:24px;box-shadow:0 20px 50px rgba(0,0,0,0.6);position:relative;z-index:10;'>"
+                         "<div style='font-size:48px;margin-bottom:20px;filter:drop-shadow(0 0 12px rgba(59,130,246,0.4));'>🔒</div>"
+                         "<h1 style='font-size:22px;font-weight:700;color:#fff;margin:0 0 12px 0;letter-spacing:-0.3px;'>QUANTRA PRO Feature</h1>"
+                         "<p style='color:#7878a3;font-size:13px;line-height:1.6;margin:0 0 32px 0;'>The premium analytics views (Sector Momentum, OI Thesis, and RSI Divergence) are reserved for Pro subscribers. Upgrade your plan to unlock institutional-grade derivative analysis tools.</p>"
+                         "<a href='/billing' style='background:#3b82f6;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-size:13px;font-weight:600;display:inline-block;box-shadow:0 4px 20px rgba(59,130,246,0.3);transition:all 0.15s;outline:none;'>💳 Upgrade to Pro — ₹999/mo</a>"
+                         "<br><a href='/' style='color:#7878a3;font-size:12px;margin-top:20px;display:inline-block;text-decoration:none;font-weight:500;'>Back to Dashboard</a>"
+                         "</div></body></html>",
+                    content_type="text/html",
+                    status=403
+                )
+
     backend_url = f"http://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
 
     headers = {}
@@ -1669,6 +2277,11 @@ async def proxy_http(request):
     for key, val in request.headers.items():
         if key.lower() not in skip_headers:
             headers[key] = val
+
+    if session:
+        headers["X-User-Id"] = str(session["user_id"])
+        headers["X-User-Role"] = str(session["role"])
+        headers["X-Username"] = str(session["username"])
 
     body = await request.read() if request.can_read_body else None
 
@@ -1838,13 +2451,13 @@ async def auto_scan_timer(app):
 
 async def on_startup(app):
     app["cleanup_task"] = asyncio.create_task(session_cleanup_task(app))
-    app["auto_scan_task"] = asyncio.create_task(auto_scan_timer(app))
+    # app["auto_scan_task"] = asyncio.create_task(auto_scan_timer(app))
     log.info(f"Auth proxy started on :{PROXY_PORT}, backend at {BACKEND_HOST}:{BACKEND_PORT}")
     if SECURITY_AVAILABLE:
         log.info("Security: rate limiting, brute force guard, CSRF, security headers — ALL ACTIVE")
     else:
         log.warning("Security: DEGRADED — security.py not found")
-    log.info("Auto-scan timer: ACTIVE (every 5 min during market hours)")
+    log.info("Auto-scan timer: DEACTIVATED in auth_proxy (managed solely by ws_server.py)")
     tg_token = TELEGRAM_BOT_TOKEN or (_config or {}).get("telegram_bot_token", "")
     if tg_token:
         log.info("Telegram alerts: ACTIVE (chat_id=%s)", TELEGRAM_CHAT_ID)
@@ -1859,6 +2472,223 @@ async def on_shutdown(app):
     if _db:
         _db.close()
     log.info("Auth proxy shutting down")
+
+
+# ============================================================
+# EMAIL VERIFICATION ENDPOINTS
+# ============================================================
+
+async def handle_verify_email_api(request):
+    """POST /api/auth/verify-email — verify OTP and mark email as verified."""
+    if not _db:
+        return web.json_response({"error": "Database not available"}, status=503)
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        # Allow verification with user_id + otp directly (pre-session flow)
+        user_id = data.get("user_id")
+        if not user_id:
+            return web.json_response({"error": "Unauthorized"}, status=401)
+    else:
+        user_id = session["user_id"]
+
+    otp = str(data.get("otp", "")).strip()
+    if not otp or len(otp) != 6:
+        return web.json_response({"error": "Enter a valid 6-digit OTP"}, status=400)
+
+    ok, msg = _db.verify_email_otp(user_id, otp)
+    if not ok:
+        return web.json_response({"error": msg}, status=400)
+
+    log.info(f"Email verified for user_id={user_id}")
+    return web.json_response({"ok": True, "message": "Email verified successfully"})
+
+
+async def handle_resend_otp(request):
+    """POST /api/auth/resend-otp — resend email OTP."""
+    if not _db:
+        return web.json_response({"error": "Database not available"}, status=503)
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    user_id = session["user_id"] if session else data.get("user_id")
+    if not user_id:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    user = _db.get_user(user_id)
+    if not user or not user.get("email"):
+        return web.json_response({"error": "No email on file"}, status=400)
+
+    if user.get("email_verified"):
+        return web.json_response({"ok": True, "message": "Email already verified"})
+
+    import random
+    from datetime import datetime, timedelta
+    otp = str(random.randint(100000, 999999))
+    expires_at = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
+    _db.set_email_otp(user_id, otp, expires_at)
+    sent = await send_verification_email(user["email"], user["username"], otp)
+    if not sent:
+        return web.json_response({"error": "Failed to send email. Check RESEND_API_KEY config."}, status=500)
+    return web.json_response({"ok": True, "message": "OTP resent"})
+
+
+async def handle_verify_email_page(request):
+    """Serve verify_email.html."""
+    html_path = Path(__file__).parent / "verify_email.html"
+    if not html_path.exists():
+        return web.Response(text="Verify email page not found", status=404)
+    return web.FileResponse(html_path)
+
+
+# ============================================================
+# BILLING ENDPOINTS (Razorpay)
+# ============================================================
+
+async def handle_billing_status(request):
+    """GET /api/billing/status — return user's current plan and subscription info."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    if not _db:
+        return web.json_response({"error": "DB unavailable"}, status=503)
+    user = _db.get_user(session["user_id"])
+    if not user:
+        return web.json_response({"error": "User not found"}, status=404)
+    plan = _db.get_user_plan(session["user_id"])
+    if session["role"] == "admin":
+        plan = "pro"
+    
+    # Read keys from env / config
+    rzp_key = os.environ.get("RAZORPAY_KEY_ID", "") or RAZORPAY_KEY_ID
+    
+    return web.json_response({
+        "ok": True,
+        "plan": plan,
+        "subscription_status": user.get("subscription_status", "inactive"),
+        "subscription_expires_at": user.get("subscription_expires_at"),
+        "razorpay_key": rzp_key,
+        "pro_amount": PRO_PLAN_AMOUNT_PAISE,
+        "pro_amount_display": "₹999/month",
+    })
+
+
+async def handle_billing_create_order(request):
+    """POST /api/billing/create-order — create a Razorpay order for Pro upgrade."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    rzp_key = os.environ.get("RAZORPAY_KEY_ID", "") or RAZORPAY_KEY_ID
+    rzp_secret = os.environ.get("RAZORPAY_KEY_SECRET", "") or RAZORPAY_KEY_SECRET
+    if not rzp_key or not rzp_secret:
+        return web.json_response({"error": "Payment system not configured. Contact support."}, status=503)
+
+    import base64
+    import secrets as _sec
+    receipt = f"order_{session['user_id']}_{_sec.token_hex(4)}"
+    auth_str = base64.b64encode(f"{rzp_key}:{rzp_secret}".encode()).decode()
+
+    try:
+        async with ClientSession() as cs:
+            async with cs.post(
+                "https://api.razorpay.com/v1/orders",
+                headers={"Authorization": f"Basic {auth_str}", "Content-Type": "application/json"},
+                json={
+                    "amount": PRO_PLAN_AMOUNT_PAISE,
+                    "currency": "INR",
+                    "receipt": receipt,
+                    "notes": {"user_id": str(session["user_id"]), "plan": "pro"},
+                },
+            ) as resp:
+                order_data = await resp.json()
+                if resp.status not in (200, 201):
+                    log.error(f"Razorpay order creation failed: {order_data}")
+                    return web.json_response({"error": "Failed to create payment order"}, status=500)
+                log.info(f"Razorpay order created: {order_data.get('id')} for user {session['user_id']}")
+                return web.json_response({
+                    "ok": True,
+                    "order_id": order_data["id"],
+                    "amount": order_data["amount"],
+                    "currency": order_data["currency"],
+                    "razorpay_key": rzp_key,
+                })
+    except Exception as e:
+        log.error(f"Razorpay create order error: {e}")
+        return web.json_response({"error": "Payment system error"}, status=500)
+
+
+async def handle_billing_verify_payment(request):
+    """POST /api/billing/verify-payment — verify Razorpay payment signature and upgrade plan."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    razorpay_order_id = data.get("razorpay_order_id", "")
+    razorpay_payment_id = data.get("razorpay_payment_id", "")
+    razorpay_signature = data.get("razorpay_signature", "")
+
+    if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+        return web.json_response({"error": "Missing payment verification fields"}, status=400)
+
+    rzp_secret = os.environ.get("RAZORPAY_KEY_SECRET", "") or RAZORPAY_KEY_SECRET
+    if not rzp_secret:
+        return web.json_response({"error": "Payment verification failed — system secret missing"}, status=500)
+
+    # Verify signature: HMAC-SHA256(order_id + "|" + payment_id, key_secret)
+    import hmac as _hmac
+    import hashlib as _hl
+    expected_sig = _hmac.new(
+        rzp_secret.encode(),
+        f"{razorpay_order_id}|{razorpay_payment_id}".encode(),
+        _hl.sha256
+    ).hexdigest()
+
+    if not _hmac.compare_digest(expected_sig, razorpay_signature):
+        log.warning(f"Razorpay signature mismatch for user {session['user_id']}")
+        return web.json_response({"error": "Payment verification failed"}, status=400)
+
+    # Upgrade user to pro for 30 days
+    from datetime import datetime, timedelta
+    expires_at = (datetime.utcnow() + timedelta(days=30)).isoformat()
+    _db.update_subscription(
+        session["user_id"],
+        plan="pro",
+        razorpay_subscription_id=razorpay_payment_id,
+        subscription_status="active",
+        subscription_expires_at=expires_at,
+    )
+    log.info(f"User {session['user_id']} upgraded to Pro. Payment: {razorpay_payment_id}. Expires: {expires_at}")
+    return web.json_response({"ok": True, "plan": "pro", "expires_at": expires_at})
+
+
+async def handle_billing_page(request):
+    """Serve billing.html (auth required)."""
+    token = get_session_from_request(request)
+    session = validate_session(token)
+    if not session:
+        raise web.HTTPFound("/login")
+    html_path = Path(__file__).parent / "billing.html"
+    if not html_path.exists():
+        return web.Response(text="Billing page not found", status=404)
+    return web.FileResponse(html_path)
 
 
 def create_app():
@@ -1899,11 +2729,40 @@ def create_app():
     app.router.add_post("/api/user/trades", handle_paper_trade_create)
     app.router.add_post("/api/user/trades/{id}", handle_paper_trade_update)
 
+    # Watchlist API
+    app.router.add_get("/api/user/watchlist", handle_watchlist_get)
+    app.router.add_post("/api/user/watchlist", handle_watchlist_set)
+    app.router.add_post("/api/user/watchlist/add", handle_watchlist_add)
+    app.router.add_post("/api/user/watchlist/remove", handle_watchlist_remove)
+
+    # Column config API
+    app.router.add_get("/api/user/column-config", handle_column_config_get)
+    app.router.add_post("/api/user/column-config", handle_column_config_post)
+
+    # Settings page
+    app.router.add_get("/settings", handle_settings_page)
+
     # AI Chat
     app.router.add_post("/api/chat", handle_chat_api)
     app.router.add_get("/api/admin/ai-settings", handle_ai_settings_get)
     app.router.add_post("/api/admin/ai-settings", handle_ai_settings_post)
     app.router.add_post("/api/admin/ai-test", handle_ai_test)
+
+    # Email verification routes
+    app.router.add_post("/api/auth/verify-email", handle_verify_email_api)
+    app.router.add_post("/api/auth/resend-otp", handle_resend_otp)
+    app.router.add_get("/verify-email", handle_verify_email_page)
+
+    # Billing routes
+    app.router.add_get("/api/billing/status", handle_billing_status)
+    app.router.add_post("/api/billing/create-order", handle_billing_create_order)
+    app.router.add_post("/api/billing/verify-payment", handle_billing_verify_payment)
+    app.router.add_get("/billing", handle_billing_page)
+
+    # Admin integrations (Resend email + Razorpay billing)
+    app.router.add_get("/api/admin/integrations", handle_admin_integrations_get)
+    app.router.add_post("/api/admin/integrations", handle_admin_integrations_post)
+    app.router.add_post("/api/admin/test-email", handle_admin_test_email)
 
     # Admin user management
     app.router.add_get("/api/admin/users", handle_admin_users)

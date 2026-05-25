@@ -1,0 +1,44 @@
+{
+  "admin_paths": [
+    "/admin",
+    "/divergence"
+  ],
+  "session_max_age": 86400,
+  "active_ai_provider": "perplexity",
+  "ai_providers": {
+    "perplexity": {
+      "api_key": "YOUR_PERPLEXITY_API_KEY",
+      "model": "llama-3.1-sonar-large-128k-online",
+      "base_url": "https://api.perplexity.ai"
+    },
+    "nvidia": {
+      "api_key": "YOUR_NVIDIA_API_KEY",
+      "model": "meta/llama-3.1-405b-instruct",
+      "base_url": "https://integrate.api.nvidia.com/v1"
+    }
+  },
+  "rate_limits": {
+    "login": {
+      "max_requests": 5,
+      "window_seconds": 900
+    },
+    "register": {
+      "max_requests": 3,
+      "window_seconds": 3600
+    },
+    "api": {
+      "max_requests": 120,
+      "window_seconds": 60
+    },
+    "chat": {
+      "max_requests": 20,
+      "window_seconds": 60
+    }
+  },
+  "security": {
+    "max_failed_attempts": 5,
+    "lockout_duration_sec": 900,
+    "max_concurrent_sessions": 5,
+    "csrf_enabled": true
+  }
+}
