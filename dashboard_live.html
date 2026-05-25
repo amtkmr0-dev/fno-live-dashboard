@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/static/js/lightweight-charts.js"></script>
 <link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
 <link rel="stylesheet" href="/static/css/components.css">
 <link rel="stylesheet" href="/static/css/premium-polish.css">
@@ -3965,7 +3965,7 @@ function openAnalysis(sym) {
   document.getElementById('analysisPanel').classList.add('open');
   
   // Initialize lightweight chart
-  initLightweightChart(sym, "5minute");
+  setTimeout(() => { initLightweightChart(sym, "5minute"); }, 100);
   
   // Fetch and render Option Chain Context
   fetchChainContext(sym);
@@ -4036,8 +4036,8 @@ function renderAnalysisPanel() {
         </div>
         <div id="priceChartContainer" style="flex: 2; min-height: 220px; border-bottom: 1px solid var(--border); position: relative;"></div>
         <div style="display: flex; gap: 8px; padding: 4px 8px; background: var(--bg-card); border-bottom: 1px solid var(--border); z-index: 5;">
-          <button class="chart-tf-btn active" onclick="toggleBottomChartMode('futures', this)" style="font-size: 10px;">Futures OI</button>
-          <button class="chart-tf-btn" onclick="toggleBottomChartMode('options', this)" style="font-size: 10px;">Options Delta</button>
+          <button class="chart-tf-btn active" onclick="toggleBottomChartMode('total', this)" style="font-size: 10px;">Total OI</button>
+          <button class="chart-tf-btn" onclick="toggleBottomChartMode('options', this)" style="font-size: 10px;">PE-CE Delta</button>
         </div>
         <div id="oiChartContainer" style="flex: 1.2; min-height: 130px; position: relative;"></div>
         ${!(window.currentUser && (window.currentUser.plan === 'pro' || window.currentUser.role === 'admin')) ? `
@@ -4189,8 +4189,8 @@ function renderChartOnlyPanel() {
         </div>
         <div id="priceChartContainer2" style="flex: 2; min-height: 220px; border-bottom: 1px solid var(--border); position: relative;"></div>
         <div style="display: flex; gap: 8px; padding: 4px 8px; background: var(--bg-card); border-bottom: 1px solid var(--border); z-index: 5;">
-          <button class="chart-tf-btn active" onclick="toggleBottomChartMode('futures', this)" style="font-size: 10px;">Futures OI</button>
-          <button class="chart-tf-btn" onclick="toggleBottomChartMode('options', this)" style="font-size: 10px;">Options Delta</button>
+          <button class="chart-tf-btn active" onclick="toggleBottomChartMode('total', this)" style="font-size: 10px;">Total OI</button>
+          <button class="chart-tf-btn" onclick="toggleBottomChartMode('options', this)" style="font-size: 10px;">PE-CE Delta</button>
         </div>
         <div id="oiChartContainer2" style="flex: 1.2; min-height: 130px; position: relative;"></div>
         ${!(window.currentUser && (window.currentUser.plan === 'pro' || window.currentUser.role === 'admin')) ? `
