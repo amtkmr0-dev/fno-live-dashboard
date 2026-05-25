@@ -4905,7 +4905,7 @@ function initLightweightChart(sym, interval) {
     }
   });
 
-  candleSeries = priceChartInstance.addCandlestickSeries({
+  candleSeries = priceChartInstance.addSeries(LightweightCharts.CandlestickSeries, {
     upColor: themeColors.upColor,
     downColor: themeColors.downColor,
     borderUpColor: themeColors.upColor,
@@ -4914,7 +4914,7 @@ function initLightweightChart(sym, interval) {
     wickDownColor: themeColors.downColor,
   });
 
-  volumeSeries = priceChartInstance.addHistogramSeries({
+  volumeSeries = priceChartInstance.addSeries(LightweightCharts.HistogramSeries, {
     color: themeColors.volumeColor,
     priceFormat: { type: 'volume' },
     priceScaleId: 'volume-scale',
@@ -4952,7 +4952,7 @@ function initLightweightChart(sym, interval) {
     }
   });
 
-  oiSeries = oiChartInstance.addAreaSeries({
+  oiSeries = oiChartInstance.addSeries(LightweightCharts.AreaSeries, {
     lineColor: '#3b82f6',
     topColor: 'rgba(59, 130, 246, 0.25)',
     bottomColor: 'rgba(59, 130, 246, 0.0)',
@@ -4967,7 +4967,7 @@ function initLightweightChart(sym, interval) {
     }
   });
 
-  oiChangeSeries = oiChartInstance.addHistogramSeries({
+  oiChangeSeries = oiChartInstance.addSeries(LightweightCharts.HistogramSeries, {
     color: 'rgba(16, 185, 129, 0.5)',
     priceScaleId: 'oi-change-scale',
   });
