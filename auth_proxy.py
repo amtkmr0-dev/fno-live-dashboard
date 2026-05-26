@@ -72,6 +72,18 @@ except ImportError:
     SECURITY_AVAILABLE = False
 
 try:
+    from auth_helpers import make_session_decorators, compute_option_buyer_pnl
+    AUTH_HELPERS_AVAILABLE = True
+except ImportError:
+    AUTH_HELPERS_AVAILABLE = False
+
+try:
+    from internal_auth import sign as sign_internal_auth, INTERNAL_AUTH_HEADER, is_using_runtime_secret, get_secret as get_internal_secret
+    INTERNAL_AUTH_AVAILABLE = True
+except ImportError:
+    INTERNAL_AUTH_AVAILABLE = False
+
+try:
     from chat_analysis import run_analysis, get_upstox_token
     ANALYSIS_AVAILABLE = True
 except ImportError:
@@ -115,6 +127,18 @@ DEFAULT_ADMIN_PATHS = ["/admin", "/divergence"]
 MAX_REQUEST_SIZE = 100 * 1024       # 100KB default
 MAX_CHAT_REQUEST_SIZE = 500 * 1024  # 500KB for chat (includes context)
 MAX_CONCURRENT_SESSIONS = 5         # per user
+
+# Comma-separated list of upstream IPs we trust for X-Forwarded-For.
+# Leave empty to never trust the header (recommended when serving directly
+# without a reverse proxy in front). Loopback is always trusted.
+TRUSTED_PROXIES = {
+    s.strip() for s in os.environ.get("TRUSTED_PROXIES", "").split(",") if s.strip()
+}
+TRUSTED_PROXIES.update({"127.0.0.1", "::1"})
+
+# Set ``SECURE_COOKIES=1`` once you front the proxy with HTTPS so cookies
+# get the ``Secure`` flag. Defaults to off so local dev keeps working.
+SECURE_COOKIES = os.environ.get("SECURE_COOKIES", "0").strip().lower() in ("1", "true", "yes")
 
 # Resend.com email API key
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
@@ -192,6 +216,8 @@ def load_config():
         _rate_limiter.configure("api", max_requests=120, window_seconds=60)       # 120 per min
         _rate_limiter.configure("chat", max_requests=20, window_seconds=60)       # 20 per min
         _rate_limiter.configure("password", max_requests=3, window_seconds=900)   # 3 per 15m
+        _rate_limiter.configure("otp_verify", max_requests=10, window_seconds=600)  # 10 per 10m
+        _rate_limiter.configure("otp_resend", max_requests=3, window_seconds=600)   # 3 per 10m
 
         _brute_guard = BruteForceGuard(threshold=5, base_lockout=60, max_lockout=3600)
         _audit = AuditLogger(db=_db)
@@ -201,15 +227,20 @@ def load_config():
 
 
 def get_client_ip(request):
-    """Get real client IP, accounting for reverse proxies."""
-    # Trust X-Forwarded-For if behind nginx/cloudflare
-    forwarded = request.headers.get("X-Forwarded-For", "")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    real_ip = request.headers.get("X-Real-IP", "")
-    if real_ip:
-        return real_ip.strip()
-    return request.remote or "unknown"
+    """
+    Get the real client IP, trusting X-Forwarded-For only when the
+    immediate peer is in TRUSTED_PROXIES. Otherwise the header is ignored
+    so attackers can't fake their source IP and bypass rate limits.
+    """
+    peer = request.remote or "unknown"
+    if peer in TRUSTED_PROXIES:
+        forwarded = request.headers.get("X-Forwarded-For", "")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        real_ip = request.headers.get("X-Real-IP", "")
+        if real_ip:
+            return real_ip.strip()
+    return peer
 
 
 def get_session_from_request(request):
@@ -225,9 +256,30 @@ def validate_session(token):
 
 
 def is_admin_path(path):
-    """Check if path requires admin role."""
-    admin_paths = _config.get("admin_paths", DEFAULT_ADMIN_PATHS)
-    return path in admin_paths
+    """
+    True if ``path`` is administrative. Matches the configured paths exactly
+    OR as a prefix (so ``/admin/users`` and ``/api/admin/users`` are both
+    flagged when ``/admin`` and ``/api/admin`` are configured).
+    """
+    admin_paths = list(_config.get("admin_paths", DEFAULT_ADMIN_PATHS))
+    # Always require admin for proxied admin APIs — these route to ws_server
+    # whose own role checks were missing in earlier versions.
+    if "/api/admin" not in admin_paths:
+        admin_paths.append("/api/admin")
+    for p in admin_paths:
+        if path == p or path.startswith(p.rstrip("/") + "/"):
+            return True
+    return False
+
+
+# Decorator factories — bound late so handlers can use them.
+if AUTH_HELPERS_AVAILABLE:
+    require_session, require_admin = make_session_decorators(lambda token: validate_session(token))
+else:  # pragma: no cover — security should be installed
+    def require_session(handler):
+        return handler
+    def require_admin(handler):
+        return handler
 
 
 def check_rate_limit(rule, key, request):
@@ -287,9 +339,12 @@ async def security_middleware(request, handler):
         if not ok:
             if _audit:
                 _audit.csrf_violation(ip, request.path)
-            client_token = request.headers.get("X-CSRF-Token")
-            session_token = request.cookies.get("csrf_token")
-            log.warning(f"CSRF violation: {ip} {request.method} {request.path} — {reason} (client: {client_token}, session: {session_token})")
+            client_token = request.headers.get(CSRFProtection.HEADER_NAME)
+            cookie_token = request.cookies.get(CSRFProtection.COOKIE_NAME)
+            log.warning(
+                f"CSRF violation: {ip} {request.method} {request.path} — {reason} "
+                f"(header_present={bool(client_token)}, cookie_present={bool(cookie_token)})"
+            )
             return web.json_response({"error": "CSRF validation failed"}, status=403)
 
     # General API rate limiting (per IP for unauthenticated, per user for authenticated)
@@ -378,11 +433,14 @@ async def handle_login_api(request):
 
     user_record = _db.verify_password(username, password)
     if not user_record:
-        # Record failure
-        if _brute_guard:
+        # Only count brute-force when the username actually exists,
+        # so attackers can't lock out a victim's IP via unknown-user spray.
+        user_exists = _db.get_user_by_username(username) is not None
+        if _brute_guard and user_exists:
             _brute_guard.record_failure(ip)
         if _audit:
-            _audit.login_failed(ip, username, details=f"attempts={_brute_guard.get_attempt_count(ip) if _brute_guard else '?'}")
+            attempt_count = _brute_guard.get_attempt_count(ip) if _brute_guard else "?"
+            _audit.login_failed(ip, username, details=f"attempts={attempt_count}")
         log.warning(f"Failed login: '{username}' from {ip}")
         return web.json_response({"error": "Invalid credentials"}, status=401)
 
@@ -394,12 +452,14 @@ async def handle_login_api(request):
     user_id = user_record["id"]
     max_age = _config.get("session_max_age", SESSION_MAX_AGE)
 
-    # Enforce concurrent session limit
+    # Enforce concurrent session limit by trimming oldest sessions only.
     active_sessions = _db.count_user_sessions(user_id)
     if active_sessions >= MAX_CONCURRENT_SESSIONS:
-        # Delete oldest sessions to make room
-        _db.delete_user_sessions(user_id)
-        log.info(f"Cleared {active_sessions} old sessions for {username} (concurrent limit)")
+        # Keep MAX_CONCURRENT_SESSIONS - 1 newest so a slot opens for the
+        # one we're about to create.
+        removed = _db.delete_oldest_user_sessions(user_id, MAX_CONCURRENT_SESSIONS - 1)
+        if removed:
+            log.info(f"Trimmed {removed} oldest session(s) for {username} (concurrent limit)")
 
     token = _db.create_session(
         user_id, max_age=max_age,
@@ -423,7 +483,7 @@ async def handle_login_api(request):
         httponly=True,
         samesite="Strict",
         path="/",
-        secure=False,  # Set True when behind HTTPS
+        secure=SECURE_COOKIES,
     )
     # Set CSRF cookie on login
     if SECURITY_AVAILABLE:
@@ -607,9 +667,8 @@ async def handle_register_api(request):
     email_verification_sent = False
     api_key = os.environ.get("RESEND_API_KEY", "") or RESEND_API_KEY
     if email and api_key:
-        import random
         from datetime import datetime, timedelta
-        otp = str(random.randint(100000, 999999))
+        otp = _db.generate_otp(6)
         expires_at = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
         _db.set_email_otp(user_id, otp, expires_at)
         email_verification_sent = await send_verification_email(email, username, otp)
@@ -878,6 +937,7 @@ async def handle_user_change_password(request):
         httponly=True,
         samesite="Strict",
         path="/",
+        secure=SECURE_COOKIES,
     )
     return resp
 
@@ -1097,10 +1157,10 @@ async def handle_paper_trade_create(request):
     if direction not in ("BULLISH", "BEARISH", "CE", "PE"):
         return web.json_response({"error": "direction must be BULLISH/BEARISH/CE/PE"}, status=400)
 
-    # Check daily limit
+    # Check daily limit (count only manual trades; auto-trade has its own cap)
     settings = _db.get_user_settings(session["user_id"]) or {}
     max_trades = settings.get("max_paper_trades_per_day", 3)
-    today_count = _db.count_user_trades_today(session["user_id"])
+    today_count = _db.count_user_trades_today(session["user_id"], trade_type="manual")
     if today_count >= max_trades:
         return web.json_response({"error": f"Daily trade limit reached ({max_trades})"}, status=429)
 
@@ -1155,28 +1215,20 @@ async def handle_paper_trade_update(request):
     for field in ["pnl", "pnl_pct", "costs_estimated", "net_pnl"]:
         data.pop(field, None)
 
-    # Server-side calculate P&L if exiting/closed
+    # Server-side calculate P&L if exiting/closed.
+    # We standardize on the option-buyer model (premium up = profit) which
+    # matches ws_server.handle_paper_exit. The legacy branch on
+    # direction == "SELL" was incorrect because direction is stored as
+    # BULLISH/BEARISH/CE/PE and was sign-flipping bearish wins.
     status = data.get("status") or trade.get("status")
     if status in ("EXITED", "CLOSED"):
-        direction = (data.get("direction") or trade.get("direction") or "BUY").upper()
         qty = (data.get("lot_size") or trade.get("lot_size") or 1) * (data.get("lots") or trade.get("lots") or 1)
         entry_premium = data.get("entry_premium") if data.get("entry_premium") is not None else trade.get("entry_premium")
         exit_premium = data.get("exit_premium") if data.get("exit_premium") is not None else trade.get("exit_premium")
-        
-        if entry_premium is not None and exit_premium is not None:
-            if direction == "SELL":
-                pnl = round((entry_premium - exit_premium) * qty, 2)
-            else:
-                pnl = round((exit_premium - entry_premium) * qty, 2)
-            
-            pnl_pct = round((pnl / (entry_premium * qty) * 100), 2) if (entry_premium * qty) != 0 else 0.0
-            costs_estimated = 40.0
-            net_pnl = round(pnl - costs_estimated, 2)
-            
-            data["pnl"] = pnl
-            data["pnl_pct"] = pnl_pct
-            data["costs_estimated"] = costs_estimated
-            data["net_pnl"] = net_pnl
+
+        pnl_calc = compute_option_buyer_pnl(entry_premium, exit_premium, qty) if AUTH_HELPERS_AVAILABLE else None
+        if pnl_calc:
+            data.update(pnl_calc)
 
         if not data.get("exited_at") and not trade.get("exited_at"):
             data["exited_at"] = datetime.utcnow().isoformat()
@@ -2129,7 +2181,7 @@ async def handle_auto_trade_status(request):
 # ============================================================
 
 async def proxy_websocket(request):
-    """Proxy WebSocket connections to backend."""
+    """Proxy WebSocket connections to backend with signed identity."""
     token = get_session_from_request(request)
     session = validate_session(token)
     if not session:
@@ -2138,17 +2190,19 @@ async def proxy_websocket(request):
     ws_client = web.WebSocketResponse()
     await ws_client.prepare(request)
 
-    import urllib.parse
-    qs = request.query_string
-    params = urllib.parse.parse_qs(qs)
-    params['user_id'] = [str(session['user_id'])]
-    params['username'] = [str(session['username'])]
-    new_qs = urllib.parse.urlencode(params, doseq=True)
-    backend_url = f"ws://{BACKEND_HOST}:{BACKEND_PORT}{request.path}?{new_qs}"
+    backend_url = f"ws://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
+
+    # Pass identity via the signed header — query-string identity is not
+    # trusted because it can be smuggled by anyone reaching ws_server.
+    extra_headers = {}
+    if INTERNAL_AUTH_AVAILABLE:
+        extra_headers[INTERNAL_AUTH_HEADER] = sign_internal_auth(
+            session["user_id"], session["role"], session["username"],
+        )
 
     async with ClientSession() as cs_session:
         try:
-            async with cs_session.ws_connect(backend_url) as ws_backend:
+            async with cs_session.ws_connect(backend_url, headers=extra_headers) as ws_backend:
                 async def forward_to_client():
                     async for msg in ws_backend:
                         if msg.type == WSMsgType.TEXT:
@@ -2202,6 +2256,7 @@ async def proxy_http(request):
         backend_url = f"http://{BACKEND_HOST}:{BACKEND_PORT}{request.path_qs}"
         headers = {}
         skip_headers = {"host", "connection", "transfer-encoding", "keep-alive"}
+        skip_headers.update({h.lower() for h in (INTERNAL_AUTH_HEADER, "x-user-id", "x-user-role", "x-username")})
         for key, val in request.headers.items():
             if key.lower() not in skip_headers:
                 headers[key] = val
@@ -2274,14 +2329,21 @@ async def proxy_http(request):
 
     headers = {}
     skip_headers = {"host", "connection", "transfer-encoding", "keep-alive"}
+    # Always strip caller-supplied internal auth headers. We re-add the
+    # signed one below if (and only if) we have a verified session.
+    skip_headers.update({h.lower() for h in (INTERNAL_AUTH_HEADER, "x-user-id", "x-user-role", "x-username")})
     for key, val in request.headers.items():
         if key.lower() not in skip_headers:
             headers[key] = val
 
     if session:
-        headers["X-User-Id"] = str(session["user_id"])
-        headers["X-User-Role"] = str(session["role"])
-        headers["X-Username"] = str(session["username"])
+        # Send only the signed identity header. ws_server uses this to
+        # authenticate the user; legacy plaintext X-User-* headers are
+        # rejected on that side.
+        if INTERNAL_AUTH_AVAILABLE:
+            headers[INTERNAL_AUTH_HEADER] = sign_internal_auth(
+                session["user_id"], session["role"], session["username"],
+            )
 
     body = await request.read() if request.can_read_body else None
 
@@ -2384,6 +2446,7 @@ async def auto_scan_timer(app):
             # Fetch NIFTY direction (once for all users)
             nifty_direction = "NEUTRAL"
             nifty_score = 50.0
+            bridge = None
             try:
                 from auto_trader import LiveDataBridge
                 bridge = LiveDataBridge()
@@ -2398,7 +2461,9 @@ async def auto_scan_timer(app):
             # Fetch candidates (once — same candidates for all users)
             candidates = []
             try:
-                bridge = LiveDataBridge() if 'bridge' not in dir() else bridge
+                if bridge is None:
+                    from auto_trader import LiveDataBridge
+                    bridge = LiveDataBridge()
                 candidates = await bridge.scan_whitelisted_stocks(
                     nifty_direction, max_stocks=10,
                 )
@@ -2457,6 +2522,21 @@ async def on_startup(app):
         log.info("Security: rate limiting, brute force guard, CSRF, security headers — ALL ACTIVE")
     else:
         log.warning("Security: DEGRADED — security.py not found")
+    if INTERNAL_AUTH_AVAILABLE:
+        if is_using_runtime_secret():
+            secret_preview = get_internal_secret()[:8] + "…"
+            log.warning(
+                "INTERNAL_AUTH_SECRET not set — generated runtime secret %s. "
+                "Set INTERNAL_AUTH_SECRET in config.env on BOTH auth_proxy and "
+                "ws_server (same value) for cross-process auth.",
+                secret_preview,
+            )
+        else:
+            log.info("Internal auth (proxy↔ws_server): signed via INTERNAL_AUTH_SECRET")
+    if SECURE_COOKIES:
+        log.info("Session cookies will be sent with Secure=true (HTTPS expected)")
+    else:
+        log.warning("Session cookies are NOT marked Secure — set SECURE_COOKIES=1 once HTTPS is in place")
     log.info("Auto-scan timer: DEACTIVATED in auth_proxy (managed solely by ws_server.py)")
     tg_token = TELEGRAM_BOT_TOKEN or (_config or {}).get("telegram_bot_token", "")
     if tg_token:
@@ -2482,6 +2562,10 @@ async def handle_verify_email_api(request):
     """POST /api/auth/verify-email — verify OTP and mark email as verified."""
     if not _db:
         return web.json_response({"error": "Database not available"}, status=503)
+    ip = get_client_ip(request)
+    rate_resp = check_rate_limit("otp_verify", f"ip:{ip}", request)
+    if rate_resp:
+        return rate_resp
     try:
         data = await request.json()
     except Exception:
@@ -2513,6 +2597,10 @@ async def handle_resend_otp(request):
     """POST /api/auth/resend-otp — resend email OTP."""
     if not _db:
         return web.json_response({"error": "Database not available"}, status=503)
+    ip = get_client_ip(request)
+    rate_resp = check_rate_limit("otp_resend", f"ip:{ip}", request)
+    if rate_resp:
+        return rate_resp
     try:
         data = await request.json()
     except Exception:
@@ -2531,9 +2619,9 @@ async def handle_resend_otp(request):
     if user.get("email_verified"):
         return web.json_response({"ok": True, "message": "Email already verified"})
 
-    import random
+    import random  # noqa: F401  (kept for any legacy callers)
     from datetime import datetime, timedelta
-    otp = str(random.randint(100000, 999999))
+    otp = _db.generate_otp(6)
     expires_at = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
     _db.set_email_otp(user_id, otp, expires_at)
     sent = await send_verification_email(user["email"], user["username"], otp)

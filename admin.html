@@ -8,6 +8,7 @@
   })();
 </script>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin &mdash; Quantra Terminal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -200,6 +201,35 @@
 .toggle-switch input:checked + .slider::before { transform: translateX(18px); background: #fff; }
 .toggle-label { font-size: var(--fs-sm); color: var(--text); }
 
+/* === API Rate Meter table === */
+.rm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.rm-table th, .rm-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.rm-table th {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  color: var(--text-vdim);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.rm-table td.rm-num, .rm-table th.rm-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.rm-table tr:last-child td { border-bottom: none; }
+.rm-source-upstox { color: var(--blue, #3b82f6); font-weight: var(--fw-bold); }
+.rm-source-fyers { color: var(--orange, #f59e0b); font-weight: var(--fw-bold); }
+.rm-warn { color: var(--orange); }
+.rm-err  { color: var(--red); }
+
 /* === Paper Trades Summary === */
 .trades-summary {
   display: flex;
@@ -324,7 +354,7 @@ function toggleUserMenu() {
 <!-- Navigation Bar -->
 <nav class="q-nav">
   <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
-    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <img src="/static/img/quantra-monogram.svg" alt="Quantra" style="height:28px; width:28px; color:var(--accent);" />
     <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
   </a>
 
@@ -700,7 +730,43 @@ function toggleUserMenu() {
     </div>
   </div>
 
-  <!-- Settings -->
+  <!-- API Rate Meter -->
+  <div class="card" id="rateMeterCard">
+    <div class="card-header">
+      <span class="ch-icon">&#128202;</span>
+      <h2>API Rate Meter</h2>
+      <span class="ch-badge badge-ok" id="rateMeterBadge">IDLE</span>
+    </div>
+    <div class="card-body">
+      <div class="status-grid">
+        <div class="stat-item"><div class="si-label">Calls / 60s</div><div class="si-val" id="rmTotal60">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Calls / 5min</div><div class="si-val" id="rmTotal300">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">Calls / 1hr</div><div class="si-val" id="rmTotal3600">&mdash;</div></div>
+        <div class="stat-item"><div class="si-label">429s (1hr)</div><div class="si-val" id="rmThrottled">&mdash;</div></div>
+      </div>
+      <div style="margin-top:14px;overflow-x:auto">
+        <table class="rm-table" id="rmTable">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Endpoint</th>
+              <th class="rm-num">/60s</th>
+              <th class="rm-num">/5min</th>
+              <th class="rm-num">/1hr</th>
+              <th class="rm-num">Last call</th>
+            </tr>
+          </thead>
+          <tbody id="rmTableBody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-vdim);padding:14px">No calls yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text-vdim)">
+        Counters reset on server restart. Higher numbers are not necessarily bad — Upstox &amp; Fyers each
+        have per-second and per-minute caps. Watch <strong>429s</strong> and the chain endpoint in particular.
+      </div>
+    </div>
+  </div>
   <div class="card">
     <div class="card-header">
       <span class="ch-icon">&#9881;&#65039;</span>
@@ -1044,10 +1110,83 @@ async function loadStatus() {
  document.getElementById('ptClosed').textContent = s.paper_trades_closed;
  document.getElementById('ptDataDir').textContent = s.data_dir || '';
 
+ // API rate meter
+ if (s.rest_calls) renderRateMeter(s.rest_calls);
+
 
  } catch (e) {
  document.getElementById('serverStatus').textContent = 'Error: ' + e.message;
  }
+}
+
+
+// ----- API Rate Meter -----
+function renderRateMeter(rc) {
+  const t60   = (rc.last_60s   && rc.last_60s.total)   || 0;
+  const t300  = (rc.last_300s  && rc.last_300s.total)  || 0;
+  const t3600 = (rc.last_3600s && rc.last_3600s.total) || 0;
+  document.getElementById('rmTotal60').textContent   = t60.toLocaleString();
+  document.getElementById('rmTotal300').textContent  = t300.toLocaleString();
+  document.getElementById('rmTotal3600').textContent = t3600.toLocaleString();
+
+  // Count 429s in the last hour from cumulative_status by_status diff is hard;
+  // use the last_60s by_status as a near-real-time signal.
+  let throttled60 = 0;
+  const byStatus60 = (rc.last_60s && rc.last_60s.by_status) || {};
+  for (const src of Object.keys(byStatus60)) {
+    // status family 400 covers 429 (4xx). We don't separate 429 from 4xx in
+    // the meter; if you see 4xx spiking, it's almost always 429 in practice.
+    throttled60 += (byStatus60[src][400] || 0);
+  }
+  const tEl = document.getElementById('rmThrottled');
+  tEl.textContent = throttled60.toString();
+  tEl.className = 'si-val' + (throttled60 > 0 ? ' rm-err' : '');
+
+  // Badge
+  const badge = document.getElementById('rateMeterBadge');
+  if (throttled60 > 0) { badge.textContent = '429s SEEN'; badge.className = 'ch-badge badge-err'; }
+  else if (t60 === 0)  { badge.textContent = 'IDLE';      badge.className = 'ch-badge badge-warn'; }
+  else                 { badge.textContent = 'HEALTHY';   badge.className = 'ch-badge badge-ok'; }
+
+  // Build per-(source, endpoint) rows merged across windows
+  const rows = {};
+  function fold(window, key) {
+    const obj = (rc[window] && rc[window].by_endpoint) || {};
+    for (const src of Object.keys(obj)) {
+      for (const endpoint of Object.keys(obj[src])) {
+        const k = src + '|' + endpoint;
+        if (!rows[k]) rows[k] = {src, endpoint, t60: 0, t300: 0, t3600: 0};
+        rows[k][key] = obj[src][endpoint];
+      }
+    }
+  }
+  fold('last_60s',   't60');
+  fold('last_300s',  't300');
+  fold('last_3600s', 't3600');
+
+  const lastCallAge = rc.last_call_age_seconds || {};
+
+  const tbody = document.getElementById('rmTableBody');
+  const ks = Object.keys(rows).sort((a, b) => rows[b].t3600 - rows[a].t3600);
+  if (!ks.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-vdim);padding:14px">No calls yet</td></tr>';
+    return;
+  }
+  const html = ks.map(k => {
+    const r = rows[k];
+    const age = (lastCallAge[r.src] || {})[r.endpoint];
+    const ageText = (age == null) ? '&mdash;' : (age < 60 ? `${age.toFixed(1)}s ago` : `${(age / 60).toFixed(1)}m ago`);
+    const srcCls = r.src === 'upstox' ? 'rm-source-upstox' : (r.src === 'fyers' ? 'rm-source-fyers' : '');
+    return `<tr>
+      <td class="${srcCls}">${r.src}</td>
+      <td>${r.endpoint}</td>
+      <td class="rm-num">${(r.t60   || 0).toLocaleString()}</td>
+      <td class="rm-num">${(r.t300  || 0).toLocaleString()}</td>
+      <td class="rm-num">${(r.t3600 || 0).toLocaleString()}</td>
+      <td class="rm-num" style="color:var(--text-vdim)">${ageText}</td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = html;
 }
 
 

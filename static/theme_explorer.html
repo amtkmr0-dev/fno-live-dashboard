@@ -748,11 +748,11 @@ td {
 
   <div class="exp-categories">
     <div class="exp-cat">
-      <span class="exp-cat-label">Classic Interfaces</span>
-      <div class="exp-grid" id="classicGrid"></div>
+      <span class="exp-cat-label">Quantra Brand Themes</span>
+      <div class="exp-grid" id="quantraGrid"></div>
     </div>
     <div class="exp-cat">
-      <span class="exp-cat-label">Premium Visual Concepts</span>
+      <span class="exp-cat-label">Premium Themes</span>
       <div class="exp-grid" id="premiumGrid"></div>
     </div>
   </div>
@@ -943,31 +943,32 @@ td {
 <script>
 // --- Themes List ---
 const themesList = [
-  { id: 'midnight-blue', name: 'Midnight Blue', desc: 'Professional dark blue (Default)', category: 'classic', colors: ['#0f172a', '#1e293b', '#3b82f6', '#f1f5f9'] },
-  { id: 'obsidian-black', name: 'Obsidian Black', desc: 'Pure OLED black', category: 'classic', colors: ['#000000', '#0a0a0a', '#3b82f6', '#ffffff'] },
-  { id: 'emerald-dark', name: 'Emerald Dark', desc: 'Dark with green accents', category: 'classic', colors: ['#0a1612', '#0f1f1a', '#10b981', '#ecfdf5'] },
-  { id: 'royal-purple', name: 'Royal Purple', desc: 'Elegant deep purple', category: 'classic', colors: ['#1a0f2e', '#251642', '#a855f7', '#f3e8ff'] },
-  { id: 'crimson-red', name: 'Crimson Red', desc: 'Bold trading red', category: 'classic', colors: ['#1e0b0b', '#2d1212', '#ef4444', '#fef2f2'] },
-  { id: 'arctic-blue', name: 'Arctic Blue', desc: 'Cool terminal blue', category: 'classic', colors: ['#091824', '#0f293d', '#0ea5e9', '#f0f9ff'] },
-  { id: 'obsidian-quantum', name: 'Obsidian Quantum', desc: 'Deep glowing cyberpunk', category: 'premium', colors: ['#050508', '#0d0d12', '#3b82f6', '#e2e8f0'] },
-  { id: 'neon-cyber', name: 'Neon Cyber', desc: 'Retro synthwave terminal', category: 'premium', colors: ['#070919', '#0b0e26', '#00d4ff', '#ffffff'] },
-  { id: 'glassmorphism', name: 'Glassmorphism', desc: 'Sleek frosted layout', category: 'premium', colors: ['#4f46e5', 'rgba(255,255,255,0.15)', '#ffffff', '#ffffff'] },
-  { id: 'minimal-pro', name: 'Minimal Pro', desc: 'High-contrast light mode', category: 'premium', colors: ['#fafafa', '#ffffff', '#000000', '#0f172a'] },
-  { id: 'terminal-hacker', name: 'Terminal Hacker', desc: 'Retro green CRT style', category: 'premium', colors: ['#000000', '#050905', '#00ff00', '#00ff00'] },
-  { id: 'gradient-luxury', name: 'Gradient Luxury', desc: 'Velvet dark rose gold', category: 'premium', colors: ['#09090f', 'rgba(255,255,255,0.03)', '#ff0080', '#ffffff'] },
-  { id: 'neumorphism', name: 'Neumorphism', desc: 'Soft tactile bevel curves', category: 'premium', colors: ['#e0e5ec', '#e0e5ec', '#3182ce', '#4a5568'] },
-  { id: 'bloomberg-pro', name: 'Bloomberg Pro', desc: 'Bloomberg density standard', category: 'premium', colors: ['#000000', '#0b0b0b', '#ff9800', '#e0e0e0'] }
+  // Quantra brand themes — added 2026-05-26
+  { id: 'quantra-carbon', name: 'Quantra Carbon', desc: 'Refined dark, sharp blue accents', category: 'quantra', colors: ['#050508', '#0d0e12', '#3b82f6', '#10b981'] },
+  { id: 'quantra-slate', name: 'Quantra Slate', desc: 'Soft slate, indigo accents', category: 'quantra', colors: ['#0f1419', '#161c24', '#6366f1', '#14b8a6'] },
+  { id: 'quantra-paper', name: 'Quantra Paper', desc: 'Clean light, daytime use', category: 'quantra', colors: ['#fafafa', '#ffffff', '#2563eb', '#15803d'] },
+  { id: 'quantra-onyx', name: 'Quantra Onyx', desc: 'OLED black, neon accents', category: 'quantra', colors: ['#000000', '#060608', '#00e5ff', '#00ff9d'] },
+  { id: 'quantra-mint', name: 'Quantra Mint', desc: 'Warm grey, mint/terracotta', category: 'quantra', colors: ['#1a1f1d', '#21262a', '#5eead4', '#e07a5f'] },
+  // Premium themes — replaced classic set on 2026-05-26
+  { id: 'midnight-blue', name: 'Midnight Blue', desc: 'Professional dark blue', category: 'premium', colors: ['#0f172a', '#1e293b', '#3b82f6', '#f1f5f9'] },
+  { id: 'obsidian-black', name: 'Obsidian Black', desc: 'Pure OLED black', category: 'premium', colors: ['#000000', '#0a0a0a', '#3b82f6', '#ffffff'] },
+  { id: 'aurora', name: 'Aurora', desc: 'Deep violet, premium night', category: 'premium', colors: ['#0a0717', '#11102a', '#a78bfa', '#34d399'] },
+  { id: 'trader-pro', name: 'Trader Pro', desc: 'Bloomberg-style, orange accent', category: 'premium', colors: ['#000000', '#0a0a0a', '#ff9800', '#00c853'] },
+  { id: 'sunset-trade', name: 'Sunset Trade', desc: 'Warm coral, evening sessions', category: 'premium', colors: ['#1a1410', '#221c17', '#fb923c', '#65a30d'] },
+  { id: 'ocean-deep', name: 'Ocean Deep', desc: 'Calm teal, focus mode', category: 'premium', colors: ['#051221', '#0a1c30', '#22d3ee', '#2dd4bf'] }
 ];
 
 let selectedTheme = 'midnight-blue';
 
 // Render the Selector Deck Cards
 function renderSelectorDeck() {
-  const classicContainer = document.getElementById('classicGrid');
+  const classicContainer = document.getElementById('classicGrid');  // may be null after redesign
   const premiumContainer = document.getElementById('premiumGrid');
+  const quantraContainer = document.getElementById('quantraGrid');
   
-  classicContainer.innerHTML = '';
+  if (classicContainer) classicContainer.innerHTML = '';
   premiumContainer.innerHTML = '';
+  if (quantraContainer) quantraContainer.innerHTML = '';
 
   themesList.forEach(t => {
     const card = document.createElement('div');
@@ -989,7 +990,9 @@ function renderSelectorDeck() {
       </div>
     `;
 
-    if (t.category === 'classic') {
+    if (t.category === 'quantra' && quantraContainer) {
+      quantraContainer.appendChild(card);
+    } else if (t.category === 'classic' && classicContainer) {
       classicContainer.appendChild(card);
     } else {
       premiumContainer.appendChild(card);

@@ -8,6 +8,7 @@
   })();
 </script>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>F&amp;O Live Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1181,7 +1182,7 @@ thead th.col-sym { z-index: 15; background: #161a25; }
 <!-- Navigation Bar -->
 <nav class="site-nav">
   <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
-    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <img src="/static/img/quantra-monogram.svg" alt="Quantra" style="height:28px; width:28px; color:var(--accent);" />
     <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
   </a>
     <div class="nav-links">
@@ -1653,9 +1654,10 @@ function renderHeatmap() {
     const avg = data.chgCount > 0 ? data.chgSum / data.chgCount : 0;
     const cell = document.createElement('div');
     cell.className = 'heat-cell';
-    const intensity = Math.min(Math.abs(avg) * 15, 40);
-    const hue = avg >= 0 ? '160' : '0';
-    cell.style.background = `hsla(${hue}, 60%, 50%, ${(intensity / 100).toFixed(2)})`;
+    // Boost baseline opacity for dark themes so small changes are clearly visible
+    const intensity = Math.min(Math.abs(avg) * 40 + 20, 85);
+    const hue = avg >= 0 ? '150' : '350';
+    cell.style.background = `hsla(${hue}, 85%, 45%, ${(intensity / 100).toFixed(2)})`;
     cell.innerHTML = `<span class="h-name">${sec} (${data.count})</span><span class="h-val">${avg >= 0 ? '+' : ''}${avg.toFixed(1)}%</span>`;
     cell.onclick = () => {
       document.getElementById('sectorFilter').value = sec;

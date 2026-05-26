@@ -296,16 +296,18 @@ SECURITY_HEADERS = {
     "Pragma": "no-cache",
 }
 
-# Strict CSP for HTML pages served by auth_proxy
-# Allows inline styles (needed for our single-file HTML approach) but blocks eval
+# Strict CSP for HTML pages served by auth_proxy.
+# 'unsafe-inline' is still allowed for the legacy single-file HTML approach;
+# 'unsafe-eval' has been dropped. If you add a library that needs eval (some
+# old chart libs), prefer replacing it over re-enabling eval.
 CONTENT_SECURITY_POLICY = (
     "default-src 'self'; "
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://checkout.razorpay.com https://unpkg.com https://cdn.jsdelivr.net; "
+    "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://checkout.razorpay.com https://unpkg.com https://cdn.jsdelivr.net https://s3.tradingview.com https://s.tradingview.com; "
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
     "font-src 'self' https://fonts.gstatic.com https://frontend-cdn.perplexity.ai; "
     "img-src 'self' data: blob: https://*.razorpay.com; "
     "connect-src 'self' ws: wss: https://api.razorpay.com; "
-    "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com; "
+    "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://s.tradingview.com https://s3.tradingview.com; "
     "frame-ancestors 'none'; "
     "base-uri 'self'; "
     "form-action 'self';"

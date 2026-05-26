@@ -31,7 +31,7 @@ from typing import Optional
 
 log = logging.getLogger("quantra.db")
 
-SCHEMA_VERSION = 6  # v5: email verification + plan fields; v6: billing
+SCHEMA_VERSION = 7  # v5: email verification + plan; v6: billing; v7: otp attempts + indexes
 
 # ============================================================
 # PASSWORD HASHING — PBKDF2-HMAC-SHA256
@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS users (
     email_verified INTEGER NOT NULL DEFAULT 0,
     email_otp TEXT,
     email_otp_expires_at TEXT,
+    email_otp_attempts INTEGER NOT NULL DEFAULT 0,
     plan TEXT NOT NULL DEFAULT 'free',
     razorpay_customer_id TEXT,
     razorpay_subscription_id TEXT,
@@ -290,6 +291,8 @@ class DB:
             self._migrate_v4_to_v5()
         if current_version < 6:
             self._migrate_v5_to_v6()
+        if current_version < 7:
+            self._migrate_v6_to_v7()
 
     def _migrate_v1_to_v2(self):
         """
@@ -321,9 +324,14 @@ class DB:
             log.warning(f"Migration v1→v2 error (may already be applied): {e}")
 
     def close(self):
-        if self._conn:
-            self._conn.close()
-            self._conn = None
+        """Close the thread-local SQLite connection if one was opened."""
+        conn = getattr(self._local, "conn", None)
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            self._local.conn = None
 
     # ============================================================
     # USERS
@@ -432,33 +440,60 @@ class DB:
         return dict(row) if row else None
 
     def set_email_otp(self, user_id, otp, expires_at):
-        """Store an email OTP for verification."""
+        """Store an email OTP for verification (resets the attempt counter)."""
         self.conn.execute(
-            "UPDATE users SET email_otp = ?, email_otp_expires_at = ? WHERE id = ?",
+            "UPDATE users SET email_otp = ?, email_otp_expires_at = ?, email_otp_attempts = 0 WHERE id = ?",
             (otp, expires_at, user_id),
         )
         self.conn.commit()
 
-    def verify_email_otp(self, user_id, otp):
-        """Verify OTP. Returns True on success, False otherwise."""
+    @staticmethod
+    def generate_otp(digits=6):
+        """Generate a numeric OTP using the OS CSPRNG (replaces random.randint)."""
+        n = 10 ** digits
+        return str(secrets.randbelow(n)).zfill(digits)
+
+    def verify_email_otp(self, user_id, otp, max_attempts=5):
+        """
+        Verify OTP. Returns ``(ok, message)``.
+
+        Honors a per-OTP attempt counter so a 6-digit OTP can't be
+        brute-forced. After ``max_attempts`` wrong tries the OTP is
+        invalidated and the user must request a new one.
+        """
         row = self.conn.execute(
-            "SELECT email_otp, email_otp_expires_at FROM users WHERE id = ?",
+            "SELECT email_otp, email_otp_expires_at, email_otp_attempts FROM users WHERE id = ?",
             (user_id,)
         ).fetchone()
         if not row or not row["email_otp"]:
             return False, "No OTP found"
-        if row["email_otp"] != otp:
-            return False, "Invalid OTP"
+        attempts = row["email_otp_attempts"] or 0
+        if attempts >= max_attempts:
+            # Invalidate so a new OTP must be requested
+            self.conn.execute(
+                "UPDATE users SET email_otp = NULL, email_otp_expires_at = NULL WHERE id = ?",
+                (user_id,)
+            )
+            self.conn.commit()
+            return False, "Too many attempts. Request a new code."
         from datetime import datetime
         try:
             exp = datetime.fromisoformat(row["email_otp_expires_at"])
-        except ValueError:
+        except (TypeError, ValueError):
             return False, "Invalid expiry date format"
         if exp < datetime.utcnow():
             return False, "OTP expired"
+        if not hmac.compare_digest(str(row["email_otp"]), str(otp)):
+            self.conn.execute(
+                "UPDATE users SET email_otp_attempts = email_otp_attempts + 1 WHERE id = ?",
+                (user_id,)
+            )
+            self.conn.commit()
+            return False, "Invalid OTP"
         # Mark verified, clear OTP
         self.conn.execute(
-            "UPDATE users SET email_verified = 1, email_otp = NULL, email_otp_expires_at = NULL WHERE id = ?",
+            "UPDATE users SET email_verified = 1, email_otp = NULL, "
+            "email_otp_expires_at = NULL, email_otp_attempts = 0 WHERE id = ?",
             (user_id,)
         )
         self.conn.commit()
@@ -668,12 +703,8 @@ class DB:
         if row["expires_at"] < datetime.utcnow().isoformat():
             self.delete_session(token)
             return None
-        # Update last_seen
-        self.conn.execute(
-            "UPDATE sessions SET last_seen = datetime('now') WHERE token = ?",
-            (token,),
-        )
-        self.conn.commit()
+        # Update last_seen (throttled to once per minute to avoid write amp)
+        self.touch_session(token, throttle_seconds=60)
         return {
             "user_id": row["user_id"],
             "username": row["username"],
@@ -690,6 +721,55 @@ class DB:
         """Delete all sessions for a user."""
         self.conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
         self.conn.commit()
+
+    def delete_oldest_user_sessions(self, user_id, keep):
+        """
+        Keep the ``keep`` most recently created sessions for ``user_id``,
+        delete the rest. Used to enforce a per-user concurrent-session cap
+        without nuking every device the user owns.
+
+        Orders by SQLite ``rowid`` (insert order) which is monotonic and
+        unambiguous; ``created_at`` is only second-resolution.
+        """
+        rows = self.conn.execute(
+            "SELECT token FROM sessions WHERE user_id = ? ORDER BY rowid DESC",
+            (user_id,),
+        ).fetchall()
+        stale = [r["token"] for r in rows[keep:]]
+        if not stale:
+            return 0
+        placeholders = ",".join("?" for _ in stale)
+        self.conn.execute(
+            f"DELETE FROM sessions WHERE token IN ({placeholders})", stale,
+        )
+        self.conn.commit()
+        return len(stale)
+
+    def touch_session(self, token, throttle_seconds=60):
+        """
+        Update ``last_seen`` on a session, but only if it hasn't been
+        updated in the last ``throttle_seconds``. Reduces SQLite write
+        amplification on busy authenticated routes.
+        """
+        row = self.conn.execute(
+            "SELECT last_seen FROM sessions WHERE token = ?", (token,),
+        ).fetchone()
+        if not row:
+            return False
+        try:
+            from datetime import datetime as _dt
+            last = _dt.fromisoformat(row["last_seen"])
+            age = (_dt.utcnow() - last).total_seconds()
+        except Exception:
+            age = throttle_seconds + 1  # fall through to update
+        if age < throttle_seconds:
+            return False
+        self.conn.execute(
+            "UPDATE sessions SET last_seen = datetime('now') WHERE token = ?",
+            (token,),
+        )
+        self.conn.commit()
+        return True
 
     def count_user_sessions(self, user_id):
         """Count active sessions for a user."""
@@ -1036,6 +1116,21 @@ class DB:
             log.info("Migration v5 → v6 complete")
         except Exception as e:
             log.warning(f"Migration v5→v6 error: {e}")
+
+    def _migrate_v6_to_v7(self):
+        """v6 → v7: Add email_otp_attempts counter to users."""
+        log.info("Running migration v6 → v7...")
+        try:
+            cols = {r[1] for r in self.conn.execute("PRAGMA table_info(users)").fetchall()}
+            if "email_otp_attempts" not in cols:
+                self.conn.execute(
+                    "ALTER TABLE users ADD COLUMN email_otp_attempts INTEGER NOT NULL DEFAULT 0"
+                )
+                log.info("  Added email_otp_attempts column to users")
+            self.conn.commit()
+            log.info("Migration v6 → v7 complete")
+        except Exception as e:
+            log.warning(f"Migration v6→v7 error: {e}")
 
     # ============================================================
     # WATCHLIST

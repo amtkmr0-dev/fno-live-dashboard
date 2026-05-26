@@ -71,7 +71,7 @@
    THEME 2: OBSIDIAN BLACK
    Pure black theme for OLED displays
    ============================================================ */
-:root[data-theme=\"obsidian-black\"] {
+:root[data-theme="obsidian-black"] {
   /* Backgrounds */
   --bg: #000000;
   --surface: #0a0a0a;
@@ -127,254 +127,6 @@
   
   --theme-name: "Obsidian Black";
   --theme-description: "Pure black for OLED";
-}
-
-/* ============================================================
-   THEME 3: EMERALD DARK
-   Dark theme with green accents
-   ============================================================ */
-:root[data-theme=\"emerald-dark\"] {
-  /* Backgrounds */
-  --bg: #0a1612;
-  --surface: #0f1f1a;
-  --surface-alt: #1a2e26;
-  --surface-hover: #243d33;
-  --surface-active: #2e4c40;
-  --bg-elevated: #0f1f1a;
-  
-  /* Borders */
-  --border: #1a2e26;
-  --border-light: #243d33;
-  --border-dark: #0f1f1a;
-  --border-focus: #10b981;
-  
-  /* Text */
-  --text: #ecfdf5;
-  --text-dim: #d1fae5;
-  --text-vdim: #a7f3d0;
-  --text-bright: #ffffff;
-  --text-muted: #6ee7b7;
-  
-  /* Accent */
-  --accent: #10b981;
-  --accent-hover: #34d399;
-  --accent-soft: rgba(16, 185, 129, 0.2);
-  
-  /* Semantic Colors */
-  --green: #10b981;
-  --green-soft: rgba(16, 185, 129, 0.2);
-  --green-text: #34d399;
-  --green-hover: #059669;
-  
-  --red: #f43f5e;
-  --red-soft: rgba(244, 63, 94, 0.2);
-  --red-text: #fb7185;
-  --red-hover: #e11d48;
-  
-  --blue: #06b6d4;
-  --blue-soft: rgba(6, 182, 212, 0.2);
-  --blue-text: #22d3ee;
-  
-  --orange: #fb923c;
-  --orange-soft: rgba(251, 146, 60, 0.2);
-  
-  --purple: #a78bfa;
-  --purple-soft: rgba(167, 139, 250, 0.2);
-  
-  --yellow: #fbbf24;
-  --yellow-soft: rgba(251, 191, 36, 0.2);
-  
-  --cyan: #06b6d4;
-  --gold: #fbbf24;
-  
-  --theme-name: "Emerald Dark";
-  --theme-description: "Dark with green accents";
-}
-
-/* ============================================================
-   THEME 4: ROYAL PURPLE
-   Elegant purple theme
-   ============================================================ */
-:root[data-theme=\"royal-purple\"] {
-  /* Backgrounds */
-  --bg: #1a0f2e;
-  --surface: #251a3a;
-  --surface-alt: #312547;
-  --surface-hover: #3d3054;
-  --surface-active: #493b61;
-  --bg-elevated: #251a3a;
-  
-  /* Borders */
-  --border: #312547;
-  --border-light: #3d3054;
-  --border-dark: #251a3a;
-  --border-focus: #a855f7;
-  
-  /* Text */
-  --text: #faf5ff;
-  --text-dim: #e9d5ff;
-  --text-vdim: #d8b4fe;
-  --text-bright: #ffffff;
-  --text-muted: #c084fc;
-  
-  /* Accent */
-  --accent: #a855f7;
-  --accent-hover: #c084fc;
-  --accent-soft: rgba(168, 85, 247, 0.2);
-  
-  /* Semantic Colors */
-  --green: #22c55e;
-  --green-soft: rgba(34, 197, 94, 0.2);
-  --green-text: #4ade80;
-  --green-hover: #16a34a;
-  
-  --red: #f43f5e;
-  --red-soft: rgba(244, 63, 94, 0.2);
-  --red-text: #fb7185;
-  --red-hover: #e11d48;
-  
-  --blue: #8b5cf6;
-  --blue-soft: rgba(139, 92, 246, 0.2);
-  --blue-text: #a78bfa;
-  
-  --orange: #fb923c;
-  --orange-soft: rgba(251, 146, 60, 0.2);
-  
-  --purple: #a855f7;
-  --purple-soft: rgba(168, 85, 247, 0.2);
-  
-  --yellow: #fbbf24;
-  --yellow-soft: rgba(251, 191, 36, 0.2);
-  
-  --cyan: #06b6d4;
-  --gold: #fbbf24;
-  
-  --theme-name: "Royal Purple";
-  --theme-description: "Elegant purple theme";
-}
-
-/* ============================================================
-   THEME 5: CRIMSON RED
-   Bold red theme for active traders
-   ============================================================ */
-:root[data-theme=\"crimson-red\"] {
-  /* Backgrounds */
-  --bg: #1a0a0a;
-  --surface: #2a1414;
-  --surface-alt: #3a1f1f;
-  --surface-hover: #4a2929;
-  --surface-active: #5a3434;
-  --bg-elevated: #2a1414;
-  
-  /* Borders */
-  --border: #3a1f1f;
-  --border-light: #4a2929;
-  --border-dark: #2a1414;
-  --border-focus: #ef4444;
-  
-  /* Text */
-  --text: #fef2f2;
-  --text-dim: #fecaca;
-  --text-vdim: #fca5a5;
-  --text-bright: #ffffff;
-  --text-muted: #f87171;
-  
-  /* Accent */
-  --accent: #ef4444;
-  --accent-hover: #f87171;
-  --accent-soft: rgba(239, 68, 68, 0.2);
-  
-  /* Semantic Colors */
-  --green: #22c55e;
-  --green-soft: rgba(34, 197, 94, 0.2);
-  --green-text: #4ade80;
-  --green-hover: #16a34a;
-  
-  --red: #ef4444;
-  --red-soft: rgba(239, 68, 68, 0.2);
-  --red-text: #f87171;
-  --red-hover: #dc2626;
-  
-  --blue: #3b82f6;
-  --blue-soft: rgba(59, 130, 246, 0.2);
-  --blue-text: #60a5fa;
-  
-  --orange: #fb923c;
-  --orange-soft: rgba(251, 146, 60, 0.2);
-  
-  --purple: #a855f7;
-  --purple-soft: rgba(168, 85, 247, 0.2);
-  
-  --yellow: #fbbf24;
-  --yellow-soft: rgba(251, 191, 36, 0.2);
-  
-  --cyan: #06b6d4;
-  --gold: #fbbf24;
-  
-  --theme-name: "Crimson Red";
-  --theme-description: "Bold red for traders";
-}
-
-/* ============================================================
-   THEME 6: ARCTIC BLUE
-   Cool blue theme
-   ============================================================ */
-:root[data-theme=\"arctic-blue\"] {
-  /* Backgrounds */
-  --bg: #0a1929;
-  --surface: #132f4c;
-  --surface-alt: #1e4976;
-  --surface-hover: #2a5a8f;
-  --surface-active: #366ba8;
-  --bg-elevated: #132f4c;
-  
-  /* Borders */
-  --border: #1e4976;
-  --border-light: #2a5a8f;
-  --border-dark: #132f4c;
-  --border-focus: #0ea5e9;
-  
-  /* Text */
-  --text: #e0f2fe;
-  --text-dim: #bae6fd;
-  --text-vdim: #7dd3fc;
-  --text-bright: #ffffff;
-  --text-muted: #38bdf8;
-  
-  /* Accent */
-  --accent: #0ea5e9;
-  --accent-hover: #38bdf8;
-  --accent-soft: rgba(14, 165, 233, 0.2);
-  
-  /* Semantic Colors */
-  --green: #22c55e;
-  --green-soft: rgba(34, 197, 94, 0.2);
-  --green-text: #4ade80;
-  --green-hover: #16a34a;
-  
-  --red: #f43f5e;
-  --red-soft: rgba(244, 63, 94, 0.2);
-  --red-text: #fb7185;
-  --red-hover: #e11d48;
-  
-  --blue: #0ea5e9;
-  --blue-soft: rgba(14, 165, 233, 0.2);
-  --blue-text: #38bdf8;
-  
-  --orange: #fb923c;
-  --orange-soft: rgba(251, 146, 60, 0.2);
-  
-  --purple: #a78bfa;
-  --purple-soft: rgba(167, 139, 250, 0.2);
-  
-  --yellow: #fbbf24;
-  --yellow-soft: rgba(251, 191, 36, 0.2);
-  
-  --cyan: #06b6d4;
-  --gold: #fbbf24;
-  
-  --theme-name: "Arctic Blue";
-  --theme-description: "Cool blue theme";
 }
 
 /* ============================================================
@@ -586,29 +338,9 @@
 .theme-card[data-theme="obsidian-black"] .theme-preview-color:nth-child(4) { background: #22c55e; }
 .theme-card[data-theme="obsidian-black"] .theme-preview-color:nth-child(5) { background: #ef4444; }
 
-.theme-card[data-theme="emerald-dark"] .theme-preview-color:nth-child(1) { background: #0a1612; }
-.theme-card[data-theme="emerald-dark"] .theme-preview-color:nth-child(2) { background: #0f1f1a; }
-.theme-card[data-theme="emerald-dark"] .theme-preview-color:nth-child(3) { background: #10b981; }
-.theme-card[data-theme="emerald-dark"] .theme-preview-color:nth-child(4) { background: #06b6d4; }
-.theme-card[data-theme="emerald-dark"] .theme-preview-color:nth-child(5) { background: #f43f5e; }
 
-.theme-card[data-theme="royal-purple"] .theme-preview-color:nth-child(1) { background: #1a0f2e; }
-.theme-card[data-theme="royal-purple"] .theme-preview-color:nth-child(2) { background: #251a3a; }
-.theme-card[data-theme="royal-purple"] .theme-preview-color:nth-child(3) { background: #a855f7; }
-.theme-card[data-theme="royal-purple"] .theme-preview-color:nth-child(4) { background: #22c55e; }
-.theme-card[data-theme="royal-purple"] .theme-preview-color:nth-child(5) { background: #f43f5e; }
 
-.theme-card[data-theme="crimson-red"] .theme-preview-color:nth-child(1) { background: #1a0a0a; }
-.theme-card[data-theme="crimson-red"] .theme-preview-color:nth-child(2) { background: #2a1414; }
-.theme-card[data-theme="crimson-red"] .theme-preview-color:nth-child(3) { background: #ef4444; }
-.theme-card[data-theme="crimson-red"] .theme-preview-color:nth-child(4) { background: #22c55e; }
-.theme-card[data-theme="crimson-red"] .theme-preview-color:nth-child(5) { background: #3b82f6; }
 
-.theme-card[data-theme="arctic-blue"] .theme-preview-color:nth-child(1) { background: #0a1929; }
-.theme-card[data-theme="arctic-blue"] .theme-preview-color:nth-child(2) { background: #132f4c; }
-.theme-card[data-theme="arctic-blue"] .theme-preview-color:nth-child(3) { background: #0ea5e9; }
-.theme-card[data-theme="arctic-blue"] .theme-preview-color:nth-child(4) { background: #22c55e; }
-.theme-card[data-theme="arctic-blue"] .theme-preview-color:nth-child(5) { background: #f43f5e; }
 
 /* Mobile responsive */
 @media (max-width: 768px) {
@@ -1351,3 +1083,583 @@
 .btn-cols:hover {
   background: var(--accent-soft) !important;
 }
+
+
+/* ============================================================
+   QUANTRA THEMES — added 2026-05-26
+   Five themes designed for the Quantra Terminal brand. Each follows
+   the existing CSS-variable contract (bg, surface*, border*, text*,
+   accent*, semantic colors). Same structure as obsidian-black above
+   so adding new themes only needs vars, not new selectors.
+   ============================================================ */
+
+/* ---- Quantra Carbon ---------------------------------------- */
+/* Refined dark, true-black background, sharper grid lines, blue   */
+/* accent. Default-ready for power users who want maximum contrast. */
+:root[data-theme="quantra-carbon"] {
+  --bg: #050508;
+  --surface: #0d0e12;
+  --surface-alt: #14161c;
+  --surface-hover: #1c1f27;
+  --surface-active: #262a35;
+  --bg-elevated: #0d0e12;
+
+  --border: #1f232c;
+  --border-light: #2a2f3a;
+  --border-dark: #161922;
+  --border-focus: #3b82f6;
+
+  --text: #f5f7fa;
+  --text-dim: #c2c8d2;
+  --text-vdim: #8a92a0;
+  --text-bright: #ffffff;
+  --text-muted: #5b6271;
+
+  --accent: #3b82f6;
+  --accent-hover: #5b9bff;
+  --accent-soft: rgba(59, 130, 246, 0.15);
+
+  --green: #10b981;
+  --green-soft: rgba(16, 185, 129, 0.18);
+  --green-text: #34d399;
+  --green-hover: #059669;
+
+  --red: #ef4444;
+  --red-soft: rgba(239, 68, 68, 0.18);
+  --red-text: #f87171;
+  --red-hover: #dc2626;
+
+  --blue: #3b82f6;
+  --blue-soft: rgba(59, 130, 246, 0.18);
+  --blue-text: #60a5fa;
+
+  --orange: #f59e0b;
+  --orange-soft: rgba(245, 158, 11, 0.18);
+
+  --purple: #a855f7;
+  --purple-soft: rgba(168, 85, 247, 0.18);
+
+  --yellow: #eab308;
+  --yellow-soft: rgba(234, 179, 8, 0.18);
+
+  --cyan: #06b6d4;
+  --gold: #fbbf24;
+
+  --theme-name: "Quantra Carbon";
+  --theme-description: "Refined dark, sharp blue accents";
+}
+
+/* ---- Quantra Slate ----------------------------------------- */
+/* Softer dark, deep slate-navy. Easier on the eyes for long       */
+/* sessions. Same structure, mellower palette.                     */
+:root[data-theme="quantra-slate"] {
+  --bg: #0f1419;
+  --surface: #161c24;
+  --surface-alt: #1d2530;
+  --surface-hover: #25303c;
+  --surface-active: #2f3b48;
+  --bg-elevated: #161c24;
+
+  --border: #25303c;
+  --border-light: #34404e;
+  --border-dark: #1d2530;
+  --border-focus: #6366f1;
+
+  --text: #e6ebf2;
+  --text-dim: #b6bdc8;
+  --text-vdim: #7d8593;
+  --text-bright: #ffffff;
+  --text-muted: #535b69;
+
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-soft: rgba(99, 102, 241, 0.16);
+
+  --green: #14b8a6;
+  --green-soft: rgba(20, 184, 166, 0.18);
+  --green-text: #2dd4bf;
+  --green-hover: #0d9488;
+
+  --red: #f43f5e;
+  --red-soft: rgba(244, 63, 94, 0.18);
+  --red-text: #fb7185;
+  --red-hover: #e11d48;
+
+  --blue: #6366f1;
+  --blue-soft: rgba(99, 102, 241, 0.18);
+  --blue-text: #818cf8;
+
+  --orange: #f97316;
+  --orange-soft: rgba(249, 115, 22, 0.18);
+
+  --purple: #8b5cf6;
+  --purple-soft: rgba(139, 92, 246, 0.18);
+
+  --yellow: #facc15;
+  --yellow-soft: rgba(250, 204, 21, 0.18);
+
+  --cyan: #22d3ee;
+  --gold: #fbbf24;
+
+  --theme-name: "Quantra Slate";
+  --theme-description: "Soft slate, indigo accents";
+}
+
+/* ---- Quantra Paper ----------------------------------------- */
+/* Clean light theme. Off-white background, dark text, blue accent.*/
+/* Daytime / printing / screenshots.                                */
+:root[data-theme="quantra-paper"] {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-alt: #f4f4f5;
+  --surface-hover: #e4e4e7;
+  --surface-active: #d4d4d8;
+  --bg-elevated: #ffffff;
+
+  --border: #e4e4e7;
+  --border-light: #f4f4f5;
+  --border-dark: #d4d4d8;
+  --border-focus: #2563eb;
+
+  --text: #18181b;
+  --text-dim: #3f3f46;
+  --text-vdim: #71717a;
+  --text-bright: #09090b;
+  --text-muted: #a1a1aa;
+
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.10);
+
+  --green: #15803d;
+  --green-soft: rgba(21, 128, 61, 0.12);
+  --green-text: #16a34a;
+  --green-hover: #166534;
+
+  --red: #b91c1c;
+  --red-soft: rgba(185, 28, 28, 0.10);
+  --red-text: #dc2626;
+  --red-hover: #991b1b;
+
+  --blue: #2563eb;
+  --blue-soft: rgba(37, 99, 235, 0.10);
+  --blue-text: #1d4ed8;
+
+  --orange: #c2410c;
+  --orange-soft: rgba(194, 65, 12, 0.10);
+
+  --purple: #7c3aed;
+  --purple-soft: rgba(124, 58, 237, 0.10);
+
+  --yellow: #a16207;
+  --yellow-soft: rgba(161, 98, 7, 0.10);
+
+  --cyan: #0e7490;
+  --gold: #b45309;
+
+  --theme-name: "Quantra Paper";
+  --theme-description: "Clean light, daytime use";
+}
+
+/* ---- Quantra Onyx ------------------------------------------ */
+/* High-contrast OLED-friendly. Pure black with neon-accent        */
+/* highlights for momentum cells. Punchy.                          */
+:root[data-theme="quantra-onyx"] {
+  --bg: #000000;
+  --surface: #060608;
+  --surface-alt: #0c0c10;
+  --surface-hover: #14141a;
+  --surface-active: #1d1d25;
+  --bg-elevated: #060608;
+
+  --border: #1d1d25;
+  --border-light: #2a2a35;
+  --border-dark: #0c0c10;
+  --border-focus: #00e5ff;
+
+  --text: #ffffff;
+  --text-dim: #d4d4dc;
+  --text-vdim: #8a8a98;
+  --text-bright: #ffffff;
+  --text-muted: #5a5a68;
+
+  --accent: #00e5ff;
+  --accent-hover: #6efbff;
+  --accent-soft: rgba(0, 229, 255, 0.18);
+
+  --green: #00ff9d;
+  --green-soft: rgba(0, 255, 157, 0.20);
+  --green-text: #00ff9d;
+  --green-hover: #00cc7e;
+
+  --red: #ff3860;
+  --red-soft: rgba(255, 56, 96, 0.20);
+  --red-text: #ff3860;
+  --red-hover: #ff1f4a;
+
+  --blue: #00e5ff;
+  --blue-soft: rgba(0, 229, 255, 0.18);
+  --blue-text: #6efbff;
+
+  --orange: #ff9500;
+  --orange-soft: rgba(255, 149, 0, 0.18);
+
+  --purple: #c63cff;
+  --purple-soft: rgba(198, 60, 255, 0.18);
+
+  --yellow: #ffd60a;
+  --yellow-soft: rgba(255, 214, 10, 0.18);
+
+  --cyan: #00e5ff;
+  --gold: #ffcc00;
+
+  --theme-name: "Quantra Onyx";
+  --theme-description: "OLED black, neon accents";
+}
+
+/* ---- Quantra Mint ------------------------------------------ */
+/* Analytical, warm-grey background, mint-green positives,         */
+/* terracotta negatives — softer alternative to red/green.         */
+:root[data-theme="quantra-mint"] {
+  --bg: #1a1f1d;
+  --surface: #21262a;
+  --surface-alt: #2a3036;
+  --surface-hover: #343b42;
+  --surface-active: #404852;
+  --bg-elevated: #21262a;
+
+  --border: #343b42;
+  --border-light: #444c54;
+  --border-dark: #2a3036;
+  --border-focus: #5eead4;
+
+  --text: #e8ede8;
+  --text-dim: #b9c0bc;
+  --text-vdim: #828a86;
+  --text-bright: #ffffff;
+  --text-muted: #555c58;
+
+  --accent: #5eead4;
+  --accent-hover: #99f6e4;
+  --accent-soft: rgba(94, 234, 212, 0.16);
+
+  --green: #5eead4;
+  --green-soft: rgba(94, 234, 212, 0.18);
+  --green-text: #5eead4;
+  --green-hover: #2dd4bf;
+
+  --red: #e07a5f;
+  --red-soft: rgba(224, 122, 95, 0.18);
+  --red-text: #e07a5f;
+  --red-hover: #cb6848;
+
+  --blue: #38bdf8;
+  --blue-soft: rgba(56, 189, 248, 0.18);
+  --blue-text: #7dd3fc;
+
+  --orange: #f5b061;
+  --orange-soft: rgba(245, 176, 97, 0.18);
+
+  --purple: #c4b5fd;
+  --purple-soft: rgba(196, 181, 253, 0.18);
+
+  --yellow: #facc15;
+  --yellow-soft: rgba(250, 204, 21, 0.18);
+
+  --cyan: #67e8f9;
+  --gold: #f5b061;
+
+  --theme-name: "Quantra Mint";
+  --theme-description: "Warm grey, mint/terracotta";
+}
+
+/* ---- Quantra theme-card preview swatches ------------------ */
+.theme-card[data-theme="quantra-carbon"] .theme-preview-color:nth-child(1) { background: #050508; }
+.theme-card[data-theme="quantra-carbon"] .theme-preview-color:nth-child(2) { background: #0d0e12; }
+.theme-card[data-theme="quantra-carbon"] .theme-preview-color:nth-child(3) { background: #3b82f6; }
+.theme-card[data-theme="quantra-carbon"] .theme-preview-color:nth-child(4) { background: #10b981; }
+.theme-card[data-theme="quantra-carbon"] .theme-preview-color:nth-child(5) { background: #ef4444; }
+
+.theme-card[data-theme="quantra-slate"] .theme-preview-color:nth-child(1) { background: #0f1419; }
+.theme-card[data-theme="quantra-slate"] .theme-preview-color:nth-child(2) { background: #161c24; }
+.theme-card[data-theme="quantra-slate"] .theme-preview-color:nth-child(3) { background: #6366f1; }
+.theme-card[data-theme="quantra-slate"] .theme-preview-color:nth-child(4) { background: #14b8a6; }
+.theme-card[data-theme="quantra-slate"] .theme-preview-color:nth-child(5) { background: #f43f5e; }
+
+.theme-card[data-theme="quantra-paper"] .theme-preview-color:nth-child(1) { background: #fafafa; }
+.theme-card[data-theme="quantra-paper"] .theme-preview-color:nth-child(2) { background: #ffffff; }
+.theme-card[data-theme="quantra-paper"] .theme-preview-color:nth-child(3) { background: #2563eb; }
+.theme-card[data-theme="quantra-paper"] .theme-preview-color:nth-child(4) { background: #15803d; }
+.theme-card[data-theme="quantra-paper"] .theme-preview-color:nth-child(5) { background: #b91c1c; }
+
+.theme-card[data-theme="quantra-onyx"] .theme-preview-color:nth-child(1) { background: #000000; }
+.theme-card[data-theme="quantra-onyx"] .theme-preview-color:nth-child(2) { background: #060608; }
+.theme-card[data-theme="quantra-onyx"] .theme-preview-color:nth-child(3) { background: #00e5ff; }
+.theme-card[data-theme="quantra-onyx"] .theme-preview-color:nth-child(4) { background: #00ff9d; }
+.theme-card[data-theme="quantra-onyx"] .theme-preview-color:nth-child(5) { background: #ff3860; }
+
+.theme-card[data-theme="quantra-mint"] .theme-preview-color:nth-child(1) { background: #1a1f1d; }
+.theme-card[data-theme="quantra-mint"] .theme-preview-color:nth-child(2) { background: #21262a; }
+.theme-card[data-theme="quantra-mint"] .theme-preview-color:nth-child(3) { background: #5eead4; }
+.theme-card[data-theme="quantra-mint"] .theme-preview-color:nth-child(4) { background: #5eead4; }
+.theme-card[data-theme="quantra-mint"] .theme-preview-color:nth-child(5) { background: #e07a5f; }
+
+
+/* ============================================================
+   PREMIUM THEMES — added 2026-05-26 (replacement set)
+   Replaces the older emerald-dark / royal-purple / crimson-red /
+   arctic-blue / glassmorphism / neumorphism / terminal-hacker themes.
+   These four are designed for the Quantra brand: trader-grade,
+   visually distinct, professional. All follow the same CSS-variable
+   contract used by midnight-blue and the Quantra themes above.
+   ============================================================ */
+
+/* ---- Aurora ----------------------------------------------- */
+/* Deep purple-blue gradient feel, neon-violet accent. Premium      */
+/* night-mode for late-session trading.                             */
+:root[data-theme="aurora"] {
+  --bg: #0a0717;
+  --surface: #11102a;
+  --surface-alt: #1a1838;
+  --surface-hover: #25224a;
+  --surface-active: #302d5e;
+  --bg-elevated: #11102a;
+
+  --border: #2a2855;
+  --border-light: #3a3870;
+  --border-dark: #1d1c40;
+  --border-focus: #a78bfa;
+
+  --text: #ece9ff;
+  --text-dim: #b8b3e0;
+  --text-vdim: #7e7aae;
+  --text-bright: #ffffff;
+  --text-muted: #524f78;
+
+  --accent: #a78bfa;
+  --accent-hover: #c4b5fd;
+  --accent-soft: rgba(167, 139, 250, 0.16);
+
+  --green: #34d399;
+  --green-soft: rgba(52, 211, 153, 0.18);
+  --green-text: #6ee7b7;
+  --green-hover: #10b981;
+
+  --red: #fb7185;
+  --red-soft: rgba(251, 113, 133, 0.18);
+  --red-text: #fda4af;
+  --red-hover: #f43f5e;
+
+  --blue: #818cf8;
+  --blue-soft: rgba(129, 140, 248, 0.18);
+  --blue-text: #a5b4fc;
+
+  --orange: #fb923c;
+  --orange-soft: rgba(251, 146, 60, 0.18);
+
+  --purple: #a78bfa;
+  --purple-soft: rgba(167, 139, 250, 0.18);
+
+  --yellow: #fcd34d;
+  --yellow-soft: rgba(252, 211, 77, 0.18);
+
+  --cyan: #67e8f9;
+  --gold: #fbbf24;
+
+  --theme-name: "Aurora";
+  --theme-description: "Deep violet, premium night";
+}
+
+/* ---- Trader Pro ------------------------------------------- */
+/* Bloomberg-style: pure black, dense type, signature orange accent.*/
+/* For traders who came from professional terminals.                 */
+:root[data-theme="trader-pro"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-alt: #131313;
+  --surface-hover: #1c1c1c;
+  --surface-active: #262626;
+  --bg-elevated: #0a0a0a;
+
+  --border: #1c1c1c;
+  --border-light: #2a2a2a;
+  --border-dark: #131313;
+  --border-focus: #ff9800;
+
+  --text: #f5f5f5;
+  --text-dim: #c4c4c4;
+  --text-vdim: #8a8a8a;
+  --text-bright: #ffffff;
+  --text-muted: #555555;
+
+  --accent: #ff9800;
+  --accent-hover: #ffa726;
+  --accent-soft: rgba(255, 152, 0, 0.18);
+
+  --green: #00c853;
+  --green-soft: rgba(0, 200, 83, 0.20);
+  --green-text: #00e676;
+  --green-hover: #00a042;
+
+  --red: #ff1744;
+  --red-soft: rgba(255, 23, 68, 0.20);
+  --red-text: #ff5252;
+  --red-hover: #d50000;
+
+  --blue: #2196f3;
+  --blue-soft: rgba(33, 150, 243, 0.18);
+  --blue-text: #64b5f6;
+
+  --orange: #ff9800;
+  --orange-soft: rgba(255, 152, 0, 0.18);
+
+  --purple: #ab47bc;
+  --purple-soft: rgba(171, 71, 188, 0.18);
+
+  --yellow: #ffc107;
+  --yellow-soft: rgba(255, 193, 7, 0.18);
+
+  --cyan: #00bcd4;
+  --gold: #ffc107;
+
+  --theme-name: "Trader Pro";
+  --theme-description: "Bloomberg-style, orange accent";
+}
+
+/* ---- Sunset Trade ----------------------------------------- */
+/* Warm professional dark — coral/amber accents, easier on eyes for */
+/* long evening sessions. Less stark than carbon, less cold than    */
+/* slate.                                                           */
+:root[data-theme="sunset-trade"] {
+  --bg: #1a1410;
+  --surface: #221c17;
+  --surface-alt: #2c241e;
+  --surface-hover: #382f27;
+  --surface-active: #443a30;
+  --bg-elevated: #221c17;
+
+  --border: #382f27;
+  --border-light: #4a4036;
+  --border-dark: #2c241e;
+  --border-focus: #fb923c;
+
+  --text: #f5ede5;
+  --text-dim: #c8bcb0;
+  --text-vdim: #8a7e72;
+  --text-bright: #ffffff;
+  --text-muted: #5c5246;
+
+  --accent: #fb923c;
+  --accent-hover: #fdba74;
+  --accent-soft: rgba(251, 146, 60, 0.16);
+
+  --green: #65a30d;
+  --green-soft: rgba(101, 163, 13, 0.18);
+  --green-text: #84cc16;
+  --green-hover: #4d7c0f;
+
+  --red: #dc2626;
+  --red-soft: rgba(220, 38, 38, 0.18);
+  --red-text: #ef4444;
+  --red-hover: #b91c1c;
+
+  --blue: #0ea5e9;
+  --blue-soft: rgba(14, 165, 233, 0.18);
+  --blue-text: #38bdf8;
+
+  --orange: #fb923c;
+  --orange-soft: rgba(251, 146, 60, 0.18);
+
+  --purple: #c084fc;
+  --purple-soft: rgba(192, 132, 252, 0.18);
+
+  --yellow: #fbbf24;
+  --yellow-soft: rgba(251, 191, 36, 0.18);
+
+  --cyan: #22d3ee;
+  --gold: #f59e0b;
+
+  --theme-name: "Sunset Trade";
+  --theme-description: "Warm coral / amber, evening sessions";
+}
+
+/* ---- Ocean Deep ------------------------------------------- */
+/* Deep teal-blue water palette. Calm, focused. Aqua accent reads   */
+/* trustworthy and clean — fintech-adjacent without being generic.  */
+:root[data-theme="ocean-deep"] {
+  --bg: #051221;
+  --surface: #0a1c30;
+  --surface-alt: #11283f;
+  --surface-hover: #1a3550;
+  --surface-active: #234360;
+  --bg-elevated: #0a1c30;
+
+  --border: #1a3550;
+  --border-light: #294966;
+  --border-dark: #11283f;
+  --border-focus: #22d3ee;
+
+  --text: #e6f1f9;
+  --text-dim: #b3c5d6;
+  --text-vdim: #7892a8;
+  --text-bright: #ffffff;
+  --text-muted: #4d6378;
+
+  --accent: #22d3ee;
+  --accent-hover: #67e8f9;
+  --accent-soft: rgba(34, 211, 238, 0.16);
+
+  --green: #2dd4bf;
+  --green-soft: rgba(45, 212, 191, 0.18);
+  --green-text: #5eead4;
+  --green-hover: #14b8a6;
+
+  --red: #fb7185;
+  --red-soft: rgba(251, 113, 133, 0.18);
+  --red-text: #fda4af;
+  --red-hover: #f43f5e;
+
+  --blue: #38bdf8;
+  --blue-soft: rgba(56, 189, 248, 0.18);
+  --blue-text: #7dd3fc;
+
+  --orange: #f97316;
+  --orange-soft: rgba(249, 115, 22, 0.18);
+
+  --purple: #818cf8;
+  --purple-soft: rgba(129, 140, 248, 0.18);
+
+  --yellow: #facc15;
+  --yellow-soft: rgba(250, 204, 21, 0.18);
+
+  --cyan: #22d3ee;
+  --gold: #fcd34d;
+
+  --theme-name: "Ocean Deep";
+  --theme-description: "Calm teal, focus mode";
+}
+
+/* ---- Premium swatches for theme-explorer cards ------------ */
+.theme-card[data-theme="aurora"] .theme-preview-color:nth-child(1) { background: #0a0717; }
+.theme-card[data-theme="aurora"] .theme-preview-color:nth-child(2) { background: #11102a; }
+.theme-card[data-theme="aurora"] .theme-preview-color:nth-child(3) { background: #a78bfa; }
+.theme-card[data-theme="aurora"] .theme-preview-color:nth-child(4) { background: #34d399; }
+.theme-card[data-theme="aurora"] .theme-preview-color:nth-child(5) { background: #fb7185; }
+
+.theme-card[data-theme="trader-pro"] .theme-preview-color:nth-child(1) { background: #000000; }
+.theme-card[data-theme="trader-pro"] .theme-preview-color:nth-child(2) { background: #0a0a0a; }
+.theme-card[data-theme="trader-pro"] .theme-preview-color:nth-child(3) { background: #ff9800; }
+.theme-card[data-theme="trader-pro"] .theme-preview-color:nth-child(4) { background: #00c853; }
+.theme-card[data-theme="trader-pro"] .theme-preview-color:nth-child(5) { background: #ff1744; }
+
+.theme-card[data-theme="sunset-trade"] .theme-preview-color:nth-child(1) { background: #1a1410; }
+.theme-card[data-theme="sunset-trade"] .theme-preview-color:nth-child(2) { background: #221c17; }
+.theme-card[data-theme="sunset-trade"] .theme-preview-color:nth-child(3) { background: #fb923c; }
+.theme-card[data-theme="sunset-trade"] .theme-preview-color:nth-child(4) { background: #65a30d; }
+.theme-card[data-theme="sunset-trade"] .theme-preview-color:nth-child(5) { background: #dc2626; }
+
+.theme-card[data-theme="ocean-deep"] .theme-preview-color:nth-child(1) { background: #051221; }
+.theme-card[data-theme="ocean-deep"] .theme-preview-color:nth-child(2) { background: #0a1c30; }
+.theme-card[data-theme="ocean-deep"] .theme-preview-color:nth-child(3) { background: #22d3ee; }
+.theme-card[data-theme="ocean-deep"] .theme-preview-color:nth-child(4) { background: #2dd4bf; }
+.theme-card[data-theme="ocean-deep"] .theme-preview-color:nth-child(5) { background: #fb7185; }

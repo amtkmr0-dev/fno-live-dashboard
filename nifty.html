@@ -8,6 +8,7 @@
   })();
 </script>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quantra Terminal - Nifty 50 specialized Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -722,6 +723,33 @@ body::after {
   50% { opacity: 1; box-shadow: 0 0 12px var(--blue); }
   100% { opacity: 0.3; }
 }
+
+/* TradingView Style Legend */
+.tv-legend {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+.tv-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+.tv-legend-val {
+  color: var(--text-bright);
+}
+.tv-legend-val.up { color: var(--green); }
+.tv-legend-val.down { color: var(--red); }
+
 </style>
 <script src="/static/js/lightweight-charts.js"></script>
 <script src="/static/js/chart.umd.min.js"></script>
@@ -745,7 +773,7 @@ body::after {
 <!-- Header / Navigation -->
 <nav class="q-nav">
   <a href="/" class="q-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
-    <img src="/static/img/logo.png" alt="Quantra Icon" style="height:28px; width:28px; mix-blend-mode: screen;" />
+    <img src="/static/img/quantra-monogram.svg" alt="Quantra" style="height:28px; width:28px; color:var(--accent);" />
     <span class="brand-text" style="font-size:16px;font-weight:800;letter-spacing:1.5px;">QUANTRA</span>
   </a>
 
@@ -963,6 +991,15 @@ body::after {
           </div>
         </div>
       </div>
+
+      <!-- Drawing Tool -->
+      <div style="display: flex; align-items: center; gap: 6px; margin-left: 12px; border-left: 1px solid var(--border); padding-left: 12px;">
+        <button id="drawRayBtn" class="ts-select" style="background: transparent; border: 1px solid transparent; color: var(--text-dim); border-radius: 4px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onclick="toggleDrawingMode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Line
+        </button>
+      </div>
+
       <!-- Checkbox Strike Selector -->
       <div id="strikeSelectorContainer" style="display: none; align-items: center; gap: 10px; overflow-x: auto; max-width: 40%; padding-bottom: 2px;">
         <!-- Checkboxes will be dynamically rendered here -->
@@ -979,16 +1016,23 @@ body::after {
 
     <!-- Live Price Chart -->
     <div class="chart-container" id="tvChartContainer" style="position: relative; display: flex; flex-direction: column; background: #09090b; gap: 4px; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;">
-      <!-- Interactive HUD Legend Overlay -->
-      <div id="chartHudLegend" style="position: absolute; top: 12px; left: 12px; z-index: 20; pointer-events: none; font-family: var(--font-sans); font-size: 11px; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; display: flex; flex-direction: column; gap: 4px; color: var(--text-dim); transition: opacity 0.2s;">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-          <span style="color: var(--text-bright); font-weight: 700;">NIFTY 50 SPOT</span>
-          <span id="hudOhlc" style="letter-spacing: 0.2px;">O: <span class="val">—</span> H: <span class="val">—</span> L: <span class="val">—</span> C: <span class="val">—</span> V: <span class="val">—</span></span>
+
+      <!-- OHLCV Legend Overlay -->
+      <div class="tv-legend" id="tvLegend">
+        <div class="tv-legend-row" style="font-size: 15px; font-weight: 700; color: var(--text-bright); margin-bottom: 2px;" id="tvLegendSymbol">NIFTY</div>
+        <div class="tv-legend-row">
+          <span>O <span class="tv-legend-val" id="legO">—</span></span>
+          <span>H <span class="tv-legend-val" id="legH">—</span></span>
+          <span>L <span class="tv-legend-val" id="legL">—</span></span>
+          <span>C <span class="tv-legend-val" id="legC">—</span></span>
+          <span style="margin-left:4px;">Chg <span class="tv-legend-val" id="legChg">—</span></span>
         </div>
-        <div id="hudOiDetails" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 3px; font-weight: 500;">
-          <!-- Dynamic details based on mode will render here -->
+        <div class="tv-legend-row" style="font-size: 12px; margin-top: 2px;">
+          <span>Vol <span class="tv-legend-val" style="color: var(--blue);" id="legV">—</span></span>
         </div>
       </div>
+
+
       <div id="priceChartContainer" style="flex: 1; min-height: 0; width: 100%;"></div>
       <div id="oiChartContainer" style="display: none; flex: 1; min-height: 0; width: 100%; border-top: 1px solid var(--border);"></div>
     </div>
@@ -1303,6 +1347,23 @@ function updateSeriesVisibility() {
   });
 }
 
+
+// === TRADINGVIEW PRO DRAWING ===
+let isDrawingMode = false;
+function toggleDrawingMode() {
+  isDrawingMode = !isDrawingMode;
+  const btn = document.getElementById('drawRayBtn');
+  if (isDrawingMode) {
+    btn.style.background = 'var(--blue-soft)';
+    btn.style.color = 'var(--text-bright)';
+    document.getElementById('tvChartContainer').style.cursor = 'crosshair';
+  } else {
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--text-dim)';
+    document.getElementById('tvChartContainer').style.cursor = 'default';
+  }
+}
+
 function getStrikeColor(strike, type) {
   const diff = parseFloat(strike) - parseFloat(currentATMStrike);
   const isCE = type === 'ce';
@@ -1452,7 +1513,17 @@ function initLocalChart() {
 
     // 1.1 Create Price Chart (Top Pane)
     priceChartInstance = LightweightCharts.createChart(priceContainer, {
-      layout: {
+      
+      watermark: {
+        color: 'rgba(255, 255, 255, 0.04)',
+        visible: true,
+        text: 'NIFTY' + ' 5m',
+        fontSize: 120,
+        fontFamily: 'Outfit, sans-serif',
+        horzAlign: 'center',
+        vertAlign: 'center',
+      },
+layout: {
         background: { type: 'solid', color: themeColors.bgColor },
         textColor: themeColors.textColor,
         fontFamily: 'Outfit, Inter, sans-serif',
@@ -1524,7 +1595,17 @@ function initLocalChart() {
 
     // 1.2 Create OI Chart (Bottom Pane)
     oiLightweightChartInstance = LightweightCharts.createChart(oiContainer, {
-      layout: {
+      
+      watermark: {
+        color: 'rgba(255, 255, 255, 0.04)',
+        visible: true,
+        text: 'NIFTY' + ' 5m',
+        fontSize: 120,
+        fontFamily: 'Outfit, sans-serif',
+        horzAlign: 'center',
+        vertAlign: 'center',
+      },
+layout: {
         background: { type: 'solid', color: themeColors.bgColor },
         textColor: themeColors.textColor,
         fontFamily: 'Outfit, Inter, sans-serif',
@@ -1671,6 +1752,24 @@ function initLocalChart() {
     });
 
     // 1.5 Setup Resize Observers
+    
+    // Handle Drawing Clicks
+    priceChartInstance.subscribeClick(param => {
+      if (!isDrawingMode || !param.point) return;
+      const price = priceSeries.coordinateToPrice(param.point.y);
+      if (price !== null) {
+        priceSeries.createPriceLine({
+          price: price,
+          color: 'rgba(59, 130, 246, 0.8)',
+          lineWidth: 2,
+          lineStyle: 0,
+          axisLabelVisible: true,
+          title: 'Level',
+        });
+        toggleDrawingMode();
+      }
+    });
+
     priceChartResizeObserver = new ResizeObserver(entries => {
       if (priceChartInstance && entries[0]) {
         const { width, height } = entries[0].contentRect;
@@ -1805,6 +1904,26 @@ function updateHudLegend(time) {
     candle = lastCandlesArray[lastCandlesArray.length - 1];
   }
   
+  
+  // TV Pro Legend Update
+  document.getElementById('tvLegendSymbol').innerText = 'NIFTY';
+  document.getElementById('legO').innerText = candle.open.toFixed(2);
+  document.getElementById('legH').innerText = candle.high.toFixed(2);
+  document.getElementById('legL').innerText = candle.low.toFixed(2);
+  const closeEl = document.getElementById('legC');
+  closeEl.innerText = candle.close.toFixed(2);
+  
+  const legChgEl = document.getElementById('legChg');
+  const chgVal = candle.close - candle.open;
+  const chgPctVal = (chgVal / candle.open) * 100;
+  const signVal = chgVal >= 0 ? '+' : '';
+  legChgEl.innerText = `${signVal}${chgVal.toFixed(2)} (${signVal}${chgPctVal.toFixed(2)}%)`;
+  
+  closeEl.className = 'tv-legend-val ' + (chgVal >= 0 ? 'up' : 'down');
+  legChgEl.className = 'tv-legend-val ' + (chgVal >= 0 ? 'up' : 'down');
+  
+  document.getElementById('legV').innerText = candle.volume ? formatCompactNumber(candle.volume) : '—';
+
   // 1. Update OHLCV values
   const hudOhlc = document.getElementById('hudOhlc');
   if (hudOhlc) {
@@ -2319,6 +2438,15 @@ async function updateNiftyData() {
     
     // Hide Global Loader on any successful or even partial fetch (if 200 returned)
     document.getElementById('loadingOverlay').classList.add('hide');
+    const connTextEl = document.getElementById('connText');
+    if (connTextEl) {
+      connTextEl.innerText = 'Live';
+      connTextEl.style.color = 'var(--green)';
+    }
+    const connDotEl = document.getElementById('connDot');
+    if (connDotEl) connDotEl.className = 'conn-dot on';
+    const pulseDotEl = document.getElementById('pulseDot');
+    if (pulseDotEl) pulseDotEl.className = 'pulse-dot';
     
     // Update Stats Card values with strong null-guards
     const spotPrice = data.spot_price;
@@ -2421,6 +2549,15 @@ async function updateNiftyData() {
   } catch (error) {
     console.error("Failed fetching live Nifty dashboard data: ", error);
     document.getElementById('loadingOverlay').classList.add('hide');
+    const connTextEl = document.getElementById('connText');
+    if (connTextEl) {
+      connTextEl.innerText = 'Live';
+      connTextEl.style.color = 'var(--green)';
+    }
+    const connDotEl = document.getElementById('connDot');
+    if (connDotEl) connDotEl.className = 'conn-dot on';
+    const pulseDotEl = document.getElementById('pulseDot');
+    if (pulseDotEl) pulseDotEl.className = 'pulse-dot';
     
     document.getElementById('connText').innerText = "Reconnecting...";
     document.getElementById('connText').style.color = "var(--text-dim)";
