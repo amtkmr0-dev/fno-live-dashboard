@@ -1,0 +1,269 @@
+/* ============================================================
+   Nifty page reskin — 2026-05-26
+   Drop-in stylesheet that polishes the existing nifty.html layout
+   without touching its DOM structure or JS.
+
+   Activate: <link rel="stylesheet" href="/static/css/nifty-reskin.css">
+   Revert:   remove that one link line.
+
+   Goals:
+   - Tighter, professional vital-signs strip on top
+   - Cleaner chart container with subtle border treatment
+   - More legible right panel (OI buildup) with reduced visual chrome
+   - Theme-aware (uses var(--bg), var(--surface), etc.)
+   - Buttons and toggles match the rest of Quantra Onyx
+   ============================================================ */
+
+/* ---- 1. Page shell ---------------------------------------- */
+body {
+  background: var(--bg) !important;
+}
+.dashboard-container {
+  gap: 14px !important;
+  padding: 14px !important;
+}
+
+/* ---- 2. Stats grid → compact horizontal vital-signs strip ---- */
+.stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 1px !important;
+  background: var(--border) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18) !important;
+  margin-bottom: 14px !important;
+}
+.stats-grid .stat-item {
+  background: var(--surface) !important;
+  padding: 16px 18px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  transition: background 0.2s ease !important;
+}
+.stats-grid .stat-item:hover {
+  background: var(--surface-hover) !important;
+}
+.stats-grid .stat-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  color: var(--text-vdim) !important;
+  margin-bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.stats-grid .stat-label svg {
+  width: 12px !important;
+  height: 12px !important;
+  color: var(--accent) !important;
+  opacity: 0.7;
+}
+.stats-grid .stat-value,
+.stats-grid #spotPrice,
+.stats-grid #pcrValue,
+.stats-grid #maxPainValue,
+.stats-grid #expiryValue,
+.stats-grid #buildupGaugeText {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: var(--text-bright) !important;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace !important;
+  line-height: 1 !important;
+  letter-spacing: -0.5px !important;
+}
+.stats-grid .stat-sub {
+  font-size: 11px !important;
+  color: var(--text-dim) !important;
+  font-weight: 500 !important;
+  margin-top: 2px !important;
+}
+.stats-grid .stat-sub.pos-val { color: var(--green) !important; }
+.stats-grid .stat-sub.neg-val { color: var(--red) !important; }
+
+/* Spot stat: pin price colour to bright, change badge below it */
+#spotStat #spotPrice { color: var(--text-bright) !important; }
+#spotStat #spotChg {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  width: fit-content !important;
+}
+#spotStat #spotChg.pos-val {
+  background: rgba(16, 185, 129, 0.10) !important;
+  color: var(--green-text, var(--green)) !important;
+}
+#spotStat #spotChg.neg-val {
+  background: rgba(244, 63, 94, 0.10) !important;
+  color: var(--red-text, var(--red)) !important;
+}
+
+/* Buildup gauge: hide the noisy SVG circle, keep the badge */
+#buildupStat .gauge-container,
+#buildupStat svg.gauge-svg { display: none !important; }
+#buildupGaugeText { color: var(--text-bright) !important; }
+
+/* ---- 3. Chart container — clean, full-bleed ---- */
+.chart-container,
+#tvChartContainer {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.20) !important;
+}
+.chart-container:hover {
+  border-color: var(--border-light, var(--border)) !important;
+}
+
+/* TV-style legend overlay polish */
+.tv-legend {
+  background: rgba(15, 17, 22, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+  font-size: 12px !important;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace !important;
+  color: var(--text-dim) !important;
+  letter-spacing: 0.3px !important;
+}
+.tv-legend-row { gap: 14px !important; }
+.tv-legend-val { color: var(--text-bright) !important; font-weight: 600 !important; }
+.tv-legend-val.up   { color: var(--green) !important; }
+.tv-legend-val.down { color: var(--red) !important; }
+
+/* ---- 4. Mode-toggle buttons — unified pill row ---- */
+.ts-select,
+[onclick*="setChartMode"],
+[onclick*="toggleLowerPanel"],
+[onclick*="setMultiStrikeLineMode"],
+[onclick*="setOiBuildupMode"] {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-dim) !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 5px 12px !important;
+  border-radius: 6px !important;
+  letter-spacing: 0.3px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+.ts-select:hover,
+[onclick*="setChartMode"]:hover,
+[onclick*="toggleLowerPanel"]:hover,
+[onclick*="setMultiStrikeLineMode"]:hover,
+[onclick*="setOiBuildupMode"]:hover {
+  color: var(--text-bright) !important;
+  border-color: var(--accent) !important;
+}
+.ts-select.active {
+  background: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+  color: var(--text-bright) !important;
+  box-shadow: 0 2px 6px var(--accent-soft) !important;
+}
+
+/* Toggle group container — drop the inner background, let buttons breathe */
+[onclick*="setChartMode"]:not(.ts-select),
+[style*="background: rgba(0,0,0,0.3)"] {
+  background: transparent !important;
+}
+[role="group"],
+.ts-select + .ts-select {
+  margin-left: 4px !important;
+}
+
+/* Hide the verbose VIEW MODE / LOWER PANEL / LINE TYPE labels — buttons
+   speak for themselves. Saves 3 lines of label text per row. */
+.stat-label[style*="VIEW MODE"],
+.stat-label[style*="LOWER PANEL"],
+.stat-label[style*="LINE TYPE"] {
+  display: none !important;
+}
+
+/* ---- 5. Right panel — OI Buildup card ---- */
+.right-panel { gap: 14px !important; }
+
+#oiBuildupCard,
+.q-card.oi-container {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18) !important;
+}
+
+#oiBuildupCard .q-card-title {
+  border-bottom: 1px solid var(--border) !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+.oi-chart-wrapper {
+  padding: 8px 4px !important;
+}
+
+/* Cache age badge — softer, more aligned */
+.cache-badge,
+#cacheBadge {
+  background: var(--surface-alt, var(--surface)) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-vdim) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: 0.6px !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+}
+
+/* ---- 6. Strike selector & sub-toggles ---- */
+#strikeSelectorContainer {
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+#strikeSelectorContainer button,
+#strikeSelectorContainer .strike-btn {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  padding: 4px 10px !important;
+  border-radius: 4px !important;
+}
+
+/* ---- 7. HUD details below the chart ---- */
+#hudOhlc,
+#hudOiDetails {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  color: var(--text-dim) !important;
+  letter-spacing: 0.2px !important;
+}
+
+/* ---- 8. Loading overlay polish ---- */
+#loadingOverlay {
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ---- 9. Responsive ---- */
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 720px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
