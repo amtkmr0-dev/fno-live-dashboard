@@ -1639,7 +1639,70 @@
   --theme-description: "Calm teal, focus mode";
 }
 
+/* ---- Bloomberg Pro ---------------------------------------- */
+/* Authentic terminal experience: pure black + signature amber +    */
+/* cyan headers. Inspired by the classic Bloomberg terminal that    */
+/* every desk on Wall Street has glowed at since the 80s.           */
+:root[data-theme="bloomberg-pro"] {
+  --bg: #000000;
+  --surface: #0a0805;
+  --surface-alt: #14100a;
+  --surface-hover: #1f1810;
+  --surface-active: #2a2015;
+  --bg-elevated: #0a0805;
+
+  --border: #2a2015;
+  --border-light: #3d2f1f;
+  --border-dark: #14100a;
+  --border-focus: #ffb000;
+
+  --text: #ffb000;
+  --text-dim: #cc8c00;
+  --text-vdim: #8c6000;
+  --text-bright: #ffd06b;
+  --text-muted: #5a3d00;
+
+  --accent: #ffb000;
+  --accent-hover: #ffc94d;
+  --accent-soft: rgba(255, 176, 0, 0.18);
+
+  --green: #00cc66;
+  --green-soft: rgba(0, 204, 102, 0.20);
+  --green-text: #33ff99;
+  --green-hover: #00a352;
+
+  --red: #ff3333;
+  --red-soft: rgba(255, 51, 51, 0.20);
+  --red-text: #ff6666;
+  --red-hover: #cc0000;
+
+  --blue: #00bfff;
+  --blue-soft: rgba(0, 191, 255, 0.18);
+  --blue-text: #66d9ff;
+
+  --orange: #ffb000;
+  --orange-soft: rgba(255, 176, 0, 0.18);
+
+  --purple: #c77dff;
+  --purple-soft: rgba(199, 125, 255, 0.18);
+
+  --yellow: #ffd700;
+  --yellow-soft: rgba(255, 215, 0, 0.18);
+
+  --cyan: #00bfff;
+  --gold: #ffb000;
+
+  --theme-name: "Bloomberg Pro";
+  --theme-description: "Authentic terminal amber, cyan headers";
+}
+
 /* ---- Premium swatches for theme-explorer cards ------------ */
+.theme-card[data-theme="bloomberg-pro"] .theme-preview-color:nth-child(1) { background: #000000; }
+.theme-card[data-theme="bloomberg-pro"] .theme-preview-color:nth-child(2) { background: #0a0805; }
+.theme-card[data-theme="bloomberg-pro"] .theme-preview-color:nth-child(3) { background: #ffb000; }
+.theme-card[data-theme="bloomberg-pro"] .theme-preview-color:nth-child(4) { background: #00bfff; }
+.theme-card[data-theme="bloomberg-pro"] .theme-preview-color:nth-child(5) { background: #00cc66; }
+
 .theme-card[data-theme="aurora"] .theme-preview-color:nth-child(1) { background: #0a0717; }
 .theme-card[data-theme="aurora"] .theme-preview-color:nth-child(2) { background: #11102a; }
 .theme-card[data-theme="aurora"] .theme-preview-color:nth-child(3) { background: #a78bfa; }

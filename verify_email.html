@@ -1,675 +1,519 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="bloomberg-pro">
+<html lang="en" data-theme="quantra-onyx">
 <head>
-<script>
-  (function(){
-    var t = localStorage.getItem('quantra-theme');
-    if (t) document.documentElement.setAttribute('data-theme', t);
-  })();
-</script>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Verify Email — Quantra Terminal</title>
+<meta name="description" content="Verify your email address to unlock your Quantra Terminal workspace." />
 <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verify Email — QUANTRA Terminal</title>
-<meta name="description" content="Verify your email address to unlock your institutional Quantra Terminal workspace.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/css/themes.css" />
 <style>
-/* ============================================================
-   QUANTRA Terminal — Professional Premium Theme
-   Ultra-High Fidelity Email Verification Page
-   ============================================================ */
-
-:root {
-  --bg:            #050508;
-  --surface:       rgba(20, 20, 27, 0.45);
-  --surface-hover: rgba(30, 30, 42, 0.6);
-  --border:        rgba(255, 255, 255, 0.06);
-  --border-focus:  #3b82f6;
-  --text:          #d1d1f0;
-  --text-dim:      #7878a3;
-  --text-vdim:     #4d4d73;
-  --text-bright:   #f3f3ff;
-  --accent:        #3b82f6;
-  --accent-glow:   rgba(59, 130, 246, 0.4);
-  --green:         #10b981;
-  --green-glow:    rgba(16, 185, 129, 0.4);
-  --red:           #ef4444;
-  --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono:     'JetBrains Mono', monospace;
-  --radius-md:     10px;
-  --radius-lg:     16px;
-  --radius-xl:     24px;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; width: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px; line-height: 1.5;
+  background: var(--bg); color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; -webkit-font-smoothing: antialiased; }
 body {
-  font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 24px;
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 20%, var(--accent-soft) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
+    var(--bg);
   position: relative;
+  overflow: hidden;
 }
-
-/* ---- Glowing Mesh Background ---- */
-.mesh-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.grid-bg {
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.16;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 80%);
+  pointer-events: none;
   z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-.mesh-orb-1 {
-  position: absolute;
-  top: -10%;
-  left: 20%;
-  width: 700px;
-  height: 700px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(59,130,246,0.11) 0%, transparent 65%);
-  filter: blur(80px);
-  animation: floatOrb 18s ease-in-out infinite alternate;
-}
-.mesh-orb-2 {
-  position: absolute;
-  bottom: -20%;
-  right: 10%;
-  width: 800px;
-  height: 800px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 60%);
-  filter: blur(100px);
-  animation: floatOrb 24s ease-in-out infinite alternate-reverse;
-}
-@keyframes floatOrb {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(40px, -40px) scale(1.1); }
 }
 
-/* ---- Decorative Grid ---- */
-.grid-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 40px 40px;
-  z-index: 1;
-  pointer-events: none;
+.theme-switcher { position: absolute; top: 24px; right: 24px; z-index: 5; }
+.theme-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; background: var(--surface-alt);
+  border: 1px solid var(--border); border-radius: 10px;
+  color: var(--text-dim); font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.18s ease;
 }
+.theme-btn:hover { border-color: var(--accent); color: var(--text-bright); }
+.theme-btn svg { width: 14px; height: 14px; }
+.theme-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; width: 280px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4); display: none; z-index: 10;
+  max-height: 70vh; overflow-y: auto;
+}
+.theme-menu.open { display: block; }
+.theme-menu .group {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--text-vdim); padding: 10px 8px 6px;
+}
+.theme-pill { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+.theme-pill:hover { background: var(--surface-hover); }
+.theme-pill.active { background: var(--accent-soft); }
+.theme-pill .swatches { display: inline-flex; gap: 3px; }
+.theme-pill .sw { width: 10px; height: 14px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.05); }
+.theme-pill .name { font-size: 13px; color: var(--text); font-weight: 500; }
 
-/* ---- Main Card ---- */
-.card-wrapper {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 440px;
-}
 .card {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 480px;
   background: var(--surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 48px 40px;
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s;
-}
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), #06b6d4);
+  border-radius: 18px;
+  padding: 40px 36px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
-/* ---- Brand Header ---- */
-.brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 16px;
-  color: var(--text-bright);
-  letter-spacing: 2px;
-  margin-bottom: 36px;
-  text-transform: uppercase;
-}
-.brand-icon {
-  width: 24px;
-  height: 24px;
-  filter: drop-shadow(0 0 8px var(--accent));
-}
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+.brand img { width: 36px; height: 36px; }
+.brand .name { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-bright); }
+.brand .name .dim { color: var(--text-vdim); font-weight: 500; }
 
-/* ---- Header Content ---- */
-.icon-container {
-  width: 60px;
-  height: 60px;
+.icon-circle {
+  width: 64px; height: 64px;
   border-radius: 50%;
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 20px;
-  font-size: 24px;
-  position: relative;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.05);
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 22px;
 }
-.icon-container::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 1px solid var(--accent);
-  opacity: 0.15;
-  animation: pulseIcon 2s infinite;
-}
-@keyframes pulseIcon {
-  0% { transform: scale(1); opacity: 0.25; }
-  100% { transform: scale(1.3); opacity: 0; }
-}
+.icon-circle svg { width: 28px; height: 28px; }
 
-.card-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-bright);
-  text-align: center;
-  margin-bottom: 8px;
-  letter-spacing: -0.3px;
-}
-.card-sub {
-  font-size: 13px;
-  color: var(--text-dim);
-  text-align: center;
-  margin-bottom: 32px;
-  line-height: 1.6;
-}
-.email-display {
-  color: var(--text-bright);
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  font-family: var(--font-mono);
-}
+h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.015em; color: var(--text-bright); margin-bottom: 8px; }
+.subtitle { font-size: 14.5px; color: var(--text-dim); margin-bottom: 28px; line-height: 1.55; }
+.subtitle .email { color: var(--text-bright); font-weight: 600; word-break: break-all; }
 
-/* ---- OTP Input row ---- */
-.otp-row {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-bottom: 28px;
-}
+.otp-row { display: flex; gap: 10px; margin-bottom: 22px; justify-content: space-between; }
 .otp-input {
-  width: 52px;
-  height: 60px;
-  background: rgba(10, 10, 15, 0.6);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-md);
+  width: 100%; max-width: 60px; height: 60px;
   text-align: center;
-  font-size: 24px;
-  font-family: var(--font-mono);
-  font-weight: 700;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 24px; font-weight: 700;
   color: var(--text-bright);
-  outline: none;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: 'JetBrains Mono', monospace;
   caret-color: var(--accent);
+  transition: all 0.18s ease;
 }
 .otp-input:focus {
-  border-color: var(--border-focus);
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.5),
-    0 0 16px rgba(59, 130, 246, 0.35);
-  background: rgba(59, 130, 246, 0.04);
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface-alt);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .otp-input.filled {
-  border-color: rgba(59, 130, 246, 0.45);
-  background: rgba(59, 130, 246, 0.08);
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.5),
-    0 0 12px rgba(59, 130, 246, 0.15);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 .otp-input.error {
-  border-color: var(--red) !important;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.25) !important;
-  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-soft);
+  animation: shake 0.4s ease;
 }
 @keyframes shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-  40%, 60% { transform: translate3d(3px, 0, 0); }
+  0%,100% { transform: translateX(0); }
+  25%     { transform: translateX(-4px); }
+  75%     { transform: translateX(4px); }
 }
 
-/* ---- Message Box ---- */
 .error-msg {
-  color: var(--red);
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-  margin-bottom: 16px;
+  font-size: 13px;
   min-height: 18px;
-  transition: opacity 0.2s;
-  letter-spacing: 0.2px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: 500;
 }
 
-/* ---- Button ---- */
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+.btn-primary {
   width: 100%;
   padding: 14px 20px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  border: none;
-  font-family: inherit;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  border: 0; border-radius: 10px; color: #fff;
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  letter-spacing: 0.01em; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform 0.12s, box-shadow 0.18s, opacity 0.15s;
 }
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 4px 20px var(--accent-glow);
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px var(--accent-soft); }
+.btn-primary[disabled] { opacity: 0.7; cursor: not-allowed; transform: none; }
+.btn-primary .spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
-.btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5);
-  transform: translateY(-1px);
-}
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-.btn-primary:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  box-shadow: none;
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---- Resend Layout ---- */
 .resend-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-  font-size: 13px;
+  margin-top: 22px;
+  text-align: center;
+  font-size: 13.5px;
   color: var(--text-dim);
 }
 .resend-btn {
-  color: var(--accent);
-  background: none;
-  border: none;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.2s;
+  background: transparent; border: 0;
+  color: var(--accent); font-weight: 600;
+  cursor: pointer; padding: 0 4px;
+  font-family: inherit; font-size: inherit;
 }
-.resend-btn:hover:not(:disabled) {
-  color: #60a5fa;
-  text-decoration: underline;
-}
-.resend-btn:disabled {
-  color: var(--text-vdim);
-  cursor: default;
-  text-decoration: none;
-}
-.resend-timer {
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-vdim);
-}
+.resend-btn:hover:not([disabled]) { text-decoration: underline; }
+.resend-btn[disabled] { color: var(--text-muted); cursor: not-allowed; }
+.resend-timer { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-left: 4px; }
 
-/* ---- Success State ---- */
-.success-state {
+.back-link {
+  display: block;
   text-align: center;
-  display: none;
-}
-.success-icon {
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1.5px solid rgba(16, 185, 129, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  margin: 0 auto 24px;
-  box-shadow: 0 0 24px var(--green-glow);
-  position: relative;
-}
-.success-icon::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 1.5px solid var(--green);
-  opacity: 0.25;
-  animation: pulseIcon 2s infinite;
-}
-.success-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-bright);
-  margin-bottom: 12px;
-}
-.success-sub {
+  margin-top: 24px;
   font-size: 13px;
-  color: var(--text-dim);
-  margin-bottom: 32px;
-  line-height: 1.6;
+  color: var(--text-vdim);
+  text-decoration: none;
+  transition: color 0.15s;
 }
+.back-link:hover { color: var(--accent); }
+
+/* Success state */
+.success-state {
+  display: none;
+  text-align: center;
+  padding: 16px 0;
+}
+.success-state .icon-circle {
+  margin: 0 auto 22px;
+  background: var(--green-soft);
+  color: var(--green-text);
+}
+.success-state h1 { color: var(--text-bright); }
+.success-state p { color: var(--text-dim); font-size: 14.5px; margin-bottom: 24px; }
 .redirect-bar {
   height: 4px;
-  background: rgba(255,255,255,0.05);
+  background: var(--border);
   border-radius: 2px;
   overflow: hidden;
-  max-width: 240px;
-  margin: 0 auto;
+  margin-top: 16px;
 }
-.redirect-fill {
+.redirect-bar .fill {
   height: 100%;
-  background: var(--green);
-  border-radius: 2px;
-  width: 0%;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent), var(--green));
   transition: width 3s linear;
 }
 
-/* ---- Spinner ---- */
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255,255,255,0.35);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.65s linear infinite;
-  flex-shrink: 0;
+@media (max-width: 480px) {
+  .card { padding: 32px 24px; border-radius: 14px; }
+  .otp-input { height: 52px; font-size: 20px; }
+  h1 { font-size: 22px; }
+  .theme-switcher { top: 16px; right: 16px; }
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 </style>
-  <link rel="stylesheet" href="/static/css/themes.css">
 </head>
 <body>
-<div class="mesh-bg">
-  <div class="mesh-orb-1"></div>
-  <div class="mesh-orb-2"></div>
+
+<div class="grid-bg"></div>
+
+<div class="theme-switcher">
+  <button type="button" class="theme-btn" id="themeBtn" aria-haspopup="true" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="19" cy="13" r="2.5"/><circle cx="6" cy="13" r="2.5"/><circle cx="10" cy="19" r="2.5"/><path d="M12 22a10 10 0 110-20 10 10 0 010 20"/></svg>
+    <span id="themeLabel">Onyx</span>
+  </button>
+  <div class="theme-menu" id="themeMenu" role="menu"></div>
 </div>
-<div class="grid-lines"></div>
 
-<div class="card-wrapper">
-  <div class="card">
-    <div class="brand">
-      <svg class="brand-icon" viewBox="0 0 64 64" fill="none">
-        <defs><linearGradient id="lg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
-        <path d="M32 4C16.5 4 4 16.5 4 32s12.5 28 28 28c5.2 0 10.1-1.4 14.3-3.9L52 62l-2.1-7.7C54.6 50.1 60 41.5 60 32 60 16.5 47.5 4 32 4z" stroke="url(#lg)" stroke-width="3.5" fill="none"/>
+<div class="card">
+  <div class="brand">
+    <img src="/static/img/quantra-monogram.svg" alt="" />
+    <div class="name">QUANTRA <span class="dim">TERMINAL</span></div>
+  </div>
+
+  <div id="verify-state">
+    <div class="icon-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5" width="18" height="14" rx="2"/>
+        <path d="M3 7l9 6 9-6"/>
       </svg>
-      QUANTRA
     </div>
 
-    <!-- Verify state -->
-    <div id="verify-state">
-      <div class="icon-container">✉️</div>
-      <div class="card-title">Check your inbox</div>
-      <div class="card-sub">
-        We sent a 6-digit verification code to<br>
-        <span class="email-display" id="emailDisplay">your email address</span>
-      </div>
+    <h1>Verify your email</h1>
+    <p class="subtitle">
+      We sent a 6-digit verification code to <span class="email" id="emailDisplay">your inbox</span>.
+      Enter it below to activate your account.
+    </p>
 
-      <div class="otp-row" id="otpRow">
-        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp0" autocomplete="one-time-code">
-        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp1">
-        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp2">
-        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp3">
-        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp4">
-        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp5">
-      </div>
-
-      <div class="error-msg" id="errorMsg"></div>
-
-      <button class="btn btn-primary" id="verifyBtn" onclick="submitOTP()">
-        Verify Email Address
-      </button>
-
-      <div class="resend-row">
-        <span>Didn't receive the code?</span>
-        <button class="resend-btn" id="resendBtn" onclick="resendOTP()">Resend</button>
-        <span class="resend-timer" id="resendTimer"></span>
-      </div>
+    <div class="otp-row" id="otpRow">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp0" autocomplete="one-time-code" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp1" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp2" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp3" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp4" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="otp5" />
     </div>
 
-    <!-- Success state -->
-    <div class="success-state" id="successState">
-      <div class="success-icon">✓</div>
-      <div class="success-title">Verification Complete</div>
-      <div class="success-sub">Your email address was successfully verified. Redirecting to workspace…</div>
-      <div class="redirect-bar"><div class="redirect-fill" id="redirectFill"></div></div>
+    <div class="error-msg" id="errorMsg"></div>
+
+    <button class="btn-primary" id="verifyBtn" type="button">
+      <span id="verifyLabel">Verify email</span>
+    </button>
+
+    <div class="resend-row">
+      <span>Didn't get the code?</span>
+      <button class="resend-btn" id="resendBtn" type="button">Resend</button>
+      <span class="resend-timer" id="resendTimer"></span>
     </div>
   </div>
+
+  <div class="success-state" id="successState">
+    <div class="icon-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 13l4 4L19 7"/>
+      </svg>
+    </div>
+    <h1>You're all set</h1>
+    <p>Email verified successfully. Redirecting you to the dashboard…</p>
+    <div class="redirect-bar"><div class="fill" id="redirectFill"></div></div>
+  </div>
+
+  <a class="back-link" href="/login">← Back to sign in</a>
 </div>
 
 <script>
-// Get credentials and set parameters
-var _userId = new URLSearchParams(window.location.search).get('uid') || sessionStorage.getItem('verify_uid');
-var _email = new URLSearchParams(window.location.search).get('email') || sessionStorage.getItem('verify_email');
-var _resendCountdown = 30;
-var _resendTimer = null;
+(function () {
+  /* ── Theme switcher ──────────────────────────────────────────────────── */
+  var THEMES = [
+    { id: 'quantra-onyx',   name: 'Quantra Onyx',   group: 'Quantra', sw: ['#000000','#060608','#00e5ff','#00ff9d'] },
+    { id: 'quantra-carbon', name: 'Quantra Carbon', group: 'Quantra', sw: ['#050508','#0d0e12','#3b82f6','#10b981'] },
+    { id: 'quantra-slate',  name: 'Quantra Slate',  group: 'Quantra', sw: ['#0f1419','#161c24','#6366f1','#14b8a6'] },
+    { id: 'quantra-mint',   name: 'Quantra Mint',   group: 'Quantra', sw: ['#1a1f1d','#21262a','#5eead4','#e07a5f'] },
+    { id: 'quantra-paper',  name: 'Quantra Paper',  group: 'Quantra · Light', sw: ['#fafafa','#ffffff','#2563eb','#15803d'] },
+    { id: 'midnight-blue',  name: 'Midnight Blue',  group: 'Premium', sw: ['#0f172a','#1e293b','#3b82f6','#10b981'] },
+    { id: 'obsidian-black', name: 'Obsidian Black', group: 'Premium', sw: ['#000000','#0a0a0a','#3b82f6','#22c55e'] },
+    { id: 'aurora',         name: 'Aurora',         group: 'Premium', sw: ['#0a0717','#11102a','#a78bfa','#34d399'] },
+    { id: 'bloomberg-pro',  name: 'Bloomberg Pro',  group: 'Premium', sw: ['#000000','#0a0805','#ffb000','#00bfff'] },
+    { id: 'trader-pro',     name: 'Trader Pro',     group: 'Premium', sw: ['#000000','#0a0a0a','#ff9800','#00c853'] },
+    { id: 'sunset-trade',   name: 'Sunset Trade',   group: 'Premium', sw: ['#1a1410','#221c17','#fb923c','#65a30d'] },
+    { id: 'ocean-deep',     name: 'Ocean Deep',     group: 'Premium', sw: ['#051221','#0a1c30','#22d3ee','#2dd4bf'] }
+  ];
+  var DEFAULT_THEME = 'quantra-onyx';
+  function applyTheme(id) {
+    document.documentElement.setAttribute('data-theme', id);
+    try { localStorage.setItem('quantra_theme', id); } catch (_) {}
+    var t = THEMES.find(function (x) { return x.id === id; });
+    var label = document.getElementById('themeLabel');
+    if (label && t) label.textContent = t.name.replace('Quantra ', '');
+    document.querySelectorAll('.theme-pill').forEach(function (el) {
+      el.classList.toggle('active', el.getAttribute('data-id') === id);
+    });
+  }
+  function buildThemeMenu() {
+    var menu = document.getElementById('themeMenu');
+    var groups = {};
+    THEMES.forEach(function (t) { (groups[t.group] = groups[t.group] || []).push(t); });
+    var html = '';
+    Object.keys(groups).forEach(function (g) {
+      html += '<div class="group">' + g + '</div>';
+      groups[g].forEach(function (t) {
+        html += '<div class="theme-pill" data-id="' + t.id + '" role="menuitem" tabindex="0">';
+        html += '<span class="swatches">';
+        t.sw.forEach(function (c) { html += '<span class="sw" style="background:' + c + '"></span>'; });
+        html += '</span><span class="name">' + t.name + '</span></div>';
+      });
+    });
+    menu.innerHTML = html;
+    menu.querySelectorAll('.theme-pill').forEach(function (el) {
+      el.addEventListener('click', function () {
+        applyTheme(el.getAttribute('data-id'));
+        document.getElementById('themeMenu').classList.remove('open');
+      });
+    });
+  }
+  var saved;
+  try { saved = localStorage.getItem('quantra_theme'); } catch (_) { saved = null; }
+  buildThemeMenu();
+  applyTheme(saved && THEMES.some(function (t) { return t.id === saved; }) ? saved : DEFAULT_THEME);
 
-if (_email) {
-  document.getElementById('emailDisplay').textContent = _email;
-}
+  var themeBtn = document.getElementById('themeBtn');
+  var themeMenu = document.getElementById('themeMenu');
+  themeBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    themeMenu.classList.toggle('open');
+    themeBtn.setAttribute('aria-expanded', themeMenu.classList.contains('open') ? 'true' : 'false');
+  });
+  document.addEventListener('click', function () { themeMenu.classList.remove('open'); });
+  themeMenu.addEventListener('click', function (e) { e.stopPropagation(); });
 
-// ── CSRF POST Helper ──
-function getCsrf() {
-  var m = document.cookie.match(/(?:^|;\s*)quantra_csrf=([^;]*)/);
-  return m ? m[1] : '';
-}
+  /* ── OTP verification ────────────────────────────────────────────────── */
+  var _userId = new URLSearchParams(window.location.search).get('uid') || sessionStorage.getItem('verify_uid');
+  var _email  = new URLSearchParams(window.location.search).get('email') || sessionStorage.getItem('verify_email');
+  if (_email) document.getElementById('emailDisplay').textContent = _email;
 
-function post(url, body) {
-  return fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': getCsrf()
-    },
-    credentials: 'same-origin',
-    body: JSON.stringify(body)
-  }).then(r => r.json());
-}
+  var _resendCountdown = 30;
+  var _resendTimer = null;
 
-// ── OTP input row control ──
-var inputs = Array.from(document.querySelectorAll('.otp-input'));
+  function post(url, body) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body || {})
+    }).then(function (r) { return r.json(); });
+  }
 
-inputs.forEach(function(inp, i) {
-  inp.addEventListener('input', function(e) {
-    var val = e.target.value.replace(/\D/g, '');
-    e.target.value = val.slice(-1);
-    if (val) {
-      e.target.classList.add('filled');
-      if (i < 5) inputs[i + 1].focus();
-      // Auto-submit when all filled
-      if (inputs.every(el => el.value)) submitOTP();
+  var inputs = Array.from(document.querySelectorAll('.otp-input'));
+  var errorMsg = document.getElementById('errorMsg');
+  var verifyBtn = document.getElementById('verifyBtn');
+  var verifyLabel = document.getElementById('verifyLabel');
+
+  function clearError() {
+    errorMsg.style.color = '';
+    errorMsg.textContent = '';
+    inputs.forEach(function (i) { i.classList.remove('error'); });
+  }
+  function showError(msg) {
+    errorMsg.style.color = 'var(--red-text)';
+    errorMsg.textContent = msg;
+    inputs.forEach(function (i) { i.classList.add('error'); i.classList.remove('filled'); });
+    setTimeout(function () { inputs.forEach(function (i) { i.classList.remove('error'); }); }, 500);
+  }
+  function setLoading(loading) {
+    if (loading) {
+      verifyBtn.innerHTML = '<span class="spinner"></span> Verifying…';
+      verifyBtn.disabled = true;
     } else {
-      e.target.classList.remove('filled');
+      verifyBtn.innerHTML = '<span id="verifyLabel">Verify email</span>';
+      verifyBtn.disabled = false;
     }
-    clearError();
-  });
+  }
+  function getOTP() { return inputs.map(function (i) { return i.value; }).join(''); }
 
-  inp.addEventListener('keydown', function(e) {
-    if (e.key === 'Backspace' && !e.target.value && i > 0) {
-      inputs[i - 1].focus();
-      inputs[i - 1].value = '';
-      inputs[i - 1].classList.remove('filled');
-    }
-    if (e.key === 'ArrowLeft' && i > 0) inputs[i - 1].focus();
-    if (e.key === 'ArrowRight' && i < 5) inputs[i + 1].focus();
-  });
-
-  inp.addEventListener('paste', function(e) {
-    e.preventDefault();
-    var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
-    pasted.split('').forEach(function(ch, j) {
-      if (inputs[j]) {
-        inputs[j].value = ch;
-        inputs[j].classList.add('filled');
+  inputs.forEach(function (inp, i) {
+    inp.addEventListener('input', function (e) {
+      var v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      if (v) {
+        e.target.classList.add('filled');
+        if (i < 5) inputs[i + 1].focus();
+        if (inputs.every(function (el) { return el.value; })) submitOTP();
+      } else {
+        e.target.classList.remove('filled');
+      }
+      if (errorMsg.textContent) clearError();
+    });
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'Backspace' && !inp.value && i > 0) {
+        inputs[i - 1].focus();
+      } else if (e.key === 'ArrowLeft' && i > 0) {
+        inputs[i - 1].focus();
+      } else if (e.key === 'ArrowRight' && i < 5) {
+        inputs[i + 1].focus();
       }
     });
-    if (pasted.length === 6) submitOTP();
-  });
-});
-
-inputs[0].focus();
-
-function getOTP() {
-  return inputs.map(i => i.value).join('');
-}
-
-function clearError() {
-  document.getElementById('errorMsg').textContent = '';
-  document.getElementById('errorMsg').style.color = '';
-  inputs.forEach(i => i.classList.remove('error'));
-}
-
-function showError(msg) {
-  document.getElementById('errorMsg').style.color = 'var(--red)';
-  document.getElementById('errorMsg').textContent = msg;
-  inputs.forEach(i => { i.classList.add('error'); i.classList.remove('filled'); });
-  setTimeout(() => inputs.forEach(i => i.classList.remove('error')), 500);
-}
-
-function setLoading(loading) {
-  var btn = document.getElementById('verifyBtn');
-  if (loading) {
-    btn.innerHTML = '<div class="spinner"></div> Verifying…';
-    btn.disabled = true;
-  } else {
-    btn.innerHTML = 'Verify Email Address';
-    btn.disabled = false;
-  }
-}
-
-function submitOTP() {
-  var otp = getOTP();
-  if (otp.length !== 6) {
-    showError('Please enter all 6 digits');
-    return;
-  }
-  setLoading(true);
-  clearError();
-
-  var body = { otp: otp };
-  if (_userId) body.user_id = parseInt(_userId);
-
-  post('/api/auth/verify-email', body)
-  .then(d => {
-    if (d.ok) {
-      showSuccess();
-    } else {
-      setLoading(false);
-      showError(d.error || 'Invalid OTP. Please try again.');
-      inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
-      inputs[0].focus();
-    }
-  })
-  .catch(() => {
-    setLoading(false);
-    showError('Network error. Please try again.');
-  });
-}
-
-function showSuccess() {
-  document.getElementById('verify-state').style.display = 'none';
-  var s = document.getElementById('successState');
-  s.style.display = 'block';
-  // Animate redirect bar
-  setTimeout(() => {
-    document.getElementById('redirectFill').style.width = '100%';
-  }, 100);
-  // Redirect
-  setTimeout(() => {
-    window.location.href = '/';
-  }, 3200);
-}
-
-function startResendCountdown() {
-  _resendCountdown = 30;
-  var btn = document.getElementById('resendBtn');
-  var timer = document.getElementById('resendTimer');
-  btn.disabled = true;
-  _resendTimer = setInterval(function() {
-    _resendCountdown--;
-    timer.textContent = '(' + _resendCountdown + 's)';
-    if (_resendCountdown <= 0) {
-      clearInterval(_resendTimer);
-      btn.disabled = false;
-      timer.textContent = '';
-    }
-  }, 1000);
-}
-
-function resendOTP() {
-  var btn = document.getElementById('resendBtn');
-  btn.disabled = true;
-
-  var body = {};
-  if (_userId) body.user_id = parseInt(_userId);
-
-  post('/api/auth/resend-otp', body)
-  .then(d => {
-    if (d.ok) {
-      clearError();
-      var msg = document.getElementById('errorMsg');
-      msg.style.color = 'var(--green)';
-      msg.textContent = '✓ New OTP verification code sent!';
-      setTimeout(() => {
-        if (msg.textContent.includes('✓')) {
-          msg.textContent = '';
+    inp.addEventListener('paste', function (e) {
+      e.preventDefault();
+      var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      pasted.split('').forEach(function (ch, idx) {
+        if (inputs[idx]) {
+          inputs[idx].value = ch;
+          inputs[idx].classList.add('filled');
         }
-      }, 4000);
-      startResendCountdown();
-    } else {
-      btn.disabled = false;
-      showError(d.error || 'Failed to resend code. Try again.');
-    }
-  })
-  .catch(() => {
-    btn.disabled = false;
-    showError('Network error. Please try again.');
+      });
+      if (pasted.length === 6) submitOTP();
+      else if (pasted.length > 0) inputs[Math.min(pasted.length, 5)].focus();
+    });
   });
-}
+  inputs[0].focus();
 
-startResendCountdown();
+  function submitOTP() {
+    var otp = getOTP();
+    if (otp.length !== 6) { showError('Please enter all 6 digits'); return; }
+    setLoading(true); clearError();
+    var body = { otp: otp };
+    if (_userId) body.user_id = parseInt(_userId);
+
+    post('/api/auth/verify-email', body)
+      .then(function (d) {
+        if (d.ok) {
+          showSuccess();
+        } else {
+          setLoading(false);
+          showError(d.error || 'Invalid OTP. Please try again.');
+          inputs.forEach(function (i) { i.value = ''; i.classList.remove('filled'); });
+          inputs[0].focus();
+        }
+      })
+      .catch(function () {
+        setLoading(false);
+        showError('Network error. Please try again.');
+      });
+  }
+  verifyBtn.addEventListener('click', submitOTP);
+
+  function showSuccess() {
+    document.getElementById('verify-state').style.display = 'none';
+    document.getElementById('successState').style.display = 'block';
+    setTimeout(function () { document.getElementById('redirectFill').style.width = '100%'; }, 100);
+    setTimeout(function () { window.location.href = '/'; }, 3200);
+  }
+
+  function startResendCountdown() {
+    _resendCountdown = 30;
+    var btn = document.getElementById('resendBtn');
+    var timer = document.getElementById('resendTimer');
+    btn.disabled = true;
+    _resendTimer = setInterval(function () {
+      _resendCountdown--;
+      timer.textContent = '(' + _resendCountdown + 's)';
+      if (_resendCountdown <= 0) {
+        clearInterval(_resendTimer);
+        btn.disabled = false;
+        timer.textContent = '';
+      }
+    }, 1000);
+  }
+  function resendOTP() {
+    var btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    var body = {};
+    if (_userId) body.user_id = parseInt(_userId);
+    post('/api/auth/resend-otp', body)
+      .then(function (d) {
+        if (d.ok) {
+          clearError();
+          errorMsg.style.color = 'var(--green-text)';
+          errorMsg.textContent = '✓ New verification code sent';
+          setTimeout(function () { if (errorMsg.textContent.indexOf('✓') >= 0) errorMsg.textContent = ''; }, 4000);
+          startResendCountdown();
+        } else {
+          btn.disabled = false;
+          showError(d.error || 'Failed to resend code. Try again.');
+        }
+      })
+      .catch(function () {
+        btn.disabled = false;
+        showError('Network error. Please try again.');
+      });
+  }
+  document.getElementById('resendBtn').addEventListener('click', resendOTP);
+
+  startResendCountdown();
+})();
 </script>
 </body>
 </html>

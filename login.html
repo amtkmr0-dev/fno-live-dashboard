@@ -1,2202 +1,829 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="bloomberg-pro">
+<html lang="en" data-theme="quantra-onyx">
 <head>
-<script>
-  (function(){
-    var t = localStorage.getItem('quantra-theme');
-    if (t) document.documentElement.setAttribute('data-theme', t);
-  })();
-</script>
-<meta charset="UTF-8">
-<link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Quantra Terminal — Sign In</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/minimal-pro-theme.css">
+<meta name="description" content="The trader's edge, decoded. Real-time options chain, live OI flow, and smart signals for India's F&O market." />
+<link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/css/themes.css" />
 <style>
-/* ── Obsidian Cyber-Tech Core Design Tokens ───────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
+/* ============================================================
+   Quantra Terminal — Login Page (2026-05-26 redesign)
+   Split layout: brand canvas (left) + auth form (right)
+   Theme-aware via CSS vars from /static/css/themes.css
+   ============================================================ */
 
-:root {
-  --bg:           hsl(240, 16%, 2.5%); /* Midnight obsidian space background */
-  --bg-darker:    hsl(240, 20%, 1.2%); /* Purer black for overlays */
-  --surface:      hsla(240, 10%, 6%, 0.45); /* High-saturate satin glass */
-  --border:       hsla(240, 8%, 16%, 0.5); /* Slate border */
-  --border-hover: hsla(240, 8%, 25%, 0.7); /* Mid Slate border */
-  --border-focus: hsl(210, 100%, 55%); /* Electric Blue */
-  --text:         hsl(0, 0%, 98%); /* Crisp premium white */
-  --text-dim:     hsl(240, 5%, 65%); /* Muted label slate */
-  --blue:         hsl(215, 100%, 55%); /* Electric Cobalt Blue */
-  --blue-hover:   hsl(215, 100%, 48%);
-  --cyan:         hsl(180, 100%, 45%); /* Neon Cyan */
-  --green:        hsl(150, 85%, 42%); /* Emerald Green */
-  --red:          hsl(355, 85%, 55%); /* Volcanic Red */
-  --font:         'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:    SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  font-family: var(--font);
-  background-color: var(--bg);
-  color: var(--text);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
   min-height: 100vh;
-  display: flex;
   overflow: hidden;
+}
+
+/* ---- BRAND CANVAS (left) ---------------------------------- */
+
+.canvas {
   position: relative;
-  letter-spacing: -0.2px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 90% 60% at 25% 20%, var(--accent-soft) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 80%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
+    var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  border-right: 1px solid var(--border);
 }
 
-/* ── Animated Background & Particle Layer ───────────────────────────────── */
-.bg-layer {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 80% 50%, hsla(215, 100%, 50%, 0.05) 0%, transparent 55%),
-              radial-gradient(circle at 10% 20%, hsla(180, 100%, 40%, 0.03) 0%, transparent 40%),
-              var(--bg);
-}
-
-/* Cybernetic Grid Overlay */
-.bg-layer::before {
-  content: '';
+/* Animated grid backdrop */
+.grid-bg {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(hsla(215, 100%, 50%, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, hsla(215, 100%, 50%, 0.02) 1px, transparent 1px);
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 56px 56px;
-  mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 90%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 90%);
+  opacity: 0.18;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 80%);
+  pointer-events: none;
 }
 
-/* Breathing Ambient Glow Orb */
-.bg-layer::after {
-  content: '';
+/* Floating glow orbs */
+.orb {
   position: absolute;
-  right: 15%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 650px;
-  height: 650px;
-  background: radial-gradient(circle, hsla(180, 100%, 50%, 0.06) 0%, hsla(215, 100%, 50%, 0.03) 40%, transparent 70%);
   border-radius: 50%;
-  animation: breathe 10s ease-in-out infinite alternate;
-}
-
-@keyframes breathe {
-  0% { transform: translateY(-50%) scale(1); opacity: 0.8; }
-  100% { transform: translateY(-50%) scale(1.15); opacity: 1; filter: blur(20px); }
-}
-
-/* Floating CSS Particles */
-.particles {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+  filter: blur(80px);
+  opacity: 0.45;
   pointer-events: none;
-  overflow: hidden;
+  animation: drift 18s ease-in-out infinite alternate;
 }
-.particle {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background: linear-gradient(to top, var(--blue), var(--cyan));
-  border-radius: 50%;
-  opacity: 0;
-  filter: drop-shadow(0 0 6px var(--cyan));
-  animation: float-up linear infinite;
-}
-.particle:nth-child(1)  { left:  7%; animation-duration: 20s; animation-delay:  0s; }
-.particle:nth-child(2)  { left: 16%; animation-duration: 25s; animation-delay:  4s; }
-.particle:nth-child(3)  { left: 28%; animation-duration: 18s; animation-delay:  7s; }
-.particle:nth-child(4)  { left: 40%; animation-duration: 26s; animation-delay:  2s; }
-.particle:nth-child(5)  { left: 52%; animation-duration: 22s; animation-delay:  5s; }
-.particle:nth-child(6)  { left: 65%; animation-duration: 19s; animation-delay: 10s; }
-.particle:nth-child(7)  { left: 76%; animation-duration: 27s; animation-delay:  3s; }
-.particle:nth-child(8)  { left: 84%; animation-duration: 21s; animation-delay: 12s; }
-.particle:nth-child(9)  { left: 93%; animation-duration: 24s; animation-delay:  6s; }
-.particle:nth-child(10) { left: 48%; animation-duration: 28s; animation-delay: 15s; }
+.orb.a { width: 420px; height: 420px; background: var(--accent); top: -120px; left: -100px; }
+.orb.b { width: 360px; height: 360px; background: var(--cyan, #06b6d4); bottom: -120px; right: -80px; animation-delay: -6s; animation-duration: 22s; }
+.orb.c { width: 240px; height: 240px; background: var(--green); top: 40%; left: 60%; opacity: 0.25; animation-delay: -12s; }
 
-@keyframes float-up {
-  0%   { bottom: -5%; opacity: 0; transform: translateX(0) scale(0.8); }
-  10%  { opacity: 0.6; }
-  90%  { opacity: 0.4; }
-  100% { bottom: 105%; opacity: 0; transform: translateX(35px) scale(1.2); }
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(30px, -20px) scale(1.05); }
+  100% { transform: translate(-20px, 30px) scale(0.97); }
 }
 
-/* ── Split Panel Layout ─────────────────────────────────────────────────── */
-.app {
+/* Brand header */
+.brand {
   position: relative;
-  z-index: 1;
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* ── LEFT PANEL (Aesthetics & Features Showcase) ────────────────────────── */
-.left-panel {
-  display: none;
-  width: 44%;
-  flex-shrink: 0;
-  background: linear-gradient(160deg, hsla(240, 12%, 5%, 0.96) 0%, hsla(240, 20%, 2%, 0.99) 100%);
-  position: relative;
-  overflow: hidden;
-  align-items: center;
-  justify-content: flex-start;
-  flex-direction: column;
-  padding: 60px 48px 24px;
-  border-right: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-/* Double gradient pulse line at left panel right border edge */
-.left-panel::before {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 15%;
-  width: 1px;
-  height: 70%;
-  background: linear-gradient(180deg, transparent, var(--blue), var(--cyan), transparent);
-  animation: pulse-line 6s ease-in-out infinite;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
-}
-
-@keyframes pulse-line {
-  0%, 100% { opacity: 0.25; }
-  50%       { opacity: 0.8; }
-}
-
-/* Decorative futuristic grid matrix */
-.left-panel::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 250px;
-  background:
-    linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
-  mask-image: radial-gradient(ellipse at top left, black 20%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse at top left, black 20%, transparent 80%);
-  pointer-events: none;
-}
-
-.left-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 40px;
-  max-width: 380px;
-  width: 100%;
-}
-
-.tagline {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cyan);
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin-top: -16px;
-  font-family: var(--font);
-  text-shadow: 0 0 12px rgba(6, 182, 212, 0.45);
-  align-self: center;
-  text-align: center;
-}
-
-/* Feature List Styling */
-.features {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  width: 100%;
-}
-
-.feature-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 16px;
-  border-radius: 12px;
-  background: hsla(240, 10%, 10%, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.01);
-  transition: transform 0.3s, background 0.3s, border-color 0.3s;
-}
-.feature-item:hover {
-  transform: translateY(-2px);
-  background: hsla(240, 10%, 12%, 0.35);
-  border-color: rgba(255, 255, 255, 0.04);
-}
-
-.feature-icon {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: 10px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
-}
-
-.feature-icon svg {
-  width: 18px;
-  height: 18px;
-  stroke: var(--cyan);
-  fill: none;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.feature-text h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
-  letter-spacing: -0.1px;
-}
-
-.feature-text p {
-  font-size: 12.5px;
-  color: var(--text-dim);
-  line-height: 1.5;
-}
-
-.left-decoration {
-  position: absolute;
-  bottom: 50px;
-  left: 48px;
-  right: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-}
-
-/* Beautiful Candlestick Mockup Chart */
-.bg-chart {
-  position: absolute;
-  bottom: 85px;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 130px;
-  opacity: 0.16;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-/* ── RIGHT PANEL (Forms Container) ─────────────────────────────────────── */
-.right-panel {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 24px;
-  position: relative;
+  gap: 14px;
   z-index: 2;
 }
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  display: block;
+}
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-bright);
+}
+.brand-name .dim { color: var(--text-vdim); font-weight: 500; }
 
-/* ── PREMIUM GLASS CARD ────────────────────────────────────────────────── */
-.card {
-  width: 100%;
-  max-width: 430px;
-  background: var(--surface);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  padding: 44px 38px;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02),
-    0 24px 64px rgba(0, 0, 0, 0.65),
-    0 0 80px rgba(59, 130, 246, 0.03);
-  animation: card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+/* Hero copy */
+.hero {
   position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 540px;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.eyebrow .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px var(--green-soft);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.85); }
+}
+
+.hero h1 {
+  font-size: clamp(40px, 4.4vw, 60px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--text-bright);
+  background: linear-gradient(135deg, var(--text-bright) 0%, var(--accent) 60%, var(--text-bright) 110%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p.lead {
+  font-size: 18px;
+  color: var(--text-dim);
+  line-height: 1.55;
+  max-width: 480px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 22px;
+  margin-top: 8px;
+  max-width: 520px;
+}
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.feature svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+/* Live ticker strip */
+.ticker {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ticker-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-vdim);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ticker-label::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 3px var(--red-soft);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+.ticker-row {
+  display: flex;
+  gap: 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
   overflow: hidden;
 }
+.ticker-row .item { display: inline-flex; align-items: center; gap: 8px; }
+.ticker-row .sym { color: var(--text-bright); font-weight: 600; }
+.ticker-row .pos { color: var(--green-text); }
+.ticker-row .neg { color: var(--red-text); }
 
-/* Border top glow effect inside card */
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 10%;
-  width: 80%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.25), rgba(59, 130, 246, 0.25), transparent);
-  pointer-events: none;
-}
+/* ---- AUTH PANEL (right) ----------------------------------- */
 
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(24px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Mobile-only brand logo block */
-.mobile-logo {
+.panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 30px;
+  justify-content: center;
+  padding: 56px 48px;
+  background: var(--surface);
 }
 
-.card-header {
-  margin-bottom: 28px;
+/* Theme toggle in top-right corner */
+.theme-switcher {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 5;
 }
-
-.card-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 8px;
-  letter-spacing: -0.4px;
-}
-
-.card-subtitle {
-  font-size: 14.5px;
-  color: var(--text-dim);
-}
-
-/* ── Validation & Information Banners ───────────────────────────────────── */
-.banner {
-  display: none;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 10px;
-  font-size: 13.5px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--text-bright); }
+.theme-btn svg { width: 14px; height: 14px; }
+
+.theme-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  display: none;
+  z-index: 10;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.theme-menu.open { display: block; }
+.theme-menu .group {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-vdim);
+  padding: 10px 8px 6px;
+}
+.theme-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.theme-pill:hover { background: var(--surface-hover); }
+.theme-pill.active { background: var(--accent-soft); }
+.theme-pill .swatches {
+  display: inline-flex;
+  gap: 3px;
+}
+.theme-pill .sw {
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.theme-pill .name {
+  font-size: 13px;
+  color: var(--text);
   font-weight: 500;
-  margin-bottom: 22px;
-  line-height: 1.5;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-.banner.visible { display: flex; }
-
-.banner-success {
-  background: hsla(150, 85%, 42%, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #55efb4;
 }
 
-.banner-error {
-  background: hsla(355, 85%, 55%, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #ff8888;
-}
-
-.banner svg {
-  width: 17px;
-  height: 17px;
-  flex-shrink: 0;
-  margin-top: 1.5px;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  15%  { transform: translateX(-6px); }
-  30%  { transform: translateX(6px); }
-  45%  { transform: translateX(-4px); }
-  60%  { transform: translateX(4px); }
-  75%  { transform: translateX(-2px); }
-  90%  { transform: translateX(2px); }
-}
-.shake { animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
-
-/* ── Form Controls Redesign ────────────────────────────────────────────── */
-.form { display: flex; flex-direction: column; gap: 18px; }
-
-.field-group {
+/* Form card */
+.form-card {
+  width: 100%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 28px;
 }
 
-.field-label {
-  font-size: 11.5px;
+.form-header h2 {
+  font-size: 28px;
   font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+.form-header p {
   color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 14px;
 }
 
+.error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--red);
+  background: var(--red-soft);
+  border-radius: 10px;
+  color: var(--red-text);
+  font-size: 13.5px;
+  line-height: 1.45;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s, max-height 0.25s;
+}
+.error-banner.visible {
+  opacity: 1;
+  max-height: 200px;
+}
+.error-banner svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-vdim);
+}
 .input-wrap {
   position: relative;
   display: flex;
   align-items: center;
 }
-
-.input-prefix {
+.input-wrap .icon {
   position: absolute;
-  left: 15px;
-  display: flex;
-  align-items: center;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--text-vdim);
   pointer-events: none;
-  color: var(--text-dim);
-  transition: color 0.2s;
 }
-
-.input-prefix svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .input-field {
   width: 100%;
-  height: 48px;
-  background: rgba(10, 10, 12, 0.55);
+  padding: 13px 14px 13px 42px;
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--text);
-  font-family: var(--font);
+  font-family: inherit;
   font-size: 14.5px;
-  font-weight: 400;
-  padding: 0 15px 0 42px;
-  outline: none;
-  transition: border-color 0.25s, box-shadow 0.25s, background-color 0.25s;
-  -webkit-appearance: none;
-  appearance: none;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
-
-.input-field::placeholder { color: hsl(240, 4%, 32%); }
-
+.input-field::placeholder { color: var(--text-muted); }
 .input-field:focus {
-  border-color: var(--border-focus);
-  background: rgba(10, 10, 12, 0.7);
-  box-shadow: 
-    0 0 0 1px var(--border-focus), 
-    0 0 16px rgba(59, 130, 246, 0.25);
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface-alt);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
+.input-field.has-suffix { padding-right: 44px; }
 
-/* Suffix button (password eye toggle) */
-.input-suffix {
+.toggle-pass {
   position: absolute;
-  right: 12px;
+  right: 10px;
+  background: transparent;
+  border: 0;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-vdim);
   display: flex;
   align-items: center;
-  cursor: pointer;
-  color: var(--text-dim);
-  background: none;
-  border: none;
-  padding: 6px;
-  border-radius: 8px;
-  transition: color 0.15s, background-color 0.15s;
-  min-width: 36px;
-  min-height: 36px;
-  justify-content: center;
 }
-.input-suffix:hover { 
-  color: var(--text);
-  background-color: rgba(255, 255, 255, 0.04);
-}
-.input-suffix svg {
-  width: 17px;
-  height: 17px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
+.toggle-pass:hover { color: var(--text-bright); background: var(--surface-hover); }
+.toggle-pass svg { width: 18px; height: 18px; }
 
-.input-field.has-suffix { padding-right: 48px; }
-
-/* Focus animation sync with prefix icon */
-.input-field:focus ~ .input-prefix {
-  color: var(--cyan);
-}
-
-/* ── Row Extras & Custom Checks ────────────────────────────────────────── */
 .row-extras {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  font-size: 13px;
 }
-
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 13.5px;
+  gap: 8px;
   color: var(--text-dim);
-  user-select: none;
-  padding: 4px 0;
-}
-
-.checkbox-label input[type="checkbox"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--border);
-  border-radius: 6px;
-  background: rgba(10, 10, 12, 0.5);
   cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-  outline: none;
 }
-.checkbox-label input[type="checkbox"]:hover {
-  border-color: var(--border-hover);
-}
-.checkbox-label input[type="checkbox"]:focus-visible {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-.checkbox-label input[type="checkbox"]:checked {
-  background: var(--blue);
-  border-color: var(--blue);
-}
-.checkbox-label input[type="checkbox"]:checked::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 5px;
-  height: 9px;
-  border: 2px solid #fff;
-  border-top: none;
-  border-left: none;
-  transform: rotate(45deg);
-}
-
-.forgot-link {
-  font-size: 13.5px;
-  color: var(--blue);
+.checkbox-label input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+.row-extras a {
+  color: var(--accent);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.15s;
 }
-.forgot-link:hover { color: var(--cyan); text-decoration: underline; }
+.row-extras a:hover { text-decoration: underline; }
 
-/* ── State-of-the-Art Shimmer Submit Button ────────────────────────────── */
-.btn-submit {
+.btn-primary {
   width: 100%;
-  height: 50px;
-  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-hover) 100%);
-  border: none;
-  border-radius: 12px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  border: 0;
+  border-radius: 10px;
   color: #fff;
-  font-family: var(--font);
+  font-family: inherit;
   font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-top: 12px;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s, opacity 0.2s;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  gap: 8px;
+  transition: transform 0.12s, box-shadow 0.18s, opacity 0.15s;
   position: relative;
   overflow: hidden;
 }
-
-.btn-submit::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.5s;
-  pointer-events: none;
-}
-
-.btn-submit:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.45);
-}
-
-.btn-submit:hover:not(:disabled)::before {
-  transform: translateX(100%);
-  transition: transform 0.75s ease-out;
-}
-
-.btn-submit:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Spinner Loader */
-.spinner {
-  display: none;
-  width: 18px;
-  height: 18px;
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px var(--accent-soft); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary[disabled] { opacity: 0.7; cursor: not-allowed; transform: none; }
+.btn-primary svg { width: 16px; height: 16px; }
+.btn-primary .spin {
+  width: 16px; height: 16px;
   border: 2px solid rgba(255,255,255,0.35);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: spin 0.65s linear infinite;
-  flex-shrink: 0;
-}
-.spinner.visible { display: block; }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ── Card Footer & Metadata ────────────────────────────────────────────── */
-.card-footer {
-  margin-top: 26px;
-  text-align: center;
-  font-size: 13.5px;
-  color: var(--text-dim);
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding-top: 22px;
-}
-
-.card-footer a {
-  color: var(--blue);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.15s;
-}
-.card-footer a:hover { color: var(--cyan); }
-
-.version-tag {
-  display: block;
-  margin-top: 12px;
-  font-size: 11px;
-  color: hsl(240, 4%, 28%);
-  font-family: var(--font-mono);
-  letter-spacing: 0.5px;
-}
-
-/* Compliance Disclosure Layer */
-.compliance-footer {
-  margin-top: auto;
-  padding: 24px 8px 12px;
-  text-align: left;
-}
-.compliance-footer p {
-  font-size: 9.5px;
-  line-height: 1.6;
-  color: hsl(240, 4%, 30%);
-  margin-bottom: 6px;
-}
-.compliance-footer p:last-child { margin-bottom: 0; }
-.compliance-footer .compliance-links {
-  margin-top: 10px;
-  font-size: 9.5px;
-}
-.compliance-footer .compliance-links a {
-  color: hsl(240, 4%, 40%);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-.compliance-footer .compliance-links a:hover {
-  color: var(--text-dim);
-  text-decoration: underline;
-}
-
-/* ── LOGO WORDMARK COMPONENT ───────────────────────────────────────────── */
-.logo-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  align-self: center;
-}
-
-.logo-wordmark {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1;
-  gap: 3px;
-  margin-top: 4px;
-}
-
-.logo-name {
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  margin-right: -4px;
-  color: var(--text);
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #fff 40%, var(--text-dim) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.logo-sub {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 5px;
-  margin-right: -5px;
-  color: var(--cyan);
-  text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(6, 182, 212, 0.35);
-}
-
-@keyframes logo-glow {
-  0%, 100% { filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.25)); }
-  50%       { filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.5)) drop-shadow(0 0 24px rgba(59, 130, 246, 0.2)); }
-}
-
-.logo-mark {
-  animation: logo-glow 5s ease-in-out infinite;
-}
-
-/* Compliance Mobile Pinned footer */
-.compliance-mobile {
+  animation: spin 0.7s linear infinite;
   display: none;
 }
+.btn-primary.loading .spin { display: inline-block; }
+.btn-primary.loading .label, .btn-primary.loading svg.arrow { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Desktop View Breakpoint ───────────────────────────────────────────── */
-@media (min-width: 900px) {
-  .left-panel {
-    display: flex;
-  }
-
-  .mobile-logo {
-    display: none;
-  }
-
-  .right-panel {
-    padding: 48px 64px;
-  }
-}
-
-/* ── Mobile View Breakpoint ────────────────────────────────────────────── */
-@media (max-width: 899px) {
-  body { overflow-y: auto; }
-
-  .right-panel {
-    padding: 40px 16px 48px;
-    align-items: flex-start;
-    padding-top: 48px;
-  }
-
-  .card {
-    padding: 36px 24px;
-    border-radius: 16px;
-  }
-
-  .compliance-mobile {
-    display: block;
-    padding: 24px 24px 16px;
-    text-align: center;
-    width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-  }
-  .compliance-mobile p {
-    font-size: 9.5px;
-    line-height: 1.6;
-    color: hsl(240, 4%, 32%);
-    margin: 0 0 6px;
-  }
-  .compliance-mobile a {
-    color: hsl(240, 4%, 44%);
-    text-decoration: none;
-    transition: color 0.15s;
-  }
-  .compliance-mobile a:hover {
-    color: var(--text-dim);
-    text-decoration: underline;
-  }
-}
-
-@media (max-width: 440px) {
-  .card {
-    padding: 30px 18px;
-  }
-
-  .row-extras {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
-}
-
-/* ── Custom Scrollbar styling ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
-
-/* Input autofill override styling */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--text);
-  -webkit-box-shadow: 0 0 0 1000px hsl(240, 15%, 4%) inset;
-  transition: background-color 5000s ease-in-out 0s;
-  caret-color: var(--text);
-}
-
-/* ── Premium Layout Theme Overrides ────────────────────────────────────── */
-
-/* Theme 2: Slate Minimal Pro (High-End Light Theme) */
-body.theme-slate-minimal {
-  --bg:           hsl(210, 20%, 98%);
-  --bg-darker:    hsl(210, 20%, 94%);
-  --surface:      hsla(210, 20%, 96%, 0.85);
-  --border:       hsl(210, 14%, 86%);
-  --border-hover: hsl(210, 14%, 76%);
-  --border-focus: hsl(215, 90%, 50%);
-  --text:         hsl(210, 30%, 15%);
-  --text-dim:     hsl(210, 15%, 45%);
-  --blue:         hsl(215, 90%, 50%);
-  --blue-hover:   hsl(215, 90%, 42%);
-  --cyan:         hsl(190, 95%, 40%);
-  --green:        hsl(150, 75%, 36%);
-  --red:          hsl(355, 75%, 48%);
-}
-body.theme-slate-minimal .bg-layer {
-  background: radial-gradient(circle at 80% 50%, hsla(215, 90%, 50%, 0.04) 0%, transparent 55%),
-              radial-gradient(circle at 10% 20%, hsla(190, 90%, 40%, 0.03) 0%, transparent 40%),
-              var(--bg);
-}
-body.theme-slate-minimal .bg-layer::before {
-  background-image:
-    linear-gradient(hsla(215, 90%, 50%, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, hsla(215, 90%, 50%, 0.03) 1px, transparent 1px);
-}
-body.theme-slate-minimal .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: 
-    0 4px 6px -1px rgba(0,0,0,0.02), 
-    0 10px 30px -3px rgba(0,0,0,0.05), 
-    0 20px 40px -5px rgba(0,0,0,0.05);
-}
-body.theme-slate-minimal .input-field {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
-  color: var(--text);
-}
-body.theme-slate-minimal .input-field:focus {
-  background: #ffffff;
-  box-shadow: 0 0 0 1px var(--border-focus), 0 0 12px rgba(59, 130, 246, 0.15);
-}
-body.theme-slate-minimal .left-panel {
-  background: linear-gradient(160deg, hsl(210, 24%, 93%) 0%, hsl(210, 24%, 88%) 100%);
-  border-right: 1px solid var(--border);
-}
-body.theme-slate-minimal .left-panel::before {
-  background: linear-gradient(180deg, transparent, var(--blue), var(--cyan), transparent);
-}
-body.theme-slate-minimal .left-panel::after {
-  background-image:
-    linear-gradient(rgba(215, 90%, 50%, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(215, 90%, 50%, 0.05) 1px, transparent 1px);
-}
-body.theme-slate-minimal .feature-item {
-  background: hsla(210, 20%, 94%, 0.45);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-body.theme-slate-minimal .feature-item:hover {
-  background: hsla(210, 20%, 92%, 0.6);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-body.theme-slate-minimal .feature-icon {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(6, 182, 212, 0.06) 100%);
-}
-body.theme-slate-minimal .logo-name {
-  background: linear-gradient(135deg, hsl(210, 30%, 12%) 40%, hsl(210, 15%, 35%) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-body.theme-slate-minimal .logo-sub {
-  color: var(--blue);
-}
-body.theme-slate-minimal .tagline {
-  color: var(--blue);
-  text-shadow: none;
-}
-body.theme-slate-minimal .bg-chart {
-  opacity: 0.1;
-}
-
-/* Theme 3: Classic Terminal (Retro CRT Hacker Mode) */
-body.theme-classic-terminal {
-  --bg:           #030702;
-  --bg-darker:    #010301;
-  --surface:      rgba(6, 15, 6, 0.85);
-  --border:       #15803d;
-  --border-hover: #22c55e;
-  --border-focus: #4ade80;
-  --text:         #4ade80;
-  --text-dim:     #166534;
-  --blue:         #22c55e;
-  --blue-hover:   #4ade80;
-  --cyan:         #22c55e;
-  --green:        #4ade80;
-  --red:          #ef4444;
-  --font:         var(--font-mono);
-}
-body.theme-classic-terminal::before {
-  content: " ";
-  display: block;
-  position: fixed;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  z-index: 9999;
-  background-size: 100% 4px, 6px 100%;
-  pointer-events: none;
-}
-body.theme-classic-terminal .bg-layer {
-  background: #030702;
-}
-body.theme-classic-terminal .bg-layer::before {
-  background-image:
-    linear-gradient(rgba(34, 197, 94, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 197, 94, 0.04) 1px, transparent 1px);
-}
-body.theme-classic-terminal .card {
-  border: 1.5px solid #16a34a;
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.2), inset 0 0 10px rgba(34, 197, 94, 0.1);
-  text-shadow: 0 0 2px #4ade80;
-  background: var(--surface);
-}
-body.theme-classic-terminal .input-field {
-  background: #020502;
-  border: 1px solid #166534;
-  color: #4ade80;
-  font-family: var(--font-mono);
-  box-shadow: none;
-}
-body.theme-classic-terminal .input-field::placeholder {
-  color: #14532d;
-}
-body.theme-classic-terminal .input-field:focus {
-  border-color: #4ade80;
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.35);
-}
-body.theme-classic-terminal .btn-submit {
-  background: transparent;
-  border: 1px solid #4ade80;
-  color: #4ade80;
-  text-shadow: 0 0 2px #4ade80;
-  box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
-  font-family: var(--font-mono);
-}
-body.theme-classic-terminal .btn-submit:hover:not(:disabled) {
-  background: #166534;
-  color: #fff;
-  box-shadow: 0 0 16px rgba(74, 222, 128, 0.4);
-  transform: translateY(-1px);
-}
-body.theme-classic-terminal .left-panel {
-  background: #030702;
-  border-right: 1px solid #16a34a;
-}
-body.theme-classic-terminal .left-panel::before {
-  background: linear-gradient(180deg, transparent, #15803d, #22c55e, transparent);
-}
-body.theme-classic-terminal .left-panel::after {
-  background-image:
-    linear-gradient(rgba(34, 197, 94, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 197, 94, 0.02) 1px, transparent 1px);
-}
-body.theme-classic-terminal .feature-item {
-  background: transparent;
-  border: 1px dashed #166534;
-}
-body.theme-classic-terminal .feature-item:hover {
-  border-color: #22c55e;
-  background: rgba(34, 197, 94, 0.02);
-}
-body.theme-classic-terminal .feature-icon {
-  background: transparent;
-  border-color: #166534;
-}
-body.theme-classic-terminal .logo-name {
-  background: none;
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: unset;
-  color: #4ade80;
-}
-body.theme-classic-terminal .logo-sub {
-  color: #22c55e;
-  text-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
-}
-body.theme-classic-terminal .tagline {
-  color: #4ade80;
-  text-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
-}
-body.theme-classic-terminal .bg-chart {
-  opacity: 0.25;
-}
-
-/* Theme 4: Aurora Mesh (Translucent Holographic Glow) */
-body.theme-aurora-mesh {
-  --bg:           #0c061e;
-  --bg-darker:    #05020c;
-  --surface:      rgba(15, 8, 35, 0.35);
-  --border:       rgba(139, 92, 246, 0.22);
-  --border-hover: rgba(139, 92, 246, 0.38);
-  --border-focus: hsl(265, 95%, 65%);
-  --text:         #ffffff;
-  --text-dim:     #c084fc;
-  --blue:         hsl(265, 95%, 62%);
-  --blue-hover:   hsl(265, 95%, 52%);
-  --cyan:         hsl(325, 95%, 58%);
-  --green:        #34d399;
-  --red:          #f87171;
-}
-body.theme-aurora-mesh .bg-layer {
-  background: linear-gradient(135deg, #0b071a 0%, #150a2e 100%);
-  overflow: hidden;
-}
-body.theme-aurora-mesh .bg-layer::after {
-  content: '';
-  position: absolute;
-  top: -20%; left: -20%; width: 140%; height: 140%;
-  background: 
-    radial-gradient(circle at 15% 25%, rgba(139, 92, 246, 0.22) 0%, transparent 40%),
-    radial-gradient(circle at 85% 15%, rgba(236, 72, 153, 0.22) 0%, transparent 45%),
-    radial-gradient(circle at 45% 85%, rgba(6, 182, 212, 0.18) 0%, transparent 40%);
-  animation: aurora-rotation 24s linear infinite;
-  filter: blur(65px);
-}
-@keyframes aurora-rotation {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-body.theme-aurora-mesh .card {
-  background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 24px 64px rgba(0, 0, 0, 0.4),
-    0 0 100px rgba(139, 92, 246, 0.12);
-  backdrop-filter: blur(45px) saturate(180%);
-  -webkit-backdrop-filter: blur(45px) saturate(180%);
-}
-body.theme-aurora-mesh .input-field {
-  background: rgba(10, 5, 24, 0.48);
-  border: 1px solid rgba(139, 92, 246, 0.22);
-}
-body.theme-aurora-mesh .input-field:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 1px var(--border-focus), 0 0 20px rgba(139, 92, 246, 0.35);
-  background: rgba(10, 5, 24, 0.6);
-}
-body.theme-aurora-mesh .btn-submit {
-  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
-}
-body.theme-aurora-mesh .btn-submit:hover:not(:disabled) {
-  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
-}
-body.theme-aurora-mesh .left-panel {
-  background: rgba(10, 6, 24, 0.55);
-  border-right: 1px solid rgba(139, 92, 246, 0.18);
-}
-body.theme-aurora-mesh .left-panel::before {
-  background: linear-gradient(180deg, transparent, #8b5cf6, #ec4899, transparent);
-}
-body.theme-aurora-mesh .left-panel::after {
-  background-image:
-    linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
-}
-body.theme-aurora-mesh .feature-item {
-  background: rgba(139, 92, 246, 0.04);
-  border: 1px solid rgba(139, 92, 246, 0.12);
-}
-body.theme-aurora-mesh .feature-item:hover {
-  background: rgba(139, 92, 246, 0.08);
-  border-color: rgba(139, 92, 246, 0.22);
-}
-body.theme-aurora-mesh .feature-icon {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%);
-  border-color: rgba(139, 92, 246, 0.25);
-}
-body.theme-aurora-mesh .logo-name {
-  background: linear-gradient(135deg, #ffffff 40%, #d8b4fe 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-body.theme-aurora-mesh .logo-sub {
-  color: #c084fc;
-}
-body.theme-aurora-mesh .tagline {
-  color: #d8b4fe;
-  text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
-}
-body.theme-aurora-mesh .bg-chart {
-  opacity: 0.18;
-}
-
-/* Theme 5: Nebula Deep Cosmic (Space Mesh & Electric Pink) */
-body.theme-nebula-deep {
-  --bg:           #02000a;
-  --bg-darker:    #010005;
-  --surface:      rgba(10, 5, 28, 0.45);
-  --border:       rgba(236, 72, 153, 0.2);
-  --border-hover: rgba(236, 72, 153, 0.4);
-  --border-focus: #f43f5e;
-  --text:         #ffffff;
-  --text-dim:     #e879f9;
-  --blue:         #d946ef;
-  --blue-hover:   #c026d3;
-  --cyan:         #f43f5e;
-  --green:        #10b981;
-  --red:          #ef4444;
-}
-body.theme-nebula-deep .bg-layer {
-  background: linear-gradient(135deg, #02000a 0%, #0c0422 100%);
-  overflow: hidden;
-}
-body.theme-nebula-deep .bg-layer::after {
-  content: '';
-  position: absolute;
-  top: -20%; left: -20%; width: 140%; height: 140%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(217, 70, 239, 0.2) 0%, transparent 40%),
-    radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.18) 0%, transparent 45%),
-    radial-gradient(circle at 50% 80%, rgba(124, 58, 237, 0.2) 0%, transparent 40%);
-  animation: aurora-rotation 28s linear infinite;
-  filter: blur(70px);
-}
-body.theme-nebula-deep .particle {
-  background: linear-gradient(to top, #d946ef, #f43f5e);
-  filter: drop-shadow(0 0 6px #d946ef);
-}
-body.theme-nebula-deep .card {
-  background: var(--surface);
-  border: 1px solid rgba(236, 72, 153, 0.25);
-  box-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.1) inset,
-    0 24px 64px rgba(0, 0, 0, 0.5),
-    0 0 100px rgba(217, 70, 239, 0.15);
-  backdrop-filter: blur(45px) saturate(180%);
-  -webkit-backdrop-filter: blur(45px) saturate(180%);
-}
-body.theme-nebula-deep .card::before {
-  background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.4), rgba(217, 70, 239, 0.4), transparent);
-}
-body.theme-nebula-deep .input-field {
-  background: rgba(8, 2, 20, 0.5);
-  border: 1px solid rgba(236, 72, 153, 0.2);
-}
-body.theme-nebula-deep .input-field:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 1px var(--border-focus), 0 0 20px rgba(244, 63, 94, 0.35);
-  background: rgba(8, 2, 20, 0.65);
-}
-body.theme-nebula-deep .btn-submit {
-  background: linear-gradient(135deg, #d946ef 0%, #f43f5e 100%);
-  box-shadow: 0 4px 20px rgba(217, 70, 239, 0.35);
-}
-body.theme-nebula-deep .btn-submit:hover:not(:disabled) {
-  box-shadow: 0 8px 30px rgba(217, 70, 239, 0.55);
-}
-body.theme-nebula-deep .left-panel {
-  background: rgba(6, 2, 18, 0.6);
-  border-right: 1px solid rgba(236, 72, 153, 0.15);
-}
-body.theme-nebula-deep .left-panel::before {
-  background: linear-gradient(180deg, transparent, #d946ef, #f43f5e, transparent);
-}
-body.theme-nebula-deep .left-panel::after {
-  background-image:
-    linear-gradient(rgba(236, 72, 153, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(236, 72, 153, 0.03) 1px, transparent 1px);
-}
-body.theme-nebula-deep .feature-item {
-  background: rgba(217, 70, 239, 0.03);
-  border: 1px solid rgba(217, 70, 239, 0.08);
-}
-body.theme-nebula-deep .feature-item:hover {
-  background: rgba(217, 70, 239, 0.07);
-  border-color: rgba(217, 70, 239, 0.18);
-}
-body.theme-nebula-deep .feature-icon {
-  background: linear-gradient(135deg, rgba(217, 70, 239, 0.08) 0%, rgba(244, 63, 94, 0.08) 100%);
-  border-color: rgba(217, 70, 239, 0.2);
-}
-body.theme-nebula-deep .logo-name {
-  background: linear-gradient(135deg, #ffffff 40%, #f472b6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-body.theme-nebula-deep .logo-sub {
-  color: #e879f9;
-}
-body.theme-nebula-deep .tagline {
-  color: #f472b6;
-  text-shadow: 0 0 10px rgba(217, 70, 239, 0.45);
-}
-body.theme-nebula-deep .bg-chart {
-  opacity: 0.2;
-}
-
-/* Theme 6: Gold Obsidian Luxe (Golden Neon & Warm Satin) */
-body.theme-gold-obsidian {
-  --bg:           #080705;
-  --bg-darker:    #030201;
-  --surface:      rgba(18, 15, 12, 0.55);
-  --border:       rgba(212, 175, 55, 0.18);
-  --border-hover: rgba(212, 175, 55, 0.35);
-  --border-focus: #e5c158;
-  --text:         #faf9f6;
-  --text-dim:     #c5a880;
-  --blue:         #d4af37;
-  --blue-hover:   #f3e5ab;
-  --cyan:         #e5c158;
-  --green:        #10b981;
-  --red:          #ef4444;
-}
-body.theme-gold-obsidian .bg-layer {
-  background: radial-gradient(circle at 80% 50%, hsla(43, 67%, 45%, 0.05) 0%, transparent 55%),
-              radial-gradient(circle at 10% 20%, hsla(43, 67%, 30%, 0.03) 0%, transparent 40%),
-              var(--bg);
-}
-body.theme-gold-obsidian .bg-layer::before {
-  background-image:
-    linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
-}
-body.theme-gold-obsidian .bg-layer::after {
-  background: radial-gradient(circle, hsla(43, 67%, 50%, 0.05) 0%, hsla(43, 67%, 30%, 0.02) 40%, transparent 70%);
-}
-body.theme-gold-obsidian .particle {
-  background: linear-gradient(to top, #d4af37, #f3e5ab);
-  filter: drop-shadow(0 0 6px #d4af37);
-}
-body.theme-gold-obsidian .card {
-  background: var(--surface);
-  border: 1px solid rgba(212, 175, 55, 0.22);
-  box-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 24px 64px rgba(0, 0, 0, 0.75),
-    0 0 100px rgba(212, 175, 55, 0.08);
-}
-body.theme-gold-obsidian .card::before {
-  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.35), rgba(229, 193, 88, 0.35), transparent);
-}
-body.theme-gold-obsidian .input-field {
-  background: rgba(10, 8, 6, 0.65);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  color: var(--text);
-}
-body.theme-gold-obsidian .input-field::placeholder {
-  color: #6e5f4d;
-}
-body.theme-gold-obsidian .input-field:focus {
-  border-color: var(--border-focus);
-  background: rgba(10, 8, 6, 0.8);
-  box-shadow: 0 0 0 1px var(--border-focus), 0 0 20px rgba(212, 175, 55, 0.25);
-}
-body.theme-gold-obsidian .btn-submit {
-  background: linear-gradient(135deg, #d4af37 0%, #e5c158 100%);
-  color: #0c0a05;
-  font-weight: 800;
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
-  text-shadow: none;
-}
-body.theme-gold-obsidian .btn-submit:hover:not(:disabled) {
-  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.55);
-}
-body.theme-gold-obsidian .left-panel {
-  background: linear-gradient(160deg, #0b0a08 0%, #030302 100%);
-  border-right: 1px solid rgba(212, 175, 55, 0.12);
-}
-body.theme-gold-obsidian .left-panel::before {
-  background: linear-gradient(180deg, transparent, #d4af37, #e5c158, transparent);
-}
-body.theme-gold-obsidian .left-panel::after {
-  background-image:
-    linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
-}
-body.theme-gold-obsidian .feature-item {
-  background: rgba(212, 175, 55, 0.02);
-  border: 1px solid rgba(212, 175, 55, 0.08);
-}
-body.theme-gold-obsidian .feature-item:hover {
-  background: rgba(212, 175, 55, 0.05);
-  border-color: rgba(212, 175, 55, 0.18);
-}
-body.theme-gold-obsidian .feature-icon {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(229, 193, 88, 0.05) 100%);
-  border-color: rgba(212, 175, 55, 0.18);
-}
-body.theme-gold-obsidian .logo-name {
-  background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-body.theme-gold-obsidian .logo-sub {
-  color: #c5a880;
-}
-body.theme-gold-obsidian .tagline {
-  color: #d4af37;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.35);
-}
-body.theme-gold-obsidian .bg-chart {
-  opacity: 0.14;
-}
-
-/* Theme 7: Cyberpunk Neon Grid (High Contrast Cyan & Monospace) */
-body.theme-cyberpunk {
-  --bg:           #030307;
-  --bg-darker:    #010103;
-  --surface:      rgba(6, 8, 16, 0.85);
-  --border:       #00ffcc;
-  --border-hover: #ffff00;
-  --border-focus: #ff0055;
-  --text:         #00ffcc;
-  --text-dim:     #8b9bb4;
-  --blue:         #ffff00;
-  --blue-hover:   #ffff33;
-  --cyan:         #00ffcc;
-  --green:        #39ff14;
-  --red:          #ff0033;
-  --font:         var(--font-mono);
-}
-body.theme-cyberpunk .bg-layer {
-  background: #030307;
-}
-body.theme-cyberpunk .bg-layer::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0, 255, 204, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%);
-}
-body.theme-cyberpunk .bg-layer::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-  background-size: 100% 6px, 8px 100%;
-  pointer-events: none;
-  z-index: 5;
-}
-body.theme-cyberpunk .particle {
-  background: #00ffcc;
-  width: 5px;
-  height: 5px;
-  border-radius: 0;
-  filter: drop-shadow(0 0 6px #00ffcc);
-}
-body.theme-cyberpunk .card {
-  background: var(--surface);
-  border: 2px solid #00ffcc;
-  border-radius: 0px;
-  box-shadow: 
-    0 0 15px rgba(0, 255, 204, 0.3),
-    inset 0 0 10px rgba(0, 255, 204, 0.1);
-  position: relative;
-}
-body.theme-cyberpunk .card::after {
-  content: '';
-  position: absolute;
-  top: -2px; left: -2px; width: 16px; height: 16px;
-  border-top: 4px solid #ff0055;
-  border-left: 4px solid #ff0055;
-  pointer-events: none;
-}
-body.theme-cyberpunk .card::before {
-  content: '';
-  position: absolute;
-  bottom: -2px; right: -2px; width: 16px; height: 16px;
-  border-bottom: 4px solid #ffff00;
-  border-right: 4px solid #ffff00;
-  pointer-events: none;
-  background: none;
-}
-body.theme-cyberpunk .input-field {
-  background: #05050c;
-  border: 1px solid rgba(0, 255, 204, 0.4);
-  color: #00ffcc;
-  border-radius: 0;
-  font-family: var(--font-mono);
-}
-body.theme-cyberpunk .input-field::placeholder {
-  color: rgba(0, 255, 204, 0.25);
-}
-body.theme-cyberpunk .input-field:focus {
-  border-color: #ff0055;
-  background: #05050c;
-  box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
-}
-body.theme-cyberpunk .checkbox-label input[type="checkbox"] {
-  border-radius: 0;
-  border: 1.5px solid #00ffcc;
-}
-body.theme-cyberpunk .checkbox-label input[type="checkbox"]:checked {
-  background: #00ffcc;
-  border-color: #00ffcc;
-}
-body.theme-cyberpunk .checkbox-label input[type="checkbox"]:checked::after {
-  border-color: #000;
-}
-body.theme-cyberpunk .btn-submit {
-  background: #ffff00;
-  color: #000;
-  border: none;
-  border-radius: 0;
-  font-family: var(--font-mono);
-  font-weight: 900;
-  box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
-  text-shadow: none;
-}
-body.theme-cyberpunk .btn-submit:hover:not(:disabled) {
-  background: #00ffcc;
-  color: #000;
-  box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
-  transform: translateY(-2px);
-}
-body.theme-cyberpunk .left-panel {
-  background: #030307;
-  border-right: 2px solid #00ffcc;
-}
-body.theme-cyberpunk .left-panel::before {
-  background: linear-gradient(180deg, transparent, #00ffcc, #ff0055, transparent);
-}
-body.theme-cyberpunk .left-panel::after {
-  background-image:
-    linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
-}
-body.theme-cyberpunk .feature-item {
-  background: transparent;
-  border: 1px solid rgba(0, 255, 204, 0.25);
-  border-radius: 0;
-}
-body.theme-cyberpunk .feature-item:hover {
-  background: rgba(0, 255, 204, 0.03);
-  border-color: #ffff00;
-}
-body.theme-cyberpunk .feature-icon {
-  background: transparent;
-  border-color: rgba(0, 255, 204, 0.4);
-  border-radius: 0;
-}
-body.theme-cyberpunk .feature-icon svg {
-  stroke: #00ffcc;
-}
-body.theme-cyberpunk .logo-name {
-  background: none;
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: unset;
-  color: #00ffcc;
-  text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-}
-body.theme-cyberpunk .logo-sub {
-  color: #ffff00;
-  text-shadow: 0 0 8px rgba(255, 255, 0, 0.5);
-}
-body.theme-cyberpunk .tagline {
-  color: #ff0055;
-  text-shadow: 0 0 8px rgba(255, 0, 85, 0.5);
-}
-body.theme-cyberpunk .bg-chart {
-  opacity: 0.3;
-}
-body.theme-cyberpunk .card-footer {
-  border-top: 1px solid rgba(0, 255, 204, 0.2);
-}
-body.theme-cyberpunk .card-footer a {
-  color: #ffff00;
-}
-body.theme-cyberpunk .card-footer a:hover {
-  color: #ff0055;
-}
-
-/* ── Theme Switcher Widget Style ───────────────────────────────────────── */
-.theme-switcher-widget {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
-  background: rgba(15, 15, 20, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 12px 14px;
-  width: 200px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+.divider {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-.theme-switcher-widget .switcher-title {
-  font-size: 10.5px;
-  font-weight: 800;
-  color: var(--text-dim);
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 2px;
+  color: var(--text-vdim);
 }
-.theme-switcher-widget .switcher-options {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
-.theme-switcher-widget .switcher-btn {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+
+.footer-link {
+  text-align: center;
+  font-size: 14px;
   color: var(--text-dim);
-  font-family: var(--font);
-  font-size: 12px;
+}
+.footer-link a {
+  color: var(--accent);
+  text-decoration: none;
   font-weight: 600;
-  padding: 8px 10px;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
-.theme-switcher-widget .switcher-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  border-color: rgba(255, 255, 255, 0.1);
+.footer-link a:hover { text-decoration: underline; }
+
+.legal {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
-.theme-switcher-widget .switcher-btn.active {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+.legal a { color: var(--text-vdim); text-decoration: none; }
+.legal a:hover { color: var(--accent); }
+
+/* ---- RESPONSIVE -------------------------------------------- */
+@media (max-width: 920px) {
+  body { grid-template-columns: 1fr; overflow: auto; }
+  .canvas { display: none; }
+  .panel { padding: 64px 24px 80px; min-height: 100vh; }
+  .form-card { max-width: 100%; }
 }
 
-/* Theme Adaptations for Switcher Widget */
-body.theme-slate-minimal .theme-switcher-widget {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: hsl(210, 14%, 86%);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-}
-body.theme-slate-minimal .theme-switcher-widget .switcher-btn {
-  background: rgba(0, 0, 0, 0.02);
-  border-color: rgba(0, 0, 0, 0.05);
-  color: hsl(210, 15%, 45%);
-}
-body.theme-slate-minimal .theme-switcher-widget .switcher-btn:hover {
-  background: rgba(0, 0, 0, 0.04);
-  color: hsl(210, 30%, 15%);
-}
-body.theme-slate-minimal .theme-switcher-widget .switcher-btn.active {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+@media (max-width: 480px) {
+  .panel { padding: 48px 20px 80px; }
+  .form-header h2 { font-size: 24px; }
+  .theme-switcher { top: 16px; right: 16px; }
 }
 
-body.theme-classic-terminal .theme-switcher-widget {
-  background: #030702;
-  border-color: #15803d;
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.1);
-}
-body.theme-classic-terminal .theme-switcher-widget .switcher-btn {
-  background: transparent;
-  border-color: #166534;
-  color: #166534;
-  font-family: var(--font-mono);
-}
-body.theme-classic-terminal .theme-switcher-widget .switcher-btn:hover {
-  border-color: #4ade80;
-  color: #4ade80;
-}
-body.theme-classic-terminal .theme-switcher-widget .switcher-btn.active {
-  background: #166534;
-  color: #fff;
-  border-color: #4ade80;
-  box-shadow: none;
-}
-
-body.theme-aurora-mesh .theme-switcher-widget {
-  background: rgba(15, 8, 35, 0.65);
-  border-color: rgba(139, 92, 246, 0.25);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-}
-body.theme-aurora-mesh .theme-switcher-widget .switcher-btn {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.05);
-  color: #c084fc;
-}
-body.theme-aurora-mesh .theme-switcher-widget .switcher-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-}
-body.theme-aurora-mesh .theme-switcher-widget .switcher-btn.active {
-  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
-}
-
-body.theme-nebula-deep .theme-switcher-widget {
-  background: rgba(12, 6, 28, 0.75);
-  border-color: rgba(236, 72, 153, 0.25);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-}
-body.theme-nebula-deep .theme-switcher-widget .switcher-btn {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.05);
-  color: #e879f9;
-}
-body.theme-nebula-deep .theme-switcher-widget .switcher-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-}
-body.theme-nebula-deep .theme-switcher-widget .switcher-btn.active {
-  background: linear-gradient(135deg, #d946ef 0%, #f43f5e 100%);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 2px 8px rgba(217, 70, 239, 0.4);
-}
-
-body.theme-gold-obsidian .theme-switcher-widget {
-  background: rgba(18, 15, 12, 0.85);
-  border-color: rgba(212, 175, 55, 0.25);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
-}
-body.theme-gold-obsidian .theme-switcher-widget .switcher-btn {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.05);
-  color: #c5a880;
-}
-body.theme-gold-obsidian .theme-switcher-widget .switcher-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-}
-body.theme-gold-obsidian .theme-switcher-widget .switcher-btn.active {
-  background: linear-gradient(135deg, #d4af37 0%, #e5c158 100%);
-  color: #0c0a05;
-  border-color: #faf9f6;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
-  font-weight: 700;
-}
-
-body.theme-cyberpunk .theme-switcher-widget {
-  background: #030307;
-  border: 1px solid #00ffcc;
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
-}
-body.theme-cyberpunk .theme-switcher-widget .switcher-btn {
-  background: transparent;
-  border: 1px solid rgba(0, 255, 204, 0.2);
-  color: #00ffcc;
-  font-family: var(--font-mono);
-}
-body.theme-cyberpunk .theme-switcher-widget .switcher-btn:hover {
-  border-color: #ffff00;
-  color: #ffff00;
-}
-body.theme-cyberpunk .theme-switcher-widget .switcher-btn.active {
-  background: #ffff00;
-  color: #000;
-  border-color: #00ffcc;
-  box-shadow: 0 0 10px rgba(255, 255, 0, 0.4);
-  font-weight: 700;
+/* For light themes (quantra-paper), tone down the gradient on h1 */
+:root[data-theme="quantra-paper"] .hero h1 {
+  background: linear-gradient(135deg, #0f172a 0%, var(--accent) 70%, #0f172a 110%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 </style>
-  <script>
-    (function () {
-      var savedTheme = localStorage.getItem('login-theme');
-      if (savedTheme && savedTheme !== 'default') {
-        document.body.classList.add(savedTheme);
-      }
-    })();
-  </script>
-  <link rel="stylesheet" href="/static/css/themes.css">
 </head>
 <body>
 
-<!-- Background effects -->
-<div class="bg-layer" aria-hidden="true"></div>
-<div class="particles" aria-hidden="true">
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-</div>
+<!-- ===== LEFT: BRAND CANVAS ===== -->
+<aside class="canvas" aria-hidden="true">
+  <div class="grid-bg"></div>
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+  <div class="orb c"></div>
 
-<div class="app">
+  <div class="brand">
+    <img src="/static/img/quantra-monogram.svg" alt="" class="brand-logo" />
+    <div class="brand-name">QUANTRA <span class="dim">TERMINAL</span></div>
+  </div>
 
-  <!-- ── LEFT PANEL ──────────────────────────────────────────────────────── -->
-  <aside class="left-panel" aria-label="Product features">
+  <div class="hero">
+    <span class="eyebrow"><span class="dot"></span>Live · NSE F&amp;O</span>
+    <h1>The trader's edge,<br/>decoded.</h1>
+    <p class="lead">
+      Real-time options chain, live OI flow, and smart signals — built for traders
+      who think in probabilities. Not opinions.
+    </p>
 
-    <!-- Glowing Interactive Candlestick Options Graph -->
-    <svg class="bg-chart" viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-      <!-- Grid Lines -->
-      <line x1="0" y1="20" x2="400" y2="20" stroke="rgba(255, 255, 255, 0.02)" stroke-width="1"/>
-      <line x1="0" y1="55" x2="400" y2="55" stroke="rgba(255, 255, 255, 0.02)" stroke-width="1"/>
-      <line x1="0" y1="90" x2="400" y2="90" stroke="rgba(255, 255, 255, 0.02)" stroke-width="1"/>
-      
-      <!-- Option volatility curves -->
-      <path d="M0,110 C50,90 100,105 150,55 C200,5 250,45 300,15 C350,-15 400,25 400,25"
-        fill="none" stroke="url(#chart-grad-1)" stroke-width="2.5" stroke-linecap="round" filter="drop-shadow(0 4px 12px rgba(6, 182, 212, 0.4))"/>
-      <path d="M0,120 C50,110 100,125 150,90 C200,55 250,75 300,45 C350,15 400,35 400,35"
-        fill="none" stroke="url(#chart-grad-2)" stroke-width="1.5" stroke-dasharray="5 4" stroke-linecap="round" opacity="0.6"/>
-
-      <!-- Glowing Pulse Markers -->
-      <circle cx="150" cy="55" r="4" fill="#06b6d4" filter="drop-shadow(0 0 8px #06b6d4)"/>
-      <circle cx="300" cy="15" r="4" fill="#3b82f6" filter="drop-shadow(0 0 8px #3b82f6)"/>
-
-      <defs>
-        <linearGradient id="chart-grad-1" x1="0" y1="0" x2="400" y2="0">
-          <stop offset="0%" stop-color="#3b82f6"/>
-          <stop offset="50%" stop-color="#06b6d4"/>
-          <stop offset="100%" stop-color="#34d399"/>
-        </linearGradient>
-        <linearGradient id="chart-grad-2" x1="0" y1="0" x2="400" y2="0">
-          <stop offset="0%" stop-color="#06b6d4"/>
-          <stop offset="100%" stop-color="#3b82f6"/>
-        </linearGradient>
-      </defs>
-    </svg>
-
-    <div class="left-content">
-
-      <!-- Logo (desktop left panel) -->
-      <div class="logo-block">
-        <svg class="logo-mark" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="ApexDelta mark">
-          <defs>
-            <linearGradient id="apex-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#3b82f6"/>
-              <stop offset="100%" stop-color="#06b6d4"/>
-            </linearGradient>
-            <linearGradient id="apex-grad-glow" x1="0" y1="64" x2="64" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.1"/>
-            </linearGradient>
-          </defs>
-          <!-- Interlocking Geometric Delta chevron pointing upward -->
-          <path d="M32 6 L58 52 L32 42 L6 52 Z" fill="url(#apex-grad-glow)" stroke="url(#apex-grad)" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M32 18 L46 44 L32 37 L18 44 Z" fill="url(#apex-grad)" opacity="0.95" stroke-linejoin="round"/>
-          <circle cx="32" cy="6" r="2.5" fill="#06b6d4" filter="drop-shadow(0 0 6px #06b6d4)"/>
-        </svg>
-
-        <div class="logo-wordmark">
-          <span class="logo-name">Quantra</span>
-          <span class="logo-sub">Terminal</span>
-        </div>
+    <div class="feature-grid">
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l3 3 5-5 5 5 5-5"/></svg>
+        <span>Live option chain with PCR &amp; max-pain</span>
       </div>
-
-      <p class="tagline">Institutional-Grade F&amp;O Analytics</p>
-
-      <!-- Feature bullets -->
-      <div class="features">
-
-        <div class="feature-item">
-          <div class="feature-icon" aria-hidden="true">
-            <!-- Options flow grid / strike chain icon -->
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="3" width="7" height="7" rx="1"/>
-              <rect x="14" y="3" width="7" height="7" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" rx="1"/>
-              <rect x="14" y="14" width="7" height="7" rx="1"/>
-              <path d="M10 6.5 h4 M6.5 10 v4 M14 17.5 h-4"/>
-            </svg>
-          </div>
-          <div class="feature-text">
-            <h3>Real-time Options Flow</h3>
-            <p>Live NSE/BSE order book analytics with advanced multi-strike Open Interest tracking.</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon" aria-hidden="true">
-            <!-- Trend line / high frequency spark icon -->
-            <svg viewBox="0 0 24 24">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-          </div>
-          <div class="feature-text">
-            <h3>Quantitative Signal Engine</h3>
-            <p>High-probability mathematical indicators computed live across Nifty, BankNifty, and derivatives.</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon" aria-hidden="true">
-            <!-- Multi-timeframe layout icon -->
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-              <path d="M12 2 a10 10 0 0 1 8 4"/>
-            </svg>
-          </div>
-          <div class="feature-text">
-            <h3>Multi-Timeframe Charting</h3>
-            <p>Perfect sub-second synchronization across 3m, 5m, and 15m intervals running simultaneously.</p>
-          </div>
-        </div>
-
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>Sub-second tick freshness</span>
       </div>
-
-    </div><!-- /left-content -->
-
-    <!-- SEBI Compliance Disclaimer -->
-    <div class="compliance-footer">
-      <p>Investment in securities market are subject to market risks. Trading in derivatives is extremely risky. Quantra Terminal provides advanced analytics for informational purposes only &mdash; not investment advice.</p>
-      <p class="compliance-links"><a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a></p>
-    </div>
-
-    <div class="left-decoration" aria-hidden="true"></div>
-  </aside><!-- /left-panel -->
-
-  <!-- ── RIGHT PANEL ─────────────────────────────────────────────────────── -->
-  <main class="right-panel">
-    <div class="card" role="main">
-
-      <!-- Mobile-only logo -->
-      <div class="mobile-logo" aria-label="Quantra Terminal">
-        <svg class="logo-mark" width="52" height="52" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="apex-grad-m" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#3b82f6"/>
-              <stop offset="100%" stop-color="#06b6d4"/>
-            </linearGradient>
-            <linearGradient id="apex-grad-glow-m" x1="0" y1="64" x2="64" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.1"/>
-            </linearGradient>
-          </defs>
-          <path d="M32 6 L58 52 L32 42 L6 52 Z" fill="url(#apex-grad-glow-m)" stroke="url(#apex-grad-m)" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M32 18 L46 44 L32 37 L18 44 Z" fill="url(#apex-grad-m)" opacity="0.95" stroke-linejoin="round"/>
-          <circle cx="32" cy="6" r="2.5" fill="#06b6d4"/>
-        </svg>
-        <div class="logo-wordmark" style="margin-top:8px;">
-          <span class="logo-name">Quantra</span>
-          <span class="logo-sub">Terminal</span>
-        </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 4 4 5-7"/></svg>
+        <span>OI build-up &amp; volume surge alerts</span>
       </div>
-
-      <!-- Card header -->
-      <div class="card-header">
-        <h1 class="card-title">Welcome Back</h1>
-        <p class="card-subtitle">Sign in to your institutional workspace</p>
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+        <span>Paper trading with auto-exit logic</span>
       </div>
-
-      <!-- Success banner (?registered=1) -->
-      <div id="success-banner" class="banner banner-success" role="status" aria-live="polite">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-        <span>Account created successfully! Please log in below.</span>
-      </div>
-
-      <!-- Error banner -->
-      <div id="error-banner" class="banner banner-error" role="alert" aria-live="assertive">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span id="error-text">Invalid username or password.</span>
-      </div>
-
-      <!-- Form -->
-      <form class="form" id="login-form" novalidate>
-
-        <!-- Username -->
-        <div class="field-group">
-          <label class="field-label" for="username">Username</label>
-          <div class="input-wrap">
-            <span class="input-prefix" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </span>
-            <input
-              class="input-field"
-              type="text"
-              id="username"
-              name="username"
-              placeholder="your.username"
-              autocomplete="username"
-              autocapitalize="none"
-              spellcheck="false"
-              required
-              aria-required="true"
-            >
-          </div>
-        </div>
-
-        <!-- Password -->
-        <div class="field-group">
-          <label class="field-label" for="password">Password</label>
-          <div class="input-wrap">
-            <span class="input-prefix" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            </span>
-            <input
-              class="input-field has-suffix"
-              type="password"
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              required
-              aria-required="true"
-            >
-            <button
-              type="button"
-              class="input-suffix"
-              id="pw-toggle"
-              aria-label="Show password"
-              title="Toggle password visibility"
-            >
-              <!-- Eye open icon -->
-              <svg id="eye-open" viewBox="0 0 24 24">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <!-- Eye closed icon (hidden by default) -->
-              <svg id="eye-closed" viewBox="0 0 24 24" style="display:none;">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Remember me + Forgot -->
-        <div class="row-extras">
-          <label class="checkbox-label">
-            <input type="checkbox" id="remember-me" name="remember">
-            <span>Remember me</span>
-          </label>
-          <a href="#" class="forgot-link" tabindex="0">Forgot password?</a>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit" class="btn-submit" id="submit-btn">
-          <div class="spinner" id="spinner" aria-hidden="true"></div>
-          <span id="btn-label">Sign In</span>
-        </button>
-
-      </form><!-- /form -->
-
-      <!-- Footer -->
-      <footer class="card-footer">
-        <span>Don't have an account? <a href="/register">Create one</a></span>
-        <span class="version-tag">Quantra Terminal &nbsp;v2.0</span>
-      </footer>
-
-    </div><!-- /card -->
-
-    <!-- Mobile-only compliance (left panel hidden on mobile) -->
-    <div class="compliance-mobile">
-      <p>Investment in securities market are subject to market risks. Trading in derivatives is extremely risky. Quantra Terminal provides advanced analytics for informational purposes only — not investment advice.</p>
-      <p><a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/disclaimer">Disclaimer</a></p>
-    </div>
-
-  </main><!-- /right-panel -->
-
-  <!-- Theme Switcher Widget -->
-  <div class="theme-switcher-widget" id="theme-switcher">
-    <div class="switcher-title">Visual Themes</div>
-    <div class="switcher-options">
-      <button class="switcher-btn active">Cybernetic Glass</button>
-      <button class="switcher-btn">Slate Minimal Pro</button>
-      <button class="switcher-btn">Classic Terminal</button>
-      <button class="switcher-btn">Aurora Mesh</button>
-      <button class="switcher-btn">Nebula Deep Cosmic</button>
-      <button class="switcher-btn">Gold Obsidian Luxe</button>
-      <button class="switcher-btn">Cyberpunk Neon Grid</button>
     </div>
   </div>
 
-</div><!-- /app -->
+  <div class="ticker">
+    <div class="ticker-label">Markets snapshot</div>
+    <div class="ticker-row" id="tickerRow">
+      <span class="item"><span class="sym">NIFTY</span> <span class="pos" id="t-nifty">+0.42%</span></span>
+      <span class="item"><span class="sym">BANKNIFTY</span> <span class="neg" id="t-bn">−0.18%</span></span>
+      <span class="item"><span class="sym">FINNIFTY</span> <span class="pos" id="t-fn">+0.27%</span></span>
+      <span class="item"><span class="sym">VIX</span> <span class="neg" id="t-vix">12.84</span></span>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== RIGHT: AUTH PANEL ===== -->
+<main class="panel">
+
+  <!-- Theme switcher -->
+  <div class="theme-switcher">
+    <button type="button" class="theme-btn" id="themeBtn" aria-haspopup="true" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="19" cy="13" r="2.5"/><circle cx="6" cy="13" r="2.5"/><circle cx="10" cy="19" r="2.5"/><path d="M12 22a10 10 0 110-20 10 10 0 010 20"/></svg>
+      <span id="themeLabel">Onyx</span>
+    </button>
+    <div class="theme-menu" id="themeMenu" role="menu"></div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-header">
+      <h2>Sign in to continue</h2>
+      <p>Welcome back. Pick up where you left off.</p>
+    </div>
+
+    <div class="error-banner" id="errorBanner" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span id="errorText"></span>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 10-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          <input class="input-field" type="text" id="username" name="username" placeholder="your.username" autocomplete="username" required />
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:18px;">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+          <input class="input-field has-suffix" type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
+          <button type="button" class="toggle-pass" id="togglePass" aria-label="Show password">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="row-extras" style="margin-top:18px;">
+        <label class="checkbox-label">
+          <input type="checkbox" id="remember-me" name="remember" />
+          <span>Remember me</span>
+        </label>
+        <a href="/forgot-password">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn" style="margin-top:22px;">
+        <span class="label">Sign in</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <span class="spin" aria-hidden="true"></span>
+      </button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <div class="footer-link">
+      Don't have an account? <a href="/register">Create one</a>
+    </div>
+  </div>
+
+  <div class="legal">
+    <a href="/privacy">Privacy</a> &middot;
+    <a href="/terms">Terms</a> &middot;
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+</main>
 
 <script>
 (function () {
-  'use strict';
+  /* ── Theme switcher ──────────────────────────────────────────────────── */
+  var THEMES = [
+    // Quantra
+    { id: 'quantra-onyx',   name: 'Quantra Onyx',   group: 'Quantra', sw: ['#000000','#060608','#00e5ff','#00ff9d'] },
+    { id: 'quantra-carbon', name: 'Quantra Carbon', group: 'Quantra', sw: ['#050508','#0d0e12','#3b82f6','#10b981'] },
+    { id: 'quantra-slate',  name: 'Quantra Slate',  group: 'Quantra', sw: ['#0f1419','#161c24','#6366f1','#14b8a6'] },
+    { id: 'quantra-mint',   name: 'Quantra Mint',   group: 'Quantra', sw: ['#1a1f1d','#21262a','#5eead4','#e07a5f'] },
+    { id: 'quantra-paper',  name: 'Quantra Paper',  group: 'Quantra · Light', sw: ['#fafafa','#ffffff','#2563eb','#15803d'] },
+    // Premium
+    { id: 'midnight-blue',  name: 'Midnight Blue',  group: 'Premium', sw: ['#0f172a','#1e293b','#3b82f6','#10b981'] },
+    { id: 'obsidian-black', name: 'Obsidian Black', group: 'Premium', sw: ['#000000','#0a0a0a','#3b82f6','#22c55e'] },
+    { id: 'aurora',         name: 'Aurora',         group: 'Premium', sw: ['#0a0717','#11102a','#a78bfa','#34d399'] },
+    { id: 'bloomberg-pro',  name: 'Bloomberg Pro',  group: 'Premium', sw: ['#000000','#0a0805','#ffb000','#00bfff'] },
+    { id: 'trader-pro',     name: 'Trader Pro',     group: 'Premium', sw: ['#000000','#0a0a0a','#ff9800','#00c853'] },
+    { id: 'sunset-trade',   name: 'Sunset Trade',   group: 'Premium', sw: ['#1a1410','#221c17','#fb923c','#65a30d'] },
+    { id: 'ocean-deep',     name: 'Ocean Deep',     group: 'Premium', sw: ['#051221','#0a1c30','#22d3ee','#2dd4bf'] }
+  ];
+  var DEFAULT_THEME = 'quantra-onyx';
 
-  /* ── Theme Switcher Setup ──────────────────────────────────────────────── */
-  (function initThemeSwitcher() {
-    var savedTheme = localStorage.getItem('login-theme') || 'default';
-    var themes = ['theme-slate-minimal', 'theme-classic-terminal', 'theme-aurora-mesh', 'theme-nebula-deep', 'theme-gold-obsidian', 'theme-cyberpunk'];
-    
-    function applyTheme(themeName) {
-      themes.forEach(function (t) {
-        document.body.classList.remove(t);
-      });
-      if (themeName !== 'default') {
-        document.body.classList.add(themeName);
-      }
-      
-      // Update switcher active buttons
-      var buttons = document.querySelectorAll('.theme-switcher-widget .switcher-btn');
-      buttons.forEach(function (btn) {
-        var t = btn.getAttribute('data-theme');
-        if (t === themeName) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
+  function applyTheme(id) {
+    document.documentElement.setAttribute('data-theme', id);
+    try { localStorage.setItem('quantra_theme', id); } catch (_) {}
+    var t = THEMES.find(function (x) { return x.id === id; });
+    var label = document.getElementById('themeLabel');
+    if (label && t) {
+      label.textContent = t.name.replace('Quantra ', '');
     }
-
-    // Apply saved theme immediately
-    applyTheme(savedTheme);
-
-    // Add click listeners to switcher buttons after DOM is parsed
-    document.addEventListener('DOMContentLoaded', function () {
-      var switcher = document.getElementById('theme-switcher');
-      if (switcher) {
-        switcher.addEventListener('click', function (e) {
-          var btn = e.target.closest('.switcher-btn');
-          if (!btn) return;
-          var newTheme = btn.getAttribute('data-theme');
-          localStorage.setItem('login-theme', newTheme);
-          applyTheme(newTheme);
-        });
-      }
+    var pills = document.querySelectorAll('.theme-pill');
+    pills.forEach(function (el) {
+      el.classList.toggle('active', el.getAttribute('data-id') === id);
     });
-  })();
+  }
 
-  /* ── Elements ──────────────────────────────────────────────────────────── */
-  var form         = document.getElementById('login-form');
-  var usernameEl   = document.getElementById('username');
-  var passwordEl   = document.getElementById('password');
-  var submitBtn    = document.getElementById('submit-btn');
-  var btnLabel     = document.getElementById('btn-label');
-  var spinner      = document.getElementById('spinner');
-  var errorBanner  = document.getElementById('error-banner');
-  var errorText    = document.getElementById('error-text');
-  var successBanner= document.getElementById('success-banner');
-  var pwToggle     = document.getElementById('pw-toggle');
-  var eyeOpen      = document.getElementById('eye-open');
-  var eyeClosed    = document.getElementById('eye-closed');
+  function buildThemeMenu() {
+    var menu = document.getElementById('themeMenu');
+    var groups = {};
+    THEMES.forEach(function (t) {
+      groups[t.group] = groups[t.group] || [];
+      groups[t.group].push(t);
+    });
+    var html = '';
+    Object.keys(groups).forEach(function (g) {
+      html += '<div class="group">' + g + '</div>';
+      groups[g].forEach(function (t) {
+        html += '<div class="theme-pill" data-id="' + t.id + '" role="menuitem" tabindex="0">';
+        html += '<span class="swatches">';
+        t.sw.forEach(function (c) { html += '<span class="sw" style="background:' + c + '"></span>'; });
+        html += '</span>';
+        html += '<span class="name">' + t.name + '</span>';
+        html += '</div>';
+      });
+    });
+    menu.innerHTML = html;
+    menu.querySelectorAll('.theme-pill').forEach(function (el) {
+      el.addEventListener('click', function () {
+        applyTheme(el.getAttribute('data-id'));
+        menu.classList.remove('open');
+      });
+    });
+  }
 
-  /* ── ?registered=1 banner ──────────────────────────────────────────────── */
-  (function checkRegistered() {
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('registered') === '1') {
-      successBanner.classList.add('visible');
-    }
-  })();
+  var saved;
+  try { saved = localStorage.getItem('quantra_theme'); } catch (_) { saved = null; }
+  buildThemeMenu();
+  applyTheme(saved && THEMES.some(function (t) { return t.id === saved; }) ? saved : DEFAULT_THEME);
 
-  /* ── Password toggle ───────────────────────────────────────────────────── */
-  pwToggle.addEventListener('click', function () {
-    var isPassword = passwordEl.type === 'password';
-    passwordEl.type = isPassword ? 'text' : 'password';
-    eyeOpen.style.display   = isPassword ? 'none' : '';
-    eyeClosed.style.display = isPassword ? '' : 'none';
-    pwToggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-    passwordEl.focus();
+  var themeBtn = document.getElementById('themeBtn');
+  var themeMenu = document.getElementById('themeMenu');
+  themeBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    themeMenu.classList.toggle('open');
+    themeBtn.setAttribute('aria-expanded', themeMenu.classList.contains('open') ? 'true' : 'false');
+  });
+  document.addEventListener('click', function () { themeMenu.classList.remove('open'); });
+  themeMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  /* ── Show/hide password ─────────────────────────────────────────────── */
+  var passEl = document.getElementById('password');
+  var togglePass = document.getElementById('togglePass');
+  togglePass.addEventListener('click', function () {
+    var hidden = passEl.type === 'password';
+    passEl.type = hidden ? 'text' : 'password';
+    togglePass.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
   });
 
-  /* ── Helpers ────────────────────────────────────────────────────────────── */
-  function setLoading(loading) {
-    submitBtn.disabled = loading;
-    spinner.classList.toggle('visible', loading);
-    btnLabel.textContent = loading ? 'Signing in…' : 'Sign In';
+  /* ── Error banner ───────────────────────────────────────────────────── */
+  var errorBanner = document.getElementById('errorBanner');
+  var errorText = document.getElementById('errorText');
+  function showError(msg) { errorText.textContent = msg; errorBanner.classList.add('visible'); }
+  function hideError() { errorBanner.classList.remove('visible'); }
+
+  /* ── Loading state ──────────────────────────────────────────────────── */
+  var submitBtn = document.getElementById('submitBtn');
+  function setLoading(on) {
+    submitBtn.disabled = on;
+    submitBtn.classList.toggle('loading', on);
   }
 
-  function showError(msg) {
-    errorText.textContent = msg || 'An unexpected error occurred. Please try again.';
-    errorBanner.classList.remove('shake');
-    // Force reflow so animation restarts if already shown
-    void errorBanner.offsetWidth;
-    errorBanner.classList.add('visible', 'shake');
-    successBanner.classList.remove('visible');
-  }
+  /* ── Form submit (wire-compatible with /api/auth/login) ─────────────── */
+  var form = document.getElementById('loginForm');
+  var usernameEl = document.getElementById('username');
 
-  function hideError() {
-    errorBanner.classList.remove('visible', 'shake');
-  }
-
-  /* ── Form submit ────────────────────────────────────────────────────────── */
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     hideError();
-
     var username = usernameEl.value.trim();
-    var password = passwordEl.value;
-
-    if (!username) {
-      showError('Please enter your username.');
-      usernameEl.focus();
-      return;
-    }
-    if (!password) {
-      showError('Please enter your password.');
-      passwordEl.focus();
-      return;
-    }
+    var password = passEl.value;
+    if (!username) { showError('Please enter your username.'); usernameEl.focus(); return; }
+    if (!password) { showError('Please enter your password.'); passEl.focus(); return; }
 
     setLoading(true);
-
     fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
       body: JSON.stringify({ username: username, password: password })
     })
-    .then(function (res) {
-      return res.json().then(function (data) {
-        return { status: res.status, data: data };
-      });
-    })
+    .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
     .then(function (result) {
       setLoading(false);
       if (result.data && result.data.ok === true) {
-        // Success — redirect to dashboard
         window.location.href = '/';
       } else {
-        var msg = (result.data && result.data.message)
-          ? result.data.message
-          : (result.data && result.data.error)
-            ? result.data.error
-            : 'Invalid username or password.';
+        var msg = (result.data && result.data.message) || (result.data && result.data.error) || 'Invalid username or password.';
         showError(msg);
       }
     })
-    .catch(function (err) {
+    .catch(function () {
       setLoading(false);
       showError('Connection error. Please check your network and try again.');
     });
   });
 
-  /* ── Input focus — clear error on retype ───────────────────────────────── */
-  [usernameEl, passwordEl].forEach(function (el) {
-    el.addEventListener('input', function () {
-      if (errorBanner.classList.contains('visible')) {
-        hideError();
-      }
-    });
+  [usernameEl, passEl].forEach(function (el) {
+    el.addEventListener('input', function () { if (errorBanner.classList.contains('visible')) hideError(); });
   });
 
+  /* ── Tiny ticker animation (cosmetic only — no API call) ────────────── */
+  var ticks = [
+    { id: 't-nifty', base: 0.42, dir: 1 },
+    { id: 't-bn',    base: -0.18, dir: -1 },
+    { id: 't-fn',    base: 0.27, dir: 1 },
+  ];
+  setInterval(function () {
+    ticks.forEach(function (t) {
+      var jitter = (Math.random() - 0.5) * 0.04;
+      t.base = +(t.base + jitter).toFixed(2);
+      var el = document.getElementById(t.id);
+      if (!el) return;
+      var sign = t.base >= 0 ? '+' : '−';
+      el.textContent = sign + Math.abs(t.base).toFixed(2) + '%';
+      el.className = t.base >= 0 ? 'pos' : 'neg';
+    });
+  }, 2400);
 })();
 </script>
 </body>
