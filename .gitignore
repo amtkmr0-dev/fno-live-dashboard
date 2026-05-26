@@ -147,3 +147,4 @@ _test_avg5d.py
 _test_new_apis.py
 _smoke_*.js
 _smoke_*.py
+_one_shot_*.py
