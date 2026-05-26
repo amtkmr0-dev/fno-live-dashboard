@@ -1488,7 +1488,30 @@ function scheduleReconnect() {
 }
 
 // -- Init --
-connectWS();
+// 2026-05-26: RSI scanner paused. The Upstox /api/candles fan-out for ~390
+// calls per scan is not worth it while we focus on dashboard reliability.
+// Set RSI_ENABLED = true (one place) to wake everything back up.
+const RSI_ENABLED = false;
+
+if (RSI_ENABLED) {
+  connectWS();
+} else {
+  // Soft-disable: kill the auto-scan, kill the WebSocket connect, freeze the
+  // status banner with an explainer. The page is still navigable so links
+  // don't 404; everything just stays idle.
+  setConnStatus('off');
+  if (scanStatus) {
+    scanStatus.textContent = 'RSI scanner paused — coming back later';
+    scanStatus.style.color = 'var(--text-vdim)';
+  }
+  if (refreshBtn) {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = 'Paused';
+    refreshBtn.title = 'RSI scanner is paused. Set RSI_ENABLED = true in rsi.html to re-enable.';
+    refreshBtn.style.cursor = 'not-allowed';
+    refreshBtn.style.opacity = '0.55';
+  }
+}
 </script>
 <div class="compliance-bar">
   Investment in securities market are subject to market risks. Read all the related documents carefully before investing. The securities quoted are for illustration only and are not recommendatory. Trading in derivatives is extremely risky. QUANTRA Terminal provides analytics tools for informational purposes only &mdash; not investment advice.
