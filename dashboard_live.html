@@ -2253,6 +2253,59 @@
     .chat-setup button:hover {
       opacity: 0.85;
     }
+
+    /* ================================================================
+       OVERRIDE BLOCK — 2026-05-26 sizing tweaks
+       Toggle: comment out the entire block to revert to default sizes.
+       Affects: index ticker bar (.idx-*), sector heatmap (.heat-cell),
+                hot-list button (.footer-hot-btn).
+       ================================================================ */
+    .idx-ticker-bar  { height: 56px; padding: 0 18px; }
+    .idx-tile        { padding: 0 20px; min-width: 130px; }
+    .idx-label       { font-size: 11px; letter-spacing: 0.7px; margin-bottom: 4px; }
+    .idx-val         { font-size: 17px; }
+    .idx-chg         { font-size: 12px; margin-top: 3px; }
+    .idx-breadth     { min-width: 110px; }
+    .idx-breadth-val { font-size: 16px; }
+
+    .heatmap-bar     { padding: 8px 18px; gap: 6px; }
+    .heat-cell       { padding: 7px 12px; font-size: 11px; min-width: 78px; line-height: 1.35; }
+    .heat-cell .h-name { font-weight: 700; letter-spacing: 0.3px; }
+    .heat-cell .h-val  { font-size: 10px; opacity: 0.85; }
+
+    /* Footer hot-list button — mirrors footer-watch-btn but with red/orange tint */
+    .footer-hot-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-dim);
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .footer-hot-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .footer-hot-btn.active {
+      border-color: var(--orange, #f97316);
+      color: var(--orange, #f97316);
+      background: rgba(249,115,22,0.10);
+    }
+
+    /* Top Picks card — directional border so BUY CE / BUY PE are scannable */
+    .pick-card.pc-bull { border-left: 3px solid var(--green); }
+    .pick-card.pc-bear { border-left: 3px solid var(--red); }
+    .pick-card .pc-rank {
+      font-family: var(--font-mono, monospace);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-vdim);
+      letter-spacing: 0.5px;
+      margin-right: 6px;
+    }
+    /* End override block */
   </style>
   <link rel="stylesheet" href="/static/css/themes.css">
 </head>
@@ -2705,6 +2758,9 @@
       <button class="footer-watch-btn" id="wlFilterBtn" onclick="toggleWatchlistFilter()"
         title="Show only watchlisted stocks">★ Watchlist (<span id="wlCount">0</span>)</button>
       <span class="footer-sep"></span>
+      <button class="footer-hot-btn" id="hotFilterBtn" onclick="toggleHotlistFilter()"
+        title="Symbols matching the live OI thesis + GGG/RRR moneyness gate (auto-updated each chain refresh)">🔥 Hot (<span id="hotCount">0</span>)</button>
+      <span class="footer-sep"></span>
       <span class="footer-filter-label" id="footerFilter">No filters</span>
     </div>
 
@@ -2931,7 +2987,7 @@
     let symbolOrder = [];  // sorted symbols for rendering
     let rowElements = {};  // symbol \u2192 <tr> element
     let cellMap = {};      // "SYM:field" \u2192 <td> element
-    let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false, conviction: '', oiThesis: '', moneyness: '', watchlist: false };
+    let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false, conviction: '', oiThesis: '', moneyness: '', watchlist: false, hotlist: false };
 
     // OI thesis symbol sets (loaded from /api/oi-thesis once per page load + every 5min)
     let oiThesisSymbols = { bull: new Set(), bear: new Set(), both: new Set(), loadedAt: null };
@@ -2946,6 +3002,9 @@
     let minSurge = 0;
     let minRsCr = 0;   // Minimum |Net OI ₹ notional| in crores; 0 = disabled
     let watchlist = new Set();
+    // Auto-computed hot list (recipe: live OI thesis + GGG/RRR moneyness).
+    // Refreshed on each renderTopPicks() pass.
+    let hotlistAuto = new Set();
 
     // Restore persisted state — single key for all filter state, plus separate watchlist
     const FILTER_STORE_KEY = 'quantra_filters_v1';
@@ -3308,11 +3367,150 @@
     function toggleWatchlistFilter() {
       filters.watchlist = !filters.watchlist;
       document.getElementById('wlFilterBtn').classList.toggle('active', filters.watchlist);
+
       persistFilterState();
       applyFilters();
     }
 
+    // Toggle the auto-computed Hot list (live OI thesis + GGG/RRR moneyness).
+    // The set is rebuilt on every chain update inside renderTopPicks().
+    function toggleHotlistFilter() {
+      filters.hotlist = !filters.hotlist;
+      const btn = document.getElementById('hotFilterBtn');
+      if (btn) btn.classList.toggle('active', filters.hotlist);
+      persistFilterState();
+      applyFilters();
+    }
+    window.toggleHotlistFilter = toggleHotlistFilter;
+
     function renderTopPicks() {
+      // --------------------------------------------------------------
+      //  V2 RECIPE — strict OI thesis (live_both) + moneyness (GGG/RRR)
+      //   bull: ce_oi_chg < 0 && pe_oi_chg > 0 && pattern == 'GGG'
+      //   bear: ce_oi_chg > 0 && pe_oi_chg < 0 && pattern == 'RRR'
+      //   total_oi >= LIVE_OI_FLOOR (100k)
+      //   pick top 2 of each side ranked by vol_surge desc
+      //  Set TOP_PICKS_V2 = false in this file (one place, 4961-ish) to
+      //  fall back to the legacy conviction-tier version.
+      // --------------------------------------------------------------
+      if (typeof window.TOP_PICKS_V2 !== 'undefined' && window.TOP_PICKS_V2 === false) {
+        return _renderTopPicksLegacy();
+      }
+      const bar = document.getElementById('topPicksBar');
+      const emptyMsg = document.getElementById('topPicksEmpty');
+      bar.querySelectorAll('.pick-card').forEach(c => c.remove());
+
+      const LIVE_OI_FLOOR = 100000;
+      const universe = computeHotlistUniverse(LIVE_OI_FLOOR);
+      // Refresh hotlist set + footer counter
+      hotlistAuto = new Set(universe.bull.map(x => x.sym).concat(universe.bear.map(x => x.sym)));
+      const hcEl = document.getElementById('hotCount');
+      if (hcEl) hcEl.textContent = hotlistAuto.size;
+      // If user has the Hot filter active, re-apply so the table view reflects new membership.
+      if (filters.hotlist) {
+        // applyFilters can re-enter this function via render paths in some flows;
+        // guard with a flag to avoid recursion.
+        if (!window._inHotApply) {
+          window._inHotApply = true;
+          try { applyFilters(); } finally { window._inHotApply = false; }
+        }
+      }
+
+      const bullTop = universe.bull.slice(0, 2);  // top 2 by vol_surge
+      const bearTop = universe.bear.slice(0, 2);
+
+      if (bullTop.length === 0 && bearTop.length === 0) {
+        if (emptyMsg) {
+          emptyMsg.style.display = '';
+          emptyMsg.textContent = 'No symbols match the OI thesis + GGG/RRR + surge filter yet.';
+        }
+        return;
+      }
+      if (emptyMsg) emptyMsg.style.display = 'none';
+
+      const cards = [];
+      bullTop.forEach((row, i) => cards.push(_buildPickCardV2(row, 'CE', i + 1)));
+      bearTop.forEach((row, i) => cards.push(_buildPickCardV2(row, 'PE', i + 1)));
+      cards.forEach(c => bar.appendChild(c));
+    }
+
+    // Compute the universe of {bull, bear} symbols matching the recipe.
+    // Each side returns array of { sym, d, surge } sorted desc by surge.
+    function computeHotlistUniverse(oiFloor) {
+      const bull = [];
+      const bear = [];
+      const moneynessPattern = (m) => {
+        if (!m) return null;
+        const col = (ce, pe) => {
+          if (pe > ce && pe - ce > 1000) return 'G';
+          if (ce > pe && ce - pe > 1000) return 'R';
+          return 'N';
+        };
+        return col(m.atm_ce, m.atm_pe) + col(m.near_ce, m.near_pe) + col(m.deep_ce, m.deep_pe);
+      };
+      Object.keys(stocks).forEach(sym => {
+        const d = stocks[sym];
+        if (!d) return;
+        const toi = +d.total_oi || 0;
+        if (toi < oiFloor) return;
+        const ce = +d.ce_oi_chg || 0;
+        const pe = +d.pe_oi_chg || 0;
+        const surge = (d.vol_surge == null) ? null : +d.vol_surge;
+        if (surge == null || !isFinite(surge)) return;  // exclude cold-cache
+        const pat = moneynessPattern(d.moneyness);
+        const isBullThesis = ce < 0 && pe > 0;
+        const isBearThesis = ce > 0 && pe < 0;
+        if (isBullThesis && pat === 'GGG') bull.push({ sym: sym, d: d, surge: surge });
+        else if (isBearThesis && pat === 'RRR') bear.push({ sym: sym, d: d, surge: surge });
+      });
+      bull.sort((a, b) => b.surge - a.surge);
+      bear.sort((a, b) => b.surge - a.surge);
+      return { bull: bull, bear: bear };
+    }
+
+    function _buildPickCardV2(row, dir, rank) {
+      const sym = row.sym, d = row.d;
+      const dirCls = dir === 'CE' ? 'dir-CE' : 'dir-PE';
+      const sideCls = dir === 'CE' ? 'pc-bull' : 'pc-bear';
+      const dirLabel = dir === 'CE' ? 'BUY CE' : 'BUY PE';
+      const prem = dir === 'CE' ? d.atm_ce : d.atm_pe;
+      const surgeTxt = (d.vol_surge != null) ? d.vol_surge.toFixed(1) + 'x' : '\u2013';
+      const ceTxt = fmtOI(d.ce_oi_chg);
+      const peTxt = fmtOI(d.pe_oi_chg);
+
+      const card = document.createElement('div');
+      card.className = 'pick-card ' + sideCls;
+      card.innerHTML = `
+      <div class="pc-head">
+        <span class="pc-rank">#${rank}</span>
+        <span class="pc-sym">${sym}${d.is_n50 ? ' <span class="n50-badge">N50</span>' : ''}</span>
+        <span class="pc-dir ${dirCls}">${dirLabel}</span>
+        <span class="pc-score" title="Volume surge vs 5d avg">${surgeTxt}</span>
+      </div>
+      <div class="pc-detail">
+        \u20B9<span>${fmtPrice(d.ltp)}</span> \u00B7 Prem \u20B9<span>${fmtPrice(prem)}</span> \u00B7 IV <span>${d.atm_iv ? d.atm_iv.toFixed(1) + '%' : '\u2013'}</span> \u00B7 CE <span>${ceTxt}</span> / PE <span>${peTxt}</span>
+      </div>`;
+      card.onclick = (e) => {
+        if (e.target.closest('.pick-paper-btn')) return;
+        openAnalysis(sym);
+      };
+      const ptBtn = document.createElement('button');
+      ptBtn.className = 'pick-paper-btn';
+      ptBtn.style.cssText = 'margin-top:4px;padding:2px 8px;font-size:9px;font-weight:700;border:1px solid rgba(171,71,188,0.3);background:rgba(171,71,188,0.08);color:#CE93D8;border-radius:4px;cursor:pointer;transition:all 0.2s;width:100%';
+      ptBtn.textContent = '\uD83D\uDCCB Paper Trade';
+      ptBtn.onclick = (e) => {
+        e.stopPropagation();
+        const rec = buildTradeRec(d, dir);
+        enterPaperTrade(sym, dir, rec.entry, rec.sl, rec.t1, rec.t2);
+      };
+      card.appendChild(ptBtn);
+      return card;
+    }
+
+    // Legacy renderer — kept for instant rollback. Set window.TOP_PICKS_V2 = false
+    // in the browser console (or change the const at the bottom of this file)
+    // to use this instead of the V2 recipe above.
+    function _renderTopPicksLegacy() {
       const bar = document.getElementById('topPicksBar');
       const emptyMsg = document.getElementById('topPicksEmpty');
       // Strong tier first, then Watch tier; both must have a direction
@@ -3378,6 +3576,8 @@
         bar.appendChild(card);
       }
     }
+    // Feature flag — set to false to fall back to legacy renderer.
+    window.TOP_PICKS_V2 = true;
 
     // === Sorting ===
     // Some columns are derived (e.g., ₹ values = OI × spot) and not stored on the
@@ -3684,6 +3884,9 @@
         if (show && filters.watchlist && !watchlist.has(sym)) {
           show = false;
         }
+        if (show && filters.hotlist && !hotlistAuto.has(sym)) {
+          show = false;
+        }
         if (show && filters.oiThesis) {
           if (filters.oiThesis.startsWith('live_')) {
             // Live OI divergence — computed from current stocks state, no floor on rank
@@ -3882,6 +4085,7 @@
       filters.oiThesis = '';
       filters.moneyness = '';
       filters.watchlist = false;
+      filters.hotlist = false;
       // Sync inputs
       const sb = document.getElementById('searchBox'); if (sb) sb.value = '';
       const sf = document.getElementById('sectorFilter'); if (sf) sf.value = '';
@@ -3893,6 +4097,7 @@
       const n50btn = document.getElementById('n50Btn'); if (n50btn) n50btn.classList.remove('active');
       const pbtn = document.getElementById('poisedBtn'); if (pbtn) pbtn.classList.remove('active');
       const wlbtn = document.getElementById('wlFilterBtn'); if (wlbtn) wlbtn.classList.remove('active');
+      const hbtn = document.getElementById('hotFilterBtn'); if (hbtn) hbtn.classList.remove('active');
       // Chips + sliders
       activeChips.clear();
       minSurge = 0;

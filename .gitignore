@@ -145,3 +145,5 @@ _check_oi.py
 _check_oi2.py
 _test_avg5d.py
 _test_new_apis.py
+_smoke_*.js
+_smoke_*.py
