@@ -4021,8 +4021,38 @@ class DashboardServer:
             "breadth": {"adv": adv, "dec": dec, "total": total},
         })
 
+    # Feature flag: paused on 2026-05-27 — set to True to re-enable the page.
+    NIFTY_PAGE_ENABLED = False
+
     async def handle_nifty_page(self, request: web.Request) -> web.Response:
-        """Serve the Nifty 50 specialized page."""
+        """Serve the Nifty 50 specialized page (or a soft-disable splash)."""
+        if not self.NIFTY_PAGE_ENABLED:
+            return web.Response(
+                text=(
+                    "<!DOCTYPE html><html><head>"
+                    "<meta charset='utf-8'>"
+                    "<title>Nifty 50 — paused</title>"
+                    "<link rel='icon' type='image/svg+xml' href='/static/img/favicon.svg' />"
+                    "<link rel='stylesheet' href='/static/css/themes.css'>"
+                    "<style>"
+                    "html,body{height:100%;margin:0;background:var(--bg);color:var(--text);"
+                    "font-family:Inter,-apple-system,sans-serif;}"
+                    "body{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;text-align:center;padding:24px;}"
+                    "h1{font-size:28px;font-weight:700;color:var(--text-bright);margin:0;}"
+                    "p{color:var(--text-dim);max-width:480px;line-height:1.5;}"
+                    "a{color:var(--accent);text-decoration:none;font-weight:600;padding:10px 20px;"
+                    "border:1px solid var(--accent);border-radius:8px;}"
+                    "a:hover{background:var(--accent-soft);}"
+                    "</style></head><body>"
+                    "<h1>Nifty 50 page is paused</h1>"
+                    "<p>This page is being redesigned. The dashboard already has live "
+                    "NIFTY data in the top ticker bar.</p>"
+                    "<a href='/'>← Back to dashboard</a>"
+                    "</body></html>"
+                ),
+                content_type="text/html",
+                status=200,
+            )
         html_path = Path(__file__).parent / "nifty.html"
         if not html_path.exists():
             return web.Response(

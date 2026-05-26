@@ -1795,3 +1795,9 @@
   .q-nav-links a { padding: 7px 10px !important; }
 }
 /* END: navbar revamp */
+
+
+/* 2026-05-27: Nifty 50 page paused — hide the nav link everywhere.
+   Re-enable: delete this rule (and set NIFTY_PAGE_ENABLED=True in
+   ws_server.py). */
+.q-nav-links a#nav-nifty { display: none !important; }
