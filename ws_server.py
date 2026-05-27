@@ -1079,6 +1079,174 @@ def analyze_chain(chain_data: List[Dict[str, Any]], spot: float,
                     zero_gamma = round(s1 - g1 * (s2 - s1) / (g2 - g1), 2)
                 break
 
+    # ───────────────────────────────────────────────────────────────────────
+    #  Swing Score (composite 0-100 each side)
+    #  Combines: vol_spread (Cremers-Weinbaum), IV cheapness, DNF (institutional
+    #  dollar flow), GEX (dealer gamma support), Max-Pain pull, OI-Shift,
+    #  Moneyness pattern, Buildup, Skew (Xing-Zhang-Zhao).
+    #  Designed for swing trades (1-2 weeks). Higher = stronger setup.
+    # ───────────────────────────────────────────────────────────────────────
+    bull_swing_score = 0
+    bear_swing_score = 0
+
+    # Component breakdown stored for tooltips/debugging
+    bull_components = {}
+    bear_components = {}
+
+    # OI Shift (max 20 each side)
+    _ce_chg = total_ce_oi_chg or 0
+    _pe_chg = total_pe_oi_chg or 0
+    if abs(_ce_chg) >= 5000 or abs(_pe_chg) >= 5000:
+        if _ce_chg < 0 and _pe_chg > 0:
+            bull_swing_score += 20
+            bull_components["oi_shift"] = 20
+        elif _ce_chg > 0 and _pe_chg < 0:
+            bear_swing_score += 20
+            bear_components["oi_shift"] = 20
+
+    # Moneyness pattern (max 10)
+    if moneyness_data:
+        def _col(c, p):
+            if c == 0 and p == 0: return "N"
+            if abs(c) < 500 and abs(p) < 500: return "N"
+            if p > c: return "G"
+            if c > p: return "R"
+            return "N"
+        _pat = (_col(moneyness_data.get("atm_ce", 0), moneyness_data.get("atm_pe", 0))
+              + _col(moneyness_data.get("near_ce", 0), moneyness_data.get("near_pe", 0))
+              + _col(moneyness_data.get("deep_ce", 0), moneyness_data.get("deep_pe", 0)))
+        if _pat in ("GGG", "GGR", "GRG"):
+            bull_swing_score += 10
+            bull_components["pattern"] = 10
+        elif _pat in ("RRR", "RRG", "RGR"):
+            bear_swing_score += 10
+            bear_components["pattern"] = 10
+
+    # Vol Spread (Cremers-Weinbaum) (max 15)
+    if vol_spread_atm is not None:
+        if vol_spread_atm >= 1.5:
+            bull_swing_score += 15
+            bull_components["vol_spread"] = 15
+        elif vol_spread_atm >= 1.0:
+            bull_swing_score += 10
+            bull_components["vol_spread"] = 10
+        elif vol_spread_atm >= 0.5:
+            bull_swing_score += 5
+            bull_components["vol_spread"] = 5
+        elif vol_spread_atm <= -1.5:
+            bear_swing_score += 15
+            bear_components["vol_spread"] = 15
+        elif vol_spread_atm <= -1.0:
+            bear_swing_score += 10
+            bear_components["vol_spread"] = 10
+        elif vol_spread_atm <= -0.5:
+            bear_swing_score += 5
+            bear_components["vol_spread"] = 5
+
+    # Skew (Xing-Zhang-Zhao) (max 5)
+    if skew_25d_pct is not None:
+        if skew_25d_pct < -1:
+            bull_swing_score += 5
+            bull_components["skew"] = 5
+        elif skew_25d_pct > 3:
+            bear_swing_score += 5
+            bear_components["skew"] = 5
+
+    # IV cheapness (max 10) - low IV = cheaper time value, better swing
+    if atm_iv is not None and atm_iv > 0:
+        if atm_iv < 25:
+            bull_swing_score += 10
+            bear_swing_score += 10
+            bull_components["iv_cheap"] = 10
+            bear_components["iv_cheap"] = 10
+        elif atm_iv < 35:
+            bull_swing_score += 5
+            bear_swing_score += 5
+            bull_components["iv_cheap"] = 5
+            bear_components["iv_cheap"] = 5
+
+    # DNF (institutional money flow) (max 15)
+    if dnf_net_lakhs is not None:
+        if dnf_net_lakhs > 5000:
+            bull_swing_score += 15
+            bull_components["dnf"] = 15
+        elif dnf_net_lakhs > 1000:
+            bull_swing_score += 10
+            bull_components["dnf"] = 10
+        elif dnf_net_lakhs > 200:
+            bull_swing_score += 5
+            bull_components["dnf"] = 5
+        elif dnf_net_lakhs < -5000:
+            bear_swing_score += 15
+            bear_components["dnf"] = 15
+        elif dnf_net_lakhs < -1000:
+            bear_swing_score += 10
+            bear_components["dnf"] = 10
+        elif dnf_net_lakhs < -200:
+            bear_swing_score += 5
+            bear_components["dnf"] = 5
+
+    # GEX (dealer gamma support) (max 10)
+    if gex_total_lakhs is not None:
+        if gex_total_lakhs > 1000:
+            bull_swing_score += 10
+            bull_components["gex"] = 10
+        elif gex_total_lakhs > 300:
+            bull_swing_score += 5
+            bull_components["gex"] = 5
+        elif gex_total_lakhs < -1000:
+            bear_swing_score += 10
+            bear_components["gex"] = 10
+        elif gex_total_lakhs < -300:
+            bear_swing_score += 5
+            bear_components["gex"] = 5
+
+    # Max-Pain pull (max 10) - max pain above spot pulls UP, below pulls DOWN
+    if max_pain and atm_strike and atm_strike > 0:
+        _mp_pct = (max_pain - atm_strike) / atm_strike * 100
+        if _mp_pct > 4:
+            bull_swing_score += 10
+            bull_components["max_pain"] = 10
+        elif _mp_pct > 2:
+            bull_swing_score += 5
+            bull_components["max_pain"] = 5
+        elif _mp_pct < -4:
+            bear_swing_score += 10
+            bear_components["max_pain"] = 10
+        elif _mp_pct < -2:
+            bear_swing_score += 5
+            bear_components["max_pain"] = 5
+
+    # Buildup (max 5)
+    if buildup in ("LONG_BUILD", "SHORT_COVER"):
+        bull_swing_score += 5
+        bull_components["buildup"] = 5
+    elif buildup in ("SHORT_BUILD", "LONG_UNWIND"):
+        bear_swing_score += 5
+        bear_components["buildup"] = 5
+
+    # PCR signal (max 5)
+    if pcr_sig in ("BULLISH", "MILDLY_BULL"):
+        bull_swing_score += 5
+        bull_components["pcr_sig"] = 5
+    elif pcr_sig in ("BEARISH", "MILDLY_BEAR"):
+        bear_swing_score += 5
+        bear_components["pcr_sig"] = 5
+
+    # Cap at 100
+    bull_swing_score = min(100, bull_swing_score)
+    bear_swing_score = min(100, bear_swing_score)
+
+    # Pick the dominant side
+    if bull_swing_score >= bear_swing_score:
+        swing_score = bull_swing_score
+        swing_side = "BULL"
+        swing_components = bull_components
+    else:
+        swing_score = bear_swing_score
+        swing_side = "BEAR"
+        swing_components = bear_components
+
     result.update({
         "pcr": round(pcr, 2),
         "pcr_sig": pcr_sig,
@@ -1092,22 +1260,13 @@ def analyze_chain(chain_data: List[Dict[str, Any]], spot: float,
         "vol_oi": round(vol_oi, 3),
         "atm_iv": atm_iv,
         "vol_spread_atm": vol_spread_atm,
+        "swing_score": swing_score,
+        "swing_score_bull": bull_swing_score,
+        "swing_score_bear": bear_swing_score,
+        "swing_side": swing_side,
+        "swing_components": swing_components,
         "max_pain": max_pain,
         "mp_dist": mp_dist,
-        "atm_ce": atm_ce_ltp,
-        "atm_pe": atm_pe_ltp,
-        "prem_ok": prem_ok,
-        "atm_strike": atm_strike,
-        "opt_vol": total_opt_vol,
-        "moneyness": moneyness_data,
-        
-        # New Options Microstructure Metrics
-        "skew_25d": round(skew_25d, 2),
-        "skew_25d_pct": skew_25d_pct,
-        "dnf_ce_lakhs": dnf_ce_lakhs,
-        "dnf_pe_lakhs": dnf_pe_lakhs,
-        "dnf_net_lakhs": dnf_net_lakhs,
-        "gex_total_lakhs": gex_total_lakhs,
         "zero_gamma": zero_gamma,
     })
     return result

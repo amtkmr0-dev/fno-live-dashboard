@@ -2747,6 +2747,7 @@
           <th class="w-small g-oi" data-key="pcr">PCR</th>
           <th class="w-oi g-oi" data-key="total_oi">Total OI</th>
           <th class="w-oi g-oi" data-key="moneyness" title="OI Moneyness (ATM | Near OTM | Deep OTM)">OI Moneyness</th>
+          <th class="w-small g-oi" data-key="oi_shift" title="OI Shift: OPEN = both sides adding positions (fresh-expiry pattern, moneyness less reliable). UNWIND = both sides closing. BULL = CE↓ PE↑ (true bullish flow). BEAR = CE↑ PE↓ (true bearish flow). QUIET = minimal shift.">OI Shift</th>
           <th class="w-oi g-oi" data-key="ce_oi_chg">CE OI (sh)</th>
           <th class="w-oi g-oi" data-key="pe_oi_chg">PE OI (sh)</th>
           <th class="w-oi g-oi" data-key="net_oi">Net OI (sh)</th>
@@ -2759,6 +2760,7 @@
           <!-- Options group -->
           <th class="w-small g-opt" data-key="atm_iv">IV%</th>
           <th class="w-small g-opt" data-key="vol_spread_atm" title="Cremers-Weinbaum vol spread: ATM call IV − ATM put IV. Positive = calls richer (bullish), negative = puts richer (bearish). Magnitude in IV-points.">Vol Spread</th>
+          <th class="w-small g-opt" data-key="swing_score" title="Composite Swing Score 0-100 combining: OI Shift, Moneyness, Vol Spread, Skew, IV cheapness, DNF, GEX, Max Pain, Buildup, PCR signal. Score color: green=bull setup, red=bear setup. Click to sort by best swing trades.">Swing</th>
           <th class="w-price g-opt" data-key="max_pain">MaxPain</th>
           <th class="w-pct g-opt" data-key="mp_dist">MP Dist%</th>
           <th class="w-prem g-opt" data-key="atm_ce">CE Prem</th>
@@ -3139,10 +3141,31 @@
       if (v == null) return '\u2013';
       return v.toFixed(1) + '%';
     }
-    // Cremers-Weinbaum vol spread formatter: signed IV-points at ATM.
-    // Positive = call IV > put IV (bullish); negative = put IV > call IV (bearish).
-    function fmtVolSpread(v) {
-      if (v == null) return '\u2013';
+    // OI Shift: computed from ce_oi_chg and pe_oi_chg.
+    // BULL = CE unwinding + PE writing (true bullish flow).
+    // BEAR = CE writing + PE unwinding (true bearish flow).
+    // OPEN = both adding (fresh-expiry positioning — moneyness less reliable).
+    // UNWIND = both closing. QUIET = minimal change.
+    function fmtOiShift(ce, pe) {
+      ce = ce || 0; pe = pe || 0;
+      let label, cls;
+      if (Math.abs(ce) < 5000 && Math.abs(pe) < 5000) {
+        label = 'QUIET'; cls = '';
+      } else if (ce > 0 && pe > 0) {
+        label = 'OPEN'; cls = '';
+      } else if (ce < 0 && pe < 0) {
+        label = 'UNWIND'; cls = 'val-dim';
+      } else if (ce < 0 && pe > 0) {
+        label = 'BULL'; cls = 'pos-val';
+      } else if (ce > 0 && pe < 0) {
+        label = 'BEAR'; cls = 'neg-val';
+      } else {
+        label = '\u2013'; cls = '';
+      }
+      const tip = `OI Shift: ${label}\nCE Δ: ${ce > 0 ? '+' : ''}${(ce/1000).toFixed(0)}k  PE Δ: ${pe > 0 ? '+' : ''}${(pe/1000).toFixed(0)}k\n\nBULL = CE↓ PE↑ (calls unwinding, puts writing) → true bullish flow\nBEAR = CE↑ PE↓ (calls writing, puts unwinding) → true bearish flow\nOPEN = both sides adding → fresh-expiry positioning, moneyness less reliable\nUNWIND = both sides closing → position cleanup\nQUIET = minimal change`;
+      return `<span class="${cls}" title="${tip}">${label}</span>`;
+    }
+    function fmtVolSpread(v) {      if (v == null) return '\u2013';
       const sign = v >= 0 ? '+' : '';
       return sign + v.toFixed(2);
     }
@@ -3154,8 +3177,7 @@
     }
     // Rich per-cell tooltip explaining the value in trader terms.
     // Citation: Cremers & Weinbaum, JFQA 2010.
-    function volSpreadTooltip(v) {
-      if (v == null) return 'Vol Spread: not available — at least one ATM IV leg is missing or zero.';
+    function volSpreadTooltip(v) {      if (v == null) return 'Vol Spread: not available — at least one ATM IV leg is missing or zero.';
       const abs = Math.abs(v);
       const sign = v >= 0 ? '+' : '';
       const head = `Vol Spread (Cremers-Weinbaum): ${sign}${v.toFixed(2)} IV-points\nATM call IV minus ATM put IV.\n\n`;
@@ -3176,6 +3198,36 @@
         body = '⬇ Strongly bearish — puts aggressively bid up vs calls.\nAlign with BUY PE setups for highest conviction.';
       const tail = '\n\nTrader rule of thumb (paper-cited):\n  ≥ +1.0 → calls richer → bullish\n  ≤ -1.0 → puts richer → bearish\n  |v| < 1.0 → neutral\n\n~50 bps/week excess return for the calls-rich bucket vs puts-rich bucket (Cremers & Weinbaum, JFQA 2010).';
       return head + body + tail;
+    }
+
+    // ── Swing Score (composite 0-100 each side) ─────────────────────────
+    // Higher score = stronger setup. Side flag (BULL/BEAR) tells you which
+    // direction the score backs. Designed for swing trades (1-2 weeks).
+    function fmtSwingScore(score, side) {
+      if (score == null) return '\u2013';
+      const arrow = side === 'BULL' ? '↑' : (side === 'BEAR' ? '↓' : '');
+      return `${arrow} ${score}`;
+    }
+    function swingScoreClass(score, side) {
+      if (score == null) return '';
+      if (score >= 65 && side === 'BULL') return 'pos-val';     // strong bull
+      if (score >= 65 && side === 'BEAR') return 'neg-val';     // strong bear
+      if (score >= 50 && side === 'BULL') return 'val-pos-mild';
+      if (score >= 50 && side === 'BEAR') return 'val-neg-mild';
+      return '';
+    }
+    function swingScoreTooltip(d) {
+      if (d.swing_score == null) return 'Swing Score: not available — chain data still warming.';
+      const side = d.swing_side || '?';
+      const score = d.swing_score;
+      const comps = d.swing_components || {};
+      const compLines = Object.entries(comps).map(([k, v]) => `  ${k.padEnd(14)} +${v}`).join('\n');
+      const verdict = score >= 75 ? 'STRONG setup — high conviction' :
+                      score >= 60 ? 'GOOD setup — solid confluence' :
+                      score >= 45 ? 'MODERATE — watch confirmation' :
+                      score >= 30 ? 'WEAK — many signals missing' :
+                                    'AVOID — no edge here';
+      return `Swing Score: ${score}/100 (${side})\n\n${verdict}\n\nComponents (max each):\n${compLines}\n\nFor 1-2 week swing trades. Combines:\n  OI Shift (20)  Moneyness (10)\n  Vol Spread (15)  Skew (5)\n  IV cheap (10)  DNF (15)\n  GEX (10)  Max Pain (10)\n  Buildup (5)  PCR sig (5)\n\nClick column header to sort. Top scores = best setups.`;
     }
     function fmtSurge(v) {
       if (v == null || v === 0) return '\u2013';
@@ -3292,6 +3344,7 @@
           { key: 'pcr', cls: 'w-small g-oi ' + pcrClass(d.pcr), text: d.pcr != null ? d.pcr.toFixed(2) : '\u2013' },
           { key: 'total_oi', cls: 'w-oi g-oi', text: fmtOI(d.total_oi) },
           { key: 'moneyness', cls: 'w-oi g-oi', html: fmtMoneynessPill(d.moneyness) },
+          { key: 'oi_shift', cls: 'w-small g-oi', html: fmtOiShift(d.ce_oi_chg, d.pe_oi_chg) },
           { key: 'ce_oi_chg', cls: 'w-oi g-oi ' + valClass(d.ce_oi_chg), text: fmtOI(d.ce_oi_chg) },
           { key: 'pe_oi_chg', cls: 'w-oi g-oi ' + valClass(d.pe_oi_chg), text: fmtOI(d.pe_oi_chg) },
           { key: 'net_oi', cls: 'w-oi g-oi ' + valClass(d.net_oi), text: fmtOI(d.net_oi) },
@@ -3306,6 +3359,7 @@
           // Options group
           { key: 'atm_iv', cls: 'w-small g-opt', text: fmtIV(d.atm_iv) },
           { key: 'vol_spread_atm', cls: 'w-small g-opt ' + volSpreadClass(d.vol_spread_atm), html: '<span title="' + volSpreadTooltip(d.vol_spread_atm).replace(/"/g, '&quot;') + '">' + fmtVolSpread(d.vol_spread_atm) + '</span>' },
+          { key: 'swing_score', cls: 'w-small g-opt ' + swingScoreClass(d.swing_score, d.swing_side), html: '<span title="' + swingScoreTooltip(d).replace(/"/g, '&quot;') + '">' + fmtSwingScore(d.swing_score, d.swing_side) + '</span>' },
           { key: 'max_pain', cls: 'w-price g-opt', text: fmtPrice(d.max_pain) },
           { key: 'mp_dist', cls: 'w-pct g-opt', text: fmtMPDist(d.mp_dist) },
           { key: 'atm_ce', cls: 'w-prem g-opt' + (d.atm_ce != null && d.atm_ce < 15 ? ' prem-low' : ''), text: fmtPrice(d.atm_ce) },
@@ -4472,6 +4526,7 @@
       { key: 'pcr', label: 'PCR', group: 'oi', essential: false },
       { key: 'total_oi', label: 'Total OI', group: 'oi', essential: false },
       { key: 'moneyness', label: 'OI Moneyness', group: 'oi', essential: true },
+      { key: 'oi_shift', label: 'OI Shift', group: 'oi', essential: true },
       { key: 'ce_oi_chg', label: 'CE OI (sh)', group: 'oi', essential: true },
       { key: 'pe_oi_chg', label: 'PE OI (sh)', group: 'oi', essential: true },
       { key: 'net_oi', label: 'Net OI (sh)', group: 'oi', essential: true },
@@ -4483,6 +4538,7 @@
       { key: 'net_oi_rs', label: 'Net OI \u20B9', group: 'oi', essential: true },
       { key: 'atm_iv', label: 'IV%', group: 'opt', essential: false },
       { key: 'vol_spread_atm', label: 'Vol Spread', group: 'opt', essential: true },
+      { key: 'swing_score', label: 'Swing', group: 'opt', essential: true },
       { key: 'max_pain', label: 'MaxPain', group: 'opt', essential: false },
       { key: 'mp_dist', label: 'MP Dist%', group: 'opt', essential: false },
       { key: 'atm_ce', label: 'CE Prem', group: 'opt', essential: false },
@@ -5130,6 +5186,7 @@
               if ('moneyness' in d || d.moneyness) {
                 updateCellHTML(sym, 'moneyness', fmtMoneynessPill(d.moneyness || stocks[sym].moneyness));
               }
+              updateCellHTML(sym, 'oi_shift', fmtOiShift(d.ce_oi_chg, d.pe_oi_chg));
               updateCell(sym, 'ce_oi_chg', s.ce_oi_chg, fmtOI, valClass(s.ce_oi_chg));
               updateCell(sym, 'pe_oi_chg', s.pe_oi_chg, fmtOI, valClass(s.pe_oi_chg));
               updateCell(sym, 'net_oi', s.net_oi, fmtOI, valClass(s.net_oi));
@@ -5152,6 +5209,9 @@
               updateCellHTML(sym, 'vol_spread_atm', '<span title="' + volSpreadTooltip(d.vol_spread_atm).replace(/"/g, '&quot;') + '">' + fmtVolSpread(d.vol_spread_atm) + '</span>');
               const _vsTd = cellMap[sym + ':vol_spread_atm'];
               if (_vsTd) _vsTd.className = ('w-small g-opt ' + volSpreadClass(d.vol_spread_atm)).trim();
+              updateCellHTML(sym, 'swing_score', '<span title="' + swingScoreTooltip(d).replace(/"/g, '&quot;') + '">' + fmtSwingScore(d.swing_score, d.swing_side) + '</span>');
+              const _ssTd = cellMap[sym + ':swing_score'];
+              if (_ssTd) _ssTd.className = ('w-small g-opt ' + swingScoreClass(d.swing_score, d.swing_side)).trim();
               updateCell(sym, 'max_pain', d.max_pain, fmtPrice);
               updateCell(sym, 'mp_dist', d.mp_dist, fmtMPDist);
               updateCell(sym, 'atm_ce', d.atm_ce, fmtPrice, d.atm_ce != null && d.atm_ce < 15 ? 'prem-low' : '');
