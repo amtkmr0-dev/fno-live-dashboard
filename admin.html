@@ -307,8 +307,49 @@
   color: #71717a;
   text-decoration: underline;
 }
+
+/* Quick health pills (added 2026-05-27) */
+.health-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: border-color 0.18s, background 0.18s;
+}
+.health-pill .hp-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-vdim);
+  flex-shrink: 0;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.health-pill .hp-name {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-bright);
+  font-size: 11px;
+}
+.health-pill .hp-msg { color: var(--text-dim); }
+.health-pill.ok      { border-color: var(--green); background: rgba(16,185,129,0.10); }
+.health-pill.ok      .hp-dot { background: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.18); }
+.health-pill.ok      .hp-msg { color: var(--green); }
+.health-pill.fail    { border-color: var(--red); background: rgba(239,68,68,0.10); }
+.health-pill.fail    .hp-dot { background: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.18); }
+.health-pill.fail    .hp-msg { color: var(--red); }
+.health-pill.testing { border-color: var(--blue); }
+.health-pill.testing .hp-dot { background: var(--blue); animation: hp-pulse 1.2s ease-in-out infinite; }
+.health-pill.testing .hp-msg { color: var(--blue); }
+@keyframes hp-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
 </style>
-  <link rel="stylesheet" href="/static/css/themes.css">
 </head>
 <body>
 <script>
@@ -474,6 +515,42 @@ function toggleUserMenu() {
 </nav>
 
 <main class="admin-main">
+
+  <!-- Quick broker health check (added 2026-05-27) -->
+  <div class="card" id="quickHealthCard">
+    <div class="card-header">
+      <span class="ch-icon">🩺</span>
+      <h2>Broker Health Check</h2>
+      <span class="ch-badge" id="quickHealthBadge">READY</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button class="q-btn q-btn-primary" onclick="runHealthCheck()" id="healthCheckBtn"
+          style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-size:13px;font-weight:600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 11-3-6.7L21 8"/><polyline points="21 3 21 8 16 8"/>
+          </svg>
+          Test Both Brokers
+        </button>
+        <div id="healthCheckResults" style="display:flex;gap:12px;flex-wrap:wrap;flex:1;min-width:300px;">
+          <div class="health-pill" id="upstoxHealth">
+            <span class="hp-dot"></span>
+            <span class="hp-name">Upstox</span>
+            <span class="hp-msg" id="upstoxHealthMsg">— click to test</span>
+          </div>
+          <div class="health-pill" id="fyersHealth">
+            <span class="hp-dot"></span>
+            <span class="hp-name">Fyers</span>
+            <span class="hp-msg" id="fyersHealthMsg">— click to test</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text-vdim);line-height:1.45;">
+        Tests both broker tokens in parallel. Upstox check fetches a sample quote (Reliance), Fyers check fetches a Nifty option chain row.
+        Each call also goes through the rate meter so you'll see it appear in the API Rate Meter card below.
+      </div>
+    </div>
+  </div>
 
   <!-- Token Management -->
   <div class="card" id="tokenCard">
@@ -1192,6 +1269,73 @@ function renderRateMeter(rc) {
 
 
 // ----- Token -----
+
+// Quick health check: tests both brokers in parallel and updates the
+// pills in the Broker Health Check card. Each call also shows up on
+// the rate meter (since the existing /api/admin/test-broker handler
+// already records to it). Added 2026-05-27.
+async function runHealthCheck() {
+  const btn = document.getElementById('healthCheckBtn');
+  const badge = document.getElementById('quickHealthBadge');
+  const upPill = document.getElementById('upstoxHealth');
+  const fyPill = document.getElementById('fyersHealth');
+  const upMsg = document.getElementById('upstoxHealthMsg');
+  const fyMsg = document.getElementById('fyersHealthMsg');
+
+  // Reset pills to a 'testing' state
+  [upPill, fyPill].forEach(el => {
+    el.classList.remove('ok', 'fail');
+    el.classList.add('testing');
+  });
+  upMsg.textContent = 'testing…';
+  fyMsg.textContent = 'testing…';
+  badge.textContent = 'TESTING';
+  badge.className = 'ch-badge';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+
+  async function probe(broker) {
+    try {
+      const resp = await fetch('/api/admin/test-broker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+        body: JSON.stringify({ broker })
+      });
+      const j = await resp.json();
+      return { ok: !!j.ok, msg: j.msg || (j.ok ? 'OK' : 'failed') };
+    } catch (e) {
+      return { ok: false, msg: 'connection error' };
+    }
+  }
+
+  const [up, fy] = await Promise.all([probe('upstox'), probe('fyers')]);
+
+  upPill.classList.remove('testing');
+  fyPill.classList.remove('testing');
+  upPill.classList.add(up.ok ? 'ok' : 'fail');
+  fyPill.classList.add(fy.ok ? 'ok' : 'fail');
+  // Trim long messages so the pill stays readable; full message stays in the title attr.
+  upMsg.textContent = up.msg.length > 50 ? up.msg.slice(0, 50) + '…' : up.msg;
+  fyMsg.textContent = fy.msg.length > 50 ? fy.msg.slice(0, 50) + '…' : fy.msg;
+  upPill.title = up.msg;
+  fyPill.title = fy.msg;
+
+  if (up.ok && fy.ok) {
+    badge.textContent = 'BOTH HEALTHY';
+    badge.className = 'ch-badge badge-ok';
+    showToast('Both brokers healthy', 'success');
+  } else if (up.ok || fy.ok) {
+    badge.textContent = 'PARTIAL';
+    badge.className = 'ch-badge badge-warn';
+    showToast(`${up.ok ? 'Fyers' : 'Upstox'} failing — see card`, 'warn');
+  } else {
+    badge.textContent = 'BOTH FAILING';
+    badge.className = 'ch-badge badge-error';
+    showToast('Both brokers failing — check tokens', 'error');
+  }
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
 
 async function testBroker(broker) {
   showToast(`Testing ${broker} token...`, 'info');
