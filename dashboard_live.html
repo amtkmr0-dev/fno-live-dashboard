@@ -2670,6 +2670,9 @@
       <button class="btn-toggle" id="oiFilterBtn" onclick="toggleOIFilter()" title="Toggle ATM ±5% Filter"
         style="border: 1px solid var(--gold); color: var(--gold);">[Filter: OFF] Overall OI</button>
       <button class="btn-toggle btn-n50" id="n50Btn" onclick="toggleN50()">NIFTY 50</button>
+      <button class="btn-toggle" id="volSpreadBtn" onclick="toggleVolSpread()"
+        title="Filter to symbols where ATM call IV − ATM put IV ≥ +1.0 (calls richer than puts → bullish hint per Cremers-Weinbaum 2010)">
+        Calls Rich (≥+1)</button>
       <select class="filter-select" id="convictionFilter" onchange="onConvictionChange()"
         title="Filter by composite conviction tier">
         <option value="">All Conviction</option>
@@ -2755,6 +2758,7 @@
           <th class="w-oi g-oi" data-key="net_oi_rs">Net OI ₹</th>
           <!-- Options group -->
           <th class="w-small g-opt" data-key="atm_iv">IV%</th>
+          <th class="w-small g-opt" data-key="vol_spread_atm" title="Cremers-Weinbaum vol spread: ATM call IV − ATM put IV. Positive = calls richer (bullish), negative = puts richer (bearish). Magnitude in IV-points.">Vol Spread</th>
           <th class="w-price g-opt" data-key="max_pain">MaxPain</th>
           <th class="w-pct g-opt" data-key="mp_dist">MP Dist%</th>
           <th class="w-prem g-opt" data-key="atm_ce">CE Prem</th>
@@ -3008,7 +3012,7 @@
     let symbolOrder = [];  // sorted symbols for rendering
     let rowElements = {};  // symbol \u2192 <tr> element
     let cellMap = {};      // "SYM:field" \u2192 <td> element
-    let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false, conviction: '', oiThesis: '', moneyness: '', watchlist: false, hotlist: false };
+    let filters = { search: '', sector: '', signal: '', buildup: '', n50: false, poised: false, conviction: '', oiThesis: '', moneyness: '', watchlist: false, hotlist: false, volSpread: false };
 
     // OI thesis symbol sets (loaded from /api/oi-thesis once per page load + every 5min)
     let oiThesisSymbols = { bull: new Set(), bear: new Set(), both: new Set(), loadedAt: null };
@@ -3134,6 +3138,19 @@
     function fmtIV(v) {
       if (v == null) return '\u2013';
       return v.toFixed(1) + '%';
+    }
+    // Cremers-Weinbaum vol spread formatter: signed IV-points at ATM.
+    // Positive = call IV > put IV (bullish); negative = put IV > call IV (bearish).
+    function fmtVolSpread(v) {
+      if (v == null) return '\u2013';
+      const sign = v >= 0 ? '+' : '';
+      return sign + v.toFixed(2);
+    }
+    function volSpreadClass(v) {
+      if (v == null) return '';
+      if (v >= 1.0) return 'pos-val';   // bullish hint per Cremers-Weinbaum
+      if (v <= -1.0) return 'neg-val';  // bearish hint
+      return '';
     }
     function fmtSurge(v) {
       if (v == null || v === 0) return '\u2013';
@@ -3263,6 +3280,7 @@
           { key: 'net_oi_rs', cls: 'w-oi g-oi ' + valClass(d.net_oi), text: fmtRs(((d.pe_oi_chg || 0) - (d.ce_oi_chg || 0)) * (d.ltp || 0)) },
           // Options group
           { key: 'atm_iv', cls: 'w-small g-opt', text: fmtIV(d.atm_iv) },
+          { key: 'vol_spread_atm', cls: 'w-small g-opt ' + volSpreadClass(d.vol_spread_atm), text: fmtVolSpread(d.vol_spread_atm) },
           { key: 'max_pain', cls: 'w-price g-opt', text: fmtPrice(d.max_pain) },
           { key: 'mp_dist', cls: 'w-pct g-opt', text: fmtMPDist(d.mp_dist) },
           { key: 'atm_ce', cls: 'w-prem g-opt' + (d.atm_ce != null && d.atm_ce < 15 ? ' prem-low' : ''), text: fmtPrice(d.atm_ce) },
@@ -3876,6 +3894,18 @@
       applyFilters();
     }
 
+    // Cremers-Weinbaum vol spread filter: only show symbols where the ATM call
+    // IV is at least 1.0 IV-points above the ATM put IV. Threshold mirrors the
+    // paper's empirical cutoff for the 'expensive call' bucket.
+    function toggleVolSpread() {
+      filters.volSpread = !filters.volSpread;
+      const btn = document.getElementById('volSpreadBtn');
+      if (btn) btn.classList.toggle('active', filters.volSpread);
+      persistFilterState();
+      applyFilters();
+    }
+    window.toggleVolSpread = toggleVolSpread;
+
     function applyFilters() {
       let visible = 0, total = 0;
       const surgeMin = minSurge / 10; // slider 0-50 → 0.0-5.0
@@ -3910,6 +3940,9 @@
           show = false;
         }
         if (show && filters.hotlist && !hotlistAuto.has(sym)) {
+          show = false;
+        }
+        if (show && filters.volSpread && !((d.vol_spread_atm != null) && d.vol_spread_atm >= 1.0)) {
           show = false;
         }
         if (show && filters.oiThesis) {
@@ -4111,6 +4144,7 @@
       filters.moneyness = '';
       filters.watchlist = false;
       filters.hotlist = false;
+      filters.volSpread = false;
       // Sync inputs
       const sb = document.getElementById('searchBox'); if (sb) sb.value = '';
       const sf = document.getElementById('sectorFilter'); if (sf) sf.value = '';
@@ -4123,6 +4157,7 @@
       const pbtn = document.getElementById('poisedBtn'); if (pbtn) pbtn.classList.remove('active');
       const wlbtn = document.getElementById('wlFilterBtn'); if (wlbtn) wlbtn.classList.remove('active');
       const hbtn = document.getElementById('hotFilterBtn'); if (hbtn) hbtn.classList.remove('active');
+      const vsbtn = document.getElementById('volSpreadBtn'); if (vsbtn) vsbtn.classList.remove('active');
       // Chips + sliders
       activeChips.clear();
       minSurge = 0;
@@ -4422,6 +4457,7 @@
       { key: 'pe_oi_chg_rs', label: 'PE \u20B9', group: 'oi', essential: true },
       { key: 'net_oi_rs', label: 'Net OI \u20B9', group: 'oi', essential: true },
       { key: 'atm_iv', label: 'IV%', group: 'opt', essential: false },
+      { key: 'vol_spread_atm', label: 'Vol Spread', group: 'opt', essential: true },
       { key: 'max_pain', label: 'MaxPain', group: 'opt', essential: false },
       { key: 'mp_dist', label: 'MP Dist%', group: 'opt', essential: false },
       { key: 'atm_ce', label: 'CE Prem', group: 'opt', essential: false },
@@ -5088,6 +5124,7 @@
                 updateCell(sym, 'net_oi_rs', (pe - ce) * spot, fmtRs, valClass(pe - ce));
               })();
               updateCell(sym, 'atm_iv', d.atm_iv, fmtIV);
+              updateCell(sym, 'vol_spread_atm', d.vol_spread_atm, fmtVolSpread, volSpreadClass(d.vol_spread_atm));
               updateCell(sym, 'max_pain', d.max_pain, fmtPrice);
               updateCell(sym, 'mp_dist', d.mp_dist, fmtMPDist);
               updateCell(sym, 'atm_ce', d.atm_ce, fmtPrice, d.atm_ce != null && d.atm_ce < 15 ? 'prem-low' : '');

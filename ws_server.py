@@ -655,7 +655,7 @@ def analyze_chain(chain_data: List[Dict[str, Any]], spot: float,
     result: Dict[str, Any] = {
         "pcr": None, "pcr_sig": "NEUTRAL", "buildup": "NEUTRAL",
         "ce_oi_chg": 0, "pe_oi_chg": 0, "net_oi": 0, "vol_oi": 0.0,
-        "atm_iv": None, "max_pain": None, "mp_dist": None,
+        "atm_iv": None, "vol_spread_atm": None, "max_pain": None, "mp_dist": None,
         "atm_ce": None, "atm_pe": None, "prem_ok": False, "atm_strike": None,
         "opt_vol": 0,
         "strike_map": {},  # strike -> data dict
@@ -863,6 +863,17 @@ def analyze_chain(chain_data: List[Dict[str, Any]], spot: float,
         atm_iv = round(atm_ce_iv, 2)
     elif atm_pe_iv:
         atm_iv = round(atm_pe_iv, 2)
+
+    # Cremers-Weinbaum vol spread (ATM only): IV(call) - IV(put) at ATM strike.
+    # Positive ⇒ calls richer than puts ⇒ bullish hint per the paper. Magnitude
+    # in IV-points (e.g. +1.5 = call IV is 1.5pp above put IV at ATM).
+    # Citation: Cremers & Weinbaum, "Deviations from Put-Call Parity and Stock
+    # Return Predictability", JFQA 2010.
+    # Both legs must be present and positive — a missing IV leg would otherwise
+    # collapse the spread to a single-sided IV and produce false signals.
+    vol_spread_atm = None
+    if atm_ce_iv and atm_pe_iv and atm_ce_iv > 0 and atm_pe_iv > 0:
+        vol_spread_atm = round(atm_ce_iv - atm_pe_iv, 2)
 
     # Premium viability
     best_atm_prem = max(atm_ce_ltp or 0, atm_pe_ltp or 0)
@@ -1080,6 +1091,7 @@ def analyze_chain(chain_data: List[Dict[str, Any]], spot: float,
         "net_oi": net_oi,
         "vol_oi": round(vol_oi, 3),
         "atm_iv": atm_iv,
+        "vol_spread_atm": vol_spread_atm,
         "max_pain": max_pain,
         "mp_dist": mp_dist,
         "atm_ce": atm_ce_ltp,
@@ -1573,6 +1585,7 @@ class DashboardServer:
                 "net_oi": 0,
                 "vol_oi": 0.0,
                 "atm_iv": None,
+                "vol_spread_atm": None,
                 "max_pain": None,
                 "mp_dist": None,
                 "atm_ce": None,
