@@ -3152,6 +3152,31 @@
       if (v <= -1.0) return 'neg-val';  // bearish hint
       return '';
     }
+    // Rich per-cell tooltip explaining the value in trader terms.
+    // Citation: Cremers & Weinbaum, JFQA 2010.
+    function volSpreadTooltip(v) {
+      if (v == null) return 'Vol Spread: not available — at least one ATM IV leg is missing or zero.';
+      const abs = Math.abs(v);
+      const sign = v >= 0 ? '+' : '';
+      const head = `Vol Spread (Cremers-Weinbaum): ${sign}${v.toFixed(2)} IV-points\nATM call IV minus ATM put IV.\n\n`;
+      let body;
+      if (v >= 2.0)
+        body = '⬆ Strongly bullish — calls aggressively bid up vs puts.\nAlign with BUY CE setups for highest conviction.';
+      else if (v >= 1.0)
+        body = '⬆ Bullish hint — calls richer than puts.\nMatches BUY CE setups; confirm with OI flow + GGG moneyness.';
+      else if (v >= 0.3)
+        body = '↗ Mildly bullish — slight call premium.\nWeaker signal; treat as supportive, not standalone.';
+      else if (v > -0.3)
+        body = '~ Neutral — calls and puts roughly balanced.\nNo standalone read; use other signals.';
+      else if (v > -1.0)
+        body = '↘ Mildly bearish — slight put premium.\nWeaker signal; supportive of BUY PE setups.';
+      else if (v > -2.0)
+        body = '⬇ Bearish hint — puts richer than calls.\nMatches BUY PE setups; confirm with OI flow + RRR moneyness.';
+      else
+        body = '⬇ Strongly bearish — puts aggressively bid up vs calls.\nAlign with BUY PE setups for highest conviction.';
+      const tail = '\n\nTrader rule of thumb (paper-cited):\n  ≥ +1.0 → calls richer → bullish\n  ≤ -1.0 → puts richer → bearish\n  |v| < 1.0 → neutral\n\n~50 bps/week excess return for the calls-rich bucket vs puts-rich bucket (Cremers & Weinbaum, JFQA 2010).';
+      return head + body + tail;
+    }
     function fmtSurge(v) {
       if (v == null || v === 0) return '\u2013';
       return v.toFixed(1) + 'x';
@@ -3280,7 +3305,7 @@
           { key: 'net_oi_rs', cls: 'w-oi g-oi ' + valClass(d.net_oi), text: fmtRs(((d.pe_oi_chg || 0) - (d.ce_oi_chg || 0)) * (d.ltp || 0)) },
           // Options group
           { key: 'atm_iv', cls: 'w-small g-opt', text: fmtIV(d.atm_iv) },
-          { key: 'vol_spread_atm', cls: 'w-small g-opt ' + volSpreadClass(d.vol_spread_atm), text: fmtVolSpread(d.vol_spread_atm) },
+          { key: 'vol_spread_atm', cls: 'w-small g-opt ' + volSpreadClass(d.vol_spread_atm), html: '<span title="' + volSpreadTooltip(d.vol_spread_atm).replace(/"/g, '&quot;') + '">' + fmtVolSpread(d.vol_spread_atm) + '</span>' },
           { key: 'max_pain', cls: 'w-price g-opt', text: fmtPrice(d.max_pain) },
           { key: 'mp_dist', cls: 'w-pct g-opt', text: fmtMPDist(d.mp_dist) },
           { key: 'atm_ce', cls: 'w-prem g-opt' + (d.atm_ce != null && d.atm_ce < 15 ? ' prem-low' : ''), text: fmtPrice(d.atm_ce) },
@@ -5124,7 +5149,9 @@
                 updateCell(sym, 'net_oi_rs', (pe - ce) * spot, fmtRs, valClass(pe - ce));
               })();
               updateCell(sym, 'atm_iv', d.atm_iv, fmtIV);
-              updateCell(sym, 'vol_spread_atm', d.vol_spread_atm, fmtVolSpread, volSpreadClass(d.vol_spread_atm));
+              updateCellHTML(sym, 'vol_spread_atm', '<span title="' + volSpreadTooltip(d.vol_spread_atm).replace(/"/g, '&quot;') + '">' + fmtVolSpread(d.vol_spread_atm) + '</span>');
+              const _vsTd = cellMap[sym + ':vol_spread_atm'];
+              if (_vsTd) _vsTd.className = ('w-small g-opt ' + volSpreadClass(d.vol_spread_atm)).trim();
               updateCell(sym, 'max_pain', d.max_pain, fmtPrice);
               updateCell(sym, 'mp_dist', d.mp_dist, fmtMPDist);
               updateCell(sym, 'atm_ce', d.atm_ce, fmtPrice, d.atm_ce != null && d.atm_ce < 15 ? 'prem-low' : '');
