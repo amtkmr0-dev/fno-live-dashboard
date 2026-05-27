@@ -1801,3 +1801,168 @@
    Re-enable: delete this rule (and set NIFTY_PAGE_ENABLED=True in
    ws_server.py). */
 .q-nav-links a#nav-nifty { display: none !important; }
+
+
+/* ============================================================
+   Bloomberg Pro consistency overrides — 2026-05-27
+   These pull the dashboard's hardcoded sector/signal/buildup
+   palettes into a single amber-on-black aesthetic so the live
+   dashboard matches what the theme_explorer preview shows.
+
+   Revert: comment out this block (everything between the
+   BEGIN/END markers below). Other themes are unaffected.
+   ============================================================ */
+/* BEGIN: bloomberg-pro overrides */
+
+/* All sector chips → amber tint */
+:root[data-theme="bloomberg-pro"] .sector-pill,
+:root[data-theme="bloomberg-pro"] .sector-IT,
+:root[data-theme="bloomberg-pro"] .sector-BANK,
+:root[data-theme="bloomberg-pro"] .sector-PSU_BANK,
+:root[data-theme="bloomberg-pro"] .sector-FIN,
+:root[data-theme="bloomberg-pro"] .sector-FINANCE,
+:root[data-theme="bloomberg-pro"] .sector-AUTO,
+:root[data-theme="bloomberg-pro"] .sector-METAL,
+:root[data-theme="bloomberg-pro"] .sector-PHARMA,
+:root[data-theme="bloomberg-pro"] .sector-HEALTHCARE,
+:root[data-theme="bloomberg-pro"] .sector-ENERGY,
+:root[data-theme="bloomberg-pro"] .sector-REALTY,
+:root[data-theme="bloomberg-pro"] .sector-INFRA,
+:root[data-theme="bloomberg-pro"] .sector-CONSUMER,
+:root[data-theme="bloomberg-pro"] .sector-HEALTH,
+:root[data-theme="bloomberg-pro"] .sector-MEDIA,
+:root[data-theme="bloomberg-pro"] .sector-INSURANCE,
+:root[data-theme="bloomberg-pro"] .sector-INDEX,
+:root[data-theme="bloomberg-pro"] .sector-OTHER,
+:root[data-theme="bloomberg-pro"] .sector-DEFAULT {
+  background: rgba(255, 176, 0, 0.10) !important;
+  color: var(--accent) !important;
+  border: 1px solid rgba(255, 176, 0, 0.25) !important;
+}
+
+/* Signal pills: BULLISH = green, BEARISH = red, NEUTRAL = amber-muted */
+:root[data-theme="bloomberg-pro"] .sig-pill.sig-BULLISH,
+:root[data-theme="bloomberg-pro"] .sig-pill.sig-MILDLY_BULL {
+  background: var(--green-soft) !important;
+  color: var(--green-text) !important;
+  border-color: var(--green) !important;
+}
+:root[data-theme="bloomberg-pro"] .sig-pill.sig-BEARISH,
+:root[data-theme="bloomberg-pro"] .sig-pill.sig-MILDLY_BEAR {
+  background: var(--red-soft) !important;
+  color: var(--red-text) !important;
+  border-color: var(--red) !important;
+}
+:root[data-theme="bloomberg-pro"] .sig-pill.sig-NEUTRAL {
+  background: rgba(255, 176, 0, 0.06) !important;
+  color: var(--text-vdim) !important;
+  border-color: rgba(255, 176, 0, 0.18) !important;
+}
+
+/* Buildup pills: keep semantic colors but tone bg into the terminal palette */
+:root[data-theme="bloomberg-pro"] .bu-pill.bu-LONG_BUILD,
+:root[data-theme="bloomberg-pro"] .bu-pill.bu-SHORT_COVER {
+  background: rgba(0, 204, 102, 0.16) !important;
+  color: var(--green-text) !important;
+}
+:root[data-theme="bloomberg-pro"] .bu-pill.bu-SHORT_BUILD,
+:root[data-theme="bloomberg-pro"] .bu-pill.bu-LONG_UNWIND {
+  background: rgba(255, 51, 51, 0.16) !important;
+  color: var(--red-text) !important;
+}
+:root[data-theme="bloomberg-pro"] .bu-pill.bu-NEUTRAL {
+  background: rgba(255, 176, 0, 0.06) !important;
+  color: var(--text-vdim) !important;
+}
+
+/* Conviction tier badges (TRIPLE/DOUBLE/SINGLE on the volume confluence column,
+   STRONG/WATCH on the top-picks card) → amber-toned */
+:root[data-theme="bloomberg-pro"] .pick-card .pc-tier.tier-strong,
+:root[data-theme="bloomberg-pro"] .vol-conf-TRIPLE {
+  background: rgba(0, 204, 102, 0.18) !important;
+  color: var(--green-text) !important;
+}
+:root[data-theme="bloomberg-pro"] .pick-card .pc-tier.tier-watch,
+:root[data-theme="bloomberg-pro"] .vol-conf-DOUBLE {
+  background: rgba(255, 176, 0, 0.18) !important;
+  color: var(--accent) !important;
+}
+:root[data-theme="bloomberg-pro"] .vol-conf-SINGLE {
+  background: rgba(255, 176, 0, 0.10) !important;
+  color: var(--accent) !important;
+}
+
+/* Direction badges next to symbol (BUY CE / BUY PE) */
+:root[data-theme="bloomberg-pro"] .dir-badge.dir-CE,
+:root[data-theme="bloomberg-pro"] .pc-dir.dir-CE {
+  background: rgba(0, 204, 102, 0.18) !important;
+  color: var(--green-text) !important;
+}
+:root[data-theme="bloomberg-pro"] .dir-badge.dir-PE,
+:root[data-theme="bloomberg-pro"] .pc-dir.dir-PE {
+  background: rgba(255, 51, 51, 0.18) !important;
+  color: var(--red-text) !important;
+}
+
+/* N50 + READY badges on symbol cell */
+:root[data-theme="bloomberg-pro"] .n50-badge {
+  background: rgba(255, 176, 0, 0.18) !important;
+  color: var(--accent) !important;
+  border-color: rgba(255, 176, 0, 0.35) !important;
+}
+:root[data-theme="bloomberg-pro"] .poised-badge {
+  background: rgba(0, 204, 102, 0.18) !important;
+  color: var(--green-text) !important;
+}
+
+/* Filter buttons (NIFTY 50, TRADE READY, [Filter: OFF] Overall OI) */
+:root[data-theme="bloomberg-pro"] .btn-toggle.btn-n50,
+:root[data-theme="bloomberg-pro"] .btn-toggle.btn-poised {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+:root[data-theme="bloomberg-pro"] .btn-toggle.btn-n50.active,
+:root[data-theme="bloomberg-pro"] .btn-toggle.btn-poised.active {
+  background: var(--accent-soft) !important;
+  color: var(--text-bright) !important;
+}
+
+/* Watchlist + Hot footer buttons */
+:root[data-theme="bloomberg-pro"] .footer-watch-btn.active {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+}
+
+/* Top navbar gradient — replace cyan→cyan with amber→cyan so the active
+   pill reads as proper Bloomberg amber to cyan sweep */
+:root[data-theme="bloomberg-pro"] .q-nav-links a.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%) !important;
+  color: #000 !important;
+}
+:root[data-theme="bloomberg-pro"] .q-nav-links a.active .nav-ico { color: #000 !important; }
+:root[data-theme="bloomberg-pro"] .q-nav-brand .brand-text {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Top index ticker (NIFTY/BANKNIFTY/MIDCAP/VIX) — amber numbers */
+:root[data-theme="bloomberg-pro"] .idx-val {
+  color: var(--accent) !important;
+}
+:root[data-theme="bloomberg-pro"] .idx-vix .idx-val {
+  color: var(--yellow) !important;
+}
+:root[data-theme="bloomberg-pro"] .idx-label {
+  color: var(--text-dim) !important;
+}
+
+/* Fresh pill — keep the green/red semantic but use the bloomberg palette */
+:root[data-theme="bloomberg-pro"] .fresh-pill.fresh   { color: var(--green-text) !important; background: rgba(0,204,102,0.10) !important; }
+:root[data-theme="bloomberg-pro"] .fresh-pill.warm    { color: var(--accent) !important; background: var(--accent-soft) !important; }
+:root[data-theme="bloomberg-pro"] .fresh-pill.stale   { color: var(--red-text) !important; background: rgba(255,51,51,0.10) !important; }
+:root[data-theme="bloomberg-pro"] .fresh-pill.offline { color: var(--text-vdim) !important; background: rgba(140,96,0,0.10) !important; }
+
+/* END: bloomberg-pro overrides */
