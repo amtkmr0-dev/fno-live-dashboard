@@ -3,7 +3,7 @@
 Every feature, optimization, and refactor we've discussed but **not yet shipped**.
 Top of list = highest priority. Update this file every time we defer something or finish a P0 item.
 
-Last updated: **2026-05-27 08:10 IST**
+Last updated: **2026-05-27 08:43 IST**
 
 ---
 
@@ -11,9 +11,9 @@ Last updated: **2026-05-27 08:10 IST**
 
 | # | Task | Why it's P0 | Estimated effort |
 |---|------|-------------|------------------|
-| 1 | **Cremers-Weinbaum vol spread** as a column on the dashboard table | The single most-cited research signal we haven't shipped. 5 lines server-side, 1 column on table, 1 filter toggle. No new API calls. The "concrete improvement to the trading edge" the user explicitly asked for. | 15-25 min |
-| 2 | **30 s TTL cache on `/api/candles`** | Drops Upstox call rate sharply on every page that polls candles. The single highest-leverage operational change. ~5 lines wrap on `handle_api_candles`. | 5-10 min |
-| 3 | **Theme color editor (Part B from the bloomberg-pro discussion)** | Allow per-color overrides on top of any theme; save as "Custom" 13th theme via localStorage. Bloomberg Pro consistency is now fixed (Part A done) but the editor lets the user fine-tune any future theme. | 60-90 min |
+| 1 | **30 s TTL cache on `/api/candles`** | Drops Upstox call rate sharply on every page that polls candles. The single highest-leverage operational change. ~5 lines wrap on `handle_api_candles`. | 5-10 min |
+| 2 | **Theme color editor (Part B from the bloomberg-pro discussion)** | Allow per-color overrides on top of any theme; save as "Custom" 13th theme via localStorage. | 60-90 min |
+| 3 | **Bloomberg Pro browser-cache fix** — preview vs live still mismatched on user's tab even after theme overrides. Add cache-buster query string to themes.css `<link>` so cache can never bite again. | 5 min |
 
 ---
 
@@ -90,6 +90,7 @@ Last updated: **2026-05-27 08:10 IST**
 - ✅ Layman summary of research papers
 - ✅ Upstox API per-page usage audit
 - ✅ Backups pruned (kept only latest two)
+- ✅ **P0 #1: Cremers-Weinbaum vol spread shipped end-to-end** — `vol_spread_atm = ce_iv[atm] − pe_iv[atm]` on chain payload, "Vol Spread" column on dashboard (green ≥+1, red ≤−1), "Calls Rich (≥+1)" filter toggle, both-leg guard against missing IV. Zero new API calls.
 
 ---
 
