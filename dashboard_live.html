@@ -2873,6 +2873,7 @@
         <div class="ce-section-row">
           <div class="ce-hint">Toggle columns and drag to reorder. Saved automatically.</div>
           <div class="ce-presets">
+            <button class="ce-preset-btn active" onclick="applyColPreset('trading')" title="Ideal trading view: 15 key columns only">Trading ★</button>
             <button class="ce-preset-btn" onclick="applyColPreset('essentials')">Essentials</button>
             <button class="ce-preset-btn" onclick="applyColPreset('compact')">Compact</button>
             <button class="ce-preset-btn" onclick="applyColPreset('full')">Full</button>
@@ -4519,7 +4520,7 @@
       { key: 'low', label: 'Low', group: 'pricedetail', essential: false },
       { key: 'range_pct', label: 'Range%', group: 'pricedetail', essential: false },
       { key: 'vol', label: 'Volume', group: 'vol', essential: false },
-      { key: 'vol_surge', label: 'Surge 5d', group: 'vol', essential: false },
+      { key: 'vol_surge', label: 'Surge 5d', group: 'vol', essential: true },
       { key: 'vol_surge_10d', label: 'Surge 10d', group: 'vol', essential: false },
       { key: 'vol_surge_20d', label: 'Surge 20d', group: 'vol', essential: false },
       { key: 'vol_confluence', label: 'Vol Conf', group: 'vol', essential: true },
@@ -4529,13 +4530,13 @@
       { key: 'oi_shift', label: 'OI Shift', group: 'oi', essential: true },
       { key: 'ce_oi_chg', label: 'CE OI (sh)', group: 'oi', essential: true },
       { key: 'pe_oi_chg', label: 'PE OI (sh)', group: 'oi', essential: true },
-      { key: 'net_oi', label: 'Net OI (sh)', group: 'oi', essential: true },
+      { key: 'net_oi', label: 'Net OI (sh)', group: 'oi', essential: false },
       { key: 'ce_oi_chg_lots', label: 'CE Lots', group: 'oi', essential: false },
       { key: 'pe_oi_chg_lots', label: 'PE Lots', group: 'oi', essential: false },
       { key: 'net_oi_lots', label: 'Net Lots', group: 'oi', essential: false },
-      { key: 'ce_oi_chg_rs', label: 'CE \u20B9', group: 'oi', essential: true },
-      { key: 'pe_oi_chg_rs', label: 'PE \u20B9', group: 'oi', essential: true },
-      { key: 'net_oi_rs', label: 'Net OI \u20B9', group: 'oi', essential: true },
+      { key: 'ce_oi_chg_rs', label: 'CE \u20B9', group: 'oi', essential: false },
+      { key: 'pe_oi_chg_rs', label: 'PE \u20B9', group: 'oi', essential: false },
+      { key: 'net_oi_rs', label: 'Net OI \u20B9', group: 'oi', essential: false },
       { key: 'atm_iv', label: 'IV%', group: 'opt', essential: false },
       { key: 'vol_spread_atm', label: 'Vol Spread', group: 'opt', essential: true },
       { key: 'swing_score', label: 'Swing', group: 'opt', essential: true },
@@ -4555,8 +4556,14 @@
     let colOrder = COLUMN_REGISTRY.map(c => c.key);
 
     (function hydrateCols() {
-      // Sensible defaults: essentials on, rest off
-      COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = !!c.essential; });
+      // Default: Trading preset (15 key columns). Falls back to saved state if present.
+      const TRADING_SET = new Set([
+        'score', 'symbol', 'sector', 'ltp', 'chg_pct',
+        'pcr_sig', 'buildup', 'vol_surge', 'vol_confluence',
+        'moneyness', 'oi_shift', 'ce_oi_chg', 'pe_oi_chg',
+        'vol_spread_atm', 'swing_score'
+      ]);
+      COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = TRADING_SET.has(c.key); });
       try {
         const saved = JSON.parse(localStorage.getItem(COLS_STORE_KEY) || '{}');
         if (saved && saved.visible && typeof saved.visible === 'object') {
@@ -4784,6 +4791,16 @@
       if (preset === 'reset') {
         COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = !!c.essential; });
         colOrder = COLUMN_REGISTRY.map(c => c.key);
+      } else if (preset === 'trading') {
+        // Ideal trading cockpit: 15 key columns — everything needed to make a
+        // trade decision, nothing that clutters the scan.
+        const TRADING_SET = new Set([
+          'score', 'symbol', 'sector', 'ltp', 'chg_pct',
+          'pcr_sig', 'buildup', 'vol_surge', 'vol_confluence',
+          'moneyness', 'oi_shift', 'ce_oi_chg', 'pe_oi_chg',
+          'vol_spread_atm', 'swing_score'
+        ]);
+        COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = TRADING_SET.has(c.key); });
       } else if (preset === 'essentials') {
         COLUMN_REGISTRY.forEach(c => { colVisible[c.key] = !!c.essential; });
       } else if (preset === 'compact') {
