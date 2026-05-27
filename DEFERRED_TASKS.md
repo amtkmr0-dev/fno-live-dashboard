@@ -3,7 +3,7 @@
 Every feature, optimization, and refactor we've discussed but **not yet shipped**.
 Top of list = highest priority. Update this file every time we defer something or finish a P0 item.
 
-Last updated: **2026-05-27 08:43 IST**
+Last updated: **2026-05-27 09:08 IST**
 
 ---
 
@@ -11,9 +11,8 @@ Last updated: **2026-05-27 08:43 IST**
 
 | # | Task | Why it's P0 | Estimated effort |
 |---|------|-------------|------------------|
-| 1 | **30 s TTL cache on `/api/candles`** | Drops Upstox call rate sharply on every page that polls candles. The single highest-leverage operational change. ~5 lines wrap on `handle_api_candles`. | 5-10 min |
-| 2 | **Theme color editor (Part B from the bloomberg-pro discussion)** | Allow per-color overrides on top of any theme; save as "Custom" 13th theme via localStorage. | 60-90 min |
-| 3 | **Bloomberg Pro browser-cache fix** — preview vs live still mismatched on user's tab even after theme overrides. Add cache-buster query string to themes.css `<link>` so cache can never bite again. | 5 min |
+| 1 | **Theme color editor (Part B from the bloomberg-pro discussion)** | Allow per-color overrides on top of any theme; save as "Custom" 13th theme via localStorage. | 60-90 min |
+| 2 | **Bloomberg Pro browser-cache fix** — preview vs live still mismatched on user's tab even after theme overrides. Add cache-buster query string to themes.css `<link>` so cache can never bite again. | 5 min |
 
 ---
 
@@ -91,6 +90,9 @@ Last updated: **2026-05-27 08:43 IST**
 - ✅ Upstox API per-page usage audit
 - ✅ Backups pruned (kept only latest two)
 - ✅ **P0 #1: Cremers-Weinbaum vol spread shipped end-to-end** — `vol_spread_atm = ce_iv[atm] − pe_iv[atm]` on chain payload, "Vol Spread" column on dashboard (green ≥+1, red ≤−1), "Calls Rich (≥+1)" filter toggle, both-leg guard against missing IV. Zero new API calls.
+- ✅ **Vol Spread per-cell hover tooltip** — magnitude-aware reading (strongly bullish / mildly bearish / neutral) + paper citation + rule-of-thumb thresholds.
+- ✅ **VOL_SPREAD_USAGE_GUIDE.md** — plain-English explainer with three usage strategies (confluence / disqualify / hidden-bias scan) + worked example + validation discipline.
+- ✅ **P0 #2: 30s TTL cache on /api/candles** — wraps `handle_api_candles` with in-memory cache keyed on (symbol, interval). 125× faster on repeat hits. Cache hits recorded as `intraday_candle_cached` label on rate meter. Drops dashboard analysis panel candle pull cost dramatically.
 
 ---
 
